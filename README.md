@@ -3,7 +3,7 @@ pyMARS
 
 Python-based (chemical kinetic) Model Automatic Reduction Software (MARS), which consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.
 
-MARS-Py currently consists of two stages:
+pyMARS currently consists of two stages:
 
  1. Directed relation graph with error propagation and sensitivity analysis (DRGEPSA)
  2. Unimportant reaction elimination
@@ -30,7 +30,7 @@ Options
 License
 -------
 
-MARS-Py is released under the MIT license, see LICENSE for details.
+pyMARS is released under the MIT license, see LICENSE for details.
 
 If you use this package as part of a scholarly publication, please cite the following papers in addition to this resource:
 
