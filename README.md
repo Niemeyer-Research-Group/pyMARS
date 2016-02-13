@@ -1,2 +1,47 @@
-# pyMARS
-Python-based (chemical kinetic) Model Automatic Reduction Software
+pyMARS
+===============
+
+Python-based (chemical kinetic) Model Automatic Reduction Software (MARS), which consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.
+
+MARS-Py currently consists of two stages:
+
+ 1. Directed relation graph with error propagation and sensitivity analysis (DRGEPSA)
+ 2. Unimportant reaction elimination
+
+Additional reduction stages, including isomer lumping and CSP-based quasi-steady-state (QSS) species reduction, are currently under development and testing.
+
+See the following publications for more detail:
+
+ * KE Niemeyer, CJ Sung, and MP Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. *Combust. Flame*, 157(9):1760--1770, 2010. doi:[10.1016/j.combustflflame.2009.12.022](http://dx.doi.org/10.1016/j.combustflflame.2009.12.022) 
+ * KE Niemeyer and CJ Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. *Combust. Flame*, 158(8):1439--1443, 2011. doi:[10.1016/j.combustflflame.2010.12.010](http://dx.doi.org/10.1016/j.combustflflame.2010.12.010).
+ * KE Niemeyer and CJ Sung. Mechanism reduction for multicomponent surrogates: A case study using toluene reference fuels.  *Combust. Flame*, in press, 2014. doi:[10.1016/j.combustflame.2014.05.001](http://dx.doi.org/10.1016/j.combustflame.2014.05.001)
+ * TF Lu and CK Law. *Combustion and Flame*, 154:153--163, 2008. doi:[10.1016/j.combustflame.2007.11.013](http://dx.doi.org/10.1016/j.combustflame.2007.11.013)
+
+Usage
+-----
+
+
+
+Options
+-------
+
+
+
+License
+-------
+
+MARS-Py is released under the modified BSD license, see LICENSE for details.
+
+If you use this package as part of a scholarly publication, please cite the following papers in addition to this resource:
+
+ * KE Niemeyer, CJ Sung, and MP Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. *Combust. Flame*, 157(9):1760--1770, 2010. doi:[10.1016/j.combustflflame.2009.12.022](http://dx.doi.org/10.1016/j.combustflflame.2009.12.022) 
+ * KE Niemeyer and CJ Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. *Combust. Flame*, 158(8):1439--1443, 2011. doi:[10.1016/j.combustflflame.2010.12.010](http://dx.doi.org/10.1016/j.combustflflame.2010.12.010).
+ * KE Niemeyer and CJ Sung. Mechanism reduction for multicomponent surrogates: A case study using toluene reference fuels.  *Combust. Flame*, in press, 2014. doi:[10.1016/j.combustflame.2014.05.001](http://dx.doi.org/10.1016/j.combustflame.2014.05.001) 
+
+Authors
+-------
+Kyle E. Niemeyer, Oregon State University
+[Kyle.Niemeyer@oregonstate.edu](mailto:Kyle.Niemeyer@oregonstate.edu)
+
+Chih-Jen Sung, University of Connecticut
+[cjsung@engr.uconn.edu](mailto:cjsung@engr.uconn.edu)
