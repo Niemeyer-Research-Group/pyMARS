@@ -30,7 +30,7 @@ Options
 License
 -------
 
-MARS-Py is released under the modified BSD license, see LICENSE for details.
+MARS-Py is released under the MIT license, see LICENSE for details.
 
 If you use this package as part of a scholarly publication, please cite the following papers in addition to this resource:
 
@@ -42,6 +42,3 @@ Authors
 -------
 Kyle E. Niemeyer, Oregon State University
 [Kyle.Niemeyer@oregonstate.edu](mailto:Kyle.Niemeyer@oregonstate.edu)
-
-Chih-Jen Sung, University of Connecticut
-[cjsung@engr.uconn.edu](mailto:cjsung@engr.uconn.edu)
