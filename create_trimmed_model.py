@@ -1,8 +1,17 @@
-#function to read in an xml/cti file and remove species and reactions
 
+
+#Local Imports
 import cantera as ct
 
 def datareadin(data_file, exclusion_list):
+    """ Function to reduce list of species and corresponding reactions.
+
+    param data_file:
+        local .cti or .xml data file containing mechanism information
+    param exclusion_list:
+        List of species that will be trimmed
+    """
+
     Solution = ct.Solution(data_file)
     Species = Solution.species_names
 
@@ -22,7 +31,8 @@ def datareadin(data_file, exclusion_list):
                 list.append(Solution.reaction(i))
 
     ReactionObjects = list
-    New= ct.Solution(species=SpeciesObjects, reactions=ReactionObjects, thermo='IdealGas', kinetics='GasKinetics')
+    New= ct.Solution(species=SpeciesObjects, reactions=ReactionObjects,
+                    thermo='IdealGas', kinetics='GasKinetics')
     print(Solution())
     print(New())
 
