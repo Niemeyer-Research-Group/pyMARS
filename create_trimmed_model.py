@@ -49,5 +49,5 @@ def create_trimmed_model(data_file, exclusion_list):
 
 #calling the function
 #list to exclude
-SPexc=['O2'];
-create_trimmed_model("gri30.cti", SPexc)
+#SPexc=['O2'];
+#create_trimmed_model("gri30.cti", SPexc)
