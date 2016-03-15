@@ -3,13 +3,23 @@
 #Local Imports
 import cantera as ct
 
-def datareadin(data_file, exclusion_list):
+def create_trimmed_model(data_file, exclusion_list):
     """ Function to reduce list of species and corresponding reactions.
 
-    param data_file:
+    Parameters
+    ----------
+    data_file:
         local .cti or .xml data file containing mechanism information
-    param exclusion_list:
+    exclusion_list:
         List of species that will be trimmed
+
+    Returns
+    -------
+    ReactionObjects :
+        Short list of solution reaction objects
+    New :
+        Simplified Cantera Solution
+
     """
 
     Solution = ct.Solution(data_file)
