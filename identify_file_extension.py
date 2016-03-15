@@ -13,6 +13,10 @@ def readin(data_file):
 	----------
 	data_file:
 		Local Chemkin or Cantera data file containing mechanism information
+
+	Returns
+	-------
+		Calls function corresponding to data file
 	"""
 
 	if data_file.endswith(".xml") or data_file.endswith(".cti"):
