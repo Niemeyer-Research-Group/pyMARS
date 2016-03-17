@@ -43,11 +43,10 @@ def create_trimmed_model(data_file, exclusion_list):
     ReactionObjects = list
     new_solution= ct.Solution(species=Species_Objects, reactions=ReactionObjects,
                     thermo='IdealGas', kinetics='GasKinetics')
-    print(initial_solution.n_reactions)
-    print(new_solution.n_reactions)
+
 
 
 #calling the function
 #list to exclude
-#SPexc=['O2'];
-#create_trimmed_model("gri30.cti", SPexc)
+SPexc=['O2'];
+create_trimmed_model("gri30.cti", SPexc)
