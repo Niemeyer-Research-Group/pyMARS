@@ -24,29 +24,37 @@ def create_trimmed_model(data_file, exclusion_list):
     initial_solution = ct.Solution(data_file)
     initial_species  = initial_solution.species_names
 
-    for n in exclusion_list:
-            if n in initial_species:
-                initial_species.remove(n)
 
-    Species_Objects =   [initial_solution.species(name) for name in initial_species]
-
+    #define initial reaction lists
     ReactionList    = 	initial_solution.reaction_equations()
     ReactionObjects =	initial_solution.reaction
     list	=	[]
+    #for every reaction in the list
     for i, Rxn in enumerate(ReactionList):
+
         Reactants 	= 	ReactionObjects(i).reactants
         Products	= 	ReactionObjects(i).products
+        #for every species in the exclusion list
         for k in exclusion_list:
+            #if the species is not in the reactants or products list, add it to the blank list
             if k not in Reactants and k not in Products:
                 list.append(initial_solution.reaction(i))
+
+                
+    #need to find a way to do this after eliminating reactions
+    """for n in exclusion_list:
+        if n in initial_species:
+            initial_species.remove(n)
+    """
+    #define initial species list
+    Species_Objects =   [initial_solution.species(name) for name in initial_species]
 
     ReactionObjects = list
     new_solution= ct.Solution(species=Species_Objects, reactions=ReactionObjects,
                     thermo='IdealGas', kinetics='GasKinetics')
 
 
-
 #calling the function
 #list to exclude
-SPexc=['O2'];
+SPexc=['O2', 'CO2'];
 create_trimmed_model("gri30.cti", SPexc)
