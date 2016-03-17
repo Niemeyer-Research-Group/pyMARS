@@ -34,13 +34,15 @@ def create_trimmed_model(data_file, exclusion_list):
 
         Reactants 	= 	ReactionObjects(i).reactants
         Products	= 	ReactionObjects(i).products
+
         #for every species in the exclusion list
         for k in exclusion_list:
             #if the species is not in the reactants or products list, add it to the blank list
             if k not in Reactants and k not in Products:
-                list.append(initial_solution.reaction(i))
+                list.append(ReactionObjects(i))
 
-                
+
+
     #need to find a way to do this after eliminating reactions
     """for n in exclusion_list:
         if n in initial_species:
@@ -53,6 +55,16 @@ def create_trimmed_model(data_file, exclusion_list):
     new_solution= ct.Solution(species=Species_Objects, reactions=ReactionObjects,
                     thermo='IdealGas', kinetics='GasKinetics')
 
+    print('start %s initial species') %initial_solution.n_species
+    print('end %s final species') % new_solution.n_species
+    print('start %s initial reactions') %initial_solution.n_reactions
+    print('end %s final reactions') %len(ReactionObjects)
+
+    x=initial_solution.reaction(0)
+    print(x)
+    a=x.reactant_string
+
+    print(a)
 
 #calling the function
 #list to exclude
