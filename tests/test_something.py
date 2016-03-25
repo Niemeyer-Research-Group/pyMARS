@@ -27,3 +27,10 @@ print(new_solution.n_reactions)
 
 def test_answer():
     assert func(3) == 5
+
+'''
+#output for user
+print('start %s initial species, %s initial reactions') %(initial_solution.n_species, initial_solution.n_reactions)
+print('end %s final species, %s final reactions')   %(len(final_species_objects), len(final_reaction_objects))
+
+'''
