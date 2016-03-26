@@ -7,6 +7,8 @@ test parameter:
     number and name of species eliminated
 
 """
+#import cantera
+import Cantera as ct
 
 #import function
 from create_trimmed_model import create_trimmed_model as test_func
@@ -18,12 +20,12 @@ exclusion_list = ['02', 'CO2']
 
 
 #call Function
-test_func(data_file, exclusion_list)
+result=test_func(data_file, exclusion_list)
 
-#print species number
-print(initial_solution.n_reactions)
-print(new_solution.n_reactions)
+initial_solution = result[0]
+new_solution = result[1]
 
+print(initial_solution.nSpecies())
 
 def test_answer():
     assert func(3) == 5
