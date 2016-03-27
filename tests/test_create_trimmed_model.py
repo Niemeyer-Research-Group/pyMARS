@@ -1,45 +1,39 @@
-#test
+#test create_trimmed_model
+
 """
 file:
     create_trimmed_model
 
-test parameter:
-    number and name of species eliminated
-
+test parameters:
+    number of species eliminated
+    number of reactions eliminated
 """
-#import cantera
-import cantera as ct
 
-#import function
+#import modules
+import cantera as ct
 from .. import create_trimmed_model as func
 
 #define function inputs
-data_file=('gri30.xml')
-exclusion_list = ['02', 'CO2']
+data_file = ('gri30.xml')
+exclusion_list = ['O2', 'CO2']
 
-
-
-#call Function
-result=func.create_trimmed_model(data_file, exclusion_list)
-
-print(result)
-
+#call function
+result = func.create_trimmed_model(data_file, exclusion_list)
 initial_solution = result[0]
 new_solution = result[1]
 
-n_initial_species= len(initial_solution.species())
-n_new_species= len(new_solution.species())
 
 def test_n_species():
+    n_initial_species = len(initial_solution.species())
+    n_new_species = len(new_solution.species())
     assert n_initial_species > n_new_species
+    print('%s initial species, %s final species')\
+            %(n_initial_species, n_new_species)
 
-n_initial_reactions = len(initial_solution.reactions())
-n_new_reactions = len(new_solution.reactions())
 
 def test_n_reactions():
+    n_initial_reactions = len(initial_solution.reactions())
+    n_new_reactions = len(new_solution.reactions())
     assert n_initial_reactions > n_new_reactions
-
-
-#output for user
-#print('start %s initial species, %s initial reactions') %(initial_solution.n_species, initial_solution.n_reactions)
-#print('end %s final species, %s final reactions')   %(len(final_species_objects), len(final_reaction_objects))
+    print('%s initial reactions, %s final reactions')\
+            %(n_initial_reactions, n_new_reactions)
