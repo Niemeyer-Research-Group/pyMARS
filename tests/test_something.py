@@ -8,10 +8,10 @@ test parameter:
 
 """
 #import cantera
-import Cantera as ct
+import cantera as ct
 
 #import function
-from create_trimmed_model import create_trimmed_model as test_func
+from .. import create_trimmed_model as func
 
 #define function inputs
 data_file=('gri30.xml')
@@ -20,19 +20,22 @@ exclusion_list = ['02', 'CO2']
 
 
 #call Function
-result=test_func(data_file, exclusion_list)
+result=func.create_trimmed_model(data_file, exclusion_list)
+
+print(result)
 
 initial_solution = result[0]
 new_solution = result[1]
 
-print(initial_solution.nSpecies())
+n_initial_species= len(initial_solution.species())
+n_new_species= len(new_solution.species())
 
-def test_answer():
-    assert func(3) == 5
+def test():
+    assert n_initial_species > n_new_species
 
-'''
+
+print(n_new_species)
+
 #output for user
-print('start %s initial species, %s initial reactions') %(initial_solution.n_species, initial_solution.n_reactions)
-print('end %s final species, %s final reactions')   %(len(final_species_objects), len(final_reaction_objects))
-
-'''
+#print('start %s initial species, %s initial reactions') %(initial_solution.n_species, initial_solution.n_reactions)
+#print('end %s final species, %s final reactions')   %(len(final_species_objects), len(final_reaction_objects))
