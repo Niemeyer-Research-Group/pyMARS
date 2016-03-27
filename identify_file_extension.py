@@ -2,10 +2,6 @@
 #local import
 import cantera as ct
 
-
-#used when calling the function locally for testing
-#exclusion_list=['O2']
-
 def readin(data_file):
 	"""Function to import data file and identify format.
 
@@ -27,7 +23,3 @@ def readin(data_file):
 		print("This is a Chemkin inp file")
 	else:
 		print("File type not supported")
-
-
-#used when calling the function locally for testing
-#readin('gri30.cti')
