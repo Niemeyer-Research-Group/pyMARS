@@ -59,7 +59,7 @@ def create_trimmed_model(data_file, exclusion_list):
     new_solution= ct.Solution(  species=final_species_objects,
                                 reactions=final_reaction_objects,
                                 thermo='IdealGas', kinetics='GasKinetics')
-
+    return (initial_solution, new_solution)
 
 
 '''
