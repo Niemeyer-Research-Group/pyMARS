@@ -1,4 +1,3 @@
-
 # Local Imports
 import cantera as ct
 
