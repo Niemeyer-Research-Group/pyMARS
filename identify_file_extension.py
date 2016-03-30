@@ -18,7 +18,6 @@ def readin(data_file, exclusion_list):
     #import working functions
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
-    from create_trimmed_model import create_trimmed_model
 
     if data_file.endswith(".xml") or data_file.endswith(".cti"):
         print("This is an Cantera xml or cti file")
