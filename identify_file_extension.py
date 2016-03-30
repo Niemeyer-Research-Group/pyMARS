@@ -21,5 +21,8 @@ def readin(data_file):
 		datareadin(data_file, exclusion_list)
 	elif data_file.endswith(".inp"):
 		print("This is a Chemkin inp file")
-	else:
-		print("File type not supported")
+        ck2cti --input=gri30.inp
+	#else:
+		#print("File type not supported")
+
+readin('gri30.inp')
