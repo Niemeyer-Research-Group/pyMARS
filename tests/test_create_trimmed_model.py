@@ -24,16 +24,16 @@ new_solution = result[1]
 
 
 def test_n_species():
-    n_initial_species = len(initial_solution.species())
-    n_new_species = len(new_solution.species())
+    n_initial_species = initial_solution.n_species
+    n_new_species = new_solution.n_species
     assert n_initial_species > n_new_species
     print('%s initial species, %s final species')\
             %(n_initial_species, n_new_species)
 
 
 def test_n_reactions():
-    n_initial_reactions = len(initial_solution.reactions())
-    n_new_reactions = len(new_solution.reactions())
+    n_initial_reactions = initial_solution.n_reactions
+    n_new_reactions = new_solution.n_reactions
     assert n_initial_reactions > n_new_reactions
     print('%s initial reactions, %s final reactions')\
             %(n_initial_reactions, n_new_reactions)
