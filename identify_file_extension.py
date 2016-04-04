@@ -13,7 +13,7 @@ def readin(data_file, exclusion_list):
 
     Returns
     -------
-        Calls function corresponding to data file
+        Solution object with species and reactions removed
     """
     #import working functions
     from create_trimmed_model import create_trimmed_model

@@ -59,11 +59,3 @@ def create_trimmed_model(data_file, exclusion_list):
                                 reactions=final_reaction_objects,
                                 thermo='IdealGas', kinetics='GasKinetics')
     return (initial_solution, new_solution)
-
-
-'''
-#calling the function
-#list to exclude
-SPexc=['H2', 'O2'];
-create_trimmed_model("gri30.cti", SPexc)
-'''
