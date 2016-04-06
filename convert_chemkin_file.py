@@ -11,8 +11,9 @@ def convert(data_file):
 
     converted_file_name=os.path.splitext(data_file)[0]+'_converted'
     converted_file_path=os.path.join(save_path, converted_file_name)
-
+    local_path=os.path.join(output_dir, converted_file_name)
     input_path=os.path.join(input_dir, data_file)
     input_line= "ck2cti --input=%s --output=%s" %(input_path, converted_file_path)
     os.system(input_line)
-    return converted_file_name + '.cti'
+
+    return local_path + '.cti'

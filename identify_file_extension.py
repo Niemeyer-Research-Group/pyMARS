@@ -13,8 +13,10 @@ def readin(data_file, exclusion_list):
 
     Returns
     -------
-        Solution object with species and reactions removed
+        Converted mechanism file
+        Solution object index with species and reactions removed
     """
+    global Result
     #import working functions
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
@@ -24,8 +26,6 @@ def readin(data_file, exclusion_list):
 
         #trims file
         Result=create_trimmed_model(data_file, exclusion_list)
-        initial_solution=Result[0]
-        new_solution=Result[1]
 
     elif data_file.endswith(".inp"):
         print("This is a Chemkin inp file")
@@ -35,8 +35,8 @@ def readin(data_file, exclusion_list):
 
         #trims newly converted file
         Result=create_trimmed_model(converted_file_name, exclusion_list)
-        initial_solution=Result[0]
-        new_solution=Result[1]
 
     else:
         print("File type not supported")
+
+    return (Result)
