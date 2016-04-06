@@ -16,6 +16,7 @@ def readin(data_file, exclusion_list):
         Converted mechanism file
         Solution object index with species and reactions removed
     """
+    
     global Result
     #import working functions
     from create_trimmed_model import create_trimmed_model
