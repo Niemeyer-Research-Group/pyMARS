@@ -8,11 +8,30 @@ A=readin('gri30.cti', [])
 initial=A[0]
 final=A[1]
 
-"['H2', 'CO2']"
-import cPickle
 import os
 os.system('rm -r testfile.cti')
 f=open('testfile.cti', 'w+')
+
+
+"""-----------------------------------------------------------------------------
+Write Species to file
+-----------------------------------------------------------------------------"""
+
+f.write('#'+ "-"*80 + '\n')
+f.write('#  Species Data\n')
+f.write('#'+ "-"*80 + '\n\n')
+
+for i, name in enumerate(final.species_names):
+    species=final.species(i)
+    name=final.species(i).name
+    composition= str(species.composition).replace("{", "\"").replace("}", "\"").replace("\'", "").replace(": ", ":").replace(".0", "").replace(",", "").replace(" ", "  ")
+    f.write("species(name = \"" + name + "\"," + '\n')
+    f.write("   atoms = "  + composition + '\n' )
+    f.write("   thermo = (" + '\n\n')
+
+
+
+
 
 
 
