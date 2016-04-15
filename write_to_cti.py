@@ -1,6 +1,7 @@
 """writes a solution object to a cantera cti file.
 
-currently only works for Elementary, Falloff and ThreeBody Reactions"""
+currently only works for Elementary, Falloff and ThreeBody Reactions
+based on Cantera version 2.3.0a2"""
 
 from identify_file_extension import readin
 
@@ -25,9 +26,12 @@ for i, name in enumerate(final.species_names):
     species=final.species(i)
     name=final.species(i).name
     composition= str(species.composition).replace("{", "\"").replace("}", "\"").replace("\'", "").replace(": ", ":").replace(".0", "").replace(",", "").replace(" ", "  ")
+    nasa_coeffs=species.thermo.coeffs
     f.write("species(name = \"" + name + "\"," + '\n')
     f.write("   atoms = "  + composition + '\n' )
-    f.write("   thermo = (" + '\n\n')
+    f.write("   thermo = (" + '\n')
+    f.write(str(nasa_coeffs)+ '\n\n')
+
 
 
 
