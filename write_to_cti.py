@@ -10,6 +10,7 @@ initial=A[0]
 final=A[1]
 
 import os
+import textwrap
 os.system('rm -r testfile.cti')
 f=open('testfile.cti', 'w+')
 
@@ -27,11 +28,18 @@ for i, name in enumerate(final.species_names):
     name=final.species(i).name
     composition= str(species.composition).replace("{", "\"").replace("}", "\"").replace("\'", "").replace(": ", ":").replace(".0", "").replace(",", "").replace(" ", "  ")
     nasa_coeffs=species.thermo.coeffs
+    nasa_range_1=str([species.thermo.min_temp, nasa_coeffs[0]])
+    nasa_range_2=str([nasa_coeffs[0], species.thermo.max_temp])
+    nasa_coeffs_1=str(species.thermo.coeffs[1:8])
+    nasa_coeffs_2=str(species.thermo.coeffs[8:15])
     f.write("species(name = \"" + name + "\"," + '\n')
     f.write("   atoms = "  + composition + '\n' )
     f.write("   thermo = (" + '\n')
-    f.write(str(nasa_coeffs)+ '\n\n')
-
+    nasa_string_1=str(textwrap.fill(('      NASA( ' + nasa_range_1 + ', ' + nasa_coeffs_1), width=55, subsequent_indent= '          '))
+    f.write(nasa_string_1 + ')\n')
+    nasa_string_1=str(textwrap.fill(('      NASA( ' + nasa_range_2 + ', ' + nasa_coeffs_2), width=55, subsequent_indent= '          '))
+    f.write(nasa_string_1 + ')\n')
+    f.write('\n\n')
 
 
 
