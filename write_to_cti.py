@@ -5,14 +5,33 @@ based on Cantera version 2.3.0a2"""
 
 from identify_file_extension import readin
 
-A=readin('gri30.cti', [])
-initial=A[0]
-final=A[1]
+
 
 import os
 import textwrap
-os.system('rm -r testfile.cti')
-f=open('testfile.cti', 'w+')
+
+input_file_location="Input_Data_Files/gri30.cti"
+A=readin(input_file_location, [])
+initial=A[0]
+final=A[1]
+
+
+file_path= os.path.relpath("Output_Data_Files/test_file.cti")
+cstring_remove= 'rm -r ' + file_path
+os.system(cstring_remove)
+f=open(file_path, 'w+')
+
+
+"""-----------------------------------------------------------------------------
+Write Title Block to file
+-----------------------------------------------------------------------------"""
+f.write('#'+ "-"*80 + '\n')
+f.write('#  CTI File converted from Solution Object\n')
+f.write('#'+ "-"*80 + '\n\n')
+
+units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
+f.write(units_string + '\n\n')
+
 
 
 """-----------------------------------------------------------------------------
@@ -30,19 +49,28 @@ for i, name in enumerate(final.species_names):
     nasa_coeffs=species.thermo.coeffs
     nasa_range_1=str([species.thermo.min_temp, nasa_coeffs[0]])
     nasa_range_2=str([nasa_coeffs[0], species.thermo.max_temp])
-    nasa_coeffs_1=str(species.thermo.coeffs[1:8])
-    nasa_coeffs_2=str(species.thermo.coeffs[8:15])
+
+    nasa_coeffs_1_1=','.join(map(str, species.thermo.coeffs[1:2]))
+    nasa_coeffs_1_2=','.join(map(str, species.thermo.coeffs[5:6]))
+    nasa_coeffs_1_3=','.join(map(str, species.thermo.coeffs[7:8]))
+
+    nasa_coeffs_2_1=','.join(map(str, species.thermo.coeffs[8:10]))
+    nasa_coeffs_2_2=','.join(map(str, species.thermo.coeffs[11:13]))
+    nasa_coeffs_2_3=','.join(map(str, species.thermo.coeffs[14:15]))
+
     f.write("species(name = \"" + name + "\"," + '\n')
-    f.write("   atoms = "  + composition + '\n' )
+    f.write("   atoms = "  + composition + ', \n' )
     f.write("   thermo = (" + '\n')
-    nasa_string_1=str(textwrap.fill(('      NASA( ' + nasa_range_1 + ', ' + nasa_coeffs_1), width=55, subsequent_indent= '          '))
-    f.write(nasa_string_1 + ')\n')
-    nasa_string_1=str(textwrap.fill(('      NASA( ' + nasa_range_2 + ', ' + nasa_coeffs_2), width=55, subsequent_indent= '          '))
-    f.write(nasa_string_1 + ')\n')
+    nasa_string_1=str('      NASA( ' + nasa_range_1 + ', [' + nasa_coeffs_1_1 +',\n     ' +nasa_coeffs_1_2 + ',\n      ' + nasa_coeffs_1_3 + ']')
+    f.write(nasa_string_1 + '), \n')
+    nasa_string_1=str('      NASA( ' + nasa_range_2 + ', [' + nasa_coeffs_2_1 + ',\n        ' + nasa_coeffs_2_2 + ',\n      '+ nasa_coeffs_2_3 + ']')
+    f.write(nasa_string_1 + ')\n))')
     f.write('\n\n')
 
 
-
+"""old textwrap
+nasa_string_1=str(textwrap.fill(('      NASA( ' + nasa_range_1 + ', [' + nasa_coeffs_1_1 +'\n' +nasa_coeffs_1_2 + '\n' + nasa_coeffs_1_3 + ']'), width=70, subsequent_indent= '          '))
+"""
 
 
 
@@ -64,13 +92,13 @@ for n, i in enumerate(final.reaction_equations()):
         Arr=["{:.2E}".format(equation_object.rate.pre_exponential_factor), equation_object.rate.temperature_exponent, equation_object.rate.activation_energy]
         Efficiencies=str(equation_object.efficiencies).replace("{", "\"").replace("\'", "").replace(": ", ":").replace(",", " ").replace("}", "\"")
         f.write('#  ' + 'Reaction' + ' ' + m + '\n')
-        f.write('three_body_reaction(  ' + '\"'+ equation_string + '\",   ' + str(Arr))
+        f.write('three_body_reaction(  ' + '\"'+ equation_string + '\",   ' + str(Arr) +',')
         f.write('\n          ' + 'efficiencies = '+ Efficiencies + ')' + '\n\n')
 
     if equation_type == 'ElementaryReaction':
         Arr=["{:.2E}".format(equation_object.rate.pre_exponential_factor), equation_object.rate.temperature_exponent, equation_object.rate.activation_energy]
         f.write('#  ' + 'Reaction' + ' ' + m + '\n')
-        f.write('reaction( ' + '\"'+ equation_string + '\",   ' + str(Arr)  + ')'+ '\n\n')
+        f.write('reaction( ' + '\"'+ equation_string + '\",   ' + str(Arr)  + '),'+ '\n\n')
 
     if equation_type == 'FalloffReaction':
         Efficiencies=str(equation_object.efficiencies).replace("{", "\"").replace("\'", "").replace(": ", ":").replace(",", " ").replace("}", "\"")
@@ -79,13 +107,16 @@ for n, i in enumerate(final.reaction_equations()):
         j=equation_object.falloff.parameters
         f.write('#  ' + 'Reaction' + ' ' + m + '\n')
         f.write('falloff_reaction(  ' + '\"'+ equation_string + '\",   ' +'\n'  )
-        f.write('           kf = ' + str(kf).replace("\'", "")+ '\n')
-        f.write('           kf0 = ' + str(kf0).replace("\'", ""))
+        f.write('           kf = ' + str(kf).replace("\'", "")+ ',\n')
+        f.write('           kf0 = ' + str(kf0).replace("\'", "") +',')
         try:
-            falloff_str=str('\n' + '           falloff = Troe(A = ' + str(j[0]) + ', T3 = ' + str(j[1]) + ', T1 = ' + str(j[2]) + ', T2 = ' + str(j[3]))
+            falloff_str=str('\n' + '           falloff = Troe(A = ' + str(j[0]) + ', T3 = ' + str(j[1]) + ', T1 = ' + str(j[2]) + ', T2 = ' + str(j[3]) +'),')
             f.write(falloff_str)
         except (IndexError):
             pass
         f.write('\n          ' + ' efficiencies = '+ Efficiencies + ')' + '\n\n')
 
-os.system('atom testfile.cti')
+f.close()
+
+cstring_open= 'cd Output_Data_Files \n' + 'atom test_file.cti'
+os.system(cstring_open)

@@ -1,3 +1,0 @@
-file located in
-    usr/local/lib/python2.7/site-packages/cantera
-    version 2.3.0a2

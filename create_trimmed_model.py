@@ -16,7 +16,7 @@ def create_trimmed_model(data_file, exclusion_list):
     Returns
     -------
     new_solution :
-        Simplified Cantera Solution
+        Simplified Cantera Solution Object
     """
 
     # define initial solution objects
