@@ -17,7 +17,7 @@ final=A[1]
 
 
 file_path= os.path.relpath('Output_Data_Files/test_file.cti')
-
+os.system('rm -r test_file.cti')
 f=open('test_file.cti', 'w+')
 
 
@@ -30,6 +30,12 @@ f.write('#'+ "-"*80 + '\n\n')
 
 units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
 f.write(units_string + '\n\n')
+
+"""-----------------------------------------------------------------------------
+Write Phase definition to file
+-----------------------------------------------------------------------------"""
+
+
 
 
 
@@ -48,26 +54,32 @@ for i, name in enumerate(final.species_names):
     nasa_coeffs=species.thermo.coeffs
     nasa_range_1=str([species.thermo.min_temp, nasa_coeffs[0]])
     nasa_range_2=str([nasa_coeffs[0], species.thermo.max_temp])
-    """
-    nasa_coeffs_1_1=','.join(map(str, species.thermo.coeffs[1:2]))
-    nasa_coeffs_1_2=','.join(map(str, species.thermo.coeffs[5:6]))
-    nasa_coeffs_1_3=','.join(map(str, species.thermo.coeffs[7:8]))
 
-    nasa_coeffs_2_1=','.join(map(str, species.thermo.coeffs[8:10]))
-    nasa_coeffs_2_2=','.join(map(str, species.thermo.coeffs[11:13]))
-    nasa_coeffs_2_3=','.join(map(str, species.thermo.coeffs[14:15]))
-    """
     f.write("species(name = \"" + name + "\"," + '\n')
     f.write("   atoms = "  + composition + ', \n' )
     f.write("   thermo = (" + '\n')
+
     f.write('       NASA( ' + nasa_range_1 + ', [' + str(nasa_coeffs[1]) + ', ' + str(nasa_coeffs[2]) + ',\n')
     f.write('           ' + str(nasa_coeffs[3]) + ', ' + str(nasa_coeffs[4]) + ', ' + str(nasa_coeffs[5]) + ',' + '\n')
     f.write('           ' + str(nasa_coeffs[6]) + ', ' + str(nasa_coeffs[7]) + ']  ),\n')
 
     f.write('       NASA( ' + nasa_range_2 + ', [' + str(nasa_coeffs[8]) + ', ' + str(nasa_coeffs[9]) + ',\n')
     f.write('           ' + str(nasa_coeffs[10]) + ', ' + str(nasa_coeffs[11]) + ', ' + str(nasa_coeffs[12]) + ',' + '\n')
-    f.write('           ' + str(nasa_coeffs[13]) + ', ' + str(nasa_coeffs[14]) + ']  )\n           )\n  )\n')
+    f.write('           ' + str(nasa_coeffs[13]) + ', ' + str(nasa_coeffs[14]) + ']  )\n           ), \n  ')
 
+
+    geom_string= '                      geom = '+ '\"' + species.transport.geometry + '\"' + ',\n'
+    diam_string= '                      diam = ' + str(species.transport.diameter*(10**10)) + ',\n'
+    well_depth_string='                      well_depth = ' + str(species.transport.well_depth*(10**22)) + ',\n'
+    polar_string='                      polar = ' + str(species.transport.polarizability*10**30) + ',\n'
+    rot_relax_string='                       rot_relax= ' + str(species.transport.rotational_relaxation)
+    f.write('     transport = gas_transport( \n')
+    f.write(geom_string)
+    f.write(diam_string)
+    f.write(well_depth_string)
+    f.write(polar_string)
+    f.write(rot_relax_string)
+    f.write('         )        \n        )\n\n')
 
 
 """-----------------------------------------------------------------------------
@@ -84,21 +96,21 @@ for n, i in enumerate(final.reaction_equations()):
     equation_type=type(equation_object).__name__
     m=str(n+1)
     if equation_type == 'ThreeBodyReaction':
-        Arr=["{:.2E}".format(equation_object.rate.pre_exponential_factor), equation_object.rate.temperature_exponent, equation_object.rate.activation_energy]
+        Arr=[str("{:.5E}".format(equation_object.rate.pre_exponential_factor)).replace("\'", ""), equation_object.rate.temperature_exponent, equation_object.rate.activation_energy]
         Efficiencies=str(equation_object.efficiencies).replace("{", "\"").replace("\'", "").replace(": ", ":").replace(",", " ").replace("}", "\"")
         f.write('#  ' + 'Reaction' + ' ' + m + '\n')
-        f.write('three_body_reaction(  ' + '\"'+ equation_string + '\",   ' + str(Arr) +',')
+        f.write('three_body_reaction(  ' + '\"'+ equation_string + '\",   ' + str(Arr).replace("\'", "")  +',')
         f.write('\n          ' + 'efficiencies = '+ Efficiencies + ')' + '\n\n')
 
     if equation_type == 'ElementaryReaction':
-        Arr=["{:.2E}".format(equation_object.rate.pre_exponential_factor), equation_object.rate.temperature_exponent, equation_object.rate.activation_energy]
+        Arr=["{:.5E}".format(equation_object.rate.pre_exponential_factor), equation_object.rate.temperature_exponent, equation_object.rate.activation_energy]
         f.write('#  ' + 'Reaction' + ' ' + m + '\n')
-        f.write('reaction( ' + '\"'+ equation_string + '\",   ' + str(Arr)  + '),'+ '\n\n')
+        f.write('reaction( ' + '\"'+ equation_string + '\",   ' + str(Arr).replace("\'", "")  + '),'+ '\n\n')
 
     if equation_type == 'FalloffReaction':
         Efficiencies=str(equation_object.efficiencies).replace("{", "\"").replace("\'", "").replace(": ", ":").replace(",", " ").replace("}", "\"")
-        kf=["{:.2E}".format(equation_object.high_rate.pre_exponential_factor), equation_object.high_rate.temperature_exponent, equation_object.high_rate.activation_energy]
-        kf0=["{:.2E}".format(equation_object.low_rate.pre_exponential_factor), equation_object.low_rate.temperature_exponent, equation_object.low_rate.activation_energy]
+        kf=["{:.5E}".format(equation_object.high_rate.pre_exponential_factor), equation_object.high_rate.temperature_exponent, equation_object.high_rate.activation_energy]
+        kf0=["{:.5E}".format(equation_object.low_rate.pre_exponential_factor), equation_object.low_rate.temperature_exponent, equation_object.low_rate.activation_energy]
         j=equation_object.falloff.parameters
         f.write('#  ' + 'Reaction' + ' ' + m + '\n')
         f.write('falloff_reaction(  ' + '\"'+ equation_string + '\",   ' +'\n'  )
