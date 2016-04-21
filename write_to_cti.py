@@ -10,16 +10,15 @@ from identify_file_extension import readin
 import os
 import textwrap
 
-input_file_location="Input_Data_Files/gri30.cti"
-A=readin(input_file_location, [])
+filename= 'gri30.cti'
+A=readin(filename, [])
 initial=A[0]
 final=A[1]
 
 
-file_path= os.path.relpath("Output_Data_Files/test_file.cti")
-cstring_remove= 'rm -r ' + file_path
-os.system(cstring_remove)
-f=open(file_path, 'w+')
+file_path= os.path.relpath('Output_Data_Files/test_file.cti')
+
+f=open('test_file.cti', 'w+')
 
 
 """-----------------------------------------------------------------------------
@@ -49,7 +48,7 @@ for i, name in enumerate(final.species_names):
     nasa_coeffs=species.thermo.coeffs
     nasa_range_1=str([species.thermo.min_temp, nasa_coeffs[0]])
     nasa_range_2=str([nasa_coeffs[0], species.thermo.max_temp])
-
+    """
     nasa_coeffs_1_1=','.join(map(str, species.thermo.coeffs[1:2]))
     nasa_coeffs_1_2=','.join(map(str, species.thermo.coeffs[5:6]))
     nasa_coeffs_1_3=','.join(map(str, species.thermo.coeffs[7:8]))
@@ -57,21 +56,17 @@ for i, name in enumerate(final.species_names):
     nasa_coeffs_2_1=','.join(map(str, species.thermo.coeffs[8:10]))
     nasa_coeffs_2_2=','.join(map(str, species.thermo.coeffs[11:13]))
     nasa_coeffs_2_3=','.join(map(str, species.thermo.coeffs[14:15]))
-
+    """
     f.write("species(name = \"" + name + "\"," + '\n')
     f.write("   atoms = "  + composition + ', \n' )
     f.write("   thermo = (" + '\n')
-    nasa_string_1=str('      NASA( ' + nasa_range_1 + ', [' + nasa_coeffs_1_1 +',\n     ' +nasa_coeffs_1_2 + ',\n      ' + nasa_coeffs_1_3 + ']')
-    f.write(nasa_string_1 + '), \n')
-    nasa_string_1=str('      NASA( ' + nasa_range_2 + ', [' + nasa_coeffs_2_1 + ',\n        ' + nasa_coeffs_2_2 + ',\n      '+ nasa_coeffs_2_3 + ']')
-    f.write(nasa_string_1 + ')\n))')
-    f.write('\n\n')
+    f.write('       NASA( ' + nasa_range_1 + ', [' + str(nasa_coeffs[1]) + ', ' + str(nasa_coeffs[2]) + ',\n')
+    f.write('           ' + str(nasa_coeffs[3]) + ', ' + str(nasa_coeffs[4]) + ', ' + str(nasa_coeffs[5]) + ',' + '\n')
+    f.write('           ' + str(nasa_coeffs[6]) + ', ' + str(nasa_coeffs[7]) + ']  ),\n')
 
-
-"""old textwrap
-nasa_string_1=str(textwrap.fill(('      NASA( ' + nasa_range_1 + ', [' + nasa_coeffs_1_1 +'\n' +nasa_coeffs_1_2 + '\n' + nasa_coeffs_1_3 + ']'), width=70, subsequent_indent= '          '))
-"""
-
+    f.write('       NASA( ' + nasa_range_2 + ', [' + str(nasa_coeffs[8]) + ', ' + str(nasa_coeffs[9]) + ',\n')
+    f.write('           ' + str(nasa_coeffs[10]) + ', ' + str(nasa_coeffs[11]) + ', ' + str(nasa_coeffs[12]) + ',' + '\n')
+    f.write('           ' + str(nasa_coeffs[13]) + ', ' + str(nasa_coeffs[14]) + ']  )\n           )\n  )\n')
 
 
 
@@ -118,5 +113,4 @@ for n, i in enumerate(final.reaction_equations()):
 
 f.close()
 
-cstring_open= 'cd Output_Data_Files \n' + 'atom test_file.cti'
-os.system(cstring_open)
+os.system('atom test_file.cti')

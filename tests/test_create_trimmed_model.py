@@ -1,4 +1,4 @@
-#test create_trimmed_model
+touc#test create_trimmed_model
 
 """
 file:
