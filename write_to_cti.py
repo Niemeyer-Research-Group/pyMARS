@@ -9,6 +9,7 @@ from identify_file_extension import readin
 
 import os
 import textwrap
+from string import Template
 
 filename= 'gri30.cti'
 A=readin(filename, [])
@@ -24,18 +25,50 @@ f=open('test_file.cti', 'w+')
 """-----------------------------------------------------------------------------
 Write Title Block to file
 -----------------------------------------------------------------------------"""
-f.write('#'+ "-"*80 + '\n')
+f.write('#'+ "-"*75 + '\n')
 f.write('#  CTI File converted from Solution Object\n')
-f.write('#'+ "-"*80 + '\n\n')
+f.write('#'+ "-"*75 + '\n\n')
 
 units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
 f.write(units_string + '\n\n')
+
+"""-----------------------------------------------------------------------------
+Work Functions
+-----------------------------------------------------------------------------"""
+
+def eliminate(input_string, char_to_replace, spaces='single'):
+    for char in char_to_replace:
+                input_string= input_string.replace(char, "")
+    if spaces == 'double':
+                input_string=input_string.replace(" ", "  ")
+    return input_string
+
+def wrap(input_string):
+    output_string= textwrap.fill(input_string, width=55, \
+                            subsequent_indent= '                        ')
+    return output_string
 
 """-----------------------------------------------------------------------------
 Write Phase definition to file
 -----------------------------------------------------------------------------"""
 
 
+element_names=eliminate(    str(initial.element_names), ['[', ']', '\'', ','])
+species_names=wrap(
+                    eliminate(  str(initial.species_names), \
+                                ['[', ']', '\'', ','], \
+                                spaces='double')
+                    )
+
+phase_string= Template('ideal_gas( name = \"gri30\", \n \
+            elements = \"$elements\", \n \
+            species =""" $species""", \n\
+            reactions = \"all\", \n \
+            initial_state = state(temperature = 300.0, \n \
+                                    pressure= OneAtm)        )\n\n')
+
+
+f.write(phase_string.substitute(elements=element_names, species=species_names))
 
 
 
@@ -43,9 +76,9 @@ Write Phase definition to file
 Write Species to file
 -----------------------------------------------------------------------------"""
 
-f.write('#'+ "-"*80 + '\n')
+f.write('#'+ "-"*75 + '\n')
 f.write('#  Species Data\n')
-f.write('#'+ "-"*80 + '\n\n')
+f.write('#'+ "-"*75 + '\n\n')
 
 for i, name in enumerate(final.species_names):
     species=final.species(i)
