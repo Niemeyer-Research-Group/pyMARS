@@ -21,17 +21,6 @@ file_path= os.path.relpath('Output_Data_Files/test_file.cti')
 os.system('rm -r test_file.cti')
 f=open('test_file.cti', 'w+')
 
-
-"""-----------------------------------------------------------------------------
-Write Title Block to file
------------------------------------------------------------------------------"""
-f.write('#'+ "-"*75 + '\n')
-f.write('#  CTI File converted from Solution Object\n')
-f.write('#'+ "-"*75 + '\n\n')
-
-units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
-f.write(units_string + '\n\n')
-
 """-----------------------------------------------------------------------------
 Work Functions
 -----------------------------------------------------------------------------"""
@@ -47,6 +36,26 @@ def wrap(input_string):
     output_string= textwrap.fill(input_string, width=55, \
                             subsequent_indent= '                        ')
     return output_string
+
+def section_break(title):
+    f.write('#'+ "-"*75 + '\n')
+    f.write('#' + title +'\n')
+    f.write('#'+ "-"*75 + '\n\n')
+
+def replace_multiple(input_string, replace_list):
+    for a, b in replace_list.items():
+        input_string= input_string.replace(a, b)
+    return input_string
+
+"""-----------------------------------------------------------------------------
+Write Title Block to file
+-----------------------------------------------------------------------------"""
+section_break('CTI File converted from Solution Object')
+
+units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
+f.write(units_string + '\n\n')
+
+
 
 """-----------------------------------------------------------------------------
 Write Phase definition to file
@@ -76,14 +85,14 @@ f.write(phase_string.substitute(elements=element_names, species=species_names))
 Write Species to file
 -----------------------------------------------------------------------------"""
 
-f.write('#'+ "-"*75 + '\n')
-f.write('#  Species Data\n')
-f.write('#'+ "-"*75 + '\n\n')
+section_break('Species_data')
 
 for i, name in enumerate(final.species_names):
     species=final.species(i)
     name=final.species(i).name
-    composition= str(species.composition).replace("{", "\"").replace("}", "\"").replace("\'", "").replace(": ", ":").replace(".0", "").replace(",", "").replace(" ", "  ")
+    replace_list= {'{':'\"',       '}':'\"',       '\'':'',        ':  ':':',
+                    '.0':"",         ',':'',       ' ': '  '                }
+    composition=replace_multiple(str(species.composition), replace_list )
     nasa_coeffs=species.thermo.coeffs
     nasa_range_1=str([species.thermo.min_temp, nasa_coeffs[0]])
     nasa_range_2=str([nasa_coeffs[0], species.thermo.max_temp])
@@ -119,9 +128,7 @@ for i, name in enumerate(final.species_names):
 Write reactions to file
 -----------------------------------------------------------------------------"""
 
-f.write('#'+ "-"*80 + '\n')
-f.write('#  Reaction Data\n')
-f.write('#'+ "-"*80 + '\n\n')
+section_break('Reaction Data')
 
 for n, i in enumerate(final.reaction_equations()):
     equation_string=final.reaction_equation(n)
