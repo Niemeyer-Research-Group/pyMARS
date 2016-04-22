@@ -97,9 +97,12 @@ for i, name in enumerate(final.species_names):
     nasa_range_1=str([species.thermo.min_temp, nasa_coeffs[0]])
     nasa_range_2=str([nasa_coeffs[0], species.thermo.max_temp])
 
-    f.write("species(name = \"" + name + "\"," + '\n')
-    f.write("   atoms = "  + composition + ', \n' )
-    f.write("   thermo = (" + '\n')
+    species_string=Template('species(name = "$name",\n\
+        atoms = $composition, \n\
+        thermo= (\n\
+        Nasa( $nasa_range_1, str(n)')           """STOPPED HERE """
+    f.write(species_string.substitute(name=name, composition=composition))
+
 
     f.write('       NASA( ' + nasa_range_1 + ', [' + str(nasa_coeffs[1]) + ', ' + str(nasa_coeffs[2]) + ',\n')
     f.write('           ' + str(nasa_coeffs[3]) + ', ' + str(nasa_coeffs[4]) + ', ' + str(nasa_coeffs[5]) + ',' + '\n')
