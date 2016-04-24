@@ -1,28 +1,31 @@
 """writes a solution object to a cantera cti file.
 
 currently only works for Elementary, Falloff and ThreeBody Reactions
-based on Cantera version 2.3.0a2"""
+Cantera development version 2.3.0a2 required"""
 
 from identify_file_extension import readin
 import os
 import textwrap
 from string import Template
+
+
 def write(input_file):
-    file_name= str(input_file)
-    fn = os.path.join(os.path.dirname(input_file), file_name)
 
-    A=readin(fn, [])
-    initial=A[0]
+
+    input_file_location='Input_Data_Files/' + str(input_file)
+    fileDir = os.path.dirname(os.path.realpath('__file__'))
+    input_file_name= os.path.join(fileDir, input_file_location)
+
+    A=readin(input_file_name, [])
     final=A[1]
+    output_file_location='Output_Data_Files/' + 'gri30_converted.cti'
+    output_file_name=os.path.join(fileDir, output_file_location )
+    os.system('rm -r ' + output_file_name )
+    f=open(output_file_name, 'w+')
 
-
-    file_path= os.path.relpath('Output_Data_Files/test_file.cti')
-    os.system('rm -r test_file.cti')
-    f=open('test_file.cti', 'w+')
-
-    """-----------------------------------------------------------------------------
+    """-------------------------------------------------------------------------
     Work Functions
-    -----------------------------------------------------------------------------"""
+    -------------------------------------------------------------------------"""
 
     def eliminate(input_string, char_to_replace, spaces='single'):
         for char in char_to_replace:
@@ -50,9 +53,9 @@ def write(input_file):
             input_string= input_string.replace(a, b)
         return input_string
 
-    """-----------------------------------------------------------------------------
+    """-------------------------------------------------------------------------
     Write Title Block to file
-    -----------------------------------------------------------------------------"""
+    -------------------------------------------------------------------------"""
     section_break('CTI File converted from Solution Object')
 
     units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
@@ -60,19 +63,19 @@ def write(input_file):
 
 
 
-    """-----------------------------------------------------------------------------
+    """-------------------------------------------------------------------------
     Write Phase definition to file
-    -----------------------------------------------------------------------------"""
+    -------------------------------------------------------------------------"""
 
 
-    element_names=eliminate(    str(initial.element_names), ['[', ']', '\'', ','])
+    element_names=eliminate( str(final.element_names), ['[', ']', '\'', ','])
     species_names=wrap(
-                        eliminate(  str(initial.species_names), \
+                        eliminate(  str(final.species_names), \
                                     ['[', ']', '\'', ','], \
                                     spaces='double')
                         )
 
-    phase_string= Template('ideal_gas( name = \"gri30\", \n \
+    phase_string= Template('ideal_gas(name = \"gri30\", \n \
                 elements = \"$elements\", \n \
                 species =""" $species""", \n\
                 reactions = \"all\", \n \
@@ -80,18 +83,19 @@ def write(input_file):
                                         pressure= OneAtm)        )\n\n')
 
 
-    f.write(phase_string.substitute(elements=element_names, species=species_names))
+    f.write(phase_string.substitute(elements=element_names, \
+                                    species=species_names))
 
 
 
-    """-----------------------------------------------------------------------------
+    """-------------------------------------------------------------------------
     Write Species to file
-    -----------------------------------------------------------------------------"""
+    -------------------------------------------------------------------------"""
 
     section_break('Species_data')
 
     for i, name in enumerate(final.species_names):
-        nasa_coeffs=species.thermo.coeffs
+        nasa_coeffs=final.species(i).thermo.coeffs
         species=final.species(i)
         name=final.species(i).name
         replace_list= {'{':'\"',       '}':'\"',       '\'':'',        ':  ':':',
@@ -117,19 +121,30 @@ def write(input_file):
         composition=replace_multiple(str(species.composition), replace_list )
         nasa_range_1=str([ species.thermo.min_temp, nasa_coeffs[0] ])
         nasa_range_2=str([ nasa_coeffs[0], species.thermo.max_temp ])
+        transport_geometry=species.transport.geometry
+        diameter= str(species.transport.diameter*(10**10))
+        well_depth = str(species.transport.well_depth)
+
 
         species_string=Template('species(name = "$name",\n\
             atoms = $composition, \n\
             thermo= (\n\
             NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n\
-            NASA(   $nasa_range_2, $nasa_coeffs_2  ),\n')
+            NASA(   $nasa_range_2, $nasa_coeffs_2  ),\n\
+            transport = gas_transport(\n\
+                    geom = \"$transport_geometry\", \n\
+                    diam = $diameter, \n\
+                    well_depth = $well_depth, \n\
+                    \n')
 
         f.write(species_string.substitute(name=name, composition=composition, \
-                            nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
-                            nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2))
+                    nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
+                    nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,\
+                    transport_geometry=transport_geometry, diameter=diameter,\
+                    well_depth=well_depth))
 
 
-        geom_string= '                      geom = '+ '\"' + species.transport.geometry + '\"' + ',\n'
+        """geom_string= '                      geom = '+ '\"' + species.transport.geometry + '\"' + ',\n'
         diam_string= '                      diam = ' + str(species.transport.diameter*(10**10)) + ',\n'
         well_depth_string='                      well_depth = ' + str(species.transport.well_depth*(10**22)) + ',\n'
         polar_string='                      polar = ' + str(species.transport.polarizability*10**30) + ',\n'
@@ -141,7 +156,7 @@ def write(input_file):
         f.write(polar_string)
         f.write(rot_relax_string)
         f.write('         )        \n        )\n\n')
-
+        """
 
     """-----------------------------------------------------------------------------
     Write reactions to file
@@ -183,6 +198,6 @@ def write(input_file):
             f.write('\n          ' + ' efficiencies = '+ Efficiencies + ')' + '\n\n')
 
     f.close()
-
-    os.system('atom test_file.cti')
+    cw='atom ' + output_file_name
+    os.system(cw)
 write('gri30.cti')
