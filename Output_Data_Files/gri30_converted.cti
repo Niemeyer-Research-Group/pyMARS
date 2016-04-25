@@ -1,26 +1,25 @@
 #---------------------------------------------------------------------------
-#CTI File converted from Solution Object
+#  CTI File converted from Solution Object
 #---------------------------------------------------------------------------
 
 units(length = "cm", time = "s", quantity = "mol", act_energy = "cal/mol")
 
 ideal_gas(name = "gri30", 
-                 elements = "H O C N Ar", 
-                 species =""" H2  H  O  O2  OH  H2O  HO2  H2O2  C  CH  CH2  CH2(S)
-                        CH3  CH4  CO  CO2  HCO  CH2O
-                        CH2OH  CH3O  CH3OH  C2H  C2H2
-                        C2H3  C2H4  C2H5  C2H6  HCCO
-                        CH2CO  HCCOH  N  NH  NH2  NH3
-                        NNH  NO  NO2  N2O  HNO  CN  HCN
-                        H2CN  HCNN  HCNO  HOCN  HNCO
-                        NCO  N2  AR  C3H7  C3H8  CH2CHO
-                        CH3CHO""", 
-                reactions = "all", 
-                 initial_state = state(temperature = 300.0, 
-                                         pressure= OneAtm)        )
+         elements = "H O C N Ar", 
+         species =""" H2  H  O  O2  OH  H2O  HO2  H2O2  C  CH  CH2  CH2(S)  CH3
+                        CH4  CO  CO2  HCO  CH2O  CH2OH  CH3O
+                        CH3OH  C2H  C2H2  C2H3  C2H4  C2H5
+                        C2H6  HCCO  CH2CO  HCCOH  N  NH  NH2
+                        NH3  NNH  NO  NO2  N2O  HNO  CN  HCN
+                        H2CN  HCNN  HCNO  HOCN  HNCO  NCO
+                        N2  AR  C3H7  C3H8  CH2CHO  CH3CHO""", 
+        reactions = "all", 
+         initial_state = state(temperature = 300.0, 
+                                 pressure= OneAtm)        
+        )
 
 #---------------------------------------------------------------------------
-#Species_data
+#  Species data
 #---------------------------------------------------------------------------
 
 species(name = "H2",
@@ -38,7 +37,9 @@ species(name = "H2",
                     geom = "linear", 
                     diam = 2.92, 
                     well_depth = 5.24646541131e-22, 
-                    
+                    polar = 0.79, 
+                    rot_relax = 280.0 
+                )
 species(name = "H",
             atoms = "H:1", 
             thermo= (
@@ -54,7 +55,9 @@ species(name = "H",
                     geom = "atom", 
                     diam = 2.05, 
                     well_depth = 2.00194074905e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "O",
             atoms = "O:1", 
             thermo= (
@@ -70,7 +73,9 @@ species(name = "O",
                     geom = "atom", 
                     diam = 2.75, 
                     well_depth = 1.10451903396e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "O2",
             atoms = "O:2", 
             thermo= (
@@ -86,7 +91,9 @@ species(name = "O2",
                     geom = "linear", 
                     diam = 3.46, 
                     well_depth = 1.48281680309e-21, 
-                    
+                    polar = 1.6, 
+                    rot_relax = 3.8 
+                )
 species(name = "OH",
             atoms = "H:1  O:1", 
             thermo= (
@@ -101,7 +108,9 @@ species(name = "OH",
                     geom = "linear", 
                     diam = 2.75, 
                     well_depth = 1.10451903396e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "H2O",
             atoms = "H:2  O:1", 
             thermo= (
@@ -117,7 +126,9 @@ species(name = "H2O",
                     geom = "nonlinear", 
                     diam = 2.6, 
                     well_depth = 7.90283368798e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 4.0 
+                )
 species(name = "HO2",
             atoms = "H:1  O:2", 
             thermo= (
@@ -133,7 +144,9 @@ species(name = "HO2",
                     geom = "nonlinear", 
                     diam = 3.46, 
                     well_depth = 1.48281680309e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "H2O2",
             atoms = "H:2  O:2", 
             thermo= (
@@ -149,7 +162,9 @@ species(name = "H2O2",
                     geom = "nonlinear", 
                     diam = 3.46, 
                     well_depth = 1.48281680309e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 3.8 
+                )
 species(name = "C",
             atoms = "C:1", 
             thermo= (
@@ -165,7 +180,9 @@ species(name = "C",
                     geom = "atom", 
                     diam = 3.3, 
                     well_depth = 9.85783237809e-22, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "CH",
             atoms = "H:1  C:1", 
             thermo= (
@@ -180,7 +197,9 @@ species(name = "CH",
                     geom = "linear", 
                     diam = 2.75, 
                     well_depth = 1.10451903396e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "CH2",
             atoms = "H:2  C:1", 
             thermo= (
@@ -195,7 +214,9 @@ species(name = "CH2",
                     geom = "linear", 
                     diam = 3.8, 
                     well_depth = 1.98813426113e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "CH2(S)",
             atoms = "H:2  C:1", 
             thermo= (
@@ -211,7 +232,9 @@ species(name = "CH2(S)",
                     geom = "linear", 
                     diam = 3.8, 
                     well_depth = 1.98813426113e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "CH3",
             atoms = "H:3  C:1", 
             thermo= (
@@ -226,7 +249,9 @@ species(name = "CH3",
                     geom = "linear", 
                     diam = 3.8, 
                     well_depth = 1.98813426113e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "CH4",
             atoms = "H:4  C:1", 
             thermo= (
@@ -242,7 +267,9 @@ species(name = "CH4",
                     geom = "nonlinear", 
                     diam = 3.75, 
                     well_depth = 1.95223739252e-21, 
-                    
+                    polar = 2.6, 
+                    rot_relax = 13.0 
+                )
 species(name = "CO",
             atoms = "C:1  O:1", 
             thermo= (
@@ -258,7 +285,9 @@ species(name = "CO",
                     geom = "linear", 
                     diam = 3.65, 
                     well_depth = 1.35441646539e-21, 
-                    
+                    polar = 1.95, 
+                    rot_relax = 1.8 
+                )
 species(name = "CO2",
             atoms = "C:1  O:2", 
             thermo= (
@@ -274,7 +303,9 @@ species(name = "CO2",
                     geom = "linear", 
                     diam = 3.76, 
                     well_depth = 3.36878305358e-21, 
-                    
+                    polar = 2.65, 
+                    rot_relax = 2.1 
+                )
 species(name = "HCO",
             atoms = "H:1  C:1  O:1", 
             thermo= (
@@ -290,7 +321,9 @@ species(name = "HCO",
                     geom = "nonlinear", 
                     diam = 3.59, 
                     well_depth = 6.8756309864e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "CH2O",
             atoms = "H:2  C:1  O:1", 
             thermo= (
@@ -306,7 +339,9 @@ species(name = "CH2O",
                     geom = "nonlinear", 
                     diam = 3.59, 
                     well_depth = 6.8756309864e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 species(name = "CH2OH",
             atoms = "H:3  C:1  O:1", 
             thermo= (
@@ -321,7 +356,9 @@ species(name = "CH2OH",
                     geom = "nonlinear", 
                     diam = 3.69, 
                     well_depth = 5.75730546452e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 species(name = "CH3O",
             atoms = "H:3  C:1  O:1", 
             thermo= (
@@ -336,7 +373,9 @@ species(name = "CH3O",
                     geom = "nonlinear", 
                     diam = 3.69, 
                     well_depth = 5.75730546452e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 species(name = "CH3OH",
             atoms = "H:4  C:1  O:1", 
             thermo= (
@@ -352,7 +391,9 @@ species(name = "CH3OH",
                     geom = "nonlinear", 
                     diam = 3.63, 
                     well_depth = 6.65196588202e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "C2H",
             atoms = "H:1  C:2", 
             thermo= (
@@ -368,7 +409,9 @@ species(name = "C2H",
                     geom = "linear", 
                     diam = 4.1, 
                     well_depth = 2.88555597622e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.5 
+                )
 species(name = "C2H2",
             atoms = "H:2  C:2", 
             thermo= (
@@ -384,7 +427,9 @@ species(name = "C2H2",
                     geom = "linear", 
                     diam = 4.1, 
                     well_depth = 2.88555597622e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.5 
+                )
 species(name = "C2H3",
             atoms = "H:3  C:2", 
             thermo= (
@@ -399,7 +444,9 @@ species(name = "C2H3",
                     geom = "nonlinear", 
                     diam = 4.1, 
                     well_depth = 2.88555597622e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "C2H4",
             atoms = "H:4  C:2", 
             thermo= (
@@ -415,7 +462,9 @@ species(name = "C2H4",
                     geom = "nonlinear", 
                     diam = 3.97, 
                     well_depth = 3.8768618092e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.5 
+                )
 species(name = "C2H5",
             atoms = "H:5  C:2", 
             thermo= (
@@ -431,7 +480,9 @@ species(name = "C2H5",
                     geom = "nonlinear", 
                     diam = 4.3, 
                     well_depth = 3.48337690335e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.5 
+                )
 species(name = "C2H6",
             atoms = "H:6  C:2", 
             thermo= (
@@ -447,7 +498,9 @@ species(name = "C2H6",
                     geom = "nonlinear", 
                     diam = 4.3, 
                     well_depth = 3.48337690335e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.5 
+                )
 species(name = "HCCO",
             atoms = "H:1  C:2  O:1", 
             thermo= (
@@ -463,7 +516,9 @@ species(name = "HCCO",
                     geom = "nonlinear", 
                     diam = 2.5, 
                     well_depth = 2.07097318867e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "CH2CO",
             atoms = "H:2  C:2  O:1", 
             thermo= (
@@ -479,7 +534,9 @@ species(name = "CH2CO",
                     geom = "nonlinear", 
                     diam = 3.97, 
                     well_depth = 6.01962873508e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 species(name = "HCCOH",
             atoms = "H:2  C:2  O:1", 
             thermo= (
@@ -495,7 +552,9 @@ species(name = "HCCOH",
                     geom = "nonlinear", 
                     diam = 3.97, 
                     well_depth = 6.01962873508e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 species(name = "N",
             atoms = "N:1", 
             thermo= (
@@ -510,7 +569,9 @@ species(name = "N",
                     geom = "atom", 
                     diam = 3.3, 
                     well_depth = 9.85783237809e-22, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "NH",
             atoms = "H:1  N:1", 
             thermo= (
@@ -526,7 +587,9 @@ species(name = "NH",
                     geom = "linear", 
                     diam = 2.65, 
                     well_depth = 1.10451903396e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 4.0 
+                )
 species(name = "NH2",
             atoms = "H:2  N:1", 
             thermo= (
@@ -542,7 +605,9 @@ species(name = "NH2",
                     geom = "nonlinear", 
                     diam = 2.65, 
                     well_depth = 1.10451903396e-21, 
-                    
+                    polar = 2.26, 
+                    rot_relax = 4.0 
+                )
 species(name = "NH3",
             atoms = "H:3  N:1", 
             thermo= (
@@ -558,7 +623,9 @@ species(name = "NH3",
                     geom = "nonlinear", 
                     diam = 2.92, 
                     well_depth = 6.64092069168e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 10.0 
+                )
 species(name = "NNH",
             atoms = "H:1  N:2", 
             thermo= (
@@ -574,7 +641,9 @@ species(name = "NNH",
                     geom = "nonlinear", 
                     diam = 3.8, 
                     well_depth = 9.85783237809e-22, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "NO",
             atoms = "O:1  N:1", 
             thermo= (
@@ -590,7 +659,9 @@ species(name = "NO",
                     geom = "linear", 
                     diam = 3.62, 
                     well_depth = 1.34654676728e-21, 
-                    
+                    polar = 1.76, 
+                    rot_relax = 4.0 
+                )
 species(name = "NO2",
             atoms = "O:2  N:1", 
             thermo= (
@@ -606,7 +677,9 @@ species(name = "NO2",
                     geom = "nonlinear", 
                     diam = 3.5, 
                     well_depth = 2.7612975849e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "N2O",
             atoms = "O:1  N:2", 
             thermo= (
@@ -622,7 +695,9 @@ species(name = "N2O",
                     geom = "linear", 
                     diam = 3.83, 
                     well_depth = 3.20862779365e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "HNO",
             atoms = "H:1  O:1  N:1", 
             thermo= (
@@ -638,7 +713,9 @@ species(name = "HNO",
                     geom = "nonlinear", 
                     diam = 3.49, 
                     well_depth = 1.61121714079e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "CN",
             atoms = "C:1  N:1", 
             thermo= (
@@ -653,7 +730,9 @@ species(name = "CN",
                     geom = "linear", 
                     diam = 3.86, 
                     well_depth = 1.03548659434e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "HCN",
             atoms = "H:1  C:1  N:1", 
             thermo= (
@@ -669,7 +748,9 @@ species(name = "HCN",
                     geom = "linear", 
                     diam = 3.63, 
                     well_depth = 7.85589162904e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "H2CN",
             atoms = "H:2  C:1  N:1", 
             thermo= (
@@ -684,7 +765,9 @@ species(name = "H2CN",
                     geom = "linear", 
                     diam = 3.63, 
                     well_depth = 7.85589162904e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "HCNN",
             atoms = "H:1  C:1  N:2", 
             thermo= (
@@ -700,7 +783,9 @@ species(name = "HCNN",
                     geom = "nonlinear", 
                     diam = 2.5, 
                     well_depth = 2.07097318867e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "HCNO",
             atoms = "H:1  C:1  O:1  N:1", 
             thermo= (
@@ -716,7 +801,9 @@ species(name = "HCNO",
                     geom = "nonlinear", 
                     diam = 3.83, 
                     well_depth = 3.20862779365e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "HOCN",
             atoms = "H:1  C:1  O:1  N:1", 
             thermo= (
@@ -732,7 +819,9 @@ species(name = "HOCN",
                     geom = "nonlinear", 
                     diam = 3.83, 
                     well_depth = 3.20862779365e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "HNCO",
             atoms = "H:1  C:1  O:1  N:1", 
             thermo= (
@@ -748,7 +837,9 @@ species(name = "HNCO",
                     geom = "nonlinear", 
                     diam = 3.83, 
                     well_depth = 3.20862779365e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "NCO",
             atoms = "C:1  O:1  N:1", 
             thermo= (
@@ -764,7 +855,9 @@ species(name = "NCO",
                     geom = "linear", 
                     diam = 3.83, 
                     well_depth = 3.20862779365e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "N2",
             atoms = "N:2", 
             thermo= (
@@ -780,7 +873,9 @@ species(name = "N2",
                     geom = "linear", 
                     diam = 3.62, 
                     well_depth = 1.34654676728e-21, 
-                    
+                    polar = 1.76, 
+                    rot_relax = 4.0 
+                )
 species(name = "AR",
             atoms = "Ar:1", 
             thermo= (
@@ -794,7 +889,9 @@ species(name = "AR",
                     geom = "atom", 
                     diam = 3.33, 
                     well_depth = 1.88458560169e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 0.0 
+                )
 species(name = "C3H7",
             atoms = "H:7  C:3", 
             thermo= (
@@ -809,7 +906,9 @@ species(name = "C3H7",
                     geom = "nonlinear", 
                     diam = 4.98, 
                     well_depth = 3.68357097826e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "C3H8",
             atoms = "H:8  C:3", 
             thermo= (
@@ -824,7 +923,9 @@ species(name = "C3H8",
                     geom = "nonlinear", 
                     diam = 4.98, 
                     well_depth = 3.68357097826e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 1.0 
+                )
 species(name = "CH2CHO",
             atoms = "H:3  C:2  O:1", 
             thermo= (
@@ -839,7 +940,9 @@ species(name = "CH2CHO",
                     geom = "nonlinear", 
                     diam = 3.97, 
                     well_depth = 6.01962873508e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 species(name = "CH3CHO",
             atoms = "H:4  C:2  O:1", 
             thermo= (
@@ -855,9 +958,11 @@ species(name = "CH3CHO",
                     geom = "nonlinear", 
                     diam = 3.97, 
                     well_depth = 6.01962873508e-21, 
-                    
+                    polar = 0.0, 
+                    rot_relax = 2.0 
+                )
 #---------------------------------------------------------------------------
-#Reaction Data
+#  Reaction Data
 #---------------------------------------------------------------------------
 
 #  Reaction 1

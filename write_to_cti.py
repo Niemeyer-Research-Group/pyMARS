@@ -35,7 +35,7 @@ def write(input_file):
         return input_string
 
     def wrap(input_string):
-        output_string= textwrap.fill(input_string, width=55, \
+        output_string= textwrap.fill(input_string, width=60, \
                                 subsequent_indent= '                        ')
         return output_string
     def wrap_nasa(input_string):
@@ -45,7 +45,7 @@ def write(input_file):
 
     def section_break(title):
         f.write('#'+ "-"*75 + '\n')
-        f.write('#' + title +'\n')
+        f.write('#  ' + title +'\n')
         f.write('#'+ "-"*75 + '\n\n')
 
     def replace_multiple(input_string, replace_list):
@@ -58,15 +58,13 @@ def write(input_file):
     -------------------------------------------------------------------------"""
     section_break('CTI File converted from Solution Object')
 
-    units_string="units(length = \"cm\", time = \"s\", quantity = \"mol\", act_energy = \"cal/mol\")"
-    f.write(units_string + '\n\n')
-
-
+    unit_string="units(length = \"cm\", time = \"s\"," +\
+                        " quantity = \"mol\", act_energy = \"cal/mol\")"
+    f.write(unit_string + '\n\n')
 
     """-------------------------------------------------------------------------
     Write Phase definition to file
     -------------------------------------------------------------------------"""
-
 
     element_names=eliminate( str(trimmed_solution.element_names), \
                                         ['[', ']', '\'', ','])
@@ -76,32 +74,31 @@ def write(input_file):
                                     ['[', ']', '\'', ','], \
                                     spaces='double')
                         )
-
     phase_string= Template('ideal_gas(name = \"gri30\", \n \
-                elements = \"$elements\", \n \
-                species =""" $species""", \n\
-                reactions = \"all\", \n \
-                initial_state = state(temperature = 300.0, \n \
-                                        pressure= OneAtm)        )\n\n')
+        elements = \"$elements\", \n \
+        species =""" $species""", \n\
+        reactions = \"all\", \n \
+        initial_state = state(temperature = 300.0, \n \
+                                pressure= OneAtm)        \n\
+        )\n\n')
 
 
     f.write(phase_string.substitute(elements=element_names, \
                                     species=species_names))
 
-
-
     """-------------------------------------------------------------------------
     Write Species to file
     -------------------------------------------------------------------------"""
 
-    section_break('Species_data')
+    section_break('Species data')
 
     for i, name in enumerate(trimmed_solution.species_names):
-        nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
         species=trimmed_solution.species(i)
         name=trimmed_solution.species(i).name
-        replace_list= {'{':'\"',       '}':'\"',       '\'':'',        ':  ':':',
-                        '.0':"",         ',':'',       ' ': '  '                }
+
+        nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
+        replace_list= {'{':'\"',       '}':'\"',       '\'':'',
+                    ':  ':':',      '.0':"",         ',':'',       ' ': '  '}
 
         nasa_coeffs_1=[]
         for j, k in enumerate(nasa_coeffs):
@@ -111,6 +108,7 @@ def write(input_file):
                     nasa_coeffs_1=wrap_nasa(eliminate(str(  nasa_coeffs_1), \
                                                     {'\'':""}))
                     break
+
         nasa_coeffs_2=[]
         for j, k in enumerate(nasa_coeffs):
                 coeff="{:.9e}".format(nasa_coeffs[j+1])
@@ -120,12 +118,15 @@ def write(input_file):
                                                     {'\'':""}))
                     break
 
+        #Species attributes from trimmed solution object
         composition=replace_multiple(str(species.composition), replace_list )
         nasa_range_1=str([ species.thermo.min_temp, nasa_coeffs[0] ])
         nasa_range_2=str([ nasa_coeffs[0], species.thermo.max_temp ])
         transport_geometry=species.transport.geometry
         diameter= str(species.transport.diameter*(10**10))
         well_depth = str(species.transport.well_depth)
+        polar = str(species.transport.polarizability*10**30)
+        rot_relax = str(species.transport.rotational_relaxation)
 
 
         species_string=Template('species(name = "$name",\n\
@@ -137,28 +138,15 @@ def write(input_file):
                     geom = \"$transport_geometry\", \n\
                     diam = $diameter, \n\
                     well_depth = $well_depth, \n\
-                    \n')
+                    polar = $polar, \n\
+                    rot_relax = $rot_relax \n\
+                )\n')
 
         f.write(species_string.substitute(name=name, composition=composition, \
                     nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
                     nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,\
                     transport_geometry=transport_geometry, diameter=diameter,\
-                    well_depth=well_depth))
-
-
-        """geom_string= '                      geom = '+ '\"' + species.transport.geometry + '\"' + ',\n'
-        diam_string= '                      diam = ' + str(species.transport.diameter*(10**10)) + ',\n'
-        well_depth_string='                      well_depth = ' + str(species.transport.well_depth*(10**22)) + ',\n'
-        polar_string='                      polar = ' + str(species.transport.polarizability*10**30) + ',\n'
-        rot_relax_string='                       rot_relax= ' + str(species.transport.rotational_relaxation)
-        f.write('     transport = gas_transport( \n')
-        f.write(geom_string)
-        f.write(diam_string)
-        f.write(well_depth_string)
-        f.write(polar_string)
-        f.write(rot_relax_string)
-        f.write('         )        \n        )\n\n')
-        """
+                    well_depth=well_depth, polar=polar, rot_relax=rot_relax))
 
     """-----------------------------------------------------------------------------
     Write reactions to file
