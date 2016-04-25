@@ -12,16 +12,16 @@ from string import Template
 def write(input_file):
 
 
-    input_file_location='Input_Data_Files/' + str(input_file)
-    fileDir = os.path.dirname(os.path.realpath('__file__'))
-    input_file_name= os.path.join(fileDir, input_file_location)
 
-    A=readin(input_file_name, [])
-    final=A[1]
-    output_file_location='Output_Data_Files/' + 'gri30_converted.cti'
-    output_file_name=os.path.join(fileDir, output_file_location )
-    os.system('rm -r ' + output_file_name )
+    input_file=os.path.abspath('Input_Data_Files/' + input_file)
+    output_file_name=os.path.abspath('Output_Data_Files/'+'gri30_converted.cti')
+    os.system('rm -r ' +  output_file_name)
     f=open(output_file_name, 'w+')
+
+
+    #Read In trimmed Solution to Cantera Object
+    Cantera_Solutions=readin(input_file, [])
+    trimmed_solution=Cantera_Solutions[1]
 
     """-------------------------------------------------------------------------
     Work Functions
@@ -68,9 +68,11 @@ def write(input_file):
     -------------------------------------------------------------------------"""
 
 
-    element_names=eliminate( str(final.element_names), ['[', ']', '\'', ','])
+    element_names=eliminate( str(trimmed_solution.element_names), \
+                                        ['[', ']', '\'', ','])
+
     species_names=wrap(
-                        eliminate(  str(final.species_names), \
+                        eliminate(  str(trimmed_solution.species_names), \
                                     ['[', ']', '\'', ','], \
                                     spaces='double')
                         )
@@ -94,10 +96,10 @@ def write(input_file):
 
     section_break('Species_data')
 
-    for i, name in enumerate(final.species_names):
-        nasa_coeffs=final.species(i).thermo.coeffs
-        species=final.species(i)
-        name=final.species(i).name
+    for i, name in enumerate(trimmed_solution.species_names):
+        nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
+        species=trimmed_solution.species(i)
+        name=trimmed_solution.species(i).name
         replace_list= {'{':'\"',       '}':'\"',       '\'':'',        ':  ':':',
                         '.0':"",         ',':'',       ' ': '  '                }
 
@@ -164,9 +166,9 @@ def write(input_file):
 
     section_break('Reaction Data')
 
-    for n, i in enumerate(final.reaction_equations()):
-        equation_string=final.reaction_equation(n)
-        equation_object=final.reaction(n)
+    for n, i in enumerate(trimmed_solution.reaction_equations()):
+        equation_string=trimmed_solution.reaction_equation(n)
+        equation_object=trimmed_solution.reaction(n)
         equation_type=type(equation_object).__name__
         m=str(n+1)
         if equation_type == 'ThreeBodyReaction':
