@@ -9,20 +9,22 @@ import textwrap
 from string import Template
 
 
-def write(input_file):
+def write(data_file, solution_objects):
 
-    #get input and output paths
-    input_file_path=os.path.abspath('Input_Data_Files/' + input_file)
-    input_file_name_stripped=os.path.splitext(input_file)[0]
-    output_file_name=os.path.abspath('Output_Data_Files/'+ 'trimmed_' + input_file)
-    os.system('rm -r ' +  output_file_name)
-    os.system('atom ' + input_file_path)
+
+
+    input_file_name_stripped=os.path.splitext(data_file)[0]
+    output_file_name=os.path.abspath('Output_Data_Files/'+ 'trimmed_' + input_file_name_stripped + '.cti')
+    try:
+        os.remove(output_file_name)
+    except OSError:
+        pass
+        
     f=open(output_file_name, 'w+')
 
 
     #Read In trimmed Solution to Cantera Object
-    Cantera_Solutions=readin(input_file_path, [])
-    trimmed_solution=Cantera_Solutions[1]
+    trimmed_solution=solution_objects[1]
     solution_T=trimmed_solution.T
     solution_P=trimmed_solution.P
 
@@ -255,5 +257,3 @@ def write(input_file):
     f.close()
     cw='atom ' + output_file_name
     os.system(cw)
-
-write('gri30.cti')
