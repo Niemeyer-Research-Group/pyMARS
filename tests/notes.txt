@@ -1,3 +1,0 @@
-to run tests, call 'py.test' from command line
-to view printed outputs: 'py.test -s'
-
