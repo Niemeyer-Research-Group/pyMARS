@@ -44,6 +44,8 @@ def create_trimmed_model(data_file, exclusion_list):
             final_index.remove(value)
 
     final_reaction_objects= [initial_solution.reaction(r) for r in final_index]
+    final_T=initial_solution.T
+    final_P=initial_solution.P
 
     # Remove Species
     final_species_names=initial_species_names
@@ -56,6 +58,8 @@ def create_trimmed_model(data_file, exclusion_list):
 
     # New solution definition
     new_solution= ct.Solution(  species=final_species_objects,
-                                reactions=final_reaction_objects,
-                                thermo='IdealGas', kinetics='GasKinetics')
+                        reactions=final_reaction_objects,
+                        thermo='IdealGas', kinetics='GasKinetics')
+    new_solution.TP = initial_solution.TP
+
     return (initial_solution, new_solution)
