@@ -14,19 +14,22 @@ def readin(data_file, exclusion_list):
     Returns
     -------
         Converted mechanism file
-        Solution object index with species and reactions removed
+        Trimmed Solution Object
+        Trimmed Mechanism file
     """
-    
+
     global Result
+
     #import working functions
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
+    from write_to_cti import write
 
     if data_file.endswith(".xml") or data_file.endswith(".cti"):
         print("This is an Cantera xml or cti file")
 
         #trims file
-        Result=create_trimmed_model(data_file, exclusion_list)
+        solution_objects=create_trimmed_model(data_file, exclusion_list)
 
     elif data_file.endswith(".inp"):
         print("This is a Chemkin inp file")
@@ -35,9 +38,14 @@ def readin(data_file, exclusion_list):
         converted_file_name = convert(data_file)
 
         #trims newly converted file
-        Result=create_trimmed_model(converted_file_name, exclusion_list)
+        solution_objects=create_trimmed_model(converted_file_name, \
+                                    exclusion_list)
 
     else:
         print("File type not supported")
 
-    return (Result)
+    write(data_file, solution_objects)
+
+
+
+    return (solution_objects)
