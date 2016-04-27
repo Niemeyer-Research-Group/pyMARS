@@ -46,6 +46,4 @@ def readin(data_file, exclusion_list):
 
     write(data_file, solution_objects)
 
-
-
     return (solution_objects)
