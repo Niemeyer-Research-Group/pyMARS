@@ -18,7 +18,7 @@ def convert(mech_file, thermo_file, transport_file):
     mech_file=os.path.join(input_dir, mech_file)
     thermo_file=os.path.join(input_dir, thermo_file)
     transport_file=os.path.join(input_dir, transport_file)
-    input_line= "ck2cti -i=%s -t=%s -tr=%s --output=%s" %(mech_file, thermo_file, transport_file, converted_file_path)
+    input_line= "ck2cti --input=%s --thermo=%s --transport=%s --output=%s" %(mech_file, thermo_file, transport_file, converted_file_path)
     os.system(input_line)
 
     local_path=os.path.join(output_dir, converted_file_name)
