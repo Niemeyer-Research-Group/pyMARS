@@ -9,6 +9,8 @@ test parameters:
     number of reactions eliminated
 """
 
+"""Note: this test can ONLY be run from py.test"""
+
 #import modules
 import cantera as ct
 from .. import create_trimmed_model as func
