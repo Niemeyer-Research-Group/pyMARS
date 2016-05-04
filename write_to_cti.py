@@ -3,7 +3,7 @@
 currently only works for Elementary, Falloff and ThreeBody Reactions
 Cantera development version 2.3.0a2 required"""
 
-from identify_file_extension import readin
+#from identify_file_extension import readin
 import os
 import textwrap
 from string import Template
@@ -19,7 +19,7 @@ def write(data_file, solution_objects):
         os.remove(output_file_name)
     except OSError:
         pass
-        
+
     f=open(output_file_name, 'w+')
 
 
