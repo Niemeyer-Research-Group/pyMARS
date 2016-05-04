@@ -31,7 +31,8 @@ def readin(data_file, exclusion_list):
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
 
-    elif data_file.endswith(".inp"):
+    elif data_file.endswith(".inp") or dat_file.endswith('.dat') \
+                or data_file.endswith('.txt'):
         print("This is a Chemkin inp file")
 
         #convert file to cti
