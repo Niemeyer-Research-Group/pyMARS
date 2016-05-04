@@ -27,14 +27,12 @@ def readin(data_file, exclusion_list):
 
     if data_file.endswith(".xml") or data_file.endswith(".cti"):
         print("This is an Cantera xml or cti file")
-
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
 
     elif data_file.endswith(".inp") or dat_file.endswith('.dat') \
                 or data_file.endswith('.txt'):
         print("This is a Chemkin inp file")
-
         #convert file to cti
         converted_file_name = convert(data_file)
 
