@@ -24,6 +24,7 @@ def readin(data_file, exclusion_list):
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
     from write_to_cti import write
+    from chemkin_user_prompt import ask
 
     if data_file.endswith(".xml") or data_file.endswith(".cti"):
         print("This is an Cantera xml or cti file")
@@ -32,9 +33,10 @@ def readin(data_file, exclusion_list):
 
     elif data_file.endswith(".inp") or dat_file.endswith('.dat') \
                 or data_file.endswith('.txt'):
-        print("This is a Chemkin inp file")
+        print("This is a Chemkin file")
+        ask()
         #convert file to cti
-        converted_file_name = convert(data_file)
+        converted_file_name = convert(data_file, thermo_file, transport_file)
 
         #trims newly converted file
         solution_objects=create_trimmed_model(converted_file_name, \
