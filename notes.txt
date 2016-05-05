@@ -1,0 +1,11 @@
+to run tests, call 'py.test' from command line
+to view printed outputs: 'py.test -s'
+
+to call pyMARS from command line:
+
+type __main__.py filename -species "species"
+
+where filename is the mechanism file (with extension)
+    located in input_data_files
+
+and "species" is a list of species to trim (ex. H2,O2)
