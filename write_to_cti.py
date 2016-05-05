@@ -205,11 +205,18 @@ def write(data_file, solution_objects):
 
         #Case if a ThreeBody Reaction
         if equation_type == 'ThreeBodyReaction':
-            efficiencies=str(equation_object.efficiencies)
+
+            #trimms efficiencies list
+            efficiencies=equation_object.efficiencies
+            trimmed_efficiencies=equation_object.efficiencies
+            for s in efficiencies:
+                    if s not in trimmed_solution.species_names:
+                        del trimmed_efficiencies[s]
+
             Arr=build_Arr(equation_object)
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
-            Efficiencies_string=replace_multiple(efficiencies, replace_list_2)
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies), replace_list_2)
 
             reaction_string = Template('#  Reaction $m\n' +
                         'three_body_reaction( \"$equation_string\",  $Arr,\n' +
@@ -230,12 +237,18 @@ def write(data_file, solution_objects):
 
         #Case if a FalloffReaction
         if equation_type == 'FalloffReaction':
-            efficiencies=str(equation_object.efficiencies)
+            #trimms efficiencies list
+            efficiencies=equation_object.efficiencies
+            trimmed_efficiencies=equation_object.efficiencies
+            for s in efficiencies:
+                    if s not in trimmed_solution.species_names:
+                        del trimmed_efficiencies[s]
+
             kf=build_mod_Arr(equation_object, 'high')
             kf0=build_mod_Arr(equation_object, 'low')
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
-            Efficiencies_string=replace_multiple(efficiencies, replace_list_2)
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies), replace_list_2)
 
             reaction_string = Template('#  Reaction $m\n' +
                         'falloff_reaction( \"$equation_string\",\n' +
