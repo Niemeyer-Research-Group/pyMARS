@@ -10,7 +10,19 @@ from string import Template
 
 
 def write(data_file, solution_objects):
+    """Function to write cantera solution object to cti file.
 
+    Parameters
+    ----------
+    data_file:
+        Original cantera mechanism file.
+    solution_objects:
+        Trimmed cantera solution object.
+
+    Returns
+    -------
+        Trimmed Mechanism file
+    """
 
 
     input_file_name_stripped=os.path.splitext(data_file)[0]
