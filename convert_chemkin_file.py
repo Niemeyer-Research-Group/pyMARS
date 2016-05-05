@@ -12,6 +12,7 @@ def convert(mech_file):
     ----------
     mech_file:
         Main Chemkin mechanism file
+        
     Returns
     -------
         Converted mechanism file
