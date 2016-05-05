@@ -3,7 +3,22 @@
 import os
 from chemkin_user_prompt import ask
 
+
+
 def convert(mech_file):
+    """Function to convert chemkin mechanism files to CTI.
+
+    Parameters
+    ----------
+    mech_file:
+        Main Chemkin mechanism file
+    Returns
+    -------
+        Converted mechanism file
+    """
+
+
+
     input_dir='Data_Files'
     output_dir= 'Output_Data_Files'
 
