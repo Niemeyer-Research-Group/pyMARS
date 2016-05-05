@@ -54,8 +54,7 @@ def create_trimmed_model(data_file, exclusion_list):
         if n in initial_species_names:
             final_species_names.remove(n)
 
-    final_species_objects =   [initial_solution.species(name)
-                                for name in final_species_names]
+    final_species_objects =   [initial_solution.species(name) for name in final_species_names]
 
     # New solution definition
     new_solution= ct.Solution(  species=final_species_objects,
