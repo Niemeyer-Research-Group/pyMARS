@@ -11,10 +11,9 @@ test parameters:
     by Cantera to create a Soltuion
 """
 
-
-import cantera as ct
-from convert_chemkin_file import convert
 import os
+import cantera as ct
+from .. import convert_chemkin_file
 #import __main__
 
 def test_convert_is_solution():
@@ -26,7 +25,8 @@ def test_convert_is_solution():
     os.chdir('../')
 
     #test cti file
-    file_name=convert('h2_v1b_mech.dat', 'h2_v1a_therm.dat', 'h2_v1a_tran.dat')
+    predetermined_responses=['y\n', 'y\n']
+    file_name=convert_chemkin_file.convert('h2_v1b_mech.dat')
     solution=ct.Solution(file_name)
     assert solution.__qualname__ == 'Solution'
 
