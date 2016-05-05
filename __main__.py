@@ -3,9 +3,20 @@
 import cantera as ct
 import os
 import sys
+import argparse
 
 
-solution_objects=[]
+#gets arguments from terminal
+parser=argparse.ArgumentParser(description='mechanism file name')
+parser=argparse.ArgumentParser(description='species list')
+parser.add_argument('file', type=str)
+parser.add_argument('-species', '--list',  help='delimited list input', type=str)
+args=parser.parse_args()
+data_file=args.file
+exclusion_list=[str(item) for item in args.list.split(',')]
+
+
+
 
 def readin(data_file, exclusion_list):
     """Function to import data file and identify format.
@@ -22,6 +33,7 @@ def readin(data_file, exclusion_list):
         Trimmed Solution Object
         Trimmed Mechanism file
     """
+    print(exclusion_list)
     global solution_objects
     #import working functions
     from create_trimmed_model import create_trimmed_model
@@ -37,7 +49,6 @@ def readin(data_file, exclusion_list):
     if data_file.endswith(".inp") or data_file.endswith('.dat') \
                 or data_file.endswith('.txt'):
         print("This is a Chemkin file")
-        ask()
         #convert file to cti
         converted_file_name = convert(data_file)
 
@@ -53,4 +64,4 @@ def readin(data_file, exclusion_list):
 
 
 if __name__ == '__main__':
-    readin(sys.argv[0], sys.argv[1])
+    readin(data_file, exclusion_list)
