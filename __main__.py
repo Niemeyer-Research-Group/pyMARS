@@ -7,18 +7,22 @@ import argparse
 
 
 #gets arguments from terminal
-parser=argparse.ArgumentParser(description='mechanism file name')
-parser=argparse.ArgumentParser(description='species list')
-parser.add_argument('file', type=str)
-parser.add_argument('-species', '--list',  help='delimited list input', type=str)
+parser=argparse.ArgumentParser(description='pyMARS main: \
+            converts and trims mechanism files \n')
+parser.add_argument('--file', help='input mechanism file name', type=str)
+parser.add_argument('--species',  help='comma separated list input of species\                                    to exclude', type=str)
+parser.add_argument('--thermo', help='thermodynamic data file', type=str)
+parser.add_argument('--transport', help='transport data file', type=str)
 args=parser.parse_args()
+
+
 data_file=args.file
-exclusion_list=[str(item) for item in args.list.split(',')]
+exclusion_list=[str(item) for item in args.species.split(',')]
+thermo_file=args.thermo
+transport_file=args.transport
 
 
-
-
-def readin(data_file, exclusion_list):
+def readin(data_file, exclusion_list, thermo_file, transport_file):
     """Function to import data file and identify format.
 
     Parameters
@@ -50,7 +54,7 @@ def readin(data_file, exclusion_list):
                 or data_file.endswith('.txt'):
         print("This is a Chemkin file")
         #convert file to cti
-        converted_file_name = convert(data_file)
+        converted_file_name = convert(data_file, thermo_file, transport_file)
 
         #trims newly converted file
         solution_objects=create_trimmed_model(converted_file_name, \
@@ -64,4 +68,4 @@ def readin(data_file, exclusion_list):
 
 
 if __name__ == '__main__':
-    readin(data_file, exclusion_list)
+    readin(data_file, exclusion_list, thermo_file, transport_file)

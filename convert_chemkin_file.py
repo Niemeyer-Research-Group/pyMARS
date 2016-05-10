@@ -5,14 +5,14 @@ from chemkin_user_prompt import ask
 
 
 
-def convert(mech_file):
+def convert(mech_file, thermo_file, transport_file):
     """Function to convert chemkin mechanism files to CTI.
 
     Parameters
     ----------
     mech_file:
         Main Chemkin mechanism file
-        
+
     Returns
     -------
         Converted mechanism file
@@ -31,17 +31,12 @@ def convert(mech_file):
     converted_file_name=os.path.splitext(mech_file)[0]+'_converted'
     converted_file_path=os.path.join(save_path, converted_file_name)
 
-    #determine if thermo and transport files are Separate
-    external_files=ask()
-    thermo_file=external_files[0]
-    transport_file=external_files[1]
-
     mech_file=os.path.join(input_dir, mech_file)
     thermo_file_path=os.path.join(input_dir, thermo_file)
     transport_file_path=os.path.join(input_dir, transport_file)
 
-    if thermo_file == 'none':
-        if transport_file == 'none':
+    if thermo_file == None:
+        if transport_file == None:
             input_line= "ck2cti --input=%s --output=%s" \
                 %(mech_file, converted_file_path)
             print('no thermo, no transport')
@@ -50,8 +45,8 @@ def convert(mech_file):
                 %(mech_file, transport_file_path, converted_file_path)
             print('no thermo, yes transport')
 
-    if thermo_file != 'none':
-        if transport_file == 'none':
+    if thermo_file != None:
+        if transport_file == None:
             input_line= "ck2cti --input=%s --thermo=%s  --output=%s" \
                     %(mech_file, thermo_file_path, converted_file_path)
             print('yes thermo, no transport')
