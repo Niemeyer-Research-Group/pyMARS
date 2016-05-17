@@ -14,9 +14,10 @@ test parameters:
 import os
 import cantera as ct
 from .. import convert_chemkin_file
-#import __main__
 
-def test_convert_is_solution():
+
+
+def test_is_solution():
     #setup
     os.chdir('Data_Files')
     h2_package=['h2_v1b_mech.dat', 'h2_v1a_therm.dat', 'h2_v1a_tran.dat'  ]
@@ -25,8 +26,7 @@ def test_convert_is_solution():
     os.chdir('../')
 
     #test cti file
-    predetermined_responses=['y\n', 'y\n']
-    file_name=convert_chemkin_file.convert('h2_v1b_mech.dat')
+    file_name=convert_chemkin_file.convert('h2_v1b_mech.dat', h2_package[1], h2_package[2])
     solution=ct.Solution(file_name)
     assert solution.__qualname__ == 'Solution'
 
@@ -34,3 +34,7 @@ def test_convert_is_solution():
     os.chdir('Input_Data_Files')
     for i, files in enumerate(h2_package):
             os.system('rm ' + h2_package[i])
+    return file_name
+
+def test_create_trimmed_model(file_name):
+    trimmed_solution_objects=os.system('python __main__.py --file=' + file_name)

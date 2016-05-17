@@ -1,8 +1,6 @@
 #converts Chemkin file to Cantera format
 
 import os
-from chemkin_user_prompt import ask
-
 
 
 def convert(mech_file, thermo_file, transport_file):
@@ -35,6 +33,7 @@ def convert(mech_file, thermo_file, transport_file):
     thermo_file_path=os.path.join(input_dir, thermo_file)
     transport_file_path=os.path.join(input_dir, transport_file)
 
+    #calls ck2cti based on given files
     if thermo_file == None:
         if transport_file == None:
             input_line= "ck2cti --input=%s --output=%s" \

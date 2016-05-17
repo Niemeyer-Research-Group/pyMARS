@@ -5,23 +5,6 @@ import os
 import sys
 import argparse
 
-
-#gets arguments from terminal
-parser=argparse.ArgumentParser(description='pyMARS main: \
-            converts and trims mechanism files \n')
-parser.add_argument('--file', help='input mechanism file name', type=str)
-parser.add_argument('--species',  help='comma separated list input of species\                                    to exclude', type=str)
-parser.add_argument('--thermo', help='thermodynamic data file', type=str)
-parser.add_argument('--transport', help='transport data file', type=str)
-args=parser.parse_args()
-
-
-data_file=args.file
-exclusion_list=[str(item) for item in args.species.split(',')]
-thermo_file=args.thermo
-transport_file=args.transport
-
-
 def readin(data_file, exclusion_list, thermo_file, transport_file):
     """Function to import data file and identify format.
 
@@ -43,7 +26,6 @@ def readin(data_file, exclusion_list, thermo_file, transport_file):
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
     from write_to_cti import write
-    from chemkin_user_prompt import ask
 
     if data_file.endswith(".xml") or data_file.endswith(".cti"):
         print("This is an Cantera xml or cti file")
@@ -66,6 +48,27 @@ def readin(data_file, exclusion_list, thermo_file, transport_file):
 
     return (solution_objects)
 
+
+
+#gets arguments from terminal
+parser=argparse.ArgumentParser(description='pyMARS main: \
+            converts and trims mechanism files \n')
+parser.add_argument('--file', help='input mechanism file name', type=str)
+parser.add_argument('--species',  help='comma separated list input of species\
+                                to exclude', type=str)
+parser.add_argument('--thermo', help='thermodynamic data file', type=str)
+parser.add_argument('--transport', help='transport data file', type=str)
+args=parser.parse_args()
+
+data_file=args.file
+
+#if no species are to be trimmed
+if args.species == None:
+    exclusion_list=[]
+else:
+    exclusion_list=[str(item) for item in args.species.split(',')]
+thermo_file=args.thermo
+transport_file=args.transport
 
 if __name__ == '__main__':
     readin(data_file, exclusion_list, thermo_file, transport_file)
