@@ -7,6 +7,7 @@ Cantera development version 2.3.0a2 required"""
 import os
 import textwrap
 from string import Template
+import cantera as ct
 
 
 def write(data_file, solution_objects):
@@ -171,12 +172,13 @@ def write(data_file, solution_objects):
                     break
 
         #Species attributes from trimmed solution object
+        k=ct.boltzmann
         composition = replace_multiple(str(species.composition), replace_list_1)
         nasa_range_1 = str([ species.thermo.min_temp, nasa_coeffs[0] ])
         nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
         transport_geometry = species.transport.geometry
         diameter = str(species.transport.diameter*(10**10))
-        well_depth = str(species.transport.well_depth)
+        well_depth = str(species.transport.well_depth/k)
         polar = str(species.transport.polarizability*10**30)
         rot_relax = str(species.transport.rotational_relaxation)
 
