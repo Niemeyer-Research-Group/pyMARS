@@ -36,7 +36,7 @@ species(name = "H2",
     transport = gas_transport(
                    geom = "linear",
                    diam = 2.92, 
-                   well_depth = 5.24646541131e-22, 
+                   well_depth = 38.0, 
                    polar = 0.79, 
                    rot_relax = 280.0) 
         )
@@ -56,7 +56,7 @@ species(name = "H",
     transport = gas_transport(
                    geom = "atom",
                    diam = 2.05, 
-                   well_depth = 2.00194074905e-21, 
+                   well_depth = 145.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -76,7 +76,7 @@ species(name = "O",
     transport = gas_transport(
                    geom = "atom",
                    diam = 2.75, 
-                   well_depth = 1.10451903396e-21, 
+                   well_depth = 80.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -96,7 +96,7 @@ species(name = "O2",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.46, 
-                   well_depth = 1.48281680309e-21, 
+                   well_depth = 107.4, 
                    polar = 1.6, 
                    rot_relax = 3.8) 
         )
@@ -116,7 +116,7 @@ species(name = "OH",
     transport = gas_transport(
                    geom = "linear",
                    diam = 2.75, 
-                   well_depth = 1.10451903396e-21, 
+                   well_depth = 80.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -136,7 +136,7 @@ species(name = "H2O",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 2.6, 
-                   well_depth = 7.90283368798e-21, 
+                   well_depth = 572.4, 
                    polar = 0.0, 
                    rot_relax = 4.0) 
         )
@@ -156,7 +156,7 @@ species(name = "HO2",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.46, 
-                   well_depth = 1.48281680309e-21, 
+                   well_depth = 107.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -176,7 +176,7 @@ species(name = "H2O2",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.46, 
-                   well_depth = 1.48281680309e-21, 
+                   well_depth = 107.4, 
                    polar = 0.0, 
                    rot_relax = 3.8) 
         )
@@ -196,7 +196,7 @@ species(name = "C",
     transport = gas_transport(
                    geom = "atom",
                    diam = 3.3, 
-                   well_depth = 9.85783237809e-22, 
+                   well_depth = 71.4, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -216,7 +216,7 @@ species(name = "CH",
     transport = gas_transport(
                    geom = "linear",
                    diam = 2.75, 
-                   well_depth = 1.10451903396e-21, 
+                   well_depth = 80.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -236,7 +236,7 @@ species(name = "CH2",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.8, 
-                   well_depth = 1.98813426113e-21, 
+                   well_depth = 144.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -256,7 +256,7 @@ species(name = "CH2(S)",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.8, 
-                   well_depth = 1.98813426113e-21, 
+                   well_depth = 144.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -276,7 +276,7 @@ species(name = "CH3",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.8, 
-                   well_depth = 1.98813426113e-21, 
+                   well_depth = 144.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -296,7 +296,7 @@ species(name = "CH4",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.75, 
-                   well_depth = 1.95223739252e-21, 
+                   well_depth = 141.4, 
                    polar = 2.6, 
                    rot_relax = 13.0) 
         )
@@ -316,7 +316,7 @@ species(name = "CO",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.65, 
-                   well_depth = 1.35441646539e-21, 
+                   well_depth = 98.1, 
                    polar = 1.95, 
                    rot_relax = 1.8) 
         )
@@ -336,7 +336,7 @@ species(name = "CO2",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.76, 
-                   well_depth = 3.36878305358e-21, 
+                   well_depth = 244.0, 
                    polar = 2.65, 
                    rot_relax = 2.1) 
         )
@@ -356,7 +356,7 @@ species(name = "HCO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.59, 
-                   well_depth = 6.8756309864e-21, 
+                   well_depth = 498.0, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -376,7 +376,7 @@ species(name = "CH2O",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.59, 
-                   well_depth = 6.8756309864e-21, 
+                   well_depth = 498.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
@@ -396,7 +396,7 @@ species(name = "CH2OH",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.69, 
-                   well_depth = 5.75730546452e-21, 
+                   well_depth = 417.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
@@ -416,7 +416,7 @@ species(name = "CH3O",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.69, 
-                   well_depth = 5.75730546452e-21, 
+                   well_depth = 417.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
@@ -436,7 +436,7 @@ species(name = "CH3OH",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.63, 
-                   well_depth = 6.65196588202e-21, 
+                   well_depth = 481.8, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -456,7 +456,7 @@ species(name = "C2H",
     transport = gas_transport(
                    geom = "linear",
                    diam = 4.1, 
-                   well_depth = 2.88555597622e-21, 
+                   well_depth = 209.0, 
                    polar = 0.0, 
                    rot_relax = 2.5) 
         )
@@ -476,7 +476,7 @@ species(name = "C2H2",
     transport = gas_transport(
                    geom = "linear",
                    diam = 4.1, 
-                   well_depth = 2.88555597622e-21, 
+                   well_depth = 209.0, 
                    polar = 0.0, 
                    rot_relax = 2.5) 
         )
@@ -496,7 +496,7 @@ species(name = "C2H3",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 4.1, 
-                   well_depth = 2.88555597622e-21, 
+                   well_depth = 209.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -516,7 +516,7 @@ species(name = "C2H4",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.97, 
-                   well_depth = 3.8768618092e-21, 
+                   well_depth = 280.8, 
                    polar = 0.0, 
                    rot_relax = 1.5) 
         )
@@ -536,7 +536,7 @@ species(name = "C2H5",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 4.3, 
-                   well_depth = 3.48337690335e-21, 
+                   well_depth = 252.3, 
                    polar = 0.0, 
                    rot_relax = 1.5) 
         )
@@ -556,7 +556,7 @@ species(name = "C2H6",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 4.3, 
-                   well_depth = 3.48337690335e-21, 
+                   well_depth = 252.3, 
                    polar = 0.0, 
                    rot_relax = 1.5) 
         )
@@ -576,7 +576,7 @@ species(name = "HCCO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 2.5, 
-                   well_depth = 2.07097318867e-21, 
+                   well_depth = 150.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -596,7 +596,7 @@ species(name = "CH2CO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.97, 
-                   well_depth = 6.01962873508e-21, 
+                   well_depth = 436.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
@@ -616,7 +616,7 @@ species(name = "HCCOH",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.97, 
-                   well_depth = 6.01962873508e-21, 
+                   well_depth = 436.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
@@ -636,7 +636,7 @@ species(name = "N",
     transport = gas_transport(
                    geom = "atom",
                    diam = 3.3, 
-                   well_depth = 9.85783237809e-22, 
+                   well_depth = 71.4, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -656,7 +656,7 @@ species(name = "NH",
     transport = gas_transport(
                    geom = "linear",
                    diam = 2.65, 
-                   well_depth = 1.10451903396e-21, 
+                   well_depth = 80.0, 
                    polar = 0.0, 
                    rot_relax = 4.0) 
         )
@@ -676,7 +676,7 @@ species(name = "NH2",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 2.65, 
-                   well_depth = 1.10451903396e-21, 
+                   well_depth = 80.0, 
                    polar = 2.26, 
                    rot_relax = 4.0) 
         )
@@ -696,7 +696,7 @@ species(name = "NH3",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 2.92, 
-                   well_depth = 6.64092069168e-21, 
+                   well_depth = 481.0, 
                    polar = 0.0, 
                    rot_relax = 10.0) 
         )
@@ -716,7 +716,7 @@ species(name = "NNH",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.8, 
-                   well_depth = 9.85783237809e-22, 
+                   well_depth = 71.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -736,7 +736,7 @@ species(name = "NO",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.62, 
-                   well_depth = 1.34654676728e-21, 
+                   well_depth = 97.53, 
                    polar = 1.76, 
                    rot_relax = 4.0) 
         )
@@ -756,7 +756,7 @@ species(name = "NO2",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.5, 
-                   well_depth = 2.7612975849e-21, 
+                   well_depth = 200.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -776,7 +776,7 @@ species(name = "N2O",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.83, 
-                   well_depth = 3.20862779365e-21, 
+                   well_depth = 232.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -796,7 +796,7 @@ species(name = "HNO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.49, 
-                   well_depth = 1.61121714079e-21, 
+                   well_depth = 116.7, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -816,7 +816,7 @@ species(name = "CN",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.86, 
-                   well_depth = 1.03548659434e-21, 
+                   well_depth = 75.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -836,7 +836,7 @@ species(name = "HCN",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.63, 
-                   well_depth = 7.85589162904e-21, 
+                   well_depth = 569.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -856,7 +856,7 @@ species(name = "H2CN",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.63, 
-                   well_depth = 7.85589162904e-21, 
+                   well_depth = 569.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -876,7 +876,7 @@ species(name = "HCNN",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 2.5, 
-                   well_depth = 2.07097318867e-21, 
+                   well_depth = 150.0, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -896,7 +896,7 @@ species(name = "HCNO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.83, 
-                   well_depth = 3.20862779365e-21, 
+                   well_depth = 232.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -917,7 +917,7 @@ species(name = "HOCN",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.83, 
-                   well_depth = 3.20862779365e-21, 
+                   well_depth = 232.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -938,7 +938,7 @@ species(name = "HNCO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.83, 
-                   well_depth = 3.20862779365e-21, 
+                   well_depth = 232.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -958,7 +958,7 @@ species(name = "NCO",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.83, 
-                   well_depth = 3.20862779365e-21, 
+                   well_depth = 232.4, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -978,7 +978,7 @@ species(name = "N2",
     transport = gas_transport(
                    geom = "linear",
                    diam = 3.62, 
-                   well_depth = 1.34654676728e-21, 
+                   well_depth = 97.53, 
                    polar = 1.76, 
                    rot_relax = 4.0) 
         )
@@ -998,7 +998,7 @@ species(name = "AR",
     transport = gas_transport(
                    geom = "atom",
                    diam = 3.33, 
-                   well_depth = 1.88458560169e-21, 
+                   well_depth = 136.5, 
                    polar = 0.0, 
                    rot_relax = 0.0) 
         )
@@ -1018,7 +1018,7 @@ species(name = "C3H7",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 4.98, 
-                   well_depth = 3.68357097826e-21, 
+                   well_depth = 266.8, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -1039,7 +1039,7 @@ species(name = "C3H8",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 4.98, 
-                   well_depth = 3.68357097826e-21, 
+                   well_depth = 266.8, 
                    polar = 0.0, 
                    rot_relax = 1.0) 
         )
@@ -1059,7 +1059,7 @@ species(name = "CH2CHO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.97, 
-                   well_depth = 6.01962873508e-21, 
+                   well_depth = 436.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
@@ -1080,7 +1080,7 @@ species(name = "CH3CHO",
     transport = gas_transport(
                    geom = "nonlinear",
                    diam = 3.97, 
-                   well_depth = 6.01962873508e-21, 
+                   well_depth = 436.0, 
                    polar = 0.0, 
                    rot_relax = 2.0) 
         )
