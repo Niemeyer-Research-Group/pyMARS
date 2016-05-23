@@ -145,6 +145,10 @@ def write(data_file, solution_objects):
     #write data for each species in the Solution object
     for i, name in enumerate(trimmed_solution.species_names):
 
+        #physical Constant
+        k=ct.boltzmann #joules/kelvin, boltzmann constant
+        d=3.33564e-30 #1 debye = d coulomb-meters
+
         species=trimmed_solution.species(i)
         name=trimmed_solution.species(i).name
         nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
@@ -172,7 +176,6 @@ def write(data_file, solution_objects):
                     break
 
         #Species attributes from trimmed solution object
-        k=ct.boltzmann
         composition = replace_multiple(str(species.composition), replace_list_1)
         nasa_range_1 = str([ species.thermo.min_temp, nasa_coeffs[0] ])
         nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
@@ -181,7 +184,7 @@ def write(data_file, solution_objects):
         well_depth = str(species.transport.well_depth/k)
         polar = str(species.transport.polarizability*10**30)
         rot_relax = str(species.transport.rotational_relaxation)
-
+        dipole=str(species.transport.dipole/d)
         #string template for each species
         species_string=Template('species(name = "$name",\n' +
                         '    atoms = $composition, \n' +
@@ -194,14 +197,16 @@ def write(data_file, solution_objects):
                         '                   diam = $diameter, \n' +
                         '                   well_depth = $well_depth, \n' +
                         '                   polar = $polar, \n' +
-                        '                   rot_relax = $rot_relax) \n' +
+                        '                   rot_relax = $rot_relax, \n' +
+                        '                   dipole= $dipole) \n' +
                         '        )\n\n')
         #write string template
         f.write(species_string.substitute(name=name, composition=composition, \
                     nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
                     nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,\
                     transport_geometry=transport_geometry, diameter=diameter,\
-                    well_depth=well_depth, polar=polar, rot_relax=rot_relax))
+                    well_depth=well_depth, polar=polar, rot_relax=rot_relax,\
+                    dipole=dipole))
 
     """-------------------------------------------------------------------------
     Write reactions to file
