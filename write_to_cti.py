@@ -44,7 +44,7 @@ def write(data_file, solution_objects):
     """-------------------------------------------------------------------------
     Work Functions
     -------------------------------------------------------------------------"""
-
+    c=4184 #fudge factor to fix arrhenius activation energy
     def eliminate(input_string, char_to_replace, spaces='single'):
         for char in char_to_replace:
                     input_string= input_string.replace(char, "")
@@ -71,24 +71,27 @@ def write(data_file, solution_objects):
             input_string= input_string.replace(a, b)
         return input_string
 
-    def build_Arr(equation_object):
-            A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))
+    def build_Arr(equation_object, equation_type):
+            if equation_type == 'ElementaryReaction':
+                A=A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
+            else:
+                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
             b=equation_object.rate.temperature_exponent
-            E=equation_object.rate.activation_energy
+            E=equation_object.rate.activation_energy/c
             Arr=[ A, b, E]
             return str(Arr).replace("\'", "")
 
     def build_mod_Arr(equation_object, t_range):
         if t_range =='high':
-            A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor))
+            A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor*10**3))
             b=equation_object.high_rate.temperature_exponent
-            E=equation_object.high_rate.activation_energy
+            E=equation_object.high_rate.activation_energy/c
             Arr_high=[ A, b, E]
             return str(Arr_high).replace("\'", "")
         if t_range == 'low':
-            A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor))
+            A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor*10**6))
             b=equation_object.low_rate.temperature_exponent
-            E=equation_object.low_rate.activation_energy
+            E=equation_object.low_rate.activation_energy/c
             Arr_low=[ A, b, E]
             return str(Arr_low).replace("\'", "")
 
@@ -232,7 +235,7 @@ def write(data_file, solution_objects):
                     if s not in trimmed_solution.species_names:
                         del trimmed_efficiencies[s]
 
-            Arr=build_Arr(equation_object)
+            Arr=build_Arr(equation_object, equation_type)
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
             Efficiencies_string=replace_multiple(str(trimmed_efficiencies), replace_list_2)
@@ -247,7 +250,7 @@ def write(data_file, solution_objects):
 
         #Case if an ElementaryReaction
         if equation_type == 'ElementaryReaction':
-            Arr=build_Arr(equation_object)
+            Arr=build_Arr(equation_object, equation_type)
 
             reaction_string=Template('#  Reaction $m\n'+
                                 'reaction( \"$equation_string\", $Arr)\n\n')
