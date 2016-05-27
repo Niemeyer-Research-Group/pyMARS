@@ -44,7 +44,7 @@ def write(data_file, solution_objects):
     """-------------------------------------------------------------------------
     Work Functions
     -------------------------------------------------------------------------"""
-    c=4184 #fudge factor to fix arrhenius activation energy
+    c=4184 #number of calories in 1000 Joules
     def eliminate(input_string, char_to_replace, spaces='single'):
         for char in char_to_replace:
                     input_string= input_string.replace(char, "")
