@@ -6,7 +6,7 @@ import cantera as ct
 
 
 #read in solution file, and make constant pressure adiabatic reactor
-solution1 = ct.Solution('gri30.cti')  #trimmed_h2_v1b_mech.cti
+solution1 = ct.Solution('trimmed_h2_v1b_mech.cti')  #trimmed_h2_v1b_mech.cti #gri30.cti
 solution1.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r1 = ct.IdealGasConstPressureReactor(solution1)
 sim1 = ct.ReactorNet([r1])
@@ -32,17 +32,19 @@ deriv= dT/dt
 i=deriv.argmax()
 deriv_max=[times1[i], T[i]]
 tau= times1[i]
-
+print tau
 initial_point=[times1[i-2], T[i-2]]
 
-
+for i, k in enumerate(deriv):
+    if k < 2:
+        print i
 #read in solution file, and make constant pressure adiabatic reactor
 solution2 = ct.Solution('gri30.cti')  #trimmed_h2_v1b_mech.cti
 solution2.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r2 = ct.IdealGasConstPressureReactor(solution2)
 sim2 = ct.ReactorNet([r2])
 
-time2= tau
+time2= tau*10**-3
 times2= np.zeros(100)
 n_species=len(solution2.species_names)
 data2=np.zeros((100, n_species+2))
@@ -50,7 +52,7 @@ species_array=np.ones(n_species)
 
 
 for n in range(100):
-    time2 +=1.e-5
+    time2 +=1.e-6
     sim2.advance(time2)
     times2[n] = time2 * 1e3  # time in ms
     data2[n, 0] = time2
@@ -58,7 +60,6 @@ for n in range(100):
     for k in species_array:
         species=solution2.species(k).name
         data2[n, k+2] = r2.thermo[species].Y
-
 
 # Plot the ignition delay
 if '--TAU' in sys.argv[1:]:
@@ -77,7 +78,7 @@ if '--TAU' in sys.argv[1:]:
 if '--plot' in sys.argv[1:]:
     import matplotlib.pyplot as plt
     plt.clf()
-
+    plt.axis([0, 1.2, 1000, 2800])
     #plot temp vs time
     plt.plot(times2, data2[:,1])
     plt.xlabel('Time (ms)')
