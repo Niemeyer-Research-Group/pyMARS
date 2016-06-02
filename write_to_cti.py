@@ -44,7 +44,7 @@ def write(data_file, solution_objects):
     """-------------------------------------------------------------------------
     Work Functions
     -------------------------------------------------------------------------"""
-    c=4184 #number of calories in 1000 Joules
+    c=4184 #number of calories in 1000 Joules of energy
     def eliminate(input_string, char_to_replace, spaces='single'):
         for char in char_to_replace:
                     input_string= input_string.replace(char, "")
@@ -118,11 +118,11 @@ def write(data_file, solution_objects):
     Write Phase definition to file
     -------------------------------------------------------------------------"""
 
-    element_names=eliminate( str(trimmed_solution.element_names), \
+    element_names=eliminate( str(trimmed_solution.element_names).upper(), \
                                         ['[', ']', '\'', ','])
 
     species_names=wrap(
-                        eliminate(  str(trimmed_solution.species_names), \
+                        eliminate(str(trimmed_solution.species_names).upper(), \
                                     ['[', ']', '\'', ','], \
                                     spaces='double')
                         )
@@ -153,7 +153,7 @@ def write(data_file, solution_objects):
         d=3.33564e-30 #1 debye = d coulomb-meters
 
         species=trimmed_solution.species(i)
-        name=trimmed_solution.species(i).name
+        name=str(trimmed_solution.species(i).name).upper()
         nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
         replace_list_1= {'{':'\"',       '}':'\"',       '\'':'',
                     ':  ':':',      '.0':"",         ',':'',       ' ': '  '}
@@ -220,7 +220,7 @@ def write(data_file, solution_objects):
     #write data for each reaction in the Solution Object
     for n, i in enumerate(trimmed_solution.reaction_equations()):
 
-        equation_string=trimmed_solution.reaction_equation(n)
+        equation_string=str(trimmed_solution.reaction_equation(n)).upper()
         equation_object=trimmed_solution.reaction(n)
         equation_type=type(equation_object).__name__
         m=str(n+1)
@@ -238,7 +238,8 @@ def write(data_file, solution_objects):
             Arr=build_Arr(equation_object, equation_type)
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
-            Efficiencies_string=replace_multiple(str(trimmed_efficiencies), replace_list_2)
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies).upper(),\
+                        replace_list_2)
 
             reaction_string = Template('#  Reaction $m\n' +
                         'three_body_reaction( \"$equation_string\",  $Arr,\n' +
@@ -270,7 +271,8 @@ def write(data_file, solution_objects):
             kf0=build_mod_Arr(equation_object, 'low')
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
-            Efficiencies_string=replace_multiple(str(trimmed_efficiencies), replace_list_2)
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies).upper(),\
+                                        replace_list_2)
 
             reaction_string = Template('#  Reaction $m\n' +
                         'falloff_reaction( \"$equation_string\",\n' +
