@@ -5,18 +5,22 @@ import numpy as np
 import cantera as ct
 
 
-#read in solution file, and make constant pressure adiabatic reactor
-solution1 = ct.Solution('trimmed_h2_v1b_mech.cti')  #trimmed_h2_v1b_mech.cti #gri30.cti
+#read in solution file, and make constant volume adiabatic reactor
+solution1 = ct.Solution('trimmed_h2_v1b_mech.cti')
 solution1.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
-r1 = ct.IdealGasConstPressureReactor(solution1)
+r1 = ct.IdealGasReactor(solution1)
 sim1 = ct.ReactorNet([r1])
 
 time1 = 0.0
 
 
-#run sim to find ignition delay
+"""----------------------------------------------------------------------------
+run sim to find ignition delay from dT/dt max
+-----------------------------------------------------------------------------"""
+
+
 times1 = np.zeros(100)
-data1 = np.zeros((100,2)) #first is time, second is temperature
+data1 = np.zeros((100,2)) #first column is time, second is temperature
 
 for n in range(100):
     time1 += 1.e-5
@@ -32,16 +36,41 @@ deriv= dT/dt
 i=deriv.argmax()
 deriv_max=[times1[i], T[i]]
 tau= times1[i]
-print tau
-initial_point=[times1[i-2], T[i-2]]
 
-for i, k in enumerate(deriv):
-    if k < 2:
-        print i
-#read in solution file, and make constant pressure adiabatic reactor
-solution2 = ct.Solution('gri30.cti')  #trimmed_h2_v1b_mech.cti
+
+#finds initial sample point
+for j, dti in enumerate(dT):
+    if dti > 5:     #when dT > 5 degrees kelvin
+        initial_point=[times1[j], T[j], j] # initial point, Temp, index
+        break
+
+
+#finds final sample point
+for k, dti in enumerate(dT):
+    if k > i:
+        if dti < 1:
+            final_point=[times1[k], T[k], k]
+            break
+
+#prints points of interest
+if '--points' in sys.argv[1:]:
+    print("Time[ms]    Temp[K]    Index        Point")
+    print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
+     + "       " + str(initial_point[2]) + "     " + "Initial sample point")
+    print(str(tau) + "        " + str("{0:.2f}".format(T[i])) + "       " + str(i)\
+            + "     " + "Ignition point")
+    print( str(final_point[0]) +  "       " + str("{0:.2f}".format(final_point[1]))\
+     + "       " + str(final_point[2]) + "     " + "Final sample point")
+
+"""----------------------------------------------------------------------------
+run sim to get data around ignition
+-----------------------------------------------------------------------------"""
+
+
+#read in solution file, and make constant volume adiabatic reactor
+solution2 = ct.Solution('trimmed_h2_v1b_mech.cti')
 solution2.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
-r2 = ct.IdealGasConstPressureReactor(solution2)
+r2 = ct.IdealGasReactor(solution2)
 sim2 = ct.ReactorNet([r2])
 
 time2= tau*10**-3
@@ -61,27 +90,26 @@ for n in range(100):
         species=solution2.species(k).name
         data2[n, k+2] = r2.thermo[species].Y
 
+
+"""----------------------------------------------------------------------------
+plot temperature vs time, and ignition point
+-----------------------------------------------------------------------------"""
+
+
+
 # Plot the ignition delay
-if '--TAU' in sys.argv[1:]:
+if '--plot' in sys.argv[1:]:
     import matplotlib.pyplot as plt
     plt.clf()
 
     #plot combustion point
     plt.plot(deriv_max[0], deriv_max[1], 'ro')
-    plt.plot(initial_point[0], initial_point[1], 'rx')
+    #plot points where dT > 5 degrees kelvin
+    plt.plot(initial_point[0], initial_point[1], 'rx', ms=5, mew=2)
+    plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
     #plot temp vs time
     plt.plot(times1, data1[:,0])
     plt.xlabel('Time (ms)')
     plt.ylabel('Temperature (K)')
-    plt.show()
-
-if '--plot' in sys.argv[1:]:
-    import matplotlib.pyplot as plt
-    plt.clf()
-    plt.axis([0, 1.2, 1000, 2800])
-    #plot temp vs time
-    plt.plot(times2, data2[:,1])
-    plt.xlabel('Time (ms)')
-    plt.ylabel('Temperature (K)')
-
+    plt.axis([0, 1.2, 900, 2800])
     plt.show()
