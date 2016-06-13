@@ -1,16 +1,13 @@
-
-
 import sys
 import numpy as np
 import cantera as ct
 
 
 #read in solution file, and make constant volume adiabatic reactor
-solution1 = ct.Solution('trimmed_h2_v1b_mech.cti')
+solution1 = ct.Solution('gri30.cti') #trimmed_h2_v1b_mech.cti
 solution1.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r1 = ct.IdealGasReactor(solution1)
 sim1 = ct.ReactorNet([r1])
-
 time1 = 0.0
 
 
@@ -30,8 +27,7 @@ for n in range(100):
     data1[n, 1] = r1.thermo['OH'].Y
 
 
-
-
+#get ignition point from dT/dt
 T=np.array(data1[:,0])
 dt= np.ones(len(times1)-1)*(times1[1]-times1[0])
 dT= np.diff(T)
@@ -41,14 +37,14 @@ deriv_max=[times1[i], T[i]]
 tau= times1[i]
 
 
-#finds initial sample point
+#find initial sample point
 for j, dti in enumerate(dT):
     if dti > 5:     #when dT > 5 degrees kelvin
         initial_point=[times1[j], T[j], j] # initial point, Temp, index
         break
 
 
-#finds final sample point
+#find final sample point
 for k, dti in enumerate(dT):
     if k > i:
         if dti < 1:
@@ -71,7 +67,7 @@ run sim to get data around ignition
 
 
 #read in solution file, and make constant volume adiabatic reactor
-solution2 = ct.Solution('trimmed_h2_v1b_mech.cti')
+solution2 = ct.Solution('gri30.cti')  #trimmed_h2_v1b_mech.cti
 solution2.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r2 = ct.IdealGasReactor(solution2)
 sim2 = ct.ReactorNet([r2])
@@ -92,16 +88,16 @@ for n in range(refined_steps):
     for k in species_array:                     #get species data
         species=solution2.species(k).name
         data2[n, k+2] = r2.thermo[species].Y
-    if time2 > final_point[0]*10e-4:        #breaks sample, and trims array
+    if time2 > final_point[0]*10e-4:        #breaks sim, and trims array
         data2 = data2[0:n, :]
         times2=times2[0:n]
         break
 
+
+
 """----------------------------------------------------------------------------
 plot temperature vs time, and ignition point
 -----------------------------------------------------------------------------"""
-
-
 
 # Plot the ignition delay
 if '--plot' in sys.argv[1:]:
@@ -110,6 +106,7 @@ if '--plot' in sys.argv[1:]:
 
     #plot combustion point
     plt.plot(deriv_max[0], deriv_max[1], 'ro', label= 'ignition point')
+
     #plot initial and final sample points
     plt.plot(initial_point[0], initial_point[1], 'rx', ms=5, mew=2)
     plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
