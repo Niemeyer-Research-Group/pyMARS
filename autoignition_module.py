@@ -29,6 +29,9 @@ for n in range(100):
     data1[n,0] = r1.T
     data1[n, 1] = r1.thermo['OH'].Y
 
+
+
+
 T=np.array(data1[:,0])
 dt= np.ones(len(times1)-1)*(times1[1]-times1[0])
 dT= np.diff(T)
@@ -49,7 +52,7 @@ for j, dti in enumerate(dT):
 for k, dti in enumerate(dT):
     if k > i:
         if dti < 1:
-            final_point=[times1[k], T[k], k]
+            final_point=[times1[k], T[k], k]    #final point, Temp, index
             break
 
 #prints points of interest
@@ -73,23 +76,26 @@ solution2.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r2 = ct.IdealGasReactor(solution2)
 sim2 = ct.ReactorNet([r2])
 
-time2= tau*10**-3
-times2= np.zeros(100)
+time2= initial_point[0]*10e-4 #initial_point[0]
+
+refined_steps= 100
+times2= np.zeros(refined_steps)
 n_species=len(solution2.species_names)
-data2=np.zeros((100, n_species+2))
+data2=np.zeros((refined_steps, n_species+2))
 species_array=np.ones(n_species)
-
-
-for n in range(100):
-    time2 +=1.e-6
+for n in range(refined_steps):
+    time2 +=1.0e-6
     sim2.advance(time2)
     times2[n] = time2 * 1e3  # time in ms
     data2[n, 0] = time2
     data2[n, 1] = r2.T
-    for k in species_array:
+    for k in species_array:                     #get species data
         species=solution2.species(k).name
         data2[n, k+2] = r2.thermo[species].Y
-
+    if time2 > final_point[0]*10e-4:        #breaks sample, and trims array
+        data2 = data2[0:n, :]
+        times2=times2[0:n]
+        break
 
 """----------------------------------------------------------------------------
 plot temperature vs time, and ignition point
@@ -103,14 +109,17 @@ if '--plot' in sys.argv[1:]:
     plt.clf()
 
     #plot combustion point
-    plt.plot(deriv_max[0], deriv_max[1], 'ro')
+    plt.plot(deriv_max[0], deriv_max[1], 'ro', label= 'ignition point')
     #plot initial and final sample points
     plt.plot(initial_point[0], initial_point[1], 'rx', ms=5, mew=2)
     plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
 
     #plot temp vs time
     plt.plot(times1, data1[:,0], lw=1.5)
+    plt.plot(times2, data2[:,1], ls='--', lw=2.5, label='sample range')
     plt.xlabel('Time (ms)')
+    plt.title('Mixture Temperature vs Time')
+    plt.legend()
     plt.ylabel('Temperature (K)')
-    plt.axis([0, 1.2, 900, 2800])
+    #plt.axis([0, 1.2, 900, 2800])
     plt.show()
