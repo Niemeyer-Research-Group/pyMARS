@@ -104,11 +104,12 @@ if '--plot' in sys.argv[1:]:
 
     #plot combustion point
     plt.plot(deriv_max[0], deriv_max[1], 'ro')
-    #plot points where dT > 5 degrees kelvin
+    #plot initial and final sample points
     plt.plot(initial_point[0], initial_point[1], 'rx', ms=5, mew=2)
     plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
+
     #plot temp vs time
-    plt.plot(times1, data1[:,0])
+    plt.plot(times1, data1[:,0], lw=1.5)
     plt.xlabel('Time (ms)')
     plt.ylabel('Temperature (K)')
     plt.axis([0, 1.2, 900, 2800])
