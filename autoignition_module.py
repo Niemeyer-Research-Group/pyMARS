@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import cantera as ct
+import os
 
 
 #read in solution file, and make constant volume adiabatic reactor
@@ -87,7 +88,7 @@ for n in range(refined_steps):
     data2[n, 1] = r2.T
     for k in species_array:                     #get species data
         species=solution2.species(k).name
-        data2[n, k+2] = r2.thermo[species].Y
+        data2[n, int(k+2)] = r2.thermo[species].Y
     if time2 > final_point[0]*10e-4:        #breaks sim, and trims array
         data2 = data2[0:n, :]
         times2=times2[0:n]
@@ -120,3 +121,19 @@ if '--plot' in sys.argv[1:]:
     plt.ylabel('Temperature (K)')
     #plt.axis([0, 1.2, 900, 2800])
     plt.show()
+
+
+"""----------------------------------------------------------------------------
+write data to csv
+-----------------------------------------------------------------------------"""
+names=str(solution2.species_names)
+tt=['Time (ms)', 'Temp (K)']
+names = solution2.species_names
+name_array = np.append(tt, names)
+
+file_data= np.vstack((name_array, data2))
+
+np.savetxt('test.csv', file_data,  delimiter=', ')
+
+#fmt='%.02f',
+os.system('atom test.csv')
