@@ -126,14 +126,17 @@ if '--plot' in sys.argv[1:]:
 """----------------------------------------------------------------------------
 write data to csv
 -----------------------------------------------------------------------------"""
+
+#format matrix for csv
 names=str(solution2.species_names)
 tt=['Time (ms)', 'Temp (K)']
 names = solution2.species_names
 name_array = np.append(tt, names)
-
+data2=data2.astype('|S10')
 file_data= np.vstack((name_array, data2))
+#open and write to file
+with open('test.csv', 'wb') as f:
+    np.savetxt(f, file_data, fmt=('%-12s'),  delimiter=' ')
 
-np.savetxt('test.csv', file_data,  delimiter=', ')
 
-#fmt='%.02f',
 os.system('atom test.csv')
