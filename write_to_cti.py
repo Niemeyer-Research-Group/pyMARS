@@ -292,5 +292,3 @@ def write(data_file, solution_objects):
                 pass
 
     f.close()
-    cw='atom ' + output_file_name
-    os.system(cw)
