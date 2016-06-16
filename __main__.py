@@ -26,14 +26,14 @@ def readin(data_file, exclusion_list, thermo_file, transport_file):
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
     from write_to_cti import write
-
-    if data_file.endswith(".xml") or data_file.endswith(".cti"):
+    from autoignition_module import run_sim
+    file_extension= os.path.splitext(data_file)[1]
+    if file_extension == ".cti" or ".xml":
         print("This is an Cantera xml or cti file")
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
-
-    if data_file.endswith(".inp") or data_file.endswith('.dat') \
-                or data_file.endswith('.txt'):
+        return
+    if file_extension == ".inp" or ".dat":
         print("This is a Chemkin file")
         #convert file to cti
         converted_file_name = convert(data_file, thermo_file, transport_file)
@@ -41,13 +41,22 @@ def readin(data_file, exclusion_list, thermo_file, transport_file):
         #trims newly converted file
         solution_objects=create_trimmed_model(converted_file_name, \
                                     exclusion_list)
-    else:
+        return
+    else :
         print("File type not supported")
 
     write(data_file, solution_objects)
 
-    return (solution_objects)
 
+
+    run_sim(solution_objects, args)
+
+
+
+
+"""-------------------------------------------------------------------------
+Get details from command line
+-------------------------------------------------------------------------"""
 
 
 #gets arguments from terminal
@@ -58,8 +67,10 @@ parser.add_argument('--species',  help='comma separated list input of species\
                                 to exclude', type=str)
 parser.add_argument('--thermo', help='thermodynamic data file', type=str)
 parser.add_argument('--transport', help='transport data file', type=str)
+parser.add_argument('--plot', help='plots ignition curve', action="store_true")
+parser.add_argument('--points', help='print sim sample points', action="store_true")
+parser.add_argument('--writecsv', help='write species data to csv', action="store_true")
 args=parser.parse_args()
-
 data_file=args.file
 
 #if no species are to be trimmed
