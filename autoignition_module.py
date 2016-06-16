@@ -6,7 +6,7 @@ import os
 
 #read in solution file, and make constant volume adiabatic reactor
 solution1 = ct.Solution('gri30.cti') #trimmed_h2_v1b_mech.cti
-solution1.TP = 1001.0, ct.one_atm
+solution1.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r1 = ct.Reactor(solution1)
 sim1 = ct.ReactorNet([r1])
 time1 = 0.0
@@ -21,7 +21,7 @@ times1 = np.zeros(100)
 data1 = np.zeros((100,2)) #first column is time, second is temperature
 
 for n in range(100):
-    time1 += 1.e-5
+    time1 += 1.e-4
     sim1.advance(time1)
     times1[n] = time1 * 1e3  # time in ms
     data1[n,0] = r1.T
@@ -45,7 +45,7 @@ for j, dTi in enumerate(dT):
     else:
         #sys.exit("initial sample point not found") #alternative sys exit option
         initial_point=[times1[i-5], T[i-5], j]
-        print("\nInitial Sample Point not found based on dT. Alternative method"+\
+        print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
             " of 5 steps before tau is used.")
         break
 
@@ -73,19 +73,19 @@ run sim to get data around ignition
 
 #read in solution file, and make constant volume adiabatic reactor
 solution2 = ct.Solution('gri30.cti')  #trimmed_h2_v1b_mech.cti
-solution2.TP = 1001.0, ct.one_atm
+solution2.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 r2 = ct.Reactor(solution2)
 sim2 = ct.ReactorNet([r2])
 
 time2= initial_point[0]*10e-4 #initial_point[0]
 
-refined_steps= 100
+refined_steps= 200
 times2= np.zeros(refined_steps)
 n_species=len(solution2.species_names)
 data2=np.zeros((refined_steps, n_species+2))
 species_array=np.ones(n_species)
 for n in range(refined_steps):
-    time2 +=1.0e-6
+    time2 +=1.0e-5
     sim2.advance(time2)
     times2[n] = time2 * 1e3  # time in ms
     data2[n, 0] = time2
@@ -130,17 +130,17 @@ if '--plot' in sys.argv[1:]:
 """----------------------------------------------------------------------------
 write data to csv
 -----------------------------------------------------------------------------"""
-#if '--writecsv' in sys.argv[1:]:
-#format matrix for csv
-names=str(solution2.species_names)
-tt=['Time (ms)', 'Temp (K)']
-names = solution2.species_names
-name_array = np.append(tt, names)
-data2=data2.astype('|S10')
-file_data= np.vstack((name_array, data2))
-#open and write to file
-with open('test.csv', 'wb') as f:
-    np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
+if '--writecsv' in sys.argv[1:]:
+    #format matrix for csv
+    names=str(solution2.species_names)
+    tt=['Time (ms)', 'Temp (K)']
+    names = solution2.species_names
+    name_array = np.append(tt, names)
+    data2=data2.astype('|S10')
+    file_data= np.vstack((name_array, data2))
+    #open and write to file
+    with open('test.csv', 'wb') as f:
+        np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
 
 
-os.system('atom test.csv')
+    os.system('atom test.csv')
