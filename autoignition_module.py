@@ -6,8 +6,8 @@ import os
 
 #read in solution file, and make constant volume adiabatic reactor
 solution1 = ct.Solution('gri30.cti') #trimmed_h2_v1b_mech.cti
-solution1.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
-r1 = ct.IdealGasReactor(solution1)
+solution1.TP = 1001.0, ct.one_atm
+r1 = ct.Reactor(solution1)
 sim1 = ct.ReactorNet([r1])
 time1 = 0.0
 
@@ -25,7 +25,6 @@ for n in range(100):
     sim1.advance(time1)
     times1[n] = time1 * 1e3  # time in ms
     data1[n,0] = r1.T
-    data1[n, 1] = r1.thermo['OH'].Y
 
 
 #get ignition point from dT/dt
@@ -39,11 +38,16 @@ tau= times1[i]
 
 
 #find initial sample point
-for j, dti in enumerate(dT):
-    if dti > 5:     #when dT > 5 degrees kelvin
+for j, dTi in enumerate(dT):
+    if dTi > 15.0:     #when dT > 5 degrees kelvin
         initial_point=[times1[j], T[j], j] # initial point, Temp, index
         break
-
+    else:
+        #sys.exit("initial sample point not found") #alternative sys exit option
+        initial_point=[times1[i-5], T[i-5], j]
+        print("\nInitial Sample Point not found based on dT. Alternative method"+\
+            " of 5 steps before tau is used.")
+        break
 
 #find final sample point
 for k, dti in enumerate(dT):
@@ -54,7 +58,7 @@ for k, dti in enumerate(dT):
 
 #prints points of interest
 if '--points' in sys.argv[1:]:
-    print("Time[ms]    Temp[K]    Index        Point")
+    print("\nTime[ms]    Temp[K]    Index        Point")
     print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
      + "       " + str(initial_point[2]) + "     " + "Initial sample point")
     print(str(tau) + "        " + str("{0:.2f}".format(T[i])) + "       " + str(i)\
@@ -69,8 +73,8 @@ run sim to get data around ignition
 
 #read in solution file, and make constant volume adiabatic reactor
 solution2 = ct.Solution('gri30.cti')  #trimmed_h2_v1b_mech.cti
-solution2.TPX = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
-r2 = ct.IdealGasReactor(solution2)
+solution2.TP = 1001.0, ct.one_atm
+r2 = ct.Reactor(solution2)
 sim2 = ct.ReactorNet([r2])
 
 time2= initial_point[0]*10e-4 #initial_point[0]
@@ -86,9 +90,9 @@ for n in range(refined_steps):
     times2[n] = time2 * 1e3  # time in ms
     data2[n, 0] = time2
     data2[n, 1] = r2.T
-    for k in species_array:                     #get species data
-        species=solution2.species(k).name
-        data2[n, int(k+2)] = r2.thermo[species].Y
+    for i, val in enumerate(r2.Y):                     #get species data
+        species=solution2.species(i).name
+        data2[n, int(i+2)] = val
     if time2 > final_point[0]*10e-4:        #breaks sim, and trims array
         data2 = data2[0:n, :]
         times2=times2[0:n]
@@ -126,7 +130,7 @@ if '--plot' in sys.argv[1:]:
 """----------------------------------------------------------------------------
 write data to csv
 -----------------------------------------------------------------------------"""
-
+#if '--writecsv' in sys.argv[1:]:
 #format matrix for csv
 names=str(solution2.species_names)
 tt=['Time (ms)', 'Temp (K)']
@@ -136,7 +140,7 @@ data2=data2.astype('|S10')
 file_data= np.vstack((name_array, data2))
 #open and write to file
 with open('test.csv', 'wb') as f:
-    np.savetxt(f, file_data, fmt=('%-12s'),  delimiter=' ')
+    np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
 
 
 os.system('atom test.csv')
