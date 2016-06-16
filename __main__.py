@@ -5,7 +5,7 @@ import os
 import sys
 import argparse
 
-def readin(data_file, exclusion_list, thermo_file, transport_file):
+def readin(args):
     """Function to import data file and identify format.
 
     Parameters
@@ -20,18 +20,33 @@ def readin(data_file, exclusion_list, thermo_file, transport_file):
         Trimmed Solution Object
         Trimmed Mechanism file
     """
-    print(exclusion_list)
+    data_file=args.file
+
     global solution_objects
+
     #import working functions
     from create_trimmed_model import create_trimmed_model
     from convert_chemkin_file import convert
     from write_to_cti import write
     from autoignition_module import run_sim
     file_extension= os.path.splitext(data_file)[1]
+
+    #if no species are to be trimmed
+    if args.species == None:
+        exclusion_list=[]
+    else:
+        exclusion_list=[str(item) for item in args.species.split(',')]
+    print(exclusion_list)
+
+    thermo_file = args.thermo
+    transport_file=args.transport
+
     if file_extension == ".cti" or ".xml":
         print("This is an Cantera xml or cti file")
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
+        write(data_file, solution_objects)
+        run_sim(solution_objects, args)
         return
     if file_extension == ".inp" or ".dat":
         print("This is a Chemkin file")
@@ -41,15 +56,12 @@ def readin(data_file, exclusion_list, thermo_file, transport_file):
         #trims newly converted file
         solution_objects=create_trimmed_model(converted_file_name, \
                                     exclusion_list)
+        write(data_file, solution_objects)
+        run_sim(solution_objects, args)
         return
+
     else :
         print("File type not supported")
-
-    write(data_file, solution_objects)
-
-
-
-    run_sim(solution_objects, args)
 
 
 
@@ -73,13 +85,6 @@ parser.add_argument('--writecsv', help='write species data to csv', action="stor
 args=parser.parse_args()
 data_file=args.file
 
-#if no species are to be trimmed
-if args.species == None:
-    exclusion_list=[]
-else:
-    exclusion_list=[str(item) for item in args.species.split(',')]
-thermo_file=args.thermo
-transport_file=args.transport
 
 if __name__ == '__main__':
-    readin(data_file, exclusion_list, thermo_file, transport_file)
+    readin(args)
