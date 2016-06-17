@@ -11,6 +11,8 @@ def run_sim(solution_objects, sys_args):
     r1 = ct.Reactor(solution1)
     sim1 = ct.ReactorNet([r1])
     time1 = 0.0
+    tnow=0.0
+    tfinal=5.0e-3
 
 
     """-------------------------------------------------------------------------
@@ -25,6 +27,10 @@ def run_sim(solution_objects, sys_args):
         sim1.advance(time1)
         times1[n] = time1 * 1e3  # time in ms
         data1[n,0] = r1.T
+
+    while tnow < tfinal:
+        tnow = sim1.step(tfinal)
+        print(tnow)
 
 
     #get ignition point from dT/dt
@@ -114,6 +120,7 @@ def run_sim(solution_objects, sys_args):
         #plot temp vs time
         plt.plot(times1, data1[:,0], lw=1.5)
         plt.plot(times2, data2[:,1], ls='--', lw=2.5, label='sample range')
+        plt.plot(4.0, 1500, 'rx', ms=5, mew=2)
         plt.xlabel('Time (ms)')
         plt.title('Mixture Temperature vs Time')
         plt.legend()
