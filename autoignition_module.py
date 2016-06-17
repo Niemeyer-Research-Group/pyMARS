@@ -4,6 +4,7 @@ import cantera as ct
 import os
 
 def run_sim(solution_objects, sys_args):
+    data_file=sys_args.file
     #read in solution file, and make constant volume adiabatic reactor
     solution1 = solution_objects[0]
     solution1.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
@@ -15,7 +16,6 @@ def run_sim(solution_objects, sys_args):
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
     -------------------------------------------------------------------------"""
-
 
     times1 = np.zeros(100)
     data1 = np.zeros((100,2)) #first column is time, second is temperature
@@ -33,7 +33,7 @@ def run_sim(solution_objects, sys_args):
     dT= np.diff(T)
     deriv= dT/dt
     i=deriv.argmax()
-    deriv_max=[times1[i], T[i]]
+    deriv_max=[times1[i], T[i], i]
     tau= times1[i]
 
 
@@ -100,7 +100,7 @@ def run_sim(solution_objects, sys_args):
     -------------------------------------------------------------------------"""
 
     # Plot the ignition delay
-    if '--plot' in sys.argv[1:]:
+    if sys_args.plot:
         import matplotlib.pyplot as plt
         plt.clf()
 
@@ -125,7 +125,7 @@ def run_sim(solution_objects, sys_args):
     """-------------------------------------------------------------------------
     write data to csv
     -------------------------------------------------------------------------"""
-    if '--writecsv' in sys.argv[1:]:
+    if sys_args.writecsv:
         #format matrix for csv
         names=str(solution2.species_names)
         tt=['Time (ms)', 'Temp (K)']
@@ -146,11 +146,11 @@ def run_sim(solution_objects, sys_args):
     prints out points of interest
     -------------------------------------------------------------------------"""
 
-    if '--points' in sys.argv[1:]:
+    if sys_args.points:
         print("\nTime[ms]    Temp[K]    Index        Point")
         print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
          + "       " + str(initial_point[2]) + "     " + "Initial sample point")
-        print(str(tau) + "        " + str("{0:.2f}".format(T[i])) + "       " + str(i)\
+        print(str(tau) + "        " + str("{0:.2f}".format(deriv_max[1])) + "       " + str(deriv_max[2])\
                 + "     " + "Ignition point")
         print( str(final_point[0]) +  "       " + str("{0:.2f}".format(final_point[1]))\
          + "       " + str(final_point[2]) + "     " + "Final sample point")
