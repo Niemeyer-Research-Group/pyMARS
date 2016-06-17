@@ -29,7 +29,7 @@ def readin(args):
     from convert_chemkin_file import convert
     from write_to_cti import write
     from autoignition_module import run_sim
-    file_extension= os.path.splitext(data_file)[1]
+    ext= os.path.splitext(data_file)[1]
 
     #if no species are to be trimmed
     if args.species == None:
@@ -41,14 +41,14 @@ def readin(args):
     thermo_file = args.thermo
     transport_file=args.transport
 
-    if file_extension == ".cti" or ".xml":
+    if ext == ".cti" or ext == ".xml":
         print("This is an Cantera xml or cti file")
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
         write(data_file, solution_objects)
         run_sim(solution_objects, args)
-        return
-    if file_extension == ".inp" or ".dat":
+
+    elif ext == ".inp" or ext == ".dat" or ext == ".txt":
         print("This is a Chemkin file")
         #convert file to cti
         converted_file_name = convert(data_file, thermo_file, transport_file)
@@ -58,9 +58,9 @@ def readin(args):
                                     exclusion_list)
         write(data_file, solution_objects)
         run_sim(solution_objects, args)
-        return
 
-    else :
+
+    else:
         print("File type not supported")
 
 
