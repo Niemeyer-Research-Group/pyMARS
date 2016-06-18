@@ -17,7 +17,7 @@ def run_sim(solution_objects, sys_args):
     widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
                 pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
     #initialize timer
-    timer = pb.ProgressBar(widgets=widgets, maxval=166).start() #1471
+    timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
 
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
@@ -28,11 +28,11 @@ def run_sim(solution_objects, sys_args):
     r1 = ct.Reactor(solution1)
     sim1 = ct.ReactorNet([r1])
     tnow=0.0
-    tfinal=1.0e-3
+    tfinal=5.0e-3
     index1 = 0
     times1 = []
     temps = [] #first column is time, second is temperature
-    sdata=np.zeros([1, len(r1.Y)])
+    sdata=np.zeros([0, len(r1.Y)])
     while tnow < tfinal:
 
         index1 += 1
@@ -40,27 +40,20 @@ def run_sim(solution_objects, sys_args):
         times1.append(tnow)
         temps.append(r1.T)
 
-        for i, val in enumerate(r1.Y):
-            species_data=np.array(r1.Y)
-
-            sdata= np.vstack((sdata, species_data))
-
+        species_data=np.array(r1.Y)
+        species_data=species_data[:,np.newaxis].T #translate from [1,n] to [n, 1]
+        sdata= np.vstack((sdata, species_data))    #stacks all vertically
         timer.update(index1)
     timer.finish()
+
+
+
+    #concatenate time and temperature values
     times1=np.array(times1)
     temps=np.array(temps)
-    #species_data=species_data[:,np.newaxis].T
-
     timetemp=np.vstack((times1, temps)).T
-    #timetemporary=timetemp[1,:]
-    #timetemporary=timetemporary[:, np.newaxis].T
-    print(np.shape(sdata))
-    print(np.shape(timetemp))
-    print(index1)
-    #sdata= np.hstack((timetemp, sdata))
 
-
-
+    sdata= np.hstack((timetemp, sdata))
 
     #get ignition point from dT/dt
     T=np.array(temps)
@@ -92,7 +85,7 @@ def run_sim(solution_objects, sys_args):
     #find final sample point
     for k, dti in enumerate(dT):
         if k > i:
-            if dti < 1:
+            if dti < .1:
                 final_point=[times1[k], T[k], k]    #final point, Temp, index
                 break
 
@@ -127,7 +120,7 @@ def run_sim(solution_objects, sys_args):
     -------------------------------------------------------------------------"""
     if sys_args.writecsv:
         #format matrix for csv
-        names=str(solution2.species_names)
+        names=str(solution1.species_names)
         tt=['Time (ms)', 'Temp (K)']
         names = solution1.species_names
         name_array = np.append(tt, names)
