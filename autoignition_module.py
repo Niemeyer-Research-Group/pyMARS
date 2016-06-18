@@ -3,7 +3,7 @@ import numpy as np
 import cantera as ct
 import os
 import progressbar as pb
-
+import h5py
 
 def run_sim(solution_objects, sys_args):
     data_file=sys_args.file
@@ -134,6 +134,13 @@ def run_sim(solution_objects, sys_args):
 
 
         os.system('atom '+ output_file_name)
+
+    """-------------------------------------------------------------------------
+    write data to csv
+    -------------------------------------------------------------------------"""
+
+    if sys_args.writehdf5:
+        f=h5py.File("test_file.hdf5", 'w')
 
     """-------------------------------------------------------------------------
     prints out points of interest
