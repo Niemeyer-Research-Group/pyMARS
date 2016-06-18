@@ -82,6 +82,7 @@ parser.add_argument('--transport', help='transport data file', type=str)
 parser.add_argument('--plot', help='plots ignition curve', action="store_true")
 parser.add_argument('--points', help='print sim sample points', action="store_true")
 parser.add_argument('--writecsv', help='write species data to csv', action="store_true")
+parser.add_argument('--writehdf5', help='write species data to hdf5', action="store_true")
 args=parser.parse_args()
 data_file=args.file
 
