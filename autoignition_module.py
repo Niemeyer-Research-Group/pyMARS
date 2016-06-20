@@ -52,7 +52,6 @@ def run_sim(solution_objects, sys_args):
     times1=np.array(times1)
     temps=np.array(temps)
     timetemp=np.vstack((times1, temps)).T
-
     sdata= np.hstack((timetemp, sdata))
 
     #get ignition point from dT/dt
@@ -136,11 +135,31 @@ def run_sim(solution_objects, sys_args):
         os.system('atom '+ output_file_name)
 
     """-------------------------------------------------------------------------
-    write data to csv
+    write data to hdf5
     -------------------------------------------------------------------------"""
 
     if sys_args.writehdf5:
-        f=h5py.File("test_file.hdf5", 'w')
+        #format matrix for hdf5
+        names=str(solution1.species_names)
+        tt=['Time (ms)', 'Temp (K)']
+        names = solution1.species_names
+        name_array = np.append(tt, names)
+        sdata=sdata.astype('|S10')
+        file_data= np.vstack((name_array, sdata))
+
+        #open and write to file
+        input_file_name_stripped=os.path.splitext(data_file)[0]
+        output_file_name=os.path.abspath('Output_Data_Files/'+ 'species_data_' + input_file_name_stripped + '.hdf5')
+        with h5py.File(output_file_name, 'w') as f:
+            Times = f.create_dataset("Times", data=times1)
+            Temps = f.create_dataset("Temps", data=temps)
+            sgroup= f.create_group('Species_Data')
+
+            for i, sp in enumerate(solution1.species_names):
+                    sgroup.create_dataset(sp, data=sdata[:,i+2])
+            #nco=np.array(f.get('Species_Data/H2'))
+            #print(nco)
+
 
     """-------------------------------------------------------------------------
     prints out points of interest
