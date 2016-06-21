@@ -10,24 +10,21 @@ from string import Template
 import cantera as ct
 
 
-def write(data_file, solution_objects):
+def write(solution):
     """Function to write cantera solution object to cti file.
 
     Parameters
     ----------
-    data_file:
-        Original cantera mechanism file.
-    solution_objects:
-        Trimmed cantera solution object.
+    cantera Solution
 
     Returns
     -------
         Trimmed Mechanism file
     """
 
-
-    input_file_name_stripped=os.path.splitext(data_file)[0]
-    output_file_name=os.path.abspath('Output_Data_Files/'+ 'trimmed_' + input_file_name_stripped + '.cti')
+    trimmed_solution=solution
+    input_file_name_stripped=trimmed_solution.name
+    output_file_name=os.path.abspath('Output_Data_Files/'+ 'trimmed_' + solution.name + '.cti')
     try:
         os.remove(output_file_name)
     except OSError:
@@ -37,7 +34,7 @@ def write(data_file, solution_objects):
 
 
     #Read In trimmed Solution to Cantera Object
-    trimmed_solution=solution_objects[1]
+
     solution_T=trimmed_solution.T
     solution_P=trimmed_solution.P
 
@@ -121,6 +118,8 @@ def write(data_file, solution_objects):
     element_names=eliminate( str(trimmed_solution.element_names).upper(), \
                                         ['[', ']', '\'', ','])
 
+    element_names=element_names.replace('AR', 'Ar')
+    
     species_names=wrap(
                         eliminate(str(trimmed_solution.species_names).upper(), \
                                     ['[', ']', '\'', ','], \
@@ -249,7 +248,7 @@ def write(data_file, solution_objects):
                             equation_string=equation_string, Arr=Arr, \
                             Efficiencies=Efficiencies_string))
 
-        #Case if an ElementaryReaction
+        #Case if an aryReaction
         if equation_type == 'ElementaryReaction':
             Arr=build_Arr(equation_object, equation_type)
 
