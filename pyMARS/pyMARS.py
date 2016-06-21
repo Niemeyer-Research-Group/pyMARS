@@ -47,7 +47,7 @@ def readin(args):
         print("\nThis is an Cantera xml or cti file\n")
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
-        write(data_file, solution_objects)
+        write(solution_objects[1])
         run_sim(data_file, args)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
@@ -59,8 +59,8 @@ def readin(args):
         #trims newly converted file
         solution_objects=create_trimmed_model(converted_file_name, \
                                     exclusion_list)
-        write(data_file, solution_objects)
-        run_sim(data_file, args)
+        print(converted_file_name)
+        run_sim(converted_file_name, args)
 
 
     else:
