@@ -119,7 +119,7 @@ def write(solution):
                                         ['[', ']', '\'', ','])
 
     element_names=element_names.replace('AR', 'Ar')
-    
+
     species_names=wrap(
                         eliminate(str(trimmed_solution.species_names).upper(), \
                                     ['[', ']', '\'', ','], \
