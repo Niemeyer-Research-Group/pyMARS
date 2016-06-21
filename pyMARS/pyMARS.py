@@ -11,10 +11,18 @@ from autoignition_module import run_sim
 def readin(args):
     """Function to import data file and identify format.
 
-    Parameters
+    Arguments
+        --file: Input mechanism file (ex. --file=gri30.cti)
+        --species: Species to eliminate (ex. --species='H, OH')
+        --thermo: Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
+        --transport: Transport data file if Chemkin format
+        --plot
+        --points
+        --writecsv
+        --writehdf5
+
     ----------
-    command line arguments
-    -------
+    Returns
         Converted mechanism file
         Trimmed Solution Object
         Trimmed Mechanism file
