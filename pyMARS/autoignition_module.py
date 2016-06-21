@@ -8,41 +8,35 @@ import h5py
 
 
 
-def run_sim(solution_objects, sys_args):
-    """Function to run Cantera reactor simulation
+def run_sim(mech_file, sys_args='none', **usr_args ):
+    """
+    Function to run Cantera reactor simulation
 
-    Parameters
+    Arguments
+        Cantera mechanism file
+        User arguments (plot='y', points='y', writehdf5='y', writecsv='y' )
     ----------
-    Cantera Solution Object
-    Command Line arguments
-    -------
+    Output
         Plot of Temp vs Time
+        Points of interest
         CSV file
         Hdf5 file
+    ----------
+    Example
+        run_sim('gri30.cti', points='y', plot='y')
+
     """
 
-
-    data_file=sys_args.file
-    solution1 = solution_objects[0]
+    data_file=mech_file
+    solution1 = ct.Solution(mech_file)
     solution1.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
-
-    """-------------------------------------------------------------------------
-    setup progressbar
-    -------------------------------------------------------------------------"""
-
-    #initialize widgets
-
     widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
                 pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
-    #initialize timer
     timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
 
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
     -------------------------------------------------------------------------"""
-
-    #read in solution file, and make constant volume adiabatic reactor
-
 
     r1 = ct.Reactor(solution1)
     sim1 = ct.ReactorNet([r1])
@@ -64,7 +58,7 @@ def run_sim(solution_objects, sys_args):
         sdata= np.vstack((sdata, species_data))
         timer.update(index1)
     timer.finish
-
+    print('\n')
     #concatenate time and temperature values
     times1=np.array(times1)
     temps=np.array(temps)
@@ -106,12 +100,7 @@ def run_sim(solution_objects, sys_args):
                 break
 
 
-    """-------------------------------------------------------------------------
-    plot temperature vs time, and ignition point
-    -------------------------------------------------------------------------"""
-
-    # Plot the ignition delay
-    if sys_args.plot:
+    def plot():
         import matplotlib.pyplot as plt
         plt.clf()
 
@@ -130,11 +119,7 @@ def run_sim(solution_objects, sys_args):
         #plt.axis([0, 1.2, 900, 2800])
         plt.show()
 
-
-    """-------------------------------------------------------------------------
-    write data to csv
-    -------------------------------------------------------------------------"""
-    if sys_args.writecsv:
+    def writecsv(sdata):
         #format matrix for csv
         names=str(solution1.species_names)
         tt=['Time (ms)', 'Temp (K)']
@@ -147,15 +132,9 @@ def run_sim(solution_objects, sys_args):
         output_file_name=os.path.abspath('Output_Data_Files/'+ 'species_data_' + input_file_name_stripped + '.csv')
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
-
-
         os.system('atom '+ output_file_name)
 
-    """-------------------------------------------------------------------------
-    write data to hdf5
-    -------------------------------------------------------------------------"""
-
-    if sys_args.writehdf5:
+    def writehdf5(sdata):
         #format matrix for hdf5
         names=str(solution1.species_names)
         tt=['Time (ms)', 'Temp (K)']
@@ -177,12 +156,7 @@ def run_sim(solution_objects, sys_args):
             #nco=np.array(f.get('Species_Data/H2'))
             #print(nco)
 
-
-    """-------------------------------------------------------------------------
-    prints out points of interest
-    -------------------------------------------------------------------------"""
-
-    if sys_args.points:
+    def points():
         print("\nTime[ms]    Temp[K]    Index        Point")
         print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
          + "       " + str(initial_point[2]) + "     " + "Initial sample point")
@@ -190,3 +164,26 @@ def run_sim(solution_objects, sys_args):
                 + "     " + "Ignition point")
         print( str(final_point[0]) +  "       " + str("{0:.2f}".format(final_point[1]))\
          + "       " + str(final_point[2]) + "     " + "Final sample point")
+
+
+
+
+
+    if sys_args is not 'none':
+        if sys_args.plot:
+            plot()
+        if sys_args.writecsv:
+            writecsv(sdata)
+        if sys_args.writehdf5:
+            writehdf5(sdata)
+        if sys_args.points:
+            points()
+    if sys_args is 'none':
+        if 'plot' in usr_args:
+            plot()
+        if 'writecsv' in usr_args:
+            writecsv(sdata)
+        if 'writehdf5' in usr_args:
+            writehdf5(sdata)
+        if 'points' in usr_args:
+            points()
