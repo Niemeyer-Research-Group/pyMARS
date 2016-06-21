@@ -12,3 +12,11 @@ def convert(a, b='none'):
     other_file=b
     print value
     print other_file
+
+
+
+def func(file_name, var='none', **sys_args):
+    print file_name
+    print var
+    if 'plot' in sys_args:
+        print 'plotting'
