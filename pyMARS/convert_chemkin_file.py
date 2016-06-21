@@ -2,7 +2,6 @@
 
 import os
 
-
 def convert(mech_file, thermo_file='none', transport_file='none'):
     """Function to convert chemkin mechanism files to CTI.
 
