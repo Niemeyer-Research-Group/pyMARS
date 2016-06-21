@@ -1,23 +1,23 @@
 # Local Imports
 import cantera as ct
 
-
 def create_trimmed_model(data_file, exclusion_list):
 
     """ Function to reduce list of species and corresponding reactions.
 
-    Parameters
-    ----------
+    Arguments
+
     data_file:
         local .cti or .xml data file containing mechanism information
     exclusion_list:
         List of species that will be trimmed
-
+    ----------
     Returns
-    -------
-    new_solution :
         Original Cantera Solution Object
-        Simplified Cantera Solution Object
+        Trimmed Cantera Solution Object
+    ----------
+    Example
+        create_trimmed_model('gri30.cti', ['OH', 'H'])
     """
 
     # define initial solution objects
