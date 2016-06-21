@@ -29,12 +29,18 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
     converted_file_path=os.path.join(save_path, converted_file_name)
 
     mech_file=os.path.join(input_dir, mech_file)
-    thermo_file_path=os.path.join(input_dir, thermo_file)
-    transport_file_path=os.path.join(input_dir, transport_file)
+    try:
+        thermo_file_path=os.path.join(input_dir, thermo_file)
+    except:
+        pass
+    try:
+        transport_file_path=os.path.join(input_dir, transport_file)
+    except:
+        pass
 
     #calls ck2cti based on given files
-    if thermo_file == 'none':
-        if transport_file == 'none':
+    if thermo_file == None:
+        if transport_file == None:
             input_line= "ck2cti --input=%s --output=%s" \
                 %(mech_file, converted_file_path)
             print('no thermo, no transport')
@@ -43,8 +49,8 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
                 %(mech_file, transport_file_path, converted_file_path)
             print('no thermo, yes transport')
 
-    if thermo_file != 'none':
-        if transport_file == 'none':
+    if thermo_file != None:
+        if transport_file == None:
             input_line= "ck2cti --input=%s --thermo=%s  --output=%s" \
                     %(mech_file, thermo_file_path, converted_file_path)
             print('yes thermo, no transport')
