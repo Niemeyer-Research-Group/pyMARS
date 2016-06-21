@@ -1,3 +1,6 @@
+
+
+
 import sys
 import numpy as np
 import cantera as ct
@@ -5,15 +8,33 @@ import os
 import progressbar as pb
 import h5py
 
-def run_sim(solution_objects, sys_args):
-    data_file=sys_args.file
 
+
+
+def run_sim(solution_objects, sys_args):
+    """Function to run Cantera reactor simulation
+
+    Parameters
+    ----------
+    Cantera Solution Object
+    Command Line arguments
+    -------
+        Plot of Temp vs Time
+        CSV file
+        Hdf5 file
+    """
+
+
+    data_file=sys_args.file
+    solution1 = solution_objects[0]
+    solution1.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
 
     """-------------------------------------------------------------------------
     setup progressbar
     -------------------------------------------------------------------------"""
 
     #initialize widgets
+
     widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
                 pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
     #initialize timer
@@ -22,9 +43,10 @@ def run_sim(solution_objects, sys_args):
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
     -------------------------------------------------------------------------"""
+
     #read in solution file, and make constant volume adiabatic reactor
-    solution1 = solution_objects[0]
-    solution1.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
+
+
     r1 = ct.Reactor(solution1)
     sim1 = ct.ReactorNet([r1])
     tnow=0.0
@@ -42,11 +64,9 @@ def run_sim(solution_objects, sys_args):
 
         species_data=np.array(r1.Y)
         species_data=species_data[:,np.newaxis].T #translate from [1,n] to [n, 1]
-        sdata= np.vstack((sdata, species_data))    #stacks all vertically
+        sdata= np.vstack((sdata, species_data))
         timer.update(index1)
-    timer.finish()
-
-
+    timer.finish
 
     #concatenate time and temperature values
     times1=np.array(times1)
