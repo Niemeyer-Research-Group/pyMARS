@@ -290,5 +290,5 @@ def write(data_file, solution_objects):
             except (IndexError):
                 f.write('\n           )\n\n')
                 pass
-
+        return output_file_name
     f.close()
