@@ -6,14 +6,14 @@ import os
 def convert(mech_file, thermo_file='none', transport_file='none'):
     """Function to convert chemkin mechanism files to CTI.
 
-    Parameters
+    Arguments
+        Chemkin mechanism file
+    (Optional)
+        Thermo file
+        Transport file
     ----------
-    mech_file:
-        Main Chemkin mechanism file
-
     Returns
-    -------
-        Converted mechanism file
+        Converted Cantera mechanism file
     """
 
 
