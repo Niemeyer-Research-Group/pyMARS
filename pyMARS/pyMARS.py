@@ -1,6 +1,7 @@
 
 import os, sys, argparse
 
+
 from create_trimmed_model import create_trimmed_model
 from convert_chemkin_file import convert
 from write_to_cti import write
@@ -39,7 +40,7 @@ def readin(args):
         #trims file
         solution_objects=create_trimmed_model(data_file, exclusion_list)
         write(data_file, solution_objects)
-        run_sim(solution_objects, args)
+        run_sim(data_file, args)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
 
@@ -51,7 +52,7 @@ def readin(args):
         solution_objects=create_trimmed_model(converted_file_name, \
                                     exclusion_list)
         write(data_file, solution_objects)
-        run_sim(solution_objects, args)
+        run_sim(data_file, args)
 
 
     else:
