@@ -112,7 +112,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         #plot temp vs time
         plt.plot(times1, temps)
 
-        plt.xlabel('Time (ms)')
+        plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
         plt.legend()
         plt.ylabel('Temperature (K)')
@@ -122,7 +122,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     def writecsv(sdata):
         #format matrix for csv
         names=str(solution1.species_names)
-        tt=['Time (ms)', 'Temp (K)']
+        tt=['Time (s)', 'Temp (K)']
         names = solution1.species_names
         name_array = np.append(tt, names)
         sdata=sdata.astype('|S10')
@@ -137,7 +137,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     def writehdf5(sdata):
         #format matrix for hdf5
         names=str(solution1.species_names)
-        tt=['Time (ms)', 'Temp (K)']
+        tt=['Time (s)', 'Temp (K)']
         names = solution1.species_names
         name_array = np.append(tt, names)
         sdata=sdata.astype('|S10')
