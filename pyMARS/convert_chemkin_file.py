@@ -13,6 +13,9 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
     ----------
     Returns
         Converted Cantera mechanism file
+    ----------
+    Example
+        convert('gri30.inp')
     """
 
 
@@ -39,8 +42,8 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
         pass
 
     #calls ck2cti based on given files
-    if thermo_file == None:
-        if transport_file == None:
+    if thermo_file is 'none':
+        if transport_file == 'none':
             input_line= "ck2cti --input=%s --output=%s" \
                 %(mech_file, converted_file_path)
             print('no thermo, no transport')
@@ -49,8 +52,8 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
                 %(mech_file, transport_file_path, converted_file_path)
             print('no thermo, yes transport')
 
-    if thermo_file != None:
-        if transport_file == None:
+    if thermo_file is not 'none':
+        if transport_file is 'none':
             input_line= "ck2cti --input=%s --thermo=%s  --output=%s" \
                     %(mech_file, thermo_file_path, converted_file_path)
             print('yes thermo, no transport')
