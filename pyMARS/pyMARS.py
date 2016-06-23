@@ -2,14 +2,14 @@
 import os, sys, argparse
 
 
-from create_trimmed_model import create_trimmed_model
+from create_trimmed_model import trim
 from convert_chemkin_file import convert
 from write_to_cti import write
 from autoignition_module import run_sim
 
 
 def readin(args):
-    """Function to import data file and identify format.
+    """Main function for pyMARS
 
     Arguments
         --file: Input mechanism file (ex. --file=gri30.cti)
@@ -46,7 +46,7 @@ def readin(args):
 
         print("\nThis is an Cantera xml or cti file\n")
         #trims file
-        solution_objects=create_trimmed_model(data_file, exclusion_list)
+        solution_objects=trim(data_file, exclusion_list)
         write(solution_objects[1])
         run_sim(data_file, args)
 
@@ -57,7 +57,7 @@ def readin(args):
         converted_file_name = convert(data_file, thermo_file, transport_file)
 
         #trims newly converted file
-        solution_objects=create_trimmed_model(converted_file_name, \
+        solution_objects=trim(converted_file_name, \
                                     exclusion_list)
         print(converted_file_name)
         run_sim(converted_file_name, args)
