@@ -48,3 +48,17 @@ parser.add_argument('--writehdf5', \
 args=parser.parse_args()
 
 readin(args)
+
+
+"""
+Arguments
+    --file: Input mechanism file (ex. --file=gri30.cti)
+    --species: Species to eliminate (ex. --species='H, OH')
+    --thermo: Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
+    --transport: Transport data file if Chemkin format
+    --plot
+    --points
+    --writecsv
+    --writehdf5
+
+"""
