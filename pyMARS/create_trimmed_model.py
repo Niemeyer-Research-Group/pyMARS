@@ -1,7 +1,7 @@
 # Local Imports
 import cantera as ct
 
-def create_trimmed_model(data_file, exclusion_list):
+def trim(data_file, exclusion_list):
 
     """ Function to reduce list of species and corresponding reactions.
 
