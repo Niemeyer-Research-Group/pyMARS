@@ -61,4 +61,4 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
-*__init__.py
+.gitignore
