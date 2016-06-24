@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 import os
 current_dir=os.getcwd()
@@ -9,7 +9,15 @@ setup(name='pyMARS',
       reducing the size and complexity of detailed chemical kinetic models.',
       url='http://github.com/kyleniemeyer/pyMARS',
       author='',
-      author_email='',
+      author_email='claytonp@oregonstate.edu',
       license='MIT',
-      packages=[],
-      zip_safe=False)
+      packages=find_packages(),
+      zip_safe=False,
+      entry_points={
+        'console_scripts': [
+                    'pyMARS= pyMARS.__main__:main']},
+      install_requires=['argparse', 'progressbar', 'h5py', 'os', 'sys', 'numpy',
+                    'cantera>=2.3.0a2', 'textwrap', 'string']
+
+
+    )
