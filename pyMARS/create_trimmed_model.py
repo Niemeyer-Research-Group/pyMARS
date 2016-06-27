@@ -17,7 +17,9 @@ def trim(data_file, exclusion_list):
         Trimmed Cantera Solution Object
     ----------
     Example
-        create_trimmed_model('gri30.cti', ['OH', 'H'])
+        trim('gri30.cti', ['OH', 'H'])
+        or
+        trim('gri30.cti', []) to trim no species
     """
 
     # define initial solution objects
@@ -55,11 +57,12 @@ def trim(data_file, exclusion_list):
             final_species_names.remove(n)
 
     final_species_objects =   [initial_solution.species(name) for name in final_species_names]
-
     # New solution definition
-    new_solution= ct.Solution(  species=final_species_objects,
+    new_solution= ct.Solution(species=final_species_objects,
                         reactions=final_reaction_objects,
                         thermo='IdealGas', kinetics='GasKinetics')
     new_solution.TP = initial_solution.TP
+    new_solution.name = initial_solution.name
+
 
     return (initial_solution, new_solution)
