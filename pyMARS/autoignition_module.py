@@ -29,7 +29,8 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
     data_file=mech_file
     solution1 = ct.Solution(mech_file)
-    solution1.TPY = 1001.0, ct.one_atm, 'H2:2,O2:1,N2:4'
+    mass_frac = raw_input('Enter mass fractions (ex.H2:2,O2:1,N2:4):  ')
+    solution1.TPY = 1001.0, ct.one_atm, mass_frac
     widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
                 pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
     timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
