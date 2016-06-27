@@ -1,5 +1,6 @@
 
 import os, sys, argparse
+import cantera as ct
 
 
 from create_trimmed_model import trim
@@ -31,68 +32,75 @@ def readin(args='none', **argv):
         readin(file='gri30.cti', plot='y', species='OH, H')
     """
 
-    if args is 'none':
-        args=argparse.Namespace()
-        args.plot = False
-        args.points = False
-        args.writecsv = False
-        args.writehdf5 = False
+    "--------------------------------------------------------------------------"
+    "--------------------------------------------------------------------------"
 
-        data_file = argv['file']
+    class args_none:
+        def __init__(self, argv):
+            self=argparse.Namespace()
+            self.plot = False
+            self.points = False
+            self.writecsv = False
+            self.writehdf5 = False
+            self.data_file = argv['file']
         if 'thermo' in argv:
-            thermo_file = argv['thermo']
+            self.thermo_file = argv['thermo']
         if 'transport' in argv:
-            transport_file = argv['transport']
+            self.transport_file = argv['transport']
         if 'species' in argv:
-            species = argv['species']
-            exclusion_list = [str(item) for item in species.split(',')]
-            print exclusion_list
-        else:
-            exclusion_list=[]
+            self.species = argv['species']
+            self.exclusion_list = [str(item) for item in species.split(',')]
+            print self.exclusion_list
+        #if 'species' not in argv:
+            #self.exclusion_list=[]
+
         if 'plot' in argv:
-            args.plot = True
+            self.plot = True
         if 'writecsv' in argv:
-            args.writecsv = True
+            self.writecsv = True
         if 'writehdf5' in argv:
-            args.writehdf5 = True
+            self.writehdf5 = True
         if 'points' in argv:
-            args.points = True
-        print args
+            self.points = True
 
+    class args_not_none:
+        def __init__(self, args):
+            self.plot = args.plot
+            self.points = args.points
+            self.writecsv = args.writecsv
+            self.writehdf5 = args.writehdf5
+            self.data_file= args.file
+            self.thermo_file = args.thermo
+            self.transport_file=args.transport
+            if args.species == None:
+                self.exclusion_list=[]
+            else:
+                self.exclusion_list=[str(item) for item in args.species.split(',')]
+                print(self.exclusion_list)
+
+    #if function is used directly
+    if args is 'none':
+        args = args_none(argv)
+    #function used from command line
     else:
-        data_file= args.file
-        thermo_file = args.thermo
-        transport_file=args.transport
-        if args.species == None:
-            exclusion_list=[]
-        else:
-            exclusion_list=[str(item) for item in args.species.split(',')]
-            print(exclusion_list)
-
-
-    print args
-    ext= os.path.splitext(data_file)[1]
+        args = args_not_none(args)
+    ext= os.path.splitext(args.data_file)[1]
 
     if ext == ".cti" or ext == ".xml":
-
         print("\nThis is an Cantera xml or cti file\n")
         #trims file
-        solution_objects=trim(data_file, exclusion_list)
+        solution_objects=trim(args.data_file, args.exclusion_list)
         write(solution_objects[1])
-        run_sim(data_file, args)
+        run_sim(args.data_file, args)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
-
         print("This is a Chemkin file")
         #convert file to cti
-        converted_file_name = convert(data_file, thermo_file, transport_file)
-
+        converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
-        solution_objects=trim(converted_file_name, \
-                                    exclusion_list)
+        solution_objects=trim(converted_file_name, exclusion_list)
         print(converted_file_name)
         run_sim(converted_file_name, args)
-
 
     else:
         print("File type not supported")
