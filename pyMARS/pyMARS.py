@@ -35,57 +35,47 @@ def readin(args='none', **argv):
     "--------------------------------------------------------------------------"
     "--------------------------------------------------------------------------"
 
-    class args_none:
-        def __init__(self, argv):
-            self=argparse.Namespace()
-            self.plot = False
-            self.points = False
-            self.writecsv = False
-            self.writehdf5 = False
-            self.data_file = argv['file']
-        if 'thermo' in argv:
-            self.thermo_file = argv['thermo']
-        if 'transport' in argv:
-            self.transport_file = argv['transport']
-        if 'species' in argv:
-            self.species = argv['species']
-            self.exclusion_list = [str(item) for item in species.split(',')]
-            print self.exclusion_list
-        #if 'species' not in argv:
-            #self.exclusion_list=[]
-
-        if 'plot' in argv:
-            self.plot = True
-        if 'writecsv' in argv:
-            self.writecsv = True
-        if 'writehdf5' in argv:
-            self.writehdf5 = True
-        if 'points' in argv:
-            self.points = True
-
-    class args_not_none:
-        def __init__(self, args):
-            self.plot = args.plot
-            self.points = args.points
-            self.writecsv = args.writecsv
-            self.writehdf5 = args.writehdf5
-            self.data_file= args.file
-            self.thermo_file = args.thermo
-            self.transport_file=args.transport
-            if args.species == None:
-                self.exclusion_list=[]
-            else:
-                self.exclusion_list=[str(item) for item in args.species.split(',')]
-                print(self.exclusion_list)
-
-    #if function is used directly
-    if args is 'none':
-        args = args_none(argv)
-    #function used from command line
-    else:
-        args = args_not_none(args)
+    class args():
+            if args is 'none':
+                argparse.Namespace()
+                plot = False
+                points = False
+                writecsv = False
+                writehdf5 = False
+                data_file = argv['file']
+                if 'thermo' in argv:
+                    thermo_file = argv['thermo']
+                if 'transport' in argv:
+                    transport_file = argv['transport']
+                if 'species' in argv:
+                    species = argv['species']
+                    exclusion_list = [str(item) for item in species.split(',')]
+                if 'species' not in argv:
+                    exclusion_list=[]
+                if 'plot' in argv:
+                    plot = True
+                if 'writecsv' in argv:
+                    writecsv = True
+                if 'writehdf5' in argv:
+                    writehdf5 = True
+                if 'points' in argv:
+                    points = True
+                x ='arg_none'
+            if args is not 'none':
+                plot = args.plot
+                points = args.points
+                writecsv = args.writecsv
+                writehdf5 = args.writehdf5
+                data_file= args.file
+                thermo_file = args.thermo
+                transport_file=args.transport
+                if args.species is None:
+                    exclusion_list=[]
+                else:
+                    exclusion_list=[str(item) for item in args.species.split(',')]
+                    print(exclusion_list)
+                x='args_not_none'
     ext= os.path.splitext(args.data_file)[1]
-
     if ext == ".cti" or ext == ".xml":
         print("\nThis is an Cantera xml or cti file\n")
         #trims file
@@ -98,7 +88,7 @@ def readin(args='none', **argv):
         #convert file to cti
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
-        solution_objects=trim(converted_file_name, exclusion_list)
+        solution_objects=trim(converted_file_name, args.exclusion_list)
         print(converted_file_name)
         run_sim(converted_file_name, args)
 
