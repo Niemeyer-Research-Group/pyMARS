@@ -1,7 +1,7 @@
 
 import os, sys, argparse
 import cantera as ct
-
+os.environ['Cantera_Data'] =os.getcwd()
 
 from create_trimmed_model import trim
 from convert_chemkin_file import convert
@@ -43,6 +43,8 @@ def readin(args='none', **argv):
                 writecsv = False
                 writehdf5 = False
                 data_file = argv['file']
+                thermo_file = 'none'
+                transport_file = 'none'
                 if 'thermo' in argv:
                     thermo_file = argv['thermo']
                 if 'transport' in argv:
@@ -75,6 +77,7 @@ def readin(args='none', **argv):
                     exclusion_list=[str(item) for item in args.species.split(',')]
                     print(exclusion_list)
                 x='args_not_none'
+    print 'triggered 0'
     ext= os.path.splitext(args.data_file)[1]
     if ext == ".cti" or ext == ".xml":
         print("\nThis is an Cantera xml or cti file\n")
@@ -84,10 +87,12 @@ def readin(args='none', **argv):
         run_sim(args.data_file, args)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
+        print 'triggered 1'
         print("This is a Chemkin file")
         #convert file to cti
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
+        print 'triggered2'
         solution_objects=trim(converted_file_name, args.exclusion_list)
         print(converted_file_name)
         run_sim(converted_file_name, args)
