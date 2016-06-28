@@ -2,7 +2,7 @@
 
 import os
 
-def convert(mech_file, thermo_file='none', transport_file='none'):
+def convert(mech_file, thermo_file=None, transport_file=None):
     """Function to convert chemkin mechanism files to CTI.
 
     Arguments
@@ -41,8 +41,8 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
         pass
 
     #calls ck2cti based on given files
-    if thermo_file is 'none':
-        if transport_file == 'none':
+    if thermo_file is None:
+        if transport_file == None:
             input_line= "ck2cti --input=%s --output=%s" \
                 %(mech_file, converted_file_path)
             print('no thermo, no transport')
@@ -51,8 +51,8 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
                 %(mech_file, transport_file_path, converted_file_path)
             print('no thermo, yes transport')
 
-    if thermo_file is not 'none':
-        if transport_file is 'none':
+    if thermo_file is not None:
+        if transport_file is None:
             input_line= "ck2cti --input=%s --thermo=%s  --output=%s" \
                     %(mech_file, thermo_file_path, converted_file_path)
             print('yes thermo, no transport')
