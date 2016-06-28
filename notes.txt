@@ -3,7 +3,7 @@ To install pyMARS:
 navigate to the pyMARS directory and type "python setup.py build"
 followed by "python setup.py install"
 
-
+converted mechanism files write to the current directory
 
 
 
