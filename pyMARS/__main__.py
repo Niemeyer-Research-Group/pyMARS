@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from pyMARS import readin
 import argparse
 
@@ -6,7 +7,7 @@ import argparse
 """-------------------------------------------------------------------------
 Get details from command line
 -------------------------------------------------------------------------"""
-def main():
+def main(args=None):
     """
     Arguments
         --file: Input mechanism file (ex. 1--file=gri30.cti)
@@ -55,9 +56,21 @@ def main():
                         action="store_true")
 
     args=parser.parse_args()
+    if args.file is not None:
+        readin(args)
+    if args.file is None:
+        #readin(args)
+        print """
+        Python Model Automated Reduction Software (pyMARS)
 
-    readin(args)
+        Arguments
+            --file: Input mechanism file (ex. 1--file=gri30.cti)
+            --species: Species to eliminate (ex. --species='H, OH')
+            --thermo: Thermo data file if Chemkin format(ex.--thermo= thermo.dat)
+            --transport: Transport data file if Chemkin format
+            --plot
+            --points
+            --writecsv
+            --writehdf5
 
-if __name__ == '__main__':
-    main()
-    
+        """
