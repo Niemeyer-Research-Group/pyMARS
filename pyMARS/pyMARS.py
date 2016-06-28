@@ -1,4 +1,3 @@
-
 import os, sys, argparse
 import cantera as ct
 os.environ['Cantera_Data'] =os.getcwd()
@@ -78,6 +77,8 @@ def readin(args='none', **argv):
                     print(exclusion_list)
                 x='args_not_none'
     ext= os.path.splitext(args.data_file)[1]
+
+
     if ext == ".cti" or ext == ".xml":
         print("\n\nThis is an Cantera xml or cti file\n")
         #trims file
