@@ -130,7 +130,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         file_data= np.vstack((name_array, sdata))
         #open and write to file
         input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.abspath('Output_Data_Files/'+ 'species_data_' + input_file_name_stripped + '.csv')
+        output_file_name=os.path.join( os.getcwd(), 'species_data_' + input_file_name_stripped + '.csv')
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
         os.system('atom '+ output_file_name)
@@ -146,7 +146,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
         #open and write to file
         input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.abspath('Output_Data_Files/'+ 'species_data_' + input_file_name_stripped + '.hdf5')
+        output_file_name=os.path.join(os.getcwd() + 'species_data_' + input_file_name_stripped + '.hdf5')
         with h5py.File(output_file_name, 'w') as f:
             Times = f.create_dataset("Times", data=times1)
             Temps = f.create_dataset("Temps", data=temps)
