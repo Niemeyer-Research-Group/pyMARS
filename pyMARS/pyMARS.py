@@ -42,8 +42,8 @@ def readin(args='none', **argv):
                 writecsv = False
                 writehdf5 = False
                 data_file = argv['file']
-                thermo_file = 'none'
-                transport_file = 'none'
+                thermo_file = None
+                transport_file = None
                 if 'thermo' in argv:
                     thermo_file = argv['thermo']
                 if 'transport' in argv:
@@ -77,14 +77,16 @@ def readin(args='none', **argv):
                     print(exclusion_list)
                 x='args_not_none'
     ext= os.path.splitext(args.data_file)[1]
-
+    print args.thermo_file
+    print args.data_file
+    print args.transport_file
 
     if ext == ".cti" or ext == ".xml":
         print("\n\nThis is an Cantera xml or cti file\n")
         #trims file
         solution_objects=trim(args.data_file, args.exclusion_list)
         write(solution_objects[1])
-        run_sim(args.data_file, args)
+        #run_sim(args.data_file, args)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
         print("\n\nThis is a Chemkin file")
@@ -93,7 +95,10 @@ def readin(args='none', **argv):
         #trims newly converted file
         solution_objects=trim(converted_file_name, args.exclusion_list)
         write(solution_objects[1])
-        run_sim(converted_file_name, args)
+
+        #run_sim(converted_file_name, args)
+    if "plot" or "points" or "writecsv" or "writehdf5" in args:
+        print 'running sim'
 
     else:
         print("\n\nFile type not supported")
