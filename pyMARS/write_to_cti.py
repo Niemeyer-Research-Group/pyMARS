@@ -25,7 +25,7 @@ def write(solution):
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
-    output_file_name=os.path.join(cwd, 'Output_Data_Files', input_file_name_stripped + '.cti')
+    output_file_name=os.path.join(cwd, input_file_name_stripped + '.cti')
     try:
         os.remove(output_file_name)
     except OSError:
