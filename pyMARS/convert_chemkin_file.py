@@ -61,7 +61,7 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
                     %(mech_file, thermo_file_path, \
                     transport_file_path, converted_file_path)
             print('yes thermo, yes transport')
-    print(input_line)
+    print(input_line + '\n')
 
 
     #convert and save file

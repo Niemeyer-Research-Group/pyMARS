@@ -79,20 +79,20 @@ def readin(args='none', **argv):
                 x='args_not_none'
     ext= os.path.splitext(args.data_file)[1]
     if ext == ".cti" or ext == ".xml":
-        print("\nThis is an Cantera xml or cti file\n")
+        print("\n\nThis is an Cantera xml or cti file\n")
         #trims file
         solution_objects=trim(args.data_file, args.exclusion_list)
         write(solution_objects[1])
         run_sim(args.data_file, args)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
-        print("This is a Chemkin file")
+        print("\n\nThis is a Chemkin file")
         #convert file to cti
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
         solution_objects=trim(converted_file_name, args.exclusion_list)
-        print(converted_file_name)
+        write(solution_objects[1])
         run_sim(converted_file_name, args)
 
     else:
-        print("File type not supported")
+        print("\n\nFile type not supported")

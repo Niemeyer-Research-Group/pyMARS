@@ -21,7 +21,9 @@ def trim(data_file, exclusion_list):
         or
         trim('gri30.cti', []) to trim no species
     """
-
+    print('species to exclude: ')
+    print(exclusion_list)
+    print ('\n\n')
     # define initial solution objects
     initial_solution = ct.Solution(data_file)
 
@@ -62,7 +64,7 @@ def trim(data_file, exclusion_list):
                         reactions=final_reaction_objects,
                         thermo='IdealGas', kinetics='GasKinetics')
     new_solution.TP = initial_solution.TP
-    new_solution.name = initial_solution.name
+    new_solution.name = ('trimmed_' + initial_solution.name)
 
 
     return (initial_solution, new_solution)
