@@ -20,12 +20,11 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
 
 
     input_dir='Data_Files'
-    output_dir= 'Output_Data_Files'
 
 
     #make file save path
     current_dir=os.path.dirname(os.path.abspath("~"))
-    save_path=os.path.join(current_dir, output_dir)
+    save_path=current_dir
 
     #make file save name
     converted_file_name=os.path.splitext(mech_file)[0]+'_converted'
@@ -67,5 +66,5 @@ def convert(mech_file, thermo_file='none', transport_file='none'):
 
     #convert and save file
     os.system(input_line)
-    local_path=os.path.join(output_dir, converted_file_name)
+    local_path=os.path.join(converted_file_name)
     return local_path + '.cti'
