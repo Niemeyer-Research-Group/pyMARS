@@ -146,7 +146,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
         #open and write to file
         input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.join(os.getcwd() + 'species_data_' + input_file_name_stripped + '.hdf5')
+        output_file_name=os.path.join(os.getcwd() + 'species_data_' + data_file + '.hdf5')
         with h5py.File(output_file_name, 'w') as f:
             Times = f.create_dataset("Times", data=times1)
             Temps = f.create_dataset("Temps", data=temps)
@@ -158,7 +158,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             #print(nco)
 
     def points():
-        print("\nTime[ms]    Temp[K]    Index        Point")
+        print("\nTime[ms]            Temp[K]        Index        Point")
         print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
          + "       " + str(initial_point[2]) + "     " + "Initial sample point")
         print(str(tau) + "        " + str("{0:.2f}".format(deriv_max[1])) + "       " + str(deriv_max[2])\
