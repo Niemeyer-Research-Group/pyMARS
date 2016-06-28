@@ -19,6 +19,4 @@ setup(name='pyMARS',
       install_requires=['argparse', 'h5py' , 'numpy',
                     'Cantera>=2.3.0a2', 'matplotlib']
 
-#'sys' , 'os'
-
-    )
+        )
