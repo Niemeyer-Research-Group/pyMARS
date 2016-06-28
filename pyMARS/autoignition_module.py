@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import cantera as ct
 import os
-import progressbar as pb
+#import progressbar as pb
 import h5py
 
 
@@ -31,9 +31,9 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     solution1 = ct.Solution(mech_file)
     mass_frac = raw_input('Enter mass fractions (ex.H2:2,O2:1,N2:4):  ')
     solution1.TPY = 1001.0, ct.one_atm, mass_frac
-    widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
-                pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
-    timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
+    #widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
+                #pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
+    #timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
 
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
@@ -57,8 +57,8 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         species_data=np.array(r1.Y)
         species_data=species_data[:,np.newaxis].T #translate from [1,n] to [n, 1]
         sdata= np.vstack((sdata, species_data))
-        timer.update(index1)
-    timer.finish
+        #timer.update(index1)
+    #timer.finish
     print('\n')
     #concatenate time and temperature values
     times1=np.array(times1)
@@ -130,7 +130,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         file_data= np.vstack((name_array, sdata))
         #open and write to file
         input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.join( os.getcwd(), 'species_data_' + input_file_name_stripped + '.csv')
+        output_file_name=os.path.join( os.getcwd(), 'species_data_' + data_file + '.csv')
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
         os.system('atom '+ output_file_name)
