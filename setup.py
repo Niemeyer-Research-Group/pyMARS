@@ -16,8 +16,9 @@ setup(name='pyMARS',
       entry_points={
         'console_scripts': [
                     'pyMARS= pyMARS.__main__:main']},
-      install_requires=['argparse', 'h5py', 'os', 'sys', 'numpy',
-                    'cantera>=2.3.0a2', 'textwrap', 'string', 'matplotlib']
+      install_requires=['argparse', 'h5py' , 'numpy',
+                    'Cantera>=2.3.0a2', 'matplotlib']
 
+#'sys' , 'os'
 
     )
