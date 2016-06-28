@@ -10,7 +10,7 @@ Get details from command line
 def main(args=None):
     """
     Arguments
-        --file: Input mechanism file (ex. 1--file=gri30.cti)
+        --file: Input mechanism file (ex. --file=gri30.cti)
         --species: Species to eliminate (ex. --species='H, OH')
         --thermo: Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
         --transport: Transport data file if Chemkin format
