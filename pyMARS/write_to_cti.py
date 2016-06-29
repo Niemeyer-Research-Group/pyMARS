@@ -25,11 +25,7 @@ def write(solution):
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
-    output_file_name=os.path.join(cwd, input_file_name_stripped + '.cti')
-    try:
-        os.remove(output_file_name)
-    except OSError:
-        pass
+    output_file_name=os.path.join(cwd, 'pym_' + input_file_name_stripped + '.cti')
 
     f=open(output_file_name, 'w+')
 
@@ -184,33 +180,55 @@ def write(solution):
         nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
         transport_geometry = species.transport.geometry
         diameter = str(species.transport.diameter*(10**10))
-        well_depth = str(species.transport.well_depth/boltzmann)  
+        well_depth = str(species.transport.well_depth/boltzmann)
         polar = str(species.transport.polarizability*10**30)
         rot_relax = str(species.transport.rotational_relaxation)
         dipole=str(species.transport.dipole/d)
-        #string template for each species
-        species_string=Template('species(name = "$name",\n' +
-                        '    atoms = $composition, \n' +
-                        '    thermo = (\n' +
-                        '       NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n' +
-                        '       NASA(   $nasa_range_2, $nasa_coeffs_2  )\n' +
-                        '               ),\n'
-                        '    transport = gas_transport(\n' +
-                        '                   geom = \"$transport_geometry\",\n' +
-                        '                   diam = $diameter, \n' +
-                        '                   well_depth = $well_depth, \n' +
-                        '                   polar = $polar, \n' +
-                        '                   rot_relax = $rot_relax, \n' +
-                        '                   dipole= $dipole) \n' +
-                        '        )\n\n')
-        #write string template
-        f.write(species_string.substitute(name=name, composition=composition, \
-                    nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
-                    nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,\
-                    transport_geometry=transport_geometry, diameter=diameter,\
-                    well_depth=well_depth, polar=polar, rot_relax=rot_relax,\
-                    dipole=dipole))
-
+        if species.transport.dipole != 0:
+            #string template for each species
+            species_string=Template('species(name = "$name",\n' +
+                            '    atoms = $composition, \n' +
+                            '    thermo = (\n' +
+                            '       NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n' +
+                            '       NASA(   $nasa_range_2, $nasa_coeffs_2  )\n' +
+                            '               ),\n'
+                            '    transport = gas_transport(\n' +
+                            '                   geom = \"$transport_geometry\",\n' +
+                            '                   diam = $diameter, \n' +
+                            '                   well_depth = $well_depth, \n' +
+                            '                   polar = $polar, \n' +
+                            '                   rot_relax = $rot_relax, \n' +
+                            '                   dipole= $dipole) \n' +
+                            '        )\n\n')
+            #write string template
+            f.write(species_string.substitute(name=name, composition=composition, \
+                        nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
+                        nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,\
+                        transport_geometry=transport_geometry, diameter=diameter,\
+                        well_depth=well_depth, polar=polar, rot_relax=rot_relax,\
+                        dipole=dipole))
+        if species.transport.dipole == 0:
+            #string template for each species
+            species_string=Template('species(name = "$name",\n' +
+                            '    atoms = $composition, \n' +
+                            '    thermo = (\n' +
+                            '       NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n' +
+                            '       NASA(   $nasa_range_2, $nasa_coeffs_2  )\n' +
+                            '               ),\n'
+                            '    transport = gas_transport(\n' +
+                            '                   geom = \"$transport_geometry\",\n' +
+                            '                   diam = $diameter, \n' +
+                            '                   well_depth = $well_depth, \n' +
+                            '                   polar = $polar, \n' +
+                            '                   rot_relax = $rot_relax) \n' +
+                            '        )\n\n')
+            #write string template
+            f.write(species_string.substitute(name=name, composition=composition, \
+                        nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
+                        nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,\
+                        transport_geometry=transport_geometry, diameter=diameter,\
+                        well_depth=well_depth, polar=polar, rot_relax=rot_relax,\
+                        ))
     """-------------------------------------------------------------------------
     Write reactions to file
     -------------------------------------------------------------------------"""
