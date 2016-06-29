@@ -184,10 +184,7 @@ def write(solution):
         nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
         transport_geometry = species.transport.geometry
         diameter = str(species.transport.diameter*(10**10))
-        well_depth = str(species.transport.well_depth/boltzmann)  #/k
-        if i is 0:
-            print boltzmann
-            print well_depth
+        well_depth = str(species.transport.well_depth/boltzmann)  
         polar = str(species.transport.polarizability*10**30)
         rot_relax = str(species.transport.rotational_relaxation)
         dipole=str(species.transport.dipole/d)
