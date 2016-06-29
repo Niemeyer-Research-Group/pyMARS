@@ -23,6 +23,8 @@ def write(solution):
     """
 
     trimmed_solution=solution
+    print len(trimmed_solution.reaction_equations())
+    print trimmed_solution.n_species
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
     output_file_name=os.path.join(cwd, input_file_name_stripped + '.cti')
@@ -219,7 +221,6 @@ def write(solution):
 
     #write data for each reaction in the Solution Object
     for n, i in enumerate(trimmed_solution.reaction_equations()):
-
         equation_string=str(trimmed_solution.reaction_equation(n)).upper()
         equation_object=trimmed_solution.reaction(n)
         equation_type=type(equation_object).__name__
@@ -248,8 +249,7 @@ def write(solution):
             f.write(reaction_string.substitute( m=m, \
                             equation_string=equation_string, Arr=Arr, \
                             Efficiencies=Efficiencies_string))
-
-        #Case if an aryReaction
+        #Case if an elementary Reaction
         if equation_type == 'ElementaryReaction':
             Arr=build_Arr(equation_object, equation_type)
 
@@ -290,6 +290,5 @@ def write(solution):
             except (IndexError):
                 f.write('\n           )\n\n')
                 pass
-        return output_file_name
         #print ('trimmed mechanism file:  ' + output_file_name)
     f.close()
