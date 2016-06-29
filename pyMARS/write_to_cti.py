@@ -291,5 +291,5 @@ def write(solution):
                 f.write('\n           )\n\n')
                 pass
         return output_file_name
-        print ('trimmed mechanism file:  ' + output_file_name)
+        #print ('trimmed mechanism file:  ' + output_file_name)
     f.close()

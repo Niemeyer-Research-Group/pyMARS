@@ -88,10 +88,17 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     try:
         initial_point
     except NameError:
-        #sys.exit("initial sample point not found") #alternative sys exit option
-        initial_point=[times1[i-20], T[i-20], j]
-        print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
-        " of 5 steps before tau is used.")
+        try:
+            #sys.exit("initial sample point not found") #alternative sys exit option
+            initial_point=[times1[i-20], T[i-20], j]
+            print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
+            " of 5 steps before tau is used.")
+        except IndexError:
+            try:
+                initial_point=[times1[i], T[i], j]
+            except IndexError:
+                print 'Ignition happened already? Decrease temp'
+                return
 
     #find final sample point
     for k, dti in enumerate(dT):

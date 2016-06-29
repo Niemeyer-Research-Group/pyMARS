@@ -66,6 +66,4 @@ def trim(data_file, exclusion_list):
                         thermo='IdealGas', kinetics='GasKinetics')
     new_solution.TP = initial_solution.TP
     new_solution.name = ('trimmed_' + os.path.splitext(data_file)[0])
-    print data_file
-
     return (initial_solution, new_solution)
