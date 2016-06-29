@@ -23,8 +23,6 @@ def write(solution):
     """
 
     trimmed_solution=solution
-    print len(trimmed_solution.reaction_equations())
-    print trimmed_solution.n_species
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
     output_file_name=os.path.join(cwd, input_file_name_stripped + '.cti')
