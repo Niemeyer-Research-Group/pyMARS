@@ -149,7 +149,7 @@ def write(solution):
     for i, name in enumerate(trimmed_solution.species_names):
 
         #physical Constant
-        k=ct.boltzmann #joules/kelvin, boltzmann constant
+        boltzmann=ct.boltzmann #joules/kelvin, boltzmann constant
         d=3.33564e-30 #1 debye = d coulomb-meters
 
         species=trimmed_solution.species(i)
@@ -184,7 +184,10 @@ def write(solution):
         nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
         transport_geometry = species.transport.geometry
         diameter = str(species.transport.diameter*(10**10))
-        well_depth = str(species.transport.well_depth/k)
+        well_depth = str(species.transport.well_depth/boltzmann)  #/k
+        if i is 0:
+            print boltzmann
+            print well_depth
         polar = str(species.transport.polarizability*10**30)
         rot_relax = str(species.transport.rotational_relaxation)
         dipole=str(species.transport.dipole/d)
