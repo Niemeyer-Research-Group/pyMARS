@@ -82,8 +82,6 @@ def readin(args='none', **argv):
         print("\n\nThis is an Cantera xml or cti file\n")
         #trims file
         solution_objects=trim(args.data_file, args.exclusion_list)
-        print ('solution objects before write:')
-        print solution_objects[1].name
         args.data_file=write(solution_objects[1])
         if args.plot is True:
             print 'running sim'
