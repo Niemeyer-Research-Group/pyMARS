@@ -34,11 +34,10 @@ def write(solution):
 
     solution_T=trimmed_solution.T
     solution_P=trimmed_solution.P
-
     """-------------------------------------------------------------------------
     Work Functions
     -------------------------------------------------------------------------"""
-    c=4184 #number of calories in 1000 Joules of energy
+    c=4184.0 #number of calories in 1000 Joules of energy
     def eliminate(input_string, char_to_replace, spaces='single'):
         for char in char_to_replace:
                     input_string= input_string.replace(char, "")
@@ -66,9 +65,15 @@ def write(solution):
         return input_string
 
     def build_Arr(equation_object, equation_type):
+            coeff_sum=sum(equation_object.reactants.values())
             if equation_type == 'ElementaryReaction':
-                A=A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
-            else:
+                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3)) #*10**3
+                #if equation_object.rate.activation_energy == 0 and equation_object.rate.temperature_exponent != 0:
+                if coeff_sum == 3:
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6)) #*10**6
+            if equation_type =='ThreeBodyReaction':
+                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
+            if equation_type !='ElementaryReaction' and equation_type != 'ThreeBodyReaction':
                 A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
             b=equation_object.rate.temperature_exponent
             E=equation_object.rate.activation_energy/c
@@ -267,7 +272,18 @@ def write(solution):
                             Efficiencies=Efficiencies_string))
         #Case if an elementary Reaction
         if equation_type == 'ElementaryReaction':
+            if n is 185:
+                 print equation_object
+                 print equation_type
+                 if equation_type == 'ElementaryReaction':
+                     print 'yes'
+                 print equation_object.rate.pre_exponential_factor
             Arr=build_Arr(equation_object, equation_type)
+            if n is 185:
+                print equation_string
+                print equation_type
+                print Arr
+                print equation_object.rate.pre_exponential_factor
 
             reaction_string=Template('#  Reaction $m\n'+
                                 'reaction( \"$equation_string\", $Arr)\n\n')

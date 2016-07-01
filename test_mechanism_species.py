@@ -39,8 +39,9 @@ def test(original_file, new_file):
             assert original_species.transport.rotational_relaxation == new_species.transport.rotational_relaxation
 
             assert original_species.transport.dipole == new_species.transport.dipole
-
+        print ('done with testing species definition into \n\n\n')
     def test_reactions():
+        c=4184.0
         num = 0
         for k, name1 in enumerate(new.reaction_equations()):
             num += 1
@@ -55,13 +56,16 @@ def test(original_file, new_file):
 
             if new_equation_type == 'ThreeBodyReaction':
                 if new_reaction.efficiencies != original_reaction.efficiencies:
-                    print (k, new_reaction, l, original_reaction)
+                    print('efficiencies do not match')
+                    print (k, new_reaction)
+                    print ('\n')
             if new_equation_type == 'ElementaryReaction':
                 if new_reaction.rate.pre_exponential_factor != original_reaction.rate.pre_exponential_factor:
-                        print (k, new_reaction, l, original_reaction)
+                        print (k, (new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor), new_reaction.reaction_type, new_reaction.rate.temperature_exponent, (new_reaction.rate.activation_energy/c) , new_reaction )
             #assert new_reaction.efficiencies == original_reaction.efficiencies
-
+        print ('done with testing equation info ')
     test_species_def()
     test_reactions()
 
-test('gri30.cti', 'trimmed_gri30_mod.cti')
+
+#test('gri30.cti', 'trimmed_gri30_mod.cti')
