@@ -53,15 +53,11 @@ def test(original_file, new_file):
                     original_equation_type=type(original_reaction).__name__
 
             assert new_equation_type == original_equation_type
-
-            if new_equation_type == 'ThreeBodyReaction':
-                if new_reaction.efficiencies != original_reaction.efficiencies:
-                    print('efficiencies do not match')
-                    print (k, new_reaction)
-                    print ('\n')
-            if new_equation_type == 'ElementaryReaction':
-                if new_reaction.rate.pre_exponential_factor != original_reaction.rate.pre_exponential_factor:
-                        print (k, (new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor), new_reaction.reaction_type, new_reaction.rate.temperature_exponent, (new_reaction.rate.activation_energy/c) , new_reaction )
+            try:
+                #if new_reaction.rate.pre_exponential_factor != original_reaction.rate.pre_exponential_factor:
+                print (k, (new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor), new_reaction.reaction_type, new_reaction.rate.temperature_exponent, (new_reaction.rate.activation_energy/c) , new_reaction )
+            except AttributeError:
+                pass
             #assert new_reaction.efficiencies == original_reaction.efficiencies
         print ('done with testing equation info ')
     test_species_def()

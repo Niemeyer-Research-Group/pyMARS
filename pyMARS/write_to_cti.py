@@ -21,7 +21,7 @@ def write(solution):
     -------
         Trimmed Mechanism file
     """
-
+    print 'yes'
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
@@ -67,14 +67,14 @@ def write(solution):
     def build_Arr(equation_object, equation_type):
             coeff_sum=sum(equation_object.reactants.values())
             if equation_type == 'ElementaryReaction':
-                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3)) #*10**3
+                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**3
                 #if equation_object.rate.activation_energy == 0 and equation_object.rate.temperature_exponent != 0:
                 if coeff_sum == 3:
-                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6)) #*10**6
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**6
             if equation_type =='ThreeBodyReaction':
-                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
+                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))   #*10**3
             if equation_type !='ElementaryReaction' and equation_type != 'ThreeBodyReaction':
-                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
+                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**6
             b=equation_object.rate.temperature_exponent
             E=equation_object.rate.activation_energy/c
             Arr=[ A, b, E]
@@ -82,13 +82,13 @@ def write(solution):
 
     def build_mod_Arr(equation_object, t_range):
         if t_range =='high':
-            A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor*10**3))
+            A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor))  #*10**3
             b=equation_object.high_rate.temperature_exponent
             E=equation_object.high_rate.activation_energy/c
             Arr_high=[ A, b, E]
             return str(Arr_high).replace("\'", "")
         if t_range == 'low':
-            A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor*10**6))
+            A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor))   #*10**6
             b=equation_object.low_rate.temperature_exponent
             E=equation_object.low_rate.activation_energy/c
             Arr_low=[ A, b, E]
