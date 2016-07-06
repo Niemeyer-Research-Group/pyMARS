@@ -1,6 +1,19 @@
 import cantera as ct
 
 def test(original_file, new_file):
+    """Test written cti file against original cti file.
+
+    Arguments
+    -------------
+    Original cti file
+    Newly written cti file
+
+    Returns
+    -----------
+    List of file properties that do not match
+
+
+    """
     original = ct.Solution(original_file)
     new = ct.Solution(new_file)
     comparison_list=[]
@@ -54,8 +67,9 @@ def test(original_file, new_file):
 
             assert new_equation_type == original_equation_type
             try:
-                #if new_reaction.rate.pre_exponential_factor != original_reaction.rate.pre_exponential_factor:
-                print (k, (new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor), new_reaction.reaction_type, new_reaction.rate.temperature_exponent, (new_reaction.rate.activation_energy/c) , new_reaction )
+                if new_reaction.rate.pre_exponential_factor != original_reaction.rate.pre_exponential_factor:
+                    #if new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor > .004:
+                    print (k, (new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor), new_reaction.reaction_type, new_reaction.rate.temperature_exponent, (new_reaction.rate.activation_energy/c) , new_reaction )
             except AttributeError:
                 pass
             #assert new_reaction.efficiencies == original_reaction.efficiencies
