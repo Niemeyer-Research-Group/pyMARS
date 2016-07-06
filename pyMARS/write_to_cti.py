@@ -73,8 +73,14 @@ def write(solution):
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
                 if coeff_sum == 3:
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
+                #if equation_object.duplicate is True:
+
             if equation_type =='ThreeBodyReaction':
-                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))   #*10**3
+                if coeff_sum == 1:
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
+                if coeff_sum == 2:
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))  
+
             if equation_type !='ElementaryReaction' and equation_type != 'ThreeBodyReaction':
                 A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**6
             b=equation_object.rate.temperature_exponent
