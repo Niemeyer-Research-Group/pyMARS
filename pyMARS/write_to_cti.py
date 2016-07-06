@@ -67,10 +67,12 @@ def write(solution):
     def build_Arr(equation_object, equation_type):
             coeff_sum=sum(equation_object.reactants.values())
             if equation_type == 'ElementaryReaction':
-                A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**3
-                #if equation_object.rate.activation_energy == 0 and equation_object.rate.temperature_exponent != 0:
+                if coeff_sum == 1:
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))
+                if coeff_sum == 2:
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
                 if coeff_sum == 3:
-                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**6
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
             if equation_type =='ThreeBodyReaction':
                 A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))   #*10**3
             if equation_type !='ElementaryReaction' and equation_type != 'ThreeBodyReaction':
