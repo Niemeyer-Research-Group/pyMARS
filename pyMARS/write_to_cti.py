@@ -21,7 +21,6 @@ def write(solution):
     -------
         Trimmed Mechanism file
     """
-    print 'yes'
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
@@ -79,7 +78,7 @@ def write(solution):
                 if coeff_sum == 1:
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
                 if coeff_sum == 2:
-                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))  
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
 
             if equation_type !='ElementaryReaction' and equation_type != 'ThreeBodyReaction':
                 A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor)) #*10**6
@@ -280,19 +279,7 @@ def write(solution):
                             Efficiencies=Efficiencies_string))
         #Case if an elementary Reaction
         if equation_type == 'ElementaryReaction':
-            if n is 185:
-                 print equation_object
-                 print equation_type
-                 if equation_type == 'ElementaryReaction':
-                     print 'yes'
-                 print equation_object.rate.pre_exponential_factor
             Arr=build_Arr(equation_object, equation_type)
-            if n is 185:
-                print equation_string
-                print equation_type
-                print Arr
-                print equation_object.rate.pre_exponential_factor
-
             reaction_string=Template('#  Reaction $m\n'+
                                 'reaction( \"$equation_string\", $Arr)\n\n')
             f.write(reaction_string.substitute(m=m, \
