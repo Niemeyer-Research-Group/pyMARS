@@ -83,7 +83,7 @@ def readin(args='none', **argv):
         #trims file
         solution_objects=trim(args.data_file, args.exclusion_list)
         args.data_file=write(solution_objects[1])
-        if args.plot is True:
+        if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
             run_sim(args.data_file, args)
 
