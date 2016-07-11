@@ -46,17 +46,23 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     index1 = 0
     times1 = []
     temps = [] #first column is time, second is temperature
+    mass=r1.mass
     sdata=np.zeros([0, len(r1.Y)])
+    production_data=np.zeros([0, len(solution1.net_production_rates)])
     while tnow < tfinal:
 
         index1 += 1
         tnow = sim1.step(tfinal)
         times1.append(tnow)
         temps.append(r1.T)
+        species_data=np.array(r1.Y) #*mass (optional)
+        species_data=species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
 
-        species_data=np.array(r1.Y)
-        species_data=species_data[:,np.newaxis].T #translate from [1,n] to [n, 1]
         sdata= np.vstack((sdata, species_data))
+
+        production_rates=np.array(solution1.net_production_rates)
+        production_rates=production_rates[:,np.newaxis].T
+        production_data=np.vstack((production_data, production_rates))
         #timer.update(index1)
     #timer.finish
     print('\n')
@@ -65,6 +71,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     temps=np.array(temps)
     timetemp=np.vstack((times1, temps)).T
     sdata= np.hstack((timetemp, sdata))
+    production_data= np.hstack((timetemp, production_data))
 
     #get ignition point from dT/dt
     T=np.array(temps)
@@ -74,7 +81,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     i=deriv.argmax()
     deriv_max=[times1[i], T[i], i]
     tau= times1[i]
-
+    print tau
 
     """-------------------------------------------------------------------------
     find initial and final sample points
@@ -97,7 +104,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             try:
                 initial_point=[times1[i], T[i], j]
             except IndexError:
-                print 'Ignition happened already? Decrease temp'
+                print 'Error: Initial sample point cannot be located'
                 return
 
     #find final sample point
@@ -106,6 +113,22 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             if dti < .1:
                 final_point=[times1[k], T[k], k]    #final point, Temp, index
                 break
+
+
+    initial_point[2] = i-20
+    print initial_point[2]
+    final_point[2] = i+20
+    print final_point[2]
+
+    """-------------------------------------------------------------------------
+    remove unnecessary data points (slice)
+    -------------------------------------------------------------------------"""
+
+    times1=times1[ i-20:i+20 ]
+    temps=temps[i-20:i+20 ]
+    sdata=sdata[i-20:i+20, :]
+    production_data=production_data[i-20:i+20, :]
+
 
 
     def plot():
@@ -137,7 +160,8 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         file_data= np.vstack((name_array, sdata))
         #open and write to file
         input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.join( os.getcwd(), 'species_data_' + input_file_name_stripped + '.csv')
+        output_file_name=os.path.join(input_file_name_stripped + '_species_data.csv')
+        print output_file_name
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
         os.system('atom '+ output_file_name)
@@ -153,7 +177,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
         #open and write to file
         input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.join(os.getcwd() + '/species_data_' + input_file_name_stripped + '.hdf5')
+        output_file_name=os.path.join(input_file_name_stripped + '_species_data.hdf5')
         with h5py.File(output_file_name, 'w') as f:
             Times = f.create_dataset("Times", data=times1)
             Temps = f.create_dataset("Temps", data=temps)
