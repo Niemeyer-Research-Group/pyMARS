@@ -29,8 +29,8 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
     data_file=mech_file
     solution1 = ct.Solution(mech_file)
-    mass_frac = raw_input('Enter mass fractions (ex.H2:2,O2:1,N2:4):  ')
-    solution1.TPY = 1001.0, ct.one_atm, mass_frac
+    mass_frac = raw_input('Enter mass fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich):  ') #(ex.H2:2,O2:1,N2:4)
+    solution1.TPY = 1001.0, ct.one_atm, mass_frac #1001.0
     #widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
                 #pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
     #timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
@@ -87,38 +87,9 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     find initial and final sample points
     -------------------------------------------------------------------------"""
 
-    #find initial sample point
-    for j, dTi in enumerate(dT):
-        if dTi > .2:     #when dT > 5 degrees kelvin
-            initial_point=[times1[j], T[j], j] # initial point, Temp, index
-            break
-    try:
-        initial_point
-    except NameError:
-        try:
-            #sys.exit("initial sample point not found") #alternative sys exit option
-            initial_point=[times1[i-20], T[i-20], j]
-            print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
-            " of 5 steps before tau is used.")
-        except IndexError:
-            try:
-                initial_point=[times1[i], T[i], j]
-            except IndexError:
-                print 'Error: Initial sample point cannot be located'
-                return
+    initial_point=[times1[i-20], T[i-20], i-20]
+    final_point=[times1[i+20], T[i+20], i+20]
 
-    #find final sample point
-    for k, dti in enumerate(dT):
-        if k > i:
-            if dti < .1:
-                final_point=[times1[k], T[k], k]    #final point, Temp, index
-                break
-
-
-    initial_point[2] = i-20
-    print initial_point[2]
-    final_point[2] = i+20
-    print final_point[2]
 
     """-------------------------------------------------------------------------
     remove unnecessary data points (slice)
@@ -218,3 +189,50 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             writehdf5(sdata)
         if 'points' in usr_args:
             points()
+
+
+
+
+
+
+
+
+
+
+
+
+    """
+    #find initial sample point
+    for j, dTi in enumerate(dT):
+        if dTi > .2:     #when dT > 5 degrees kelvin
+            initial_point=[times1[j], T[j], j] # initial point, Temp, index
+            break
+    try:
+        initial_point
+    except NameError:
+        try:
+            #sys.exit("initial sample point not found") #alternative sys exit option
+            initial_point=[times1[i-20], T[i-20], j]
+            print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
+            " of 5 steps before tau is used.")
+        except IndexError:
+            try:
+                initial_point=[times1[i], T[i], j]
+            except IndexError:
+                print 'Error: Initial sample point cannot be located'
+                return
+
+    #find final sample point
+    for k, dti in enumerate(dT):
+        if k > i:
+            final_point=[times1[k+20], T[k+20], k+20]    #final point, Temp, index
+            break
+    if dti < .1:
+        final_point=[times1[k], T[k], k]    #final point, Temp, index
+        break
+    initial_point[2] = i-20
+    print initial_point[2]
+    #final_point[2] = i+20
+    print final_point[2]
+
+    """
