@@ -29,8 +29,9 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
     data_file=mech_file
     solution1 = ct.Solution(mech_file)
-    mass_frac = raw_input('Enter mass fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich):  ') #(ex.H2:2,O2:1,N2:4)
-    solution1.TPY = 1001.0, ct.one_atm, mass_frac #1001.0
+    frac = raw_input('Enter mass fractions (ex.H2:2,O2:1,N2:4) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
+    Temp= float(raw_input('Enter Solution Temperature in (K):'))
+    solution1.TPX = Temp, ct.one_atm, frac #1001.0
     #widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
                 #pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
     #timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
@@ -94,6 +95,11 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     """-------------------------------------------------------------------------
     remove unnecessary data points (slice)
     -------------------------------------------------------------------------"""
+    times_total=times1
+    temps_total=temps
+    sdata_total=sdata
+    production_data_total=production_data
+
 
     times1=times1[ i-20:i+20 ]
     temps=temps[i-20:i+20 ]
@@ -112,7 +118,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         plt.plot(initial_point[0], initial_point[1], 'rx', ms=5, mew=2)
         plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
         #plot temp vs time
-        plt.plot(times1, temps)
+        plt.plot(times_total, temps_total)
 
         plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
