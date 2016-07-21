@@ -64,8 +64,19 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         production_rates=np.array(solution1.net_production_rates)
         production_rates=production_rates[:,np.newaxis].T
         production_data=np.vstack((production_data, production_rates))
+
+
+        coeffs={}
+        for r, reac in enumerate(solution1.reactions()):
+            coeffs[reac] =
+            stoich_coeff=reac.reactants
+            stoich_coeff.update(reac.products)
+            for sp in reac:
+
+
         #timer.update(index1)
     #timer.finish
+    print stoich_coeff
     print('\n')
     #concatenate time and temperature values
     times1=np.array(times1)
