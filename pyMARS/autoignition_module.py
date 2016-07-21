@@ -32,9 +32,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     frac = raw_input('Enter mass fractions (ex.H2:2,O2:1,N2:4) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
     Temp= float(raw_input('Enter Solution Temperature in (K):'))
     solution1.TPX = Temp, ct.one_atm, frac #1001.0
-    #widgets = ['Time for loop of 1471 iterations: ', pb.Percentage(), ' ',
-                #pb.Bar(marker=pb.RotatingMarker()), ' ', pb.ETA()]
-    #timer = pb.ProgressBar(widgets=widgets, maxval=1471).start() #1471
+
 
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
@@ -173,8 +171,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
             for i, sp in enumerate(solution1.species_names):
                     sgroup.create_dataset(sp, data=sdata[:,i+2])
-            #nco=np.array(f.get('Species_Data/H2'))
-            #print(nco)
+
     def points():
         print("\nTime[s]            Temp[K]        Index        Point")
         print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
