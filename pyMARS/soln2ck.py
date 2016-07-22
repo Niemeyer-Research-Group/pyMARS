@@ -11,7 +11,7 @@ import cantera as ct
 
 
 def write(solution):
-    """Function to write cantera solution object to cti file.
+    """Function to write cantera solution object to inp file.
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ def write(solution):
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
-    output_file_name=os.path.join(cwd, 'pym_' + input_file_name_stripped + '.cti')
+    output_file_name=os.path.join(cwd, 'pym_' + input_file_name_stripped + '.inp')
 
     f=open(output_file_name, 'w+')
 
@@ -45,8 +45,7 @@ def write(solution):
         return input_string
 
     def wrap(input_string):
-        output_string= textwrap.fill(input_string, width=60, \
-                                subsequent_indent= '                        ')
+        output_string= textwrap.fill(input_string, width=60) #subsequent_indent= '                        '
         return output_string
     def wrap_nasa(input_string):
         output_string= textwrap.fill(input_string, width=50, \
@@ -54,9 +53,9 @@ def write(solution):
         return output_string
 
     def section_break(title):
-        f.write('#'+ "-"*75 + '\n')
-        f.write('#  ' + title +'\n')
-        f.write('#'+ "-"*75 + '\n\n')
+        f.write('!'+ "-"*75 + '\n')
+        f.write('!  ' + title +'\n')
+        f.write('!'+ "-"*75 + '\n')
 
     def replace_multiple(input_string, replace_list):
         for a, b in replace_list.items():
@@ -113,11 +112,7 @@ def write(solution):
     """-------------------------------------------------------------------------
     Write Title Block to file
     -------------------------------------------------------------------------"""
-    section_break('CTI File converted from Solution Object')
-
-    unit_string="units(length = \"cm\", time = \"s\"," +\
-                        " quantity = \"mol\", act_energy = \"cal/mol\")"
-    f.write(unit_string + '\n\n')
+    section_break('Chemkin File converted from Solution Object')
 
 
     """-------------------------------------------------------------------------
@@ -127,25 +122,22 @@ def write(solution):
     element_names=eliminate( str(trimmed_solution.element_names).upper(), \
                                         ['[', ']', '\'', ','])
 
-    element_names=element_names.replace('AR', 'Ar')
+    element_string=Template('ELEMENTS\n'    +
+                            '$element_names\n' +
+                            'END\n')
+    f.write(element_string.substitute(element_names=element_names))
 
     species_names=wrap(
                         eliminate(str(trimmed_solution.species_names).upper(), \
                                     ['[', ']', '\'', ','], \
                                     spaces='double')
                         )
-    phase_string= Template('ideal_gas(name = \"$input_file_name_stripped\", \n' +
-                    '     elements = \"$elements\", \n' +
-                    '     species =""" $species""", \n' +
-                    '     reactions = \"all\", \n' +
-                    '     initial_state = state(temperature = $solution_T, \n \
-                            pressure= $solution_P)   )       \n\n')
+    species_string=Template('SPECIES\n' +
+                    '$species_names\n'+
+                    'END\n')
 
+    f.write(species_string.substitute(species_names=species_names))
 
-    f.write(phase_string.substitute(elements=element_names, \
-                            species=species_names,\
-                            input_file_name_stripped=input_file_name_stripped,\
-                            solution_T=solution_T, solution_P=solution_P))
 
     """-------------------------------------------------------------------------
     Write Species to file
@@ -196,6 +188,7 @@ def write(solution):
         polar = str(species.transport.polarizability*10**30)
         rot_relax = str(species.transport.rotational_relaxation)
         dipole=str(species.transport.dipole/d)
+        """
         if species.transport.dipole != 0:
             #string template for each species
             species_string=Template('species(name = "$name",\n' +
@@ -241,6 +234,9 @@ def write(solution):
                         transport_geometry=transport_geometry, diameter=diameter,\
                         well_depth=well_depth, polar=polar, rot_relax=rot_relax,\
                         ))
+            """
+
+
     """-------------------------------------------------------------------------
     Write reactions to file
     -------------------------------------------------------------------------"""
@@ -320,3 +316,7 @@ def write(solution):
     return output_file_name
         #print ('trimmed mechanism file:  ' + output_file_name)
     f.close()
+
+A=ct.Solution('gri301.cti')
+write(A)
+os.system('atom pym_gri30.inp')
