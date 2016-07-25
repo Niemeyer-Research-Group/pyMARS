@@ -112,7 +112,7 @@ def write(solution):
     """-------------------------------------------------------------------------
     Write Title Block to file
     -------------------------------------------------------------------------"""
-    section_break('Chemkin File converted from Solution Object')
+    section_break('Chemkin File converted from Solution Object by pyMARS')
 
 
     """-------------------------------------------------------------------------
@@ -155,39 +155,64 @@ def write(solution):
         species=trimmed_solution.species(i)
         name=str(trimmed_solution.species(i).name).upper()
         nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
-        replace_list_1= {'{':'\"',       '}':'\"',       '\'':'',
-                    ':  ':':',      '.0':"",         ',':'',       ' ': '  '}
-
-        #build 7-coeff NASA polynomial array
-        nasa_coeffs_1=[]
-        for j, k in enumerate(nasa_coeffs):
-
-                coeff="{:.9e}".format(nasa_coeffs[j+8])
-                nasa_coeffs_1.append(coeff)
-                if j == 6:
-                    nasa_coeffs_1=wrap_nasa(eliminate(str(  nasa_coeffs_1), \
-                                                    {'\'':""}))
-                    break
-        nasa_coeffs_2=[]
-        for j, k in enumerate(nasa_coeffs):
-
-                coeff="{:.9e}".format(nasa_coeffs[j+1])
-                nasa_coeffs_2.append(coeff)
-                if j == 6:
-                    nasa_coeffs_2=wrap_nasa(eliminate(str(  nasa_coeffs_2), \
-                                                    {'\'':""}))
-                    break
 
         #Species attributes from trimmed solution object
-        composition = replace_multiple(str(species.composition), replace_list_1)
-        nasa_range_1 = str([ species.thermo.min_temp, nasa_coeffs[0] ])
-        nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
-        transport_geometry = species.transport.geometry
-        diameter = str(species.transport.diameter*(10**10))
-        well_depth = str(species.transport.well_depth/boltzmann)
-        polar = str(species.transport.polarizability*10**30)
-        rot_relax = str(species.transport.rotational_relaxation)
-        dipole=str(species.transport.dipole/d)
+        n_molecules = len(species.composition.keys())
+        t_low='{0:.3f}'.format(species.thermo.min_temp)
+        t_max='{0:.3f}'.format(species.thermo.max_temp)
+
+
+
+        temp_range= str(t_low) + '  ' + str(t_max) + '  1000.000'
+        species_comp=''
+        for ind, atom in enumerate(species.composition):
+            species_comp += atom.upper()
+            species_comp += '   '
+            species_comp += str(int(species.composition[atom]))
+        #species_comp += '   00'*(4-n_molecules)
+
+        if type(species.transport).__name__ == 'GasTransportData':
+            species_phase= 'G'
+        else:
+            print 'Species phase not found. Assumed to be Gas'
+            species_phase='G'
+
+
+
+        line_1 = '{:<18}'.format(name) + \
+                    '{:<6}'.format('date') + \
+                '{:<20}'.format(species_comp) + \
+                '{:<4}'.format(species_phase) + \
+                '{:<31}'.format(temp_range) + \
+                '{:<1}'.format('1') + \
+                            '\n'
+        f.write(line_1)
+
+
+        def build_nasa(nasa_coeffs, row):
+            line_coeffs=''
+            lines=[[1,2,3,4,5], [6,7,8,9,10], [11,12,13,14]]
+            line_index=lines[row-2]
+            for ix, c in enumerate(nasa_coeffs):
+                if ix in line_index:
+                    if c >= 0:
+                        line_coeffs += ' '
+                    line_coeffs += str('{:.8e}'.format(c))
+            return line_coeffs
+
+        line_2_coeffs=build_nasa(nasa_coeffs, 2)
+        line_2 = line_2_coeffs  + '    2\n'
+        f.write(line_2)
+
+        line_3_coeffs=build_nasa(nasa_coeffs, 3)
+        line_3 = line_3_coeffs + '    3\n'
+        f.write(line_3)
+
+        line_4_coeffs=build_nasa(nasa_coeffs, 4)
+        line_4 = line_4_coeffs + '                   4\n'
+        f.write(line_4)
+
+
         """
         if species.transport.dipole != 0:
             #string template for each species
