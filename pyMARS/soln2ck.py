@@ -159,10 +159,10 @@ def write(solution):
         n_molecules = len(species.composition.keys())
         t_low='{0:.3f}'.format(species.thermo.min_temp)
         t_max='{0:.3f}'.format(species.thermo.max_temp)
+        t_mid='{0:.3f}'.format(species.thermo.coeffs[0])
 
 
-
-        temp_range= str(t_low) + '  ' + str(t_max) + '  1000.000'
+        temp_range= str(t_low) + '  ' + str(t_max) + '  ' + t_mid
         species_comp=''
         for ind, atom in enumerate(species.composition):
             species_comp += '{:<4}'.format(atom.upper())
