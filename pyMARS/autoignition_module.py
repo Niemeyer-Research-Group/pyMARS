@@ -32,6 +32,23 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     frac = raw_input('Enter mass fractions (ex.H2:2,O2:1,N2:4) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
     Temp= float(raw_input('Enter Solution Temperature in (K):'))
     solution1.TPX = Temp, ct.one_atm, frac #1001.0
+    species=solution1.species()
+    reactions=solution1.reactions()
+
+    class state:
+        def __init__(self, time, species_list, reactions):
+            self.time = time
+            for sp in species_list:
+                coeff={}
+                for i, rxn in enumerate(reactions):
+                    name = 'Reaction ' + str(i)
+                    if sp.name in rxn.reactants.keys():
+                        coeff[name] = (rxn.reactants.get(sp.name))
+                    if sp.name in rxn.products.keys():
+                        coeff[name] = (rxn.products.get(sp.name))
+
+                setattr(self, 'sp_'+ sp.name, coeff)
+
 
 
     """-------------------------------------------------------------------------
@@ -48,6 +65,9 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     mass=r1.mass
     sdata=np.zeros([0, len(r1.Y)])
     production_data=np.zeros([0, len(solution1.net_production_rates)])
+    state_list=list()
+
+
     while tnow < tfinal:
 
         index1 += 1
@@ -56,32 +76,52 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         temps.append(r1.T)
         species_data=np.array(r1.Y) #*mass (optional)
         species_data=species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
-
         sdata= np.vstack((sdata, species_data))
 
         production_rates=np.array(solution1.net_production_rates)
         production_rates=production_rates[:,np.newaxis].T
         production_data=np.vstack((production_data, production_rates))
 
-
-        coeffs={}
-        for r, reac in enumerate(solution1.reactions()):
-            coeffs[reac] =
-            stoich_coeff=reac.reactants
-            stoich_coeff.update(reac.products)
-            for sp in reac:
+        """
+        st=state(tnow, species, reactions)
+        st.index = index1
+        state_list.append(st)
+        """
 
 
-        #timer.update(index1)
-    #timer.finish
-    print stoich_coeff
     print('\n')
-    #concatenate time and temperature values
+    """-------------------------------------------------------------------------
+    concatenate time, temp and coeff values
+    -------------------------------------------------------------------------"""
     times1=np.array(times1)
     temps=np.array(temps)
     timetemp=np.vstack((times1, temps)).T
     sdata= np.hstack((timetemp, sdata))
     production_data= np.hstack((timetemp, production_data))
+
+    """
+    base=state_list.__getitem__(0)
+
+    #concatenate coefficient values over time
+    for idex, instance in enumerate(state_list):
+        if idex > 0:                                                                #skip the base instance
+            for spx in dir(instance):                                               #iterate through attributes (spx is a string)
+                if spx.startswith('sp_'):                                           #select species attributes
+                    base_spx = getattr(base, spx)
+                    new_spx = getattr(instance, spx)
+                    for ky in new_spx.keys():                                       #iterate through reaction keys
+                        if ky in base_spx:                                          #if current reaction is in base reaction
+                            cs=np.array(base_spx[ky])                               #convert to numpy array for easy appending
+                            cs= np.append(cs, new_spx[ky])                          #append new coeff value to aray
+                            base_spx[ky] = cs                                       #update reaction with new array of coefficient values
+
+    #test length of concatenated matrices
+    for spx in dir(base):
+        if spx.startswith('sp_'):
+            obj= getattr(base, spx)
+            for att in obj.values():
+                assert len(att) == len(times1), 'Number of coefficients does not match number of timesteps'
+    """
 
     #get ignition point from dT/dt
     T=np.array(temps)
@@ -115,6 +155,18 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     sdata=sdata[i-20:i+20, :]
     production_data=production_data[i-20:i+20, :]
 
+    """
+    for spx in dir(base):
+        if spx.startswith('sp_'):
+            obj= getattr(base, spx)
+            for att in obj.values():
+                att=att[i-20:i+20]
+    """
+
+
+    """-------------------------------------------------------------------------
+    utility functions
+    -------------------------------------------------------------------------"""
 
 
     def plot():
@@ -204,8 +256,16 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         if 'points' in usr_args:
             points()
 
+    class return_obj:
+        def __init__(self, time, temp, sp_data):
+            self.time=time
+            self.temp=temp
+            self.sp_data=sp_data
 
+    return return_obj(times1, temps, sdata)
 
+    "sdata is an array of 40 timesteps, with each instance containing an array of species"
+    "mass fractions at that instant"
 
 
 
