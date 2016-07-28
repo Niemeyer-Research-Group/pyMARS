@@ -19,7 +19,7 @@ def write(solution):
 
     Returns
     -------
-        Trimmed Mechanism file
+        Trimmed Mechanism file (.inp)
     """
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
@@ -105,6 +105,17 @@ def write(solution):
                         ', T2 = ' + str(j[3]) +')       )\n\n')
         return falloff_str
 
+    def build_nasa(nasa_coeffs, row):
+        line_coeffs=''
+        lines=[[1,2,3,4,5], [6,7,8,9,10], [11,12,13,14]]
+        line_index=lines[row-2]
+        for ix, c in enumerate(nasa_coeffs):
+            if ix in line_index:
+                if c >= 0:
+                    line_coeffs += ' '
+                line_coeffs += str('{:.8e}'.format(c))
+        return line_coeffs
+
 
     """-------------------------------------------------------------------------
     Write Title Block to file
@@ -185,18 +196,6 @@ def write(solution):
                 '{:<1}'.format('1') + \
                             '\n'
         f.write(line_1)
-
-
-        def build_nasa(nasa_coeffs, row):
-            line_coeffs=''
-            lines=[[1,2,3,4,5], [6,7,8,9,10], [11,12,13,14]]
-            line_index=lines[row-2]
-            for ix, c in enumerate(nasa_coeffs):
-                if ix in line_index:
-                    if c >= 0:
-                        line_coeffs += ' '
-                    line_coeffs += str('{:.8e}'.format(c))
-            return line_coeffs
 
         line_2_coeffs=build_nasa(nasa_coeffs, 2)
         line_2 = line_2_coeffs  + '    2\n'
@@ -307,9 +306,11 @@ def write(solution):
             f.write(duplicate_line)
     f.write('END')
     return output_file_name
-        #print ('trimmed mechanism file:  ' + output_file_name)
     f.close()
 
+
+"""
 A=ct.Solution('gri301.cti')
 write(A)
 os.system('atom pym_gri30.inp')
+"""
