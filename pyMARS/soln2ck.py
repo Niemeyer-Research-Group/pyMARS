@@ -141,6 +141,8 @@ def write(solution):
     -------------------------------------------------------------------------"""
 
     section_break('Species data')
+    f.write('THERMO ALL' +'\n')
+    f.write('   300.000  1000.000  5000.000' +'\n')
 
     #write data for each species in the Solution object
     for i, name in enumerate(trimmed_solution.species_names):
@@ -163,8 +165,7 @@ def write(solution):
         temp_range= str(t_low) + '  ' + str(t_max) + '  1000.000'
         species_comp=''
         for ind, atom in enumerate(species.composition):
-            species_comp += atom.upper()
-            species_comp += '   '
+            species_comp += '{:<4}'.format(atom.upper())
             species_comp += str(int(species.composition[atom]))
         #species_comp += '   00'*(4-n_molecules)
 
@@ -177,7 +178,7 @@ def write(solution):
 
 
         line_1 = '{:<18}'.format(name) + \
-                    '{:<6}'.format('date') + \
+                    '{:<6}'.format('    ') + \
                 '{:<20}'.format(species_comp) + \
                 '{:<4}'.format(species_phase) + \
                 '{:<31}'.format(temp_range) + \
@@ -299,6 +300,11 @@ def write(solution):
 
             fourth_line= str(Efficiencies_string) + '\n'
             f.write(fourth_line)
+
+        #dupluicate option
+        if equation_object.duplicate is True:
+            duplicate_line=' DUPLICATE' +'\n'
+            f.write(duplicate_line)
     f.write('END')
     return output_file_name
         #print ('trimmed mechanism file:  ' + output_file_name)
