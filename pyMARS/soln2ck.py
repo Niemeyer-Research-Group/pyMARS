@@ -8,6 +8,8 @@ import os
 import textwrap
 from string import Template
 import cantera as ct
+from tests.test_mechanism_from_solution import test
+import ck2cti
 
 
 def write(solution):
@@ -305,12 +307,21 @@ def write(solution):
             duplicate_line=' DUPLICATE' +'\n'
             f.write(duplicate_line)
     f.write('END')
-    return output_file_name
     f.close()
+    """-------------------------------------------------------------------------
+    Test mechanism file
+    -------------------------------------------------------------------------"""
+    original_solution=solution
+
+    parser = ck2cti.Parser()
+    outName='test_file.cti'
+    parser.convertMech(output_file_name, outName=outName)
+    new_solution=ct.Solution(outName)
+    test(original_solution, new_solution)
+    os.remove(outName)
+    return output_file_name
 
 
-"""
+
 A=ct.Solution('gri301.cti')
 write(A)
-os.system('atom pym_gri30.inp')
-"""
