@@ -8,7 +8,7 @@ import os
 import textwrap
 from string import Template
 import cantera as ct
-
+from tests.test_mechanism_from_solution import test
 
 def write(solution):
     """Function to write cantera solution object to cti file.
@@ -317,6 +317,18 @@ def write(solution):
             except (IndexError):
                 f.write('\n           )\n\n')
                 pass
-    return output_file_name
+
         #print ('trimmed mechanism file:  ' + output_file_name)
     f.close()
+
+    """-------------------------------------------------------------------------
+    Test mechanism file
+    -------------------------------------------------------------------------"""
+
+    original_solution=solution
+    new_solution=ct.Solution(output_file_name)
+    test(original_solution, new_solution)
+
+    return output_file_name
+A=ct.Solution('gri301.cti')
+write(A)
