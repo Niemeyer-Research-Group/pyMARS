@@ -248,7 +248,8 @@ def write(solution):
             replace_list_2)
 
             secondary_line= str(Efficiencies_string) + '\n'
-            f.write(secondary_line)
+            if bool(efficiencies) is True:
+                f.write(secondary_line)
 
         #Case if an elementary Reaction
         if equation_type == 'ElementaryReaction':
@@ -300,7 +301,8 @@ def write(solution):
             replace_list_2)
 
             fourth_line= str(Efficiencies_string) + '\n'
-            f.write(fourth_line)
+            if bool(efficiencies) is True:
+                f.write(fourth_line)
 
         #dupluicate option
         if equation_object.duplicate is True:
@@ -323,5 +325,5 @@ def write(solution):
 
 
 
-A=ct.Solution('gri301.cti')
-write(A)
+#A=ct.Solution('h2air_highT.cti')
+#write(A)
