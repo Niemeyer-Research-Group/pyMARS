@@ -6,7 +6,7 @@ def test(original_solution, new_solution):
     Arguments
     -------------
     Original cti file
-    Newly written cti file
+    New cti file
 
     Returns
     -----------
@@ -16,10 +16,24 @@ def test(original_solution, new_solution):
     """
     original = original_solution
     new = new_solution
+
     comparison_list=[]
     for i, species in enumerate(new.species_names):
         if species in original.species_names:
             comparison_list.append(species)
+
+
+
+    def test_species_n():
+        n_species_new=len(new.species())
+        n_species_original=len(original.species())
+        if n_species_new != n_species_original:
+            print 'Not all species accounted for\n'
+            print 'Number of species in original file: %s'  %n_species_original
+            print 'Number of species in new file: %s'   %n_species_new
+
+
+
 
 
     def test_species_def():
@@ -70,7 +84,17 @@ def test(original_solution, new_solution):
             except AttributeError:
                 pass
 
-        print ('done with testing species definition into \n\n\n')
+        print ('Species definition tests finished \n\n')
+
+    def test_reactions_n():
+        n_reactions_new=len(new.reactions())
+        n_reactions_original=len(original.reactions())
+        if n_reactions_new != n_reactions_original:
+            print 'Not all reactions accounted for\n'
+            print 'Number of reactions in original file: %s'  %n_reactions_original
+            print 'Number of reactions in new file: %s'   %n_reactions_new
+
+
     def test_reactions():
         c=4184.0
         num = 0
@@ -91,9 +115,11 @@ def test(original_solution, new_solution):
             except AttributeError:
                 pass
             #assert new_reaction.efficiencies == original_reaction.efficiencies
-        print ('done with testing equation info ')
+        print ('Equation definition tests finished\n')
+
     test_species_def()
     test_reactions()
-
+    test_species_n()
+    test_reactions_n()
 
 #test('gri301.cti', 'pym_gri30.cti')
