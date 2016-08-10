@@ -8,7 +8,7 @@ import os
 import textwrap
 from string import Template
 import cantera as ct
-from tests.test_mechanism_from_solution import test
+from test.test_mechanism_from_solution import test
 import ck2cti
 
 
@@ -17,22 +17,27 @@ def write(solution):
 
     Parameters
     ----------
-    cantera Solution
+        Cantera solution object
 
     Returns
     -------
         Trimmed Mechanism file (.inp)
+
+    Example
+    -------
+        from cantera import soln2ck
+        import cantera as ct
+        gas=ct.Solution('gri30.cti')
+        soln2ck.write(gas)
     """
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
     cwd= os.getcwd()
     output_file_name=os.path.join(cwd, 'pym_' + input_file_name_stripped + '.inp')
-
     f=open(output_file_name, 'w+')
 
 
-    #Read In trimmed Solution to Cantera Object
-
+    #Get solution temperature and pressure
     solution_T=trimmed_solution.T
     solution_P=trimmed_solution.P
     """-------------------------------------------------------------------------
@@ -87,13 +92,19 @@ def write(solution):
 
     def build_mod_Arr(equation_object, t_range):
         if t_range =='high':
-            A=str("{:.3E}".format(equation_object.high_rate.pre_exponential_factor))  #*10**3
+            if len(equation_object.products) == 1:
+                A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor*10**3))
+            else:
+                A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor))
             b='{:.3f}'.format(equation_object.high_rate.temperature_exponent)
             E='{:.2f}'.format(equation_object.high_rate.activation_energy/c)
             Arr_high=[ A, b, E]
             return Arr_high
         if t_range == 'low':
-            A=str("{:.3E}".format(equation_object.low_rate.pre_exponential_factor))   #*10**6
+            if len(equation_object.products) == 1:
+                A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor*10**6))
+            else:
+                A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor*10**3))
             b='{:.3f}'.format(equation_object.low_rate.temperature_exponent)
             E='{:.2f}'.format(equation_object.low_rate.activation_energy/c)
             Arr_low=[ A, b, E]
@@ -118,6 +129,22 @@ def write(solution):
                 line_coeffs += str('{:.8e}'.format(c))
         return line_coeffs
 
+    def build_species_string():
+        species_list_string=''
+        line =1
+        for a_val, sp_str in enumerate(trimmed_solution.species_names):
+            sp=' '
+            #get length of string next species is added
+            length_new=len(sp_str)
+            length_string=len(species_list_string)
+            total=length_new +length_string +3
+            #if string will go over width, wrap to new line
+            if total >=70*line:
+                species_list_string += '\n'
+                line +=1
+
+            species_list_string += sp_str + ((16-len(sp_str))*sp)
+        return species_list_string.upper()
 
     """-------------------------------------------------------------------------
     Write Title Block to file
@@ -137,11 +164,7 @@ def write(solution):
                             'END\n')
     f.write(element_string.substitute(element_names=element_names))
 
-    species_names=wrap(
-                        eliminate(str(trimmed_solution.species_names).upper(), \
-                                    ['[', ']', '\'', ','], \
-                                    spaces='double')
-                        )
+    species_names=build_species_string()
     species_string=Template('SPECIES\n' +
                     '$species_names\n'+
                     'END\n')
@@ -156,6 +179,7 @@ def write(solution):
     section_break('Species data')
     f.write('THERMO ALL' +'\n')
     f.write('   300.000  1000.000  5000.000' +'\n')
+    phase_unknown_list=[]
 
     #write data for each species in the Solution object
     for i, name in enumerate(trimmed_solution.species_names):
@@ -180,12 +204,11 @@ def write(solution):
         for ind, atom in enumerate(species.composition):
             species_comp += '{:<4}'.format(atom.upper())
             species_comp += str(int(species.composition[atom]))
-        #species_comp += '   00'*(4-n_molecules)
 
         if type(species.transport).__name__ == 'GasTransportData':
             species_phase= 'G'
         else:
-            print 'Species phase not found. Assumed to be Gas'
+            phase_unknown_list.append(name)
             species_phase='G'
 
 
@@ -213,6 +236,8 @@ def write(solution):
 
     f.write('END\n')
 
+    #print 'The following Species phases not found. Assumed to be Gas'
+    #print phase_unknown_list
     """-------------------------------------------------------------------------
     Write reactions to file
     -------------------------------------------------------------------------"""
@@ -229,7 +254,7 @@ def write(solution):
         #Case if a ThreeBody Reaction
         if equation_type == 'ThreeBodyReaction':
             arrhenius=build_Arr(equation_object, equation_type)
-            main_line= '{:<41}'.format(equation_string) + \
+            main_line= '{:<51}'.format(equation_string) + \
                         '{:>9}'.format(arrhenius[0])+\
                         '{:>9}'.format(arrhenius[1])+\
                         '{:>11}'.format(arrhenius[2])+\
@@ -254,7 +279,7 @@ def write(solution):
         #Case if an elementary Reaction
         if equation_type == 'ElementaryReaction':
             arrhenius=build_Arr(equation_object, equation_type)
-            main_line= '{:<41}'.format(equation_string) + \
+            main_line= '{:<51}'.format(equation_string) + \
                         '{:>9}'.format(arrhenius[0])+\
                         '{:>9}'.format(arrhenius[1])+\
                         '{:>11}'.format(arrhenius[2])+\
@@ -264,7 +289,7 @@ def write(solution):
         #Case if a FalloffReaction
         if equation_type == 'FalloffReaction':
             arr_high=build_mod_Arr(equation_object, 'high')
-            main_line= '{:<41}'.format(equation_string) + \
+            main_line= '{:<51}'.format(equation_string) + \
                         '{:>9}'.format(arr_high[0])+\
                         '{:>9}'.format(arr_high[1])+\
                         '{:>11}'.format(arr_high[2])+\
@@ -313,17 +338,24 @@ def write(solution):
     """-------------------------------------------------------------------------
     Test mechanism file
     -------------------------------------------------------------------------"""
-    original_solution=solution
 
+    original_solution=solution
+    #convert written chemkin file to cti, and get solution
     parser = ck2cti.Parser()
     outName='test_file.cti'
     parser.convertMech(output_file_name, outName=outName)
     new_solution=ct.Solution(outName)
+
+    #test new solution vs original solutoin
     test(original_solution, new_solution)
     os.remove(outName)
     return output_file_name
 
-
-
-#A=ct.Solution('h2air_highT.cti')
-#write(A)
+#used for testing
+"""
+import cantera as ct
+A=ct.Solution('gri30.cti')
+write(A)
+import os
+os.system('atom pym_gri30.inp')
+"""
