@@ -8,18 +8,23 @@ import os
 import textwrap
 from string import Template
 import cantera as ct
-from tests.test_mechanism_from_solution import test
+from test.test_mechanism_from_solution import test
 
 def write(solution):
     """Function to write cantera solution object to cti file.
 
     Parameters
     ----------
-    cantera Solution
+    Cantera solution object
 
     Returns
     -------
-        Trimmed Mechanism file
+        Trimmed Mechanism file (.cti)
+
+    Example
+    -------
+        soln2cti.write(gas)
+
     """
     trimmed_solution=solution
     input_file_name_stripped=trimmed_solution.name
@@ -29,8 +34,7 @@ def write(solution):
     f=open(output_file_name, 'w+')
 
 
-    #Read In trimmed Solution to Cantera Object
-
+    #Get solution temperature and pressure
     solution_T=trimmed_solution.T
     solution_P=trimmed_solution.P
     """-------------------------------------------------------------------------
@@ -89,13 +93,19 @@ def write(solution):
 
     def build_mod_Arr(equation_object, t_range):
         if t_range =='high':
-            A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor))  #*10**3
+            if len(equation_object.products) == 1:
+                A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor*10**3))
+            else:
+                A=str("{:.5E}".format(equation_object.high_rate.pre_exponential_factor))
             b=equation_object.high_rate.temperature_exponent
             E=equation_object.high_rate.activation_energy/c
             Arr_high=[ A, b, E]
             return str(Arr_high).replace("\'", "")
         if t_range == 'low':
-            A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor))   #*10**6
+            if len(equation_object.products) == 1:
+                A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor*10**6))
+            else:
+                A=str("{:.5E}".format(equation_object.low_rate.pre_exponential_factor*10**3))
             b=equation_object.low_rate.temperature_exponent
             E=equation_object.low_rate.activation_energy/c
             Arr_low=[ A, b, E]
@@ -109,6 +119,28 @@ def write(solution):
                         ', T2 = ' + str(j[3]) +')       )\n\n')
         return falloff_str
 
+    def build_species_string():
+        species_list_string=''
+        line =1
+        for a_val, sp_str in enumerate(trimmed_solution.species_names):
+            #get length of string next species is added
+            length_new=len(sp_str)
+            length_string=len(species_list_string)
+            total=length_new +length_string +3
+            #if string will go over width, wrap to new line
+            if line == 1:
+                if total >= 55:
+                    species_list_string += '\n'
+                    species_list_string += '                 '
+                    line +=1
+            if line >1:
+                if total >=70*line:
+                    species_list_string += '\n'
+                    species_list_string += '                 '
+                    line +=1
+
+            species_list_string += sp_str + ' '
+        return species_list_string.upper()
 
     """-------------------------------------------------------------------------
     Write Title Block to file
@@ -129,18 +161,15 @@ def write(solution):
 
     element_names=element_names.replace('AR', 'Ar')
 
-    species_names=wrap(
-                        eliminate(str(trimmed_solution.species_names).upper(), \
-                                    ['[', ']', '\'', ','], \
-                                    spaces='double')
-                        )
+    species_names=build_species_string()
+
+
     phase_string= Template('ideal_gas(name = \"$input_file_name_stripped\", \n' +
                     '     elements = \"$elements\", \n' +
                     '     species =""" $species""", \n' +
                     '     reactions = \"all\", \n' +
                     '     initial_state = state(temperature = $solution_T, \n \
                             pressure= $solution_P)   )       \n\n')
-
 
     f.write(phase_string.substitute(elements=element_names, \
                             species=species_names,\
@@ -191,7 +220,7 @@ def write(solution):
         nasa_range_1 = str([ species.thermo.min_temp, nasa_coeffs[0] ])
         nasa_range_2 = str([ nasa_coeffs[0], species.thermo.max_temp ])
 
-
+        #check if species has defined transport data
         if bool(species.transport) is True:
             transport_geometry = species.transport.geometry
             diameter = str(species.transport.diameter*(10**10))
@@ -245,6 +274,7 @@ def write(solution):
                             transport_geometry=transport_geometry, diameter=diameter,\
                             well_depth=well_depth, polar=polar, rot_relax=rot_relax,\
                             ))
+
         if bool(species.transport) is False:
             #string template for each species
             species_string=Template('species(name = "$name",\n' +
@@ -258,7 +288,6 @@ def write(solution):
             f.write(species_string.substitute(name=name, composition=composition, \
                         nasa_range_1=nasa_range_1, nasa_coeffs_1=nasa_coeffs_1,\
                         nasa_range_2=nasa_range_2, nasa_coeffs_2=nasa_coeffs_2,))
-
     """-------------------------------------------------------------------------
     Write reactions to file
     -------------------------------------------------------------------------"""
@@ -298,8 +327,13 @@ def write(solution):
         #Case if an elementary Reaction
         if equation_type == 'ElementaryReaction':
             Arr=build_Arr(equation_object, equation_type)
-            reaction_string=Template('#  Reaction $m\n'+
-                                'reaction( \"$equation_string\", $Arr)\n\n')
+            if equation_object.duplicate is True:
+                reaction_string=Template('#  Reaction $m\n'+
+                                    'reaction( \"$equation_string\", $Arr,\n'+
+                                    '        options = \'duplicate\')\n\n')
+            else:
+                reaction_string=Template('#  Reaction $m\n'+
+                                    'reaction( \"$equation_string\", $Arr)\n\n')
             f.write(reaction_string.substitute(m=m, \
                             equation_string=equation_string, Arr=Arr))
 
@@ -346,7 +380,11 @@ def write(solution):
     original_solution=solution
     new_solution=ct.Solution(output_file_name)
     test(original_solution, new_solution)
-
+    print output_file_name
     return output_file_name
-A=ct.Solution('h2air_highT.cti')
+#for testing
+"""
+import cantera as ct
+A=ct.Solution('gri30.cti')
 write(A)
+"""
