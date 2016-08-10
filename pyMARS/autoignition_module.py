@@ -67,7 +67,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     production_data=np.zeros([0, len(solution1.net_production_rates)])
     state_list=list()
 
-
+    f1=h5py.File('mass_fractions.hdf5', 'w')
     while tnow < tfinal:
 
         index1 += 1
@@ -75,8 +75,17 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         times1.append(tnow)
         temps.append(r1.T)
         species_data=np.array(r1.Y) #*mass (optional)
+
+        grp=f1.create_group(str(index1))
+        grp['Temp'] = r1.T
+        grp['Time'] = tnow
+        grp.create_dataset('Species Mass Fractions', data=species_data)
+
         species_data=species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
         sdata= np.vstack((sdata, species_data))
+
+
+
 
         production_rates=np.array(solution1.net_production_rates)
         production_rates=production_rates[:,np.newaxis].T
@@ -149,6 +158,11 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     sdata_total=sdata
     production_data_total=production_data
 
+    for grp in f1.keys():
+        if int(grp) not in range((i-20), (i+20)):
+            f1.__delitem__(str(grp))
+
+    f1.close()
 
     times1=times1[ i-20:i+20 ]
     temps=temps[i-20:i+20 ]
@@ -257,12 +271,13 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             points()
 
     class return_obj:
-        def __init__(self, time, temp, sp_data):
+        def __init__(self, time, temp, sp_data, f1):
             self.time=time
             self.temp=temp
             self.sp_data=sp_data
+            self.test=f1
 
-    return return_obj(times1, temps, sdata)
+    return return_obj(times1, temps, sdata, f1)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
@@ -275,38 +290,42 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
 
 
-    """
-    #find initial sample point
-    for j, dTi in enumerate(dT):
-        if dTi > .2:     #when dT > 5 degrees kelvin
-            initial_point=[times1[j], T[j], j] # initial point, Temp, index
-            break
-    try:
-        initial_point
-    except NameError:
-        try:
-            #sys.exit("initial sample point not found") #alternative sys exit option
-            initial_point=[times1[i-20], T[i-20], j]
-            print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
-            " of 5 steps before tau is used.")
-        except IndexError:
-            try:
-                initial_point=[times1[i], T[i], j]
-            except IndexError:
-                print 'Error: Initial sample point cannot be located'
-                return
 
-    #find final sample point
-    for k, dti in enumerate(dT):
-        if k > i:
-            final_point=[times1[k+20], T[k+20], k+20]    #final point, Temp, index
-            break
-    if dti < .1:
-        final_point=[times1[k], T[k], k]    #final point, Temp, index
+
+
+
+"""
+#find initial sample point
+for j, dTi in enumerate(dT):
+    if dTi > .2:     #when dT > 5 degrees kelvin
+        initial_point=[times1[j], T[j], j] # initial point, Temp, index
         break
-    initial_point[2] = i-20
-    print initial_point[2]
-    #final_point[2] = i+20
-    print final_point[2]
+try:
+    initial_point
+except NameError:
+    try:
+        #sys.exit("initial sample point not found") #alternative sys exit option
+        initial_point=[times1[i-20], T[i-20], j]
+        print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
+        " of 5 steps before tau is used.")
+    except IndexError:
+        try:
+            initial_point=[times1[i], T[i], j]
+        except IndexError:
+            print 'Error: Initial sample point cannot be located'
+            return
 
-    """
+#find final sample point
+for k, dti in enumerate(dT):
+    if k > i:
+        final_point=[times1[k+20], T[k+20], k+20]    #final point, Temp, index
+        break
+if dti < .1:
+    final_point=[times1[k], T[k], k]    #final point, Temp, index
+    break
+initial_point[2] = i-20
+print initial_point[2]
+#final_point[2] = i+20
+print final_point[2]
+
+"""
