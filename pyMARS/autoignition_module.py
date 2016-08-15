@@ -74,12 +74,22 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         tnow = sim1.step(tfinal)
         times1.append(tnow)
         temps.append(r1.T)
-        species_data=np.array(r1.Y) #*mass (optional)
+        species_data=r1.Y
+
+        """
+        species_mass_fractions=r1.Y #*mass (optional)
+        species_data={}
+        for idx, nm in enumerate(solution1.species_names):
+            species_data[nm] = species_mass_fractions[idx]
+        """
 
         grp=f1.create_group(str(index1))
         grp['Temp'] = r1.T
         grp['Time'] = tnow
+        grp['Pressure'] =r1.thermo.P
+        species_production_rates=r1.thermo.net_production_rates
         grp.create_dataset('Species Mass Fractions', data=species_data)
+        grp.create_dataset('Species Net Production Rates Original', data=species_production_rates)
 
         species_data=species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
         sdata= np.vstack((sdata, species_data))
