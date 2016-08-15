@@ -97,96 +97,16 @@ def make_graph(data_file, hdf5_file):
                             if weight_total != 0.0 or -0.0:
                                 G.add_edge(name, sp_A, weight=weight_total, color='b')
                             else:
-                                G.add_edge(name, sp_A, weight=weight_total, color='r')
+                                pass
+                                #G.add_edge(name, sp_A, weight=weight_total, color='r')
         print (nm, G.number_of_edges())
 
 
-    nx.draw(G, with_labels =True, edge_color='b', width=.25)
+    nx.draw(G, with_labels =True, width=.25)
 
     plt.show()
     print G.number_of_edges()
     print G.number_of_nodes()
-
-
-
-
-
-
-
-    """
-    #formatting
-    for k in ri_total:
-        ri_total[k] = '{:.2f}'.format(ri_total[k])
-
-    print ri_total['HO2']
-
-
-    for k in ri_partial:
-        if ri_partial[k] != 0:
-            print k
-    """
-
-
-
-
-
-
-
-
-
-
-
-    """
-    f= h5py.File(fname, "r")
-    class data(object):
-            times=np.array(f.get('Times'))
-            temps=np.array(f.get('Temps'))
-            species=f.get('Species_Data')
-    """
-
-
-
-
-
-    """
-    for n in data.species:
-        if n == 'OH':
-            print n
-            sp =np.array(data.species.get(n))
-            print sp.shape
-
-    sp=sp.astype(float)
-    o=sp[1]
-    z=np.diff(sp)
-    """
-
-
-    """
-    #only want elementary reactions
-    for n, rxn in enumerate(reaction_objects):
-        if rxn.reaction_type is not 1: #1 is for ElementaryReaction
-            reaction_objects.remove(rxn)
-    """
-    """
-    #Make graph and nodes (each species is a node)
-    G=nx.MultiDiGraph()
-    for i, species in enumerate(species_objects):
-        G.add_node(i, name=species.name)
-        mass_values = np.array(data.species.get(species.name))
-        mass_values = mass_values.astype(float) #convert to float
-        G.node[i]['masses'] = mass_values       #assign mass values from simulation to each node
-        G.node[i]['rates'] = np.diff(mass_values)   #get rate values for each timestep
-
-    print len(G.node[0] ['rates'])
-
-    dt=np.diff(data.times)
-    print type(reaction_objects[0]).__name__
-    for i, t in enumerate(dt):          #enumerate over every time step
-        if i == 0:                      #temporary measure to only construct DRG for first timestep
-            for n, rx in enumerate(reaction_objects):
-                species_contained= rx.products.keys() + rx.reactants.keys()
-    """
-
 
 
 
