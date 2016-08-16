@@ -51,6 +51,9 @@ def readin(args='none', **argv):
                 if 'species' in argv:
                     species = argv['species']
                     exclusion_list = [str(item) for item in species.split(',')]
+                    #strip spaces
+                    for i, sp in enumerate(exclusion_list):
+                        exclusion_list[i]=sp.strip()
                 if 'species' not in argv:
                     exclusion_list=[]
                 if 'plot' in argv:
