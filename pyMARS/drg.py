@@ -20,7 +20,6 @@ def make_graph(data_file, hdf5_file):
 
     #open reaction rate file
     f=h5py.File(hdf5_file, 'r')
-    group_1=f['422']
 
     """
     #net rates of progress for each reaction
@@ -38,7 +37,7 @@ def make_graph(data_file, hdf5_file):
     reaction_objects=solution.reactions()
 
 
-    G=nx.MultiDiGraph()
+    G=nx.MultiGraph()
     node_labels={}
     for nm, grp in f.iteritems():
         #net rates of progress for each reaction
@@ -72,7 +71,7 @@ def make_graph(data_file, hdf5_file):
                         product_species=reac.products
                         reactant_species=reac.reactants
                         if name in product_species and reactant_species:
-                            if rxn_prod_rate > 0:
+                            if rxn_prod_rate != 0:
                                 total_species = reactant_species
                             if rxn_prod_rate ==0:
                                 total_species=reac.products
@@ -95,15 +94,32 @@ def make_graph(data_file, hdf5_file):
                         edge_name=sp_A + '_'+ name
                         if G.has_edge(name, sp_A) is False:
                             if weight_total != 0.0 or -0.0:
-                                G.add_edge(name, sp_A, weight=weight_total, color='b')
+                                if weight_total > .01:
+                                    G.add_edge(name, sp_A, weight=weight_total, color='r')
+                                else:
+                                    #G.add_edge(name, sp_A, weight=weight_total, color='b')
+                                    pass
                             else:
                                 pass
                                 #G.add_edge(name, sp_A, weight=weight_total, color='r')
         print (nm, G.number_of_edges())
 
 
-    nx.draw(G, with_labels =True, width=.25)
+    #get connected species
+    essential_nodes=list(nx.node_connected_component(G, 'H'))
 
+    nx.draw(G, with_labels=True, width=.25)
+
+    #get list of species to eliminate
+    exclusion_list=list()
+    for spec in solution.species():
+        ind_name=spec.name
+        if ind_name not in essential_nodes:
+            exclusion_list.append(spec.name)
+    exclusion_list_string=''
+    for spc in exclusion_list:
+        exclusion_list_string += spc + ', '
+    print exclusion_list_string
     plt.show()
     print G.number_of_edges()
     print G.number_of_nodes()
