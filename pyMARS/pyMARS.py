@@ -77,7 +77,9 @@ def readin(args='none', **argv):
                     exclusion_list=[]
                 else:
                     exclusion_list=[str(item) for item in args.species.split(',')]
-                    print(exclusion_list)
+                    #strip spaces
+                    for i, sp in enumerate(exclusion_list):
+                        exclusion_list[i]=sp.strip()
                 x='args_not_none'
     ext= os.path.splitext(args.data_file)[1]
 
