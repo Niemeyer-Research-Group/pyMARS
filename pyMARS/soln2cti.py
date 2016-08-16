@@ -8,7 +8,7 @@ import os
 import textwrap
 from string import Template
 import cantera as ct
-from test.test_mechanism_from_solution import test
+from tests.test_mechanism_from_solution import test
 
 def write(solution):
     """Function to write cantera solution object to cti file.
