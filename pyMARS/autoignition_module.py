@@ -226,7 +226,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         print output_file_name
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
-        os.system('atom '+ output_file_name)
+        #os.system('atom '+ output_file_name)
 
     def writehdf5(sdata):
         #format matrix for hdf5
