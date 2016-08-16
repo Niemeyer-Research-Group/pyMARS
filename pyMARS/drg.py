@@ -116,9 +116,10 @@ def make_graph(data_file, hdf5_file):
         ind_name=spec.name
         if ind_name not in essential_nodes:
             exclusion_list.append(spec.name)
-    exclusion_list_string=''
+    exclusion_list_string='\''
     for spc in exclusion_list:
         exclusion_list_string += spc + ', '
+    exclusion_list_string= exclusion_list_string.rstrip(',')
     print exclusion_list_string
     plt.show()
     print G.number_of_edges()
