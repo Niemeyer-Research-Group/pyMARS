@@ -104,6 +104,7 @@ def make_graph(data_file, hdf5_file):
                             else:
                                 pass
                                 #G.add_edge(name, sp_A, weight=weight_total, color='r')
+
         #print (nm, G.number_of_edges())
 
     #get connected species
@@ -113,10 +114,12 @@ def make_graph(data_file, hdf5_file):
 
     #get list of species to eliminate
     exclusion_list=list()
+    ex_list=[]
     for spec in solution.species():
         ind_name=spec.name
         if ind_name not in essential_nodes:
             exclusion_list.append(spec.name)
+            ex_list.append(spec.name)
     exclusion_list_string='\''
     for spc in exclusion_list:
         exclusion_list_string += spc + ', '
@@ -126,7 +129,7 @@ def make_graph(data_file, hdf5_file):
     plt.show()
     print G.number_of_edges()
     print G.number_of_nodes()
-
+    return ex_list
 
 
 #make_graph('gri301.cti', 'production_rates.hdf5')

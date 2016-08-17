@@ -97,7 +97,8 @@ def readin(args='none', **argv):
         #trims file
         #need case if no trim necessary
         solution_objects=trim(args.data_file, args.exclusion_list)
-        args.data_file=write(solution_objects[1])
+        if args.run_drg is False:
+            trimmed_file=write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
             run_sim(args.data_file, args)
@@ -107,8 +108,9 @@ def readin(args='none', **argv):
             run_sim(args.data_file, args)
             get_rates('mass_fractions.hdf5', args.data_file)
             print 'running DRG'
-            make_graph(args.data_file, 'production_rates.hdf5')
-
+            drg_exclusion_list=make_graph(args.data_file, 'production_rates.hdf5')
+            new_solution_objects=trim(args.data_file, drg_exclusion_list)
+            drg_trimmed_file=write(new_solution_objects[1])
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
         print("\n\nThis is a Chemkin file")
@@ -116,18 +118,20 @@ def readin(args='none', **argv):
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
         solution_objects=trim(converted_file_name, args.exclusion_list)
-        args.data_file=write(solution_objects[1])
+        trimmed_file=write(solution_objects[1])
 
         if "plot" or "points" or "writecsv" or "writehdf5" in args:
             print 'running sim'
-            run_sim(args.data_file, args)
+            run_sim(converted_file_name, args)
 
         if 'run_drg' in args:
             print 'running sim'
-            run_sim(args.data_file, args)
-            get_rates('mass_fractions.hdf5', args.data_file)
+            run_sim(converted_file_name, args)
+            get_rates('mass_fractions.hdf5', converted_file_name)
             print 'running DRG'
-            make_graph(args.data_file, 'production_rates.hdf5')
+            drg_exclusion_list=make_graph(converted_file_name, 'production_rates.hdf5')
+            new_solution_objects=trim(converted_file_name, drg_exclusion_list)
+            args.data_file=write(new_solution_objects[1])
 
         #run_sim(converted_file_name, args)
 
