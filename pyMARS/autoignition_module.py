@@ -150,7 +150,6 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     i=deriv.argmax()
     deriv_max=[times1[i], T[i], i]
     tau= times1[i]
-    print tau
 
     """-------------------------------------------------------------------------
     find initial and final sample points
