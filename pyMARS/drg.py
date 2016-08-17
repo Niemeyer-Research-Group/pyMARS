@@ -35,6 +35,8 @@ def make_graph(data_file, hdf5_file):
     solution= ct.Solution(data_file)
     species_objects=solution.species()
     reaction_objects=solution.reactions()
+    #ask for threshold value
+    threshold=float(raw_input('Enter threshold value: '))
 
 
     G=nx.MultiGraph()
@@ -96,7 +98,7 @@ def make_graph(data_file, hdf5_file):
                         edge_name=sp_A + '_'+ name
                         if G.has_edge(name, sp_A) is False:
                             if weight_total != 0.0 or -0.0:
-                                if weight_total > .01:
+                                if weight_total > threshold:
                                     G.add_edge(name, sp_A, weight=weight_total, color='r')
                                 else:
                                     #G.add_edge(name, sp_A, weight=weight_total, color='b')
@@ -126,7 +128,7 @@ def make_graph(data_file, hdf5_file):
     exclusion_list_string= exclusion_list_string.rstrip(',')
     print 'Species to Exclude'
     print exclusion_list_string
-    plt.show()
+    plt.show(block=False)
     print G.number_of_edges()
     print G.number_of_nodes()
     return ex_list
