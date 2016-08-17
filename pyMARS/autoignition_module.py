@@ -280,13 +280,14 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             points()
 
     class return_obj:
-        def __init__(self, time, temp, sp_data, f1):
+        def __init__(self, time, temp, sp_data, f1, tau):
             self.time=time
             self.temp=temp
             self.sp_data=sp_data
             self.test=f1
+            self.tau=tau
 
-    return return_obj(times1, temps, sdata, f1)
+    return return_obj(times1, temps, sdata, f1, tau)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
