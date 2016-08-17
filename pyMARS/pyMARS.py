@@ -105,12 +105,19 @@ def readin(args='none', **argv):
 
         if args.run_drg is True:
             print 'running sim'
-            run_sim(args.data_file, args)
+            sim_result_1=run_sim(args.data_file, args)
+            tau1=sim_result_1.tau
             get_rates('mass_fractions.hdf5', args.data_file)
             print 'running DRG'
             drg_exclusion_list=make_graph(args.data_file, 'production_rates.hdf5')
             new_solution_objects=trim(args.data_file, drg_exclusion_list)
             drg_trimmed_file=write(new_solution_objects[1])
+            sim_result_2=run_sim(drg_trimmed_file, args)
+            tau2=sim_result_2.tau
+            print 'original ignition delay: ' + str(tau1)
+            print 'new ignition delay: ' + str(tau2)
+            error = (tau1-tau2)/tau1
+            print 'error: ' + str(error)
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
         print("\n\nThis is a Chemkin file")
