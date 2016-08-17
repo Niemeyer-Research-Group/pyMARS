@@ -6,6 +6,8 @@ from create_trimmed_model import trim
 from convert_chemkin_file import convert
 from soln2cti import write
 from autoignition_module import run_sim
+from get_rate_data import get_rates
+from drg import make_graph
 
 
 def readin(args='none', **argv):
@@ -20,6 +22,7 @@ def readin(args='none', **argv):
         points: print ignition point and sample range (ex. points='y')
         writecsv: write data to csv (ex. writecsv='y')
         writehdf5: write data to hdf5 (ex. writehdf5='y')
+        run_drg: run DRG
 
     ----------
     Returns
@@ -35,6 +38,7 @@ def readin(args='none', **argv):
     "--------------------------------------------------------------------------"
 
     class args():
+        #direct use case
             if args is 'none':
                 argparse.Namespace()
                 plot = False
@@ -44,6 +48,7 @@ def readin(args='none', **argv):
                 data_file = argv['file']
                 thermo_file = None
                 transport_file = None
+                run_drg = None
                 if 'thermo' in argv:
                     thermo_file = argv['thermo']
                 if 'transport' in argv:
@@ -64,7 +69,10 @@ def readin(args='none', **argv):
                     writehdf5 = True
                 if 'points' in argv:
                     points = True
+                if 'run_drg' in argv:
+                    run_drg = True
                 x ='arg_none'
+        #package from terminal use case
             if args is not 'none':
                 plot = args.plot
                 points = args.points
@@ -73,6 +81,7 @@ def readin(args='none', **argv):
                 data_file= args.file
                 thermo_file = args.thermo
                 transport_file=args.transport
+                run_drg=args.run_drg
                 if args.species is None:
                     exclusion_list=[]
                 else:
@@ -86,11 +95,20 @@ def readin(args='none', **argv):
     if ext == ".cti" or ext == ".xml":
         print("\n\nThis is an Cantera xml or cti file\n")
         #trims file
+        #need case if no trim necessary
         solution_objects=trim(args.data_file, args.exclusion_list)
         args.data_file=write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
             run_sim(args.data_file, args)
+
+        if args.run_drg is True:
+            print 'running sim'
+            run_sim(args.data_file, args)
+            get_rates('mass_fractions.hdf5', args.data_file)
+            print 'running DRG'
+            make_graph(args.data_file, 'production_rates.hdf5')
+
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
         print("\n\nThis is a Chemkin file")
@@ -103,6 +121,13 @@ def readin(args='none', **argv):
         if "plot" or "points" or "writecsv" or "writehdf5" in args:
             print 'running sim'
             run_sim(args.data_file, args)
+
+        if 'run_drg' in args:
+            print 'running sim'
+            run_sim(args.data_file, args)
+            get_rates('mass_fractions.hdf5', args.data_file)
+            print 'running DRG'
+            make_graph(args.data_file, 'production_rates.hdf5')
 
         #run_sim(converted_file_name, args)
 

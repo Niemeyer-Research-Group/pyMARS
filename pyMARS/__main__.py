@@ -18,6 +18,7 @@ def main(args=None):
         --points
         --writecsv
         --writehdf5
+        --run_drg
 
     """
     #gets arguments from terminal
@@ -54,6 +55,9 @@ def main(args=None):
     parser.add_argument('--writehdf5', \
                         help='write species data to hdf5', \
                         action="store_true")
+    parser.add_argument('--run_drg', \
+                        help='run Direct Relation Graph method to reduce', \
+                        action="store_true")
 
     args=parser.parse_args()
     if args.file is not None:
@@ -72,5 +76,6 @@ def main(args=None):
             --points
             --writecsv
             --writehdf5
+            --run_drg
 
         """
