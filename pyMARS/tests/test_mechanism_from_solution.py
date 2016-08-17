@@ -152,19 +152,19 @@ def test(original_solution, new_solution):
                         original_A='{:.1E}'.format(original_reaction.rate.pre_exponential_factor)
                         original_b='{:.1E}'.format(original_reaction.rate.temperature_exponent)
                         original_E='{:.1E}'.format(original_reaction.rate.activation_energy)
-
-                        if new_A != original_A:
-                            print 'Reaction Pre-Exponential does not match'
-                            print 'Reaction # %s : %s   || %s ' %(rx_n, new_eq_str, original_eq_str)
-                            print 'Original: %s  New: %s\n\n' %(original_A, new_A)
-                        if new_b != original_b:
-                            print 'Reaction Temperature Exponent does not match'
-                            print 'Reaction # %s : %s   || %s' %(rx_n, new_eq_str, original_eq_str)
-                            print 'Original: %s  New: %s\n\n' %(original_b, new_b)
-                        if new_E != original_E:
-                            print 'Reaction Activation Energy does not match'
-                            print 'Reaction # %s : %s   || %s' %(rx_n, new_eq_str, original_eq_str)
-                            print 'Original: %s  New: %s\n\n' %(original_E, new_E)
+                        if original_reaction.duplicate is False:
+                            if new_A != original_A:
+                                print 'Reaction Pre-Exponential does not match'
+                                print 'Reaction # %s : %s   || %s ' %(rx_n, new_eq_str, original_eq_str)
+                                print 'Original: %s  New: %s\n\n' %(original_A, new_A)
+                            if new_b != original_b:
+                                print 'Reaction Temperature Exponent does not match'
+                                print 'Reaction # %s : %s   || %s' %(rx_n, new_eq_str, original_eq_str)
+                                print 'Original: %s  New: %s\n\n' %(original_b, new_b)
+                            if new_E != original_E:
+                                print 'Reaction Activation Energy does not match'
+                                print 'Reaction # %s : %s   || %s' %(rx_n, new_eq_str, original_eq_str)
+                                print 'Original: %s  New: %s\n\n' %(original_E, new_E)
 
                     if original_equation_type == 'FalloffReaction':
                         original_A_low='{:.1E}'.format(original_reaction.low_rate.pre_exponential_factor)
