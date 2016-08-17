@@ -39,7 +39,9 @@ def make_graph(data_file, hdf5_file):
 
     G=nx.MultiGraph()
     node_labels={}
+    count=0
     for nm, grp in f.iteritems():
+        count +=1
         #net rates of progress for each reaction
         rxn_prod_rates=np.array(grp['Reaction Production Rates'])
         #net production rates for each species
@@ -102,8 +104,7 @@ def make_graph(data_file, hdf5_file):
                             else:
                                 pass
                                 #G.add_edge(name, sp_A, weight=weight_total, color='r')
-        print (nm, G.number_of_edges())
-
+        #print (nm, G.number_of_edges())
 
     #get connected species
     essential_nodes=list(nx.node_connected_component(G, 'H'))
@@ -120,6 +121,7 @@ def make_graph(data_file, hdf5_file):
     for spc in exclusion_list:
         exclusion_list_string += spc + ', '
     exclusion_list_string= exclusion_list_string.rstrip(',')
+    print 'Species to Exclude'
     print exclusion_list_string
     plt.show()
     print G.number_of_edges()
