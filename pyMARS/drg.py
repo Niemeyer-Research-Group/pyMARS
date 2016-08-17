@@ -127,4 +127,4 @@ def make_graph(data_file, hdf5_file):
 
 
 
-make_graph('gri301.cti', 'production_rates.hdf5')
+#make_graph('gri301.cti', 'production_rates.hdf5')

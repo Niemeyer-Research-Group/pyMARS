@@ -34,4 +34,4 @@ def get_rates(hdf5_file, mechanism_file):
         new_grp.create_dataset('Species Net Production Rates Original', data=species_production_rates_original)
     g.close()
 
-get_rates('mass_fractions.hdf5', 'gri301.cti')
+#get_rates('mass_fractions.hdf5', 'gri301.cti')
