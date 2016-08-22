@@ -99,7 +99,7 @@ def make_graph(data_file, hdf5_file):
                         if G.has_edge(name, sp_A) is False:
                             if weight_total != 0.0 or -0.0:
                                 if weight_total > threshold:
-                                    G.add_edge(name, sp_A, weight=weight_total, color='r')
+                                    G.add_edge(name, sp_A, weight=weight_total, color='b')
                                 else:
                                     #G.add_edge(name, sp_A, weight=weight_total, color='b')
                                     pass
@@ -110,7 +110,8 @@ def make_graph(data_file, hdf5_file):
         #print (nm, G.number_of_edges())
 
     #get connected species
-    essential_nodes=list(nx.node_connected_component(G, 'H'))
+    target=str(raw_input('Enter target starting species:'))
+    essential_nodes=list(nx.node_connected_component(G, target))
 
     nx.draw(G, with_labels=True, width=.25)
 
