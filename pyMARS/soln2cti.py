@@ -76,7 +76,7 @@ def write(solution):
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
                 if coeff_sum == 3:
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
-                if coeff_sim > 3:
+                if coeff_sum > 3:
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))
                 #if equation_object.duplicate is True:
 
