@@ -76,6 +76,8 @@ def write(solution):
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**3))
                 if coeff_sum == 3:
                     A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor*10**6))
+                if coeff_sim > 3:
+                    A=str("{:.5E}".format(equation_object.rate.pre_exponential_factor))
                 #if equation_object.duplicate is True:
 
             if equation_type =='ThreeBodyReaction':
@@ -109,6 +111,7 @@ def write(solution):
             b=equation_object.low_rate.temperature_exponent
             E=equation_object.low_rate.activation_energy/c
             Arr_low=[ A, b, E]
+
             return str(Arr_low).replace("\'", "")
 
     def build_falloff(j):
