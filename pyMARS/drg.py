@@ -3,6 +3,7 @@ import cantera as ct
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
+import time
 
 def make_graph(data_file, hdf5_file):
     """ Use the Direct Relation Graph (DRG) method to choose species to
@@ -21,16 +22,6 @@ def make_graph(data_file, hdf5_file):
     #open reaction rate file
     f=h5py.File(hdf5_file, 'r')
 
-    """
-    #net rates of progress for each reaction
-    rxn_prod_rates=np.array(group_1['Reaction Production Rates'])
-    #net production rates for each species
-    sp_prod_rates=np.array(group_1['Species Net Production Rates'])
-    #orignal net production rates for each species
-    sp_prod_rates_original=np.array(group_1['Species Net Production Rates Original'])
-    #print sp_prod_rates_original[0]
-    #print sp_prod_rates[6]
-    """
     #initalize solution and components
     solution= ct.Solution(data_file)
     species_objects=solution.species()
@@ -42,18 +33,22 @@ def make_graph(data_file, hdf5_file):
     G=nx.MultiGraph()
     node_labels={}
     count=0
+    start_time=time.time()
+
+
     for nm, grp in f.iteritems():
         count +=1
         #net rates of progress for each reaction
         rxn_prod_rates=np.array(grp['Reaction Production Rates'])
         #net production rates for each species
-        sp_prod_rates=np.array(grp['Species Net Production Rates'])
+        #sp_prod_rates=np.array(grp['Species Net Production Rates'])
         #orignal net production rates for each species
-        sp_prod_rates_original=np.array(grp['Species Net Production Rates Original'])
+        #sp_prod_rates_original=np.array(grp['Species Net Production Rates Original'])
 
         for l, m in enumerate(species_objects):
             sp_A=m.name
-            if G.has_node(sp_A) is False:
+            #if G.has_node(sp_A) is False:
+            if count == 1:
                 G.add_node(sp_A)
                 node_labels[sp_A] =l
             ri_total={}
@@ -61,14 +56,13 @@ def make_graph(data_file, hdf5_file):
             #iterate through every species
             for k, n in enumerate(species_objects):
                 name=n.name
-                #if name==sp_A:
-                    #continue
-
+                if name==sp_A:
+                    continue
                 ri_total[name] = 0
                 ri_partial[name] = 0
                 #for every species iterate through every reaction
                 for i, reac in enumerate(reaction_objects):
-                    reac_type=reac.__class__.__name__
+                    #reac_type=reac.__class__.__name__
                     #if reac.duplicate is False:
                     if reac.__contains__(name):
                         rxn_prod_rate=float(rxn_prod_rates[i])
@@ -100,13 +94,10 @@ def make_graph(data_file, hdf5_file):
                             if weight_total != 0.0 or -0.0:
                                 if weight_total > threshold:
                                     G.add_edge(name, sp_A, weight=weight_total, color='b')
-                                else:
-                                    #G.add_edge(name, sp_A, weight=weight_total, color='b')
-                                    pass
-                            else:
-                                pass
-                                #G.add_edge(name, sp_A, weight=weight_total, color='r')
 
+        progress= str(count) + '/40 timesteps'
+        print progress
+        print("--- %s seconds ---" % (time.time() - start_time))
         #print (nm, G.number_of_edges())
 
     #get connected species
