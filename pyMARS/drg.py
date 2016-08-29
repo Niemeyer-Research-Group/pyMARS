@@ -83,8 +83,14 @@ def make_graph(data_file, hdf5_file):
                 sp_A=both[0]
                 sp_B=both[1]
                 weight = float(ri_partial[ind])/float(ri_total[sp_A])
+                #only add edge if > than edge value from previous timesteps
                 if weight >= threshold:
-                    G.add_edge(sp_A, sp_B, weight=weight)
+                    if G.has_edge(sp_A, sp_B):
+                        old_weight=G[sp_A][sp_B][0]['weight']
+                        if weight >= old_weight:
+                            G.add_edge(sp_A, sp_B, weight=weight)
+                    else:
+                        G.add_edge(sp_A, sp_B, weight=weight)
             except IndexError:
                 print ind
                 continue
