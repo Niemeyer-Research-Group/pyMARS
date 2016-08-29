@@ -83,12 +83,6 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         temps.append(r1.T)
         species_data=r1.Y
 
-        """
-        species_mass_fractions=r1.Y #*mass (optional)
-        species_data={}
-        for idx, nm in enumerate(solution1.species_names):
-            species_data[nm] = species_mass_fractions[idx]
-        """
 
         grp=f1.create_group(str(index1))
         grp['Temp'] = r1.T
@@ -101,18 +95,9 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         species_data=species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
         sdata= np.vstack((sdata, species_data))
 
-
-
-
         production_rates=np.array(solution1.net_production_rates)
         production_rates=production_rates[:,np.newaxis].T
         production_data=np.vstack((production_data, production_rates))
-
-        """
-        st=state(tnow, species, reactions)
-        st.index = index1
-        state_list.append(st)
-        """
 
 
     print('\n')
@@ -125,29 +110,6 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     sdata= np.hstack((timetemp, sdata))
     production_data= np.hstack((timetemp, production_data))
 
-    """
-    base=state_list.__getitem__(0)
-
-    #concatenate coefficient values over time
-    for idex, instance in enumerate(state_list):
-        if idex > 0:                                                                #skip the base instance
-            for spx in dir(instance):                                               #iterate through attributes (spx is a string)
-                if spx.startswith('sp_'):                                           #select species attributes
-                    base_spx = getattr(base, spx)
-                    new_spx = getattr(instance, spx)
-                    for ky in new_spx.keys():                                       #iterate through reaction keys
-                        if ky in base_spx:                                          #if current reaction is in base reaction
-                            cs=np.array(base_spx[ky])                               #convert to numpy array for easy appending
-                            cs= np.append(cs, new_spx[ky])                          #append new coeff value to aray
-                            base_spx[ky] = cs                                       #update reaction with new array of coefficient values
-
-    #test length of concatenated matrices
-    for spx in dir(base):
-        if spx.startswith('sp_'):
-            obj= getattr(base, spx)
-            for att in obj.values():
-                assert len(att) == len(times1), 'Number of coefficients does not match number of timesteps'
-    """
 
     #get ignition point from dT/dt
     T=np.array(temps)
@@ -184,14 +146,6 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
     temps=temps[i-20:i+20 ]
     sdata=sdata[i-20:i+20, :]
     production_data=production_data[i-20:i+20, :]
-
-    """
-    for spx in dir(base):
-        if spx.startswith('sp_'):
-            obj= getattr(base, spx)
-            for att in obj.values():
-                att=att[i-20:i+20]
-    """
 
 
     """-------------------------------------------------------------------------
@@ -300,51 +254,3 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-#find initial sample point
-for j, dTi in enumerate(dT):
-    if dTi > .2:     #when dT > 5 degrees kelvin
-        initial_point=[times1[j], T[j], j] # initial point, Temp, index
-        break
-try:
-    initial_point
-except NameError:
-    try:
-        #sys.exit("initial sample point not found") #alternative sys exit option
-        initial_point=[times1[i-20], T[i-20], j]
-        print("\nInitial Sample Point not found based on dTmax. Alternative method"+\
-        " of 5 steps before tau is used.")
-    except IndexError:
-        try:
-            initial_point=[times1[i], T[i], j]
-        except IndexError:
-            print 'Error: Initial sample point cannot be located'
-            return
-
-#find final sample point
-for k, dti in enumerate(dT):
-    if k > i:
-        final_point=[times1[k+20], T[k+20], k+20]    #final point, Temp, index
-        break
-if dti < .1:
-    final_point=[times1[k], T[k], k]    #final point, Temp, index
-    break
-initial_point[2] = i-20
-print initial_point[2]
-#final_point[2] = i+20
-print final_point[2]
-
-"""
