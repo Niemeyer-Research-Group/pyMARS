@@ -25,6 +25,7 @@ def trim(data_file, exclusion_list):
     print('species to exclude: ')
     print(exclusion_list)
     print ('\n')
+
     # define initial solution objects
     initial_solution = ct.Solution(data_file)
 
