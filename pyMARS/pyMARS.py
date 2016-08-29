@@ -49,6 +49,7 @@ def readin(args='none', **argv):
                 thermo_file = None
                 transport_file = None
                 run_drg = None
+                initial_sim = True
                 if 'thermo' in argv:
                     thermo_file = argv['thermo']
                 if 'transport' in argv:
@@ -72,6 +73,7 @@ def readin(args='none', **argv):
                 if 'run_drg' in argv:
                     run_drg = True
                 x ='arg_none'
+
         #package from terminal use case
             if args is not 'none':
                 plot = args.plot
@@ -82,6 +84,7 @@ def readin(args='none', **argv):
                 thermo_file = args.thermo
                 transport_file=args.transport
                 run_drg=args.run_drg
+                initial_sim = True
                 if args.species is None:
                     exclusion_list=[]
                 else:
@@ -90,6 +93,8 @@ def readin(args='none', **argv):
                     for i, sp in enumerate(exclusion_list):
                         exclusion_list[i]=sp.strip()
                 x='args_not_none'
+
+
     ext= os.path.splitext(args.data_file)[1]
 
     if ext == ".cti" or ext == ".xml":
@@ -101,12 +106,18 @@ def readin(args='none', **argv):
             trimmed_file=write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
-            run_sim(args.data_file, args)
+            sim_result=run_sim(args.data_file, args)
+
 
         if args.run_drg is True:
             print 'running sim'
             sim_result_1=run_sim(args.data_file, args)
+            args.initial_sim=False
             tau1=sim_result_1.tau
+
+            #retain sim initial conditions
+            args.frac=sim_result_1.frac
+            args.Temp=sim_result_1.Temp
             get_rates('mass_fractions.hdf5', args.data_file)
             print 'running DRG'
             drg_exclusion_list=make_graph(args.data_file, 'production_rates.hdf5')
