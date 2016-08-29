@@ -89,9 +89,6 @@ def make_graph(data_file, hdf5_file):
                 print ind
                 continue
 
-
-
-
         progress= str(count) + '/40 timesteps'
         print progress
         #print("--- %s seconds ---" % (time.time() - start_time))
