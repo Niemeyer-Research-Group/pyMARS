@@ -382,7 +382,7 @@ def write(solution):
 
     original_solution=solution
     new_solution=ct.Solution(output_file_name)
-    test(original_solution, new_solution)
+    #test(original_solution, new_solution)
     print output_file_name
     return output_file_name
 #for testing
