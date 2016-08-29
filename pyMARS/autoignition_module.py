@@ -208,7 +208,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
         plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
         plt.legend()
-        plt.ylabel('Temperature (K)')
+        plt.ylabel('Temperature (C)')
         #plt.axis([0, 1.2, 900, 2800])
         plt.show()
 
@@ -281,14 +281,16 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
             points()
 
     class return_obj:
-        def __init__(self, time, temp, sp_data, f1, tau):
+        def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
             self.time=time
             self.temp=temp
             self.sp_data=sp_data
             self.test=f1
             self.tau=tau
+            self.Temp = Temp
+            self.frac = frac
 
-    return return_obj(times1, temps, sdata, f1, tau)
+    return return_obj(times1, temps, sdata, f1, tau, Temp, frac)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
