@@ -59,6 +59,7 @@ def main(args=None):
                         help='run Direct Relation Graph method to reduce', \
                         action="store_true")
 
+
     args=parser.parse_args()
     if args.file is not None:
         readin(args)
