@@ -143,7 +143,7 @@ def write(solution):
                     line +=1
 
             species_list_string += sp_str + ' '
-        return species_list_string.upper()
+        return species_list_string
 
     """-------------------------------------------------------------------------
     Write Title Block to file
@@ -159,7 +159,7 @@ def write(solution):
     Write Phase definition to file
     -------------------------------------------------------------------------"""
 
-    element_names=eliminate( str(trimmed_solution.element_names).upper(), \
+    element_names=eliminate( str(trimmed_solution.element_names), \
                                         ['[', ']', '\'', ','])
 
     element_names=element_names.replace('AR', 'Ar')
@@ -193,7 +193,7 @@ def write(solution):
         d=3.33564e-30 #1 debye = d coulomb-meters
 
         species=trimmed_solution.species(i)
-        name=str(trimmed_solution.species(i).name).upper()
+        name=str(trimmed_solution.species(i).name)
         nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
         replace_list_1= {'{':'\"',       '}':'\"',       '\'':'',
                     ':  ':':',      '.0':"",         ',':'',       ' ': '  '}
@@ -299,7 +299,7 @@ def write(solution):
 
     #write data for each reaction in the Solution Object
     for n, i in enumerate(trimmed_solution.reaction_equations()):
-        equation_string=str(trimmed_solution.reaction_equation(n)).upper()
+        equation_string=str(trimmed_solution.reaction_equation(n))
         equation_object=trimmed_solution.reaction(n)
         equation_type=type(equation_object).__name__
         m=str(n+1)
@@ -317,7 +317,7 @@ def write(solution):
             Arr=build_Arr(equation_object, equation_type)
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
-            Efficiencies_string=replace_multiple(str(trimmed_efficiencies).upper(),\
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies),\
                         replace_list_2)
 
             reaction_string = Template('#  Reaction $m\n' +
@@ -353,7 +353,7 @@ def write(solution):
             kf0=build_mod_Arr(equation_object, 'low')
             replace_list_2={"{":"\"",      "\'":"",     ": ":":", \
                                     ",":" ",     "}":"\"" }
-            Efficiencies_string=replace_multiple(str(trimmed_efficiencies).upper(),\
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies),\
                                         replace_list_2)
 
             reaction_string = Template('#  Reaction $m\n' +
@@ -382,7 +382,7 @@ def write(solution):
 
     original_solution=solution
     new_solution=ct.Solution(output_file_name)
-    #test(original_solution, new_solution)
+    test(original_solution, new_solution)
     print output_file_name
     return output_file_name
 #for testing
