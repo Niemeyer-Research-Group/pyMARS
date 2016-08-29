@@ -29,9 +29,15 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
     data_file=mech_file
     solution1 = ct.Solution(mech_file)
-    frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
-    Temp= float(raw_input('Enter Solution Temperature in (C):'))
-    Temp=Temp+273.0 #convert to kelvin
+    #allow initial conditions to be carried in if already set from previous
+    #sim.
+    if sys_args.initial_sim is True:
+        frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
+        Temp= float(raw_input('Enter Solution Temperature in (C):'))
+        Temp=Temp+273.0 #convert to kelvin
+    else:
+        frac=sys_args.frac
+        Temp=sys_args.Temp
     solution1.TPX = Temp, ct.one_atm, frac #1001.0
     species=solution1.species()
     reactions=solution1.reactions()
