@@ -144,7 +144,7 @@ def write(solution):
                 line +=1
 
             species_list_string += sp_str + ((16-len(sp_str))*sp)
-        return species_list_string.upper()
+        return species_list_string
 
     """-------------------------------------------------------------------------
     Write Title Block to file
@@ -156,7 +156,7 @@ def write(solution):
     Write Phase definition to file
     -------------------------------------------------------------------------"""
 
-    element_names=eliminate( str(trimmed_solution.element_names).upper(), \
+    element_names=eliminate( str(trimmed_solution.element_names), \
                                         ['[', ']', '\'', ','])
 
     element_string=Template('ELEMENTS\n'    +
@@ -189,7 +189,7 @@ def write(solution):
         d=3.33564e-30 #1 debye = d coulomb-meters
 
         species=trimmed_solution.species(i)
-        name=str(trimmed_solution.species(i).name).upper()
+        name=str(trimmed_solution.species(i).name)
         nasa_coeffs=trimmed_solution.species(i).thermo.coeffs
 
         #Species attributes from trimmed solution object
@@ -202,7 +202,7 @@ def write(solution):
         temp_range= str(t_low) + '  ' + str(t_max) + '  ' + t_mid
         species_comp=''
         for ind, atom in enumerate(species.composition):
-            species_comp += '{:<4}'.format(atom.upper())
+            species_comp += '{:<4}'.format(atom)
             species_comp += str(int(species.composition[atom]))
 
         if type(species.transport).__name__ == 'GasTransportData':
@@ -245,7 +245,7 @@ def write(solution):
     f.write('REACTIONS\n')
     #write data for each reaction in the Solution Object
     for n, i in enumerate(trimmed_solution.reaction_equations()):
-        equation_string=str(trimmed_solution.reaction_equation(n)).upper()
+        equation_string=str(trimmed_solution.reaction_equation(n))
         equation_string=eliminate(equation_string, ' ', 'single')
         equation_object=trimmed_solution.reaction(n)
         equation_type=type(equation_object).__name__
@@ -269,7 +269,7 @@ def write(solution):
                         del trimmed_efficiencies[s]
 
             replace_list_2={'{':'', '}':'/', '\'':'', ':':'/', ',':'/'}
-            Efficiencies_string=replace_multiple(str(trimmed_efficiencies).upper(),\
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies),\
             replace_list_2)
 
             secondary_line= str(Efficiencies_string) + '\n'
@@ -322,7 +322,7 @@ def write(solution):
                         del trimmed_efficiencies[s]
 
             replace_list_2={'{':'', '}':'/', '\'':'', ':':'/', ',':'/'}
-            Efficiencies_string=replace_multiple(str(trimmed_efficiencies).upper(),\
+            Efficiencies_string=replace_multiple(str(trimmed_efficiencies),\
             replace_list_2)
 
             fourth_line= str(Efficiencies_string) + '\n'
