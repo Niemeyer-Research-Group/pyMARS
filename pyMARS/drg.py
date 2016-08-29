@@ -98,7 +98,7 @@ def make_graph(data_file, hdf5_file):
     target=str(raw_input('Enter target starting species:'))
     essential_nodes=list(nx.node_connected_component(G, target))
 
-    nx.draw(G, with_labels=True, width=.25)
+    #nx.draw(G, with_labels=True, width=.25)
 
     #get list of species to eliminate
     exclusion_list=list()
