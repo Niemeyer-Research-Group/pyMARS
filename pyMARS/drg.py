@@ -90,7 +90,7 @@ def make_graph(data_file, hdf5_file):
                 continue
 
         progress= str(count) + '/40 timesteps'
-        print progress
+        #print progress
         #print("--- %s seconds ---" % (time.time() - start_time))
         #print (nm, G.number_of_edges())
 
