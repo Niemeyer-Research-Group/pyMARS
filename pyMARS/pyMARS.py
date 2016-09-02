@@ -125,9 +125,9 @@ def readin(args='none', **argv):
             drg_exclusion_list=make_graph(solution_object, 'production_rates.hdf5')
 
             new_solution_objects=trim(solution_object, drg_exclusion_list, args.data_file)
-            print 'DRG finished'
-            drg_trimmed_file=write(new_solution_objects[1])
 
+            drg_trimmed_file=write(new_solution_objects[1])
+            print 'DRG finished'
 
             #compare reduced mechanism against original
             sim_result_2=run_sim(new_solution_objects[1], args)
