@@ -32,25 +32,17 @@ def trim(solution_object, exclusion_list, file_name):
     initial_species_objects = initial_solution.species
     initial_species_names = initial_solution.species_names
 
-    initial_reaction_list = initial_solution.reaction_equations()
+    initial_reaction_list = initial_solution.reactions()
     initial_reaction_objects = initial_solution.reactions
 
     # Remove reactions
-    initial_index=[]
-    index_exclude=[]
-    for i, reaction_string in enumerate(initial_reaction_list):
-        initial_index.append(i)
-        Reaction = initial_reaction_list[i]
-        for n in exclusion_list:
-            if n in Reaction:
-                index_exclude.append(i)
-    final_index=initial_index
+    final_reaction_objects=[]
+    for i, reaction in enumerate(initial_reaction_list):
+        reaction_species = reaction.products.keys() + reaction.reactants.keys()
+        difference = set(reaction_species).intersection(exclusion_list)
+        if len(difference) == 0:
+            final_reaction_objects.append(reaction)
 
-    for value in index_exclude:
-        if value in final_index:
-            final_index.remove(value)
-
-    final_reaction_objects= [initial_solution.reaction(r) for r in final_index]
     final_T=initial_solution.T
     final_P=initial_solution.P
 
@@ -63,9 +55,10 @@ def trim(solution_object, exclusion_list, file_name):
     final_species_objects =   [initial_solution.species(name) for name in final_species_names]
 
     # New solution definition
-    new_solution= ct.Solution(species=final_species_objects,
-                        reactions=final_reaction_objects,
-                        thermo='IdealGas', kinetics='GasKinetics')
+    new_solution= ct.Solution(  species=final_species_objects,
+                                reactions=final_reaction_objects,
+                                thermo='IdealGas',
+                                kinetics='GasKinetics')
     new_solution.TP = initial_solution.TP
     new_solution.name = ('trimmed_' + os.path.splitext(file_name)[0])
     return (initial_solution, new_solution)
