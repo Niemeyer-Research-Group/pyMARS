@@ -5,7 +5,7 @@ import h5py
 import matplotlib.pyplot as plt
 import time
 
-def make_graph(data_file, hdf5_file):
+def make_graph(solution_object, hdf5_file):
     """ Use the Direct Relation Graph (DRG) method to choose species to
     eliminate from reaction mechanism.
 
@@ -23,7 +23,7 @@ def make_graph(data_file, hdf5_file):
     f=h5py.File(hdf5_file, 'r')
 
     #initalize solution and components
-    solution= ct.Solution(data_file)
+    solution= solution_object
     species_objects=solution.species()
     reaction_objects=solution.reactions()
     #ask for threshold value
@@ -38,7 +38,6 @@ def make_graph(data_file, hdf5_file):
     #add nodes to graph
     for ind, sp in enumerate(species_objects):
         G.add_node(sp.name)
-
     #iterate through each timestep
     for nm, grp in f.iteritems():
         count +=1
@@ -46,10 +45,8 @@ def make_graph(data_file, hdf5_file):
         #generate dict of sum production Rates
         ri_total={}
         ri_partial={}
-
         for k in species_objects:
             ri_total[k.name] = 0
-
         #iterate through reactions and build weights
         for i, reac in enumerate(reaction_objects):
             products=reac.products
@@ -64,17 +61,14 @@ def make_graph(data_file, hdf5_file):
                 for reactant in reactant_names:
                     molar_coeff=float(reactants[reactant])
                     ri_total[reactant] += (reaction_production_rate*molar_coeff)
-
                     for product in product_names:
                         partial_name= reactant + '_' + product
-
                         if product == reactant:
                             continue
                         try:
                             ri_partial[partial_name] += (reaction_production_rate*molar_coeff)
                         except KeyError:
                             ri_partial[partial_name] = (reaction_production_rate*molar_coeff)
-
         #divide progress related to species B by total progress
         #and make edge
         for ind in ri_partial:
@@ -118,8 +112,6 @@ def make_graph(data_file, hdf5_file):
     for spc in exclusion_list:
         exclusion_list_string += spc + ', '
     exclusion_list_string= exclusion_list_string.rstrip(',')
-    print 'Species to Exclude'
-    print exclusion_list_string
     plt.show(block=False)
     print G.number_of_edges()
     print G.number_of_nodes()

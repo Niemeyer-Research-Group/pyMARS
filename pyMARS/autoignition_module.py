@@ -8,7 +8,7 @@ import h5py
 
 
 
-def run_sim(mech_file, sys_args='none', **usr_args ):
+def run_sim(solution_object, sys_args='none', **usr_args ):
     """
     Function to run Cantera reactor simulation
 
@@ -27,8 +27,7 @@ def run_sim(mech_file, sys_args='none', **usr_args ):
 
     """
 
-    data_file=mech_file
-    solution1 = ct.Solution(mech_file)
+    solution1 = solution_object
     #allow initial conditions to be carried in if already set from previous
     #sim.
     if sys_args.initial_sim is True:

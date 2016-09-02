@@ -2,12 +2,14 @@ import cantera as ct
 import h5py
 import numpy as np
 
-def get_rates(hdf5_file, mechanism_file):
+def get_rates(hdf5_file, solution_object):
     #read in data file
     f=h5py.File(hdf5_file, 'r')
 
     #create file for production rates
     g=h5py.File('production_rates.hdf5', 'w')
+    #initialize solution
+    solution=solution_object
     #iterate through all 40 timesteps
     for grp in f:
         #get solution data at individual timestep
@@ -16,8 +18,7 @@ def get_rates(hdf5_file, mechanism_file):
         temp=group['Temp'].value
         pressure=group['Pressure'].value
         mass_fractions=np.array(group['Species Mass Fractions'])
-        #initalize solution, and set state
-        solution=ct.Solution(mechanism_file)
+        #set solution state
         solution.TPY= temp, pressure, mass_fractions
 
         #create groups and write production data to new file

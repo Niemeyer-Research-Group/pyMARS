@@ -99,33 +99,38 @@ def readin(args='none', **argv):
 
     if ext == ".cti" or ext == ".xml":
         print("\n\nThis is an Cantera xml or cti file\n")
+        solution_object=ct.Solution(args.data_file)
         #trims file
         #need case if no trim necessary
-        solution_objects=trim(args.data_file, args.exclusion_list)
+        solution_objects=trim(solution_object, args.exclusion_list, args.data_file)
         if args.run_drg is False:
             trimmed_file=write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
             sim_result=run_sim(args.data_file, args)
 
-
         if args.run_drg is True:
+
             print 'running sim'
-            sim_result_1=run_sim(args.data_file, args)
+            sim_result_1=run_sim(solution_object, args)
             args.initial_sim=False
             tau1=sim_result_1.tau
+            print 'sim finished'
 
             #retain sim initial conditions
             args.frac=sim_result_1.frac
             args.Temp=sim_result_1.Temp
-            get_rates('mass_fractions.hdf5', args.data_file)
+            get_rates('mass_fractions.hdf5', solution_object)
             print 'running DRG'
-            drg_exclusion_list=make_graph(args.data_file, 'production_rates.hdf5')
-            new_solution_objects=trim(args.data_file, drg_exclusion_list)
+            drg_exclusion_list=make_graph(solution_object, 'production_rates.hdf5')
+
+            new_solution_objects=trim(solution_object, drg_exclusion_list, args.data_file)
+            print 'DRG finished'
             drg_trimmed_file=write(new_solution_objects[1])
 
+
             #compare reduced mechanism against original
-            sim_result_2=run_sim(drg_trimmed_file, args)
+            sim_result_2=run_sim(new_solution_objects[1], args)
             tau2=sim_result_2.tau
             print 'original ignition delay: ' + str(tau1)
             print 'new ignition delay: ' + str(tau2)

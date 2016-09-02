@@ -2,7 +2,7 @@
 import cantera as ct
 import os
 
-def trim(data_file, exclusion_list):
+def trim(solution_object, exclusion_list, file_name):
 
     """ Function to reduce list of species and corresponding reactions.
 
@@ -27,7 +27,7 @@ def trim(data_file, exclusion_list):
     print ('\n')
 
     # define initial solution objects
-    initial_solution = ct.Solution(data_file)
+    initial_solution = solution_object
 
     initial_species_objects = initial_solution.species
     initial_species_names = initial_solution.species_names
@@ -67,5 +67,5 @@ def trim(data_file, exclusion_list):
                         reactions=final_reaction_objects,
                         thermo='IdealGas', kinetics='GasKinetics')
     new_solution.TP = initial_solution.TP
-    new_solution.name = ('trimmed_' + os.path.splitext(data_file)[0])
+    new_solution.name = ('trimmed_' + os.path.splitext(file_name)[0])
     return (initial_solution, new_solution)
