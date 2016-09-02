@@ -396,7 +396,7 @@ def write(solution):
     section_break('Reaction Data')
 
     #write data for each reaction in the Solution Object
-    for eq_index, equation in enumerate(trimmed_solution.reaction_equations()):
+    for eq_index in xrange(len(trimmed_solution.reaction_equations())):
         equation_string = str(trimmed_solution.reaction_equation(eq_index))
         equation_object = trimmed_solution.reaction(eq_index)
         equation_type = type(equation_object).__name__
@@ -489,10 +489,13 @@ def write(solution):
             except IndexError:
                 f.write('\n           )\n\n')
     f.close()
+    return output_file_name
 
+    """
     #test mechanism file
 
     original_solution = solution
     new_solution = ct.Solution(output_file_name)
     test(original_solution, new_solution)
     return output_file_name
+    """
