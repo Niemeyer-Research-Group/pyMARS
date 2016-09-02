@@ -32,8 +32,8 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     #sim.
     if sys_args.initial_sim is True:
         frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
-        Temp= float(raw_input('Enter Solution Temperature in (C):'))
-        Temp=Temp+273.0 #convert to kelvin
+        Temp= float(raw_input('Enter Solution Temperature in (K):'))
+        Temp=Temp#+273.0 #convert to kelvin
     else:
         frac=sys_args.frac
         Temp=sys_args.Temp
@@ -122,9 +122,20 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     """-------------------------------------------------------------------------
     find initial and final sample points
     -------------------------------------------------------------------------"""
-
-    initial_point=[times1[i-20], T[i-20], i-20]
-    final_point=[times1[i+20], T[i+20], i+20]
+    try:
+        initial_point=[times1[i-20], T[i-20], i-20]
+    except IndexError:
+        initial_point=[times1[0], T[0], 0]
+        print 'not enough timesteps before ignition'
+        print 'timesteps before ignition: %s' %i
+        print 'total timesteps: %s' % len(T)
+    try:
+        final_point=[times1[i+20], T[i+20], i+20]
+    except IndexError:
+        final_point=[times1[len(times1)-1], T[len(T)-1], (len(T)-1)]
+        print 'not enough timesteps after ignition'
+        print 'timesteps after ignition: %s' %(len(T)-i)
+        print 'total timesteps: %s' % len(T)
 
 
     """-------------------------------------------------------------------------
