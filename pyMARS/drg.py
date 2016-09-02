@@ -58,11 +58,11 @@ def make_graph(solution_object, hdf5_file):
             reaction_production_rate=float(rxn_prod_rates[i])
 
             if reaction_production_rate != 0:
-                for reactant in reactant_names:
-                    molar_coeff=float(reactants[reactant])
-                    ri_total[reactant] += (reaction_production_rate*molar_coeff)
-                    for product in product_names:
-                        partial_name= reactant + '_' + product
+                for product in product_names:
+                    molar_coeff=float(products[product])
+                    ri_total[product] += (reaction_production_rate*molar_coeff)
+                    for reactant in reactant_names:
+                        partial_name= product + '_' + reactant
                         if product == reactant:
                             continue
                         try:
@@ -81,7 +81,7 @@ def make_graph(solution_object, hdf5_file):
                 if weight >= threshold:
                     if G.has_edge(sp_A, sp_B):
                         old_weight=G[sp_A][sp_B][0]['weight']
-                        if weight >= old_weight:
+                        if weight > old_weight:
                             G.add_edge(sp_A, sp_B, weight=weight)
                     else:
                         G.add_edge(sp_A, sp_B, weight=weight)
