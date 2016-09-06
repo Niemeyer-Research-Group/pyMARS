@@ -58,6 +58,9 @@ def main(args=None):
     parser.add_argument('--run_drg', \
                         help='run Direct Relation Graph method to reduce', \
                         action="store_true")
+    parser.add_argument('--iterate', \
+                        help='Iterate DRG up to acceptable error limit', \
+                        action="store_true")
 
 
     args=parser.parse_args()
@@ -78,5 +81,6 @@ def main(args=None):
             --writecsv
             --writehdf5
             --run_drg
+            --iterate: Insead, iterate DRG up to acceptable error limit
 
         """

@@ -50,6 +50,8 @@ def readin(args='none', **argv):
                 transport_file = None
                 run_drg = None
                 initial_sim = True
+                iterate = False
+
                 if 'thermo' in argv:
                     thermo_file = argv['thermo']
                 if 'transport' in argv:
@@ -72,6 +74,8 @@ def readin(args='none', **argv):
                     points = True
                 if 'run_drg' in argv:
                     run_drg = True
+                if 'iterate' in argv:
+                    iterate = True
                 x ='arg_none'
 
         #package from terminal use case
@@ -85,6 +89,7 @@ def readin(args='none', **argv):
                 transport_file=args.transport
                 run_drg=args.run_drg
                 initial_sim = True
+                iterate = args.iterate
                 if args.species is None:
                     exclusion_list=[]
                 else:
@@ -110,32 +115,58 @@ def readin(args='none', **argv):
             sim_result=run_sim(solution_object, args)
 
         if args.run_drg is True:
-
-            print 'running sim'
+            #get user input
+            target_species = str(raw_input('Enter target starting species: '))
+            #run first sim
+            args.initial_sim = True
             sim_result_1=run_sim(solution_object, args)
-            args.initial_sim=False
-            tau1=sim_result_1.tau
-            print 'sim finished'
-
             #retain sim initial conditions
+            tau1=sim_result_1.tau
             args.frac=sim_result_1.frac
             args.Temp=sim_result_1.Temp
             get_rates('mass_fractions.hdf5', solution_object)
-            print 'running DRG'
-            drg_exclusion_list=make_graph(solution_object, 'production_rates.hdf5')
+            args.initial_sim = False
 
-            new_solution_objects=trim(solution_object, drg_exclusion_list, args.data_file)
-
-            drg_trimmed_file=write(new_solution_objects[1])
-            print 'DRG finished'
-
-            #compare reduced mechanism against original
-            sim_result_2=run_sim(new_solution_objects[1], args)
-            tau2=sim_result_2.tau
-            print 'original ignition delay: ' + str(tau1)
-            print 'new ignition delay: ' + str(tau2)
-            error = (tau1-tau2)/tau1
-            print 'error: ' + str(error) + ' %'
+            if args.iterate is True:
+                print 'iterate is true'
+                #set initial 0 cases
+                error = 0.0
+                threshold = 0.00
+                loop_number = 0
+                error_limit = float(raw_input('Acceptable Error Limit: '))
+                while error < error_limit:
+                    loop_number += 1
+                    threshold +=.05
+                    #run DRG
+                    drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
+                    new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
+                    #run second sim
+                    sim_result_2 = run_sim(new_solution_objects[1], args)
+                    #compare error
+                    tau2 = sim_result_2.tau
+                    #print 'original ignition delay: ' + str(tau1)
+                    #print 'new ignition delay: ' + str(tau2)
+                    error = float(abs((tau1-tau2)/tau1))
+                    print 'error: ' + str(error) + ' %'
+                    #print 'Loop number: ' + str(loop_number)
+                print 'Number of loops: %s' %loop_number
+                print 'Final max threshold value: %s' %threshold
+                print 'Error: %s ' %error
+            else:
+                threshold = float(raw_input('Enter threshold value: '))
+                drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
+                new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
+                #run second sim
+                sim_result_2 = run_sim(new_solution_objects[1], args)
+                #compare error
+                tau2 = sim_result_2.tau
+                #print 'original ignition delay: ' + str(tau1)
+                #print 'new ignition delay: ' + str(tau2)
+                error = float(abs((tau1-tau2)/tau1))
+                print 'error: ' + str(error) + ' %'
+            n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
+            print 'Number of species eliminated: %s' %n_species_eliminated
+            drg_trimmed_file = write(new_solution_objects[1])
 
     elif ext == ".inp" or ext == ".dat" or ext == ".txt":
         print("\n\nThis is a Chemkin file")
@@ -159,7 +190,6 @@ def readin(args='none', **argv):
             args.data_file=write(new_solution_objects[1])
 
         #run_sim(converted_file_name, args)
-
 
 
     else:

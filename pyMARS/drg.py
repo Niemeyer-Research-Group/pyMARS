@@ -5,7 +5,7 @@ import h5py
 import matplotlib.pyplot as plt
 import time
 
-def make_graph(solution_object, hdf5_file):
+def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     """ Use the Direct Relation Graph (DRG) method to choose species to
     eliminate from reaction mechanism.
 
@@ -27,7 +27,7 @@ def make_graph(solution_object, hdf5_file):
     species_objects=solution.species()
     reaction_objects=solution.reactions()
     #ask for threshold value
-    threshold=float(raw_input('Enter threshold value: '))
+    threshold=threshold_value
 
 
     G=nx.MultiGraph()
@@ -95,7 +95,7 @@ def make_graph(solution_object, hdf5_file):
         #print (nm, G.number_of_edges())
 
     #get connected species
-    target=str(raw_input('Enter target starting species:'))
+    target=target_species
     essential_nodes=list(nx.node_connected_component(G, target))
 
     #nx.draw(G, with_labels=True, width=.25)
