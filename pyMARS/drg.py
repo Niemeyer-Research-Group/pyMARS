@@ -29,7 +29,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     #ask for threshold value
     threshold=threshold_value
 
-
     G=nx.MultiGraph()
     node_labels={}
     count=0
@@ -55,9 +54,14 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             reactants=reac.reactants
             reactant_names=reac.reactants.keys()
 
+            #generate list of all species
+            all_species = reac.products
+            all_species.update(reac.reactants)
+
             reaction_production_rate=float(rxn_prod_rates[i])
 
             if reaction_production_rate != 0:
+                """
                 for product in product_names:
                     molar_coeff=float(products[product])
                     ri_total[product] += (reaction_production_rate*molar_coeff)
@@ -69,14 +73,45 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                             ri_partial[partial_name] += (reaction_production_rate*molar_coeff)
                         except KeyError:
                             ri_partial[partial_name] = (reaction_production_rate*molar_coeff)
+                """
+                for spx in all_species:
+                    species_A = spx
+                    molar_coeff_A = float(all_species[species_A])
+                    ri_total[species_A] += abs(reaction_production_rate* molar_coeff_A)
+                    for spy in all_species:
+                        species_B = spy
+                        partial_name = species_A + '_' + species_B
+                        if spy == spx:
+                            continue
+                        try:
+                            ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
+                        except KeyError:
+                            ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
         #divide progress related to species B by total progress
         #and make edge
+
+        ri_partial_temp = ri_partial
+        ri_partial_temp_1 = ri_partial
+        for ik in ri_partial_temp:
+            value_one = ri_partial_temp[ik]
+            split_name = ik.split('_', 1)
+            switched_name = str(split_name[1]) + '_' + str(split_name[0])
+            for il in ri_partial_temp:
+                value_two = ri_partial_temp[il]
+                if il == switched_name:
+                    ri_partial_temp_1[ik] = value_one + value_two
+                    #del ri_partial_temp_1[il]
+                else:
+                    continue
+
+
+
         for ind in ri_partial:
             try:
                 both=ind.split('_', 1)
                 sp_A=both[0]
                 sp_B=both[1]
-                weight = float(ri_partial[ind])/float(ri_total[sp_A])
+                weight = abs(float(ri_partial[ind])/float(ri_total[sp_A]))
                 #only add edge if > than edge value from previous timesteps
                 if weight >= threshold:
                     if G.has_edge(sp_A, sp_B):
@@ -115,7 +150,9 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     plt.show(block=False)
     print G.number_of_edges()
     print G.number_of_nodes()
+    f.close()
     return ex_list
+
 
 
 #make_graph('gri301.cti', 'production_rates.hdf5')
