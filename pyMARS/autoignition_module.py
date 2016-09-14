@@ -14,7 +14,12 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     Arguments
         Cantera mechanism file
-        User arguments (plot='y', points='y', writehdf5='y', writecsv='y' )
+        User arguments (plot='y',
+                        points='y',
+                        writehdf5='y',
+                        writecsv='y',
+                        initial_sim='y')
+        *User argument initial_sim needed if running module independently
     ----------
     Output
         Plot of Temp vs Time
@@ -23,14 +28,21 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         Hdf5 file
     ----------
     Example
-        run_sim('gri30.cti', points='y', plot='y')
+        run_sim(gas_solution, points='y', plot='y', initial_sim='y')
 
     """
 
     solution1 = solution_object
     #allow initial conditions to be carried in if already set from previous
     #sim.
-    if sys_args.initial_sim is True:
+    if sys_args is 'none':
+        if 'initial_sim' in usr_args:
+            initial_sim = True
+    else:
+        if sys_args.initial_sim is True:
+            initial_sim = True
+
+    if initial_sim is True:
         frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
         Temp= float(raw_input('Enter Solution Temperature in (K):'))
         Temp=Temp#+273.0 #convert to kelvin
@@ -249,6 +261,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             writehdf5(sdata)
         if 'points' in usr_args:
             points()
+
 
     class return_obj:
         def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
