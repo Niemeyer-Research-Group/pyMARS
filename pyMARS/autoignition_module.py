@@ -39,8 +39,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         if 'initial_sim' in usr_args:
             initial_sim = True
     else:
-        print 'yes'
-        print sys_args.initial_sim
         if sys_args.initial_sim is True:
             initial_sim = True
         else:
