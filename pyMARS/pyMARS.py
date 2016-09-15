@@ -146,7 +146,7 @@ def readin(args='none', **argv):
                     tau2 = sim_result_2.tau
                     #print 'original ignition delay: ' + str(tau1)
                     #print 'new ignition delay: ' + str(tau2)
-                    error = float(abs((tau1-tau2)/tau1))
+                    error = float(abs((tau1-tau2)/tau1)*100.0)
                     print 'error: ' + str(error) + ' %'
                     #print 'Loop number: ' + str(loop_number)
                 print 'Number of loops: %s' %loop_number
