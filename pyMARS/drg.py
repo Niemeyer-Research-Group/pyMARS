@@ -87,25 +87,27 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                             ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
                         except KeyError:
                             ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
-        #divide progress related to species B by total progress
-        #and make edge
 
-        ri_partial_temp = ri_partial
-        ri_partial_temp_1 = ri_partial
-        for ik in ri_partial_temp:
-            value_one = ri_partial_temp[ik]
+
+
+        #clean up duplicate edges
+        ri_partial_temp = dict(ri_partial)
+        for ik in ri_partial:
+            value_one = ri_partial[ik]
             split_name = ik.split('_', 1)
             switched_name = str(split_name[1]) + '_' + str(split_name[0])
-            for il in ri_partial_temp:
-                value_two = ri_partial_temp[il]
+            for il in ri_partial:
+                value_two = ri_partial[il]
                 if il == switched_name:
-                    ri_partial_temp_1[ik] = value_one + value_two
-                    #del ri_partial_temp_1[il]
+                    ri_partial_temp[ik] = value_one + value_two
+                    del ri_partial_temp[il]
                 else:
                     continue
+        ri_partial = dict(ri_partial_temp)
 
 
-
+#divide progress related to species B by total progress
+#and make edge
         for ind in ri_partial:
             try:
                 both=ind.split('_', 1)
@@ -123,7 +125,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             except IndexError:
                 print ind
                 continue
-
         progress= str(count) + '/40 timesteps'
         #print progress
         #print("--- %s seconds ---" % (time.time() - start_time))
@@ -156,67 +157,3 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
 
 
 #make_graph('gri301.cti', 'production_rates.hdf5')
-
-
-
-#original DRG code. takes too long
-"""
-for nm, grp in f.iteritems():
-    count +=1
-    #net rates of progress for each reaction
-    rxn_prod_rates=np.array(grp['Reaction Production Rates'])
-    #net production rates for each species
-    #sp_prod_rates=np.array(grp['Species Net Production Rates'])
-    #orignal net production rates for each species
-    #sp_prod_rates_original=np.array(grp['Species Net Production Rates Original'])
-
-    for l, m in enumerate(species_objects):
-        sp_A=m.name
-        #if G.has_node(sp_A) is False:
-        if count == 1:
-            G.add_node(sp_A)
-            node_labels[sp_A] =l
-        ri_total={}
-        ri_partial={}
-        #iterate through every species
-        for k, n in enumerate(species_objects):
-            name=n.name
-            if name==sp_A:
-                continue
-            ri_total[name] = 0
-            ri_partial[name] = 0
-            #for every species iterate through every reaction
-            for i, reac in enumerate(reaction_objects):
-                #reac_type=reac.__class__.__name__
-                #if reac.duplicate is False:
-                if reac.__contains__(name):
-                    rxn_prod_rate=float(rxn_prod_rates[i])
-                    product_species=reac.products
-                    reactant_species=reac.reactants
-                    if name in product_species and reactant_species:
-                        if rxn_prod_rate != 0:
-                            total_species = reactant_species
-                        if rxn_prod_rate ==0:
-                            total_species=reac.products
-                            total_species.update(reac.reactants)
-                        else:
-                            total_species = product_species
-                    else:
-                        total_species=reac.products
-                        total_species.update(reac.reactants)
-                    #if name in total_species.keys():
-                    molar_coeff= float(total_species[name])
-                    ri_total[name] += (rxn_prod_rate*molar_coeff)
-                    if sp_A in total_species.keys():
-                        ri_partial[name] +=  (rxn_prod_rate*molar_coeff)
-                    try:
-                        weight_total= float(ri_partial[name])/float(ri_total[name])
-                    except ZeroDivisionError:
-                        weight_total = 0.0
-
-                    edge_name=sp_A + '_'+ name
-                    if G.has_edge(name, sp_A) is False:
-                        if weight_total != 0.0 or -0.0:
-                            if weight_total > threshold:
-                                G.add_edge(name, sp_A, weight=weight_total, color='b')
-    """
