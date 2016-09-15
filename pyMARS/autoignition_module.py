@@ -39,8 +39,12 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         if 'initial_sim' in usr_args:
             initial_sim = True
     else:
+        print 'yes'
+        print sys_args.initial_sim
         if sys_args.initial_sim is True:
             initial_sim = True
+        else:
+            initial_sim = False
 
     if initial_sim is True:
         frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
