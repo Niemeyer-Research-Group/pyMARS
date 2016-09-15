@@ -6,8 +6,6 @@ import os
 import h5py
 
 
-
-
 def run_sim(solution_object, sys_args='none', **usr_args ):
     """
     Function to run Cantera reactor simulation
@@ -33,7 +31,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     """
 
     solution1 = solution_object
-    #allow initial conditions to be carried in if already set from previous
+    # temporary fix, allow initial conditions to be carried in if already set from previous
     #sim.
     if sys_args is 'none':
         if 'initial_sim' in usr_args:
@@ -46,14 +44,14 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     if initial_sim is True:
         frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
-        Temp= float(raw_input('Enter Solution Temperature in (K):'))
-        Temp=Temp#+273.0 #convert to kelvin
+        initial_temperature = float(raw_input('Enter Solution Temperature in (K):'))
+        initial_temperature = initial_temperature#+273.0 #convert to kelvin
     else:
-        frac=sys_args.frac
-        Temp=sys_args.Temp
-    solution1.TPX = Temp, ct.one_atm, frac #1001.0
-    species=solution1.species()
-    reactions=solution1.reactions()
+        frac = sys_args.frac
+        initial_temperature = sys_args.Temp
+    solution1.TPX = initial_temperature, ct.one_atm, frac #1001.0
+    species = solution1.species()
+    reactions = solution1.reactions()
 
     class state:
         def __init__(self, time, species_list, reactions):
@@ -77,8 +75,8 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     r1 = ct.Reactor(solution1)
     sim1 = ct.ReactorNet([r1])
-    tnow=0.0
-    tfinal=5.0e-3
+    tnow = 0.0
+    tfinal = 5.0e-3
     index1 = 0
     times1 = []
     temps = [] #first column is time, second is temperature
@@ -89,13 +87,11 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     f1=h5py.File('mass_fractions.hdf5', 'w')
     while tnow < tfinal:
-
         index1 += 1
         tnow = sim1.step(tfinal)
         times1.append(tnow)
         temps.append(r1.T)
         species_data=r1.Y
-
 
         grp=f1.create_group(str(index1))
         grp['Temp'] = r1.T
@@ -272,10 +268,10 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             self.sp_data=sp_data
             self.test=f1
             self.tau=tau
-            self.Temp = Temp
+            self.Temp = initial_temperature
             self.frac = frac
 
-    return return_obj(times1, temps, sdata, f1, tau, Temp, frac)
+    return return_obj(times1, temps, sdata, f1, tau, initial_temperature, frac)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
