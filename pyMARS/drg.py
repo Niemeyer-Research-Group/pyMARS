@@ -19,61 +19,43 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     exclusion_list: List of species to trim from mechanism
     """
 
-    #open reaction rate file
-    f=h5py.File(hdf5_file, 'r')
+    f = h5py.File(hdf5_file, 'r')
 
     #initalize solution and components
-    solution= solution_object
-    species_objects=solution.species()
-    reaction_objects=solution.reactions()
+    solution = solution_object
+    species_objects = solution.species()
+    reaction_objects = solution.reactions()
     #ask for threshold value
-    threshold=threshold_value
+    threshold = threshold_value
 
-    G=nx.MultiGraph()
-    node_labels={}
-    count=0
-    start_time=time.time()
+    G = nx.MultiGraph()
+    node_labels = {}
+    count = 0
+    start_time = time.time()
 
     #add nodes to graph
     for ind, sp in enumerate(species_objects):
         G.add_node(sp.name)
     #iterate through each timestep
     for nm, grp in f.iteritems():
-        count +=1
-        rxn_prod_rates=np.array(grp['Reaction Production Rates'])
+        count += 1
+        rxn_prod_rates = np.array(grp['Reaction Production Rates'])
         #generate dict of sum production Rates
-        ri_total={}
-        ri_partial={}
+        ri_total = {}
+        ri_partial = {}
         for k in species_objects:
             ri_total[k.name] = 0
         #iterate through reactions and build weights
         for i, reac in enumerate(reaction_objects):
-            products=reac.products
-            product_names=reac.products.keys()
-
-            reactants=reac.reactants
-            reactant_names=reac.reactants.keys()
-
+            products = reac.products
+            product_names = reac.products.keys()
+            reactants = reac.reactants
+            reactant_names = reac.reactants.keys()
             #generate list of all species
             all_species = reac.products
             all_species.update(reac.reactants)
-
-            reaction_production_rate=float(rxn_prod_rates[i])
-
+            reaction_production_rate = float(rxn_prod_rates[i])
             if reaction_production_rate != 0:
-                """
-                for product in product_names:
-                    molar_coeff=float(products[product])
-                    ri_total[product] += (reaction_production_rate*molar_coeff)
-                    for reactant in reactant_names:
-                        partial_name= product + '_' + reactant
-                        if product == reactant:
-                            continue
-                        try:
-                            ri_partial[partial_name] += (reaction_production_rate*molar_coeff)
-                        except KeyError:
-                            ri_partial[partial_name] = (reaction_production_rate*molar_coeff)
-                """
                 for spx in all_species:
                     species_A = spx
                     molar_coeff_A = float(all_species[species_A])
@@ -87,9 +69,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                             ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
                         except KeyError:
                             ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
-
-
-
         #clean up duplicate edges
         ri_partial_temp = dict(ri_partial)
         for ik in ri_partial:
@@ -105,19 +84,18 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                     continue
         ri_partial = dict(ri_partial_temp)
 
-
-#divide progress related to species B by total progress
-#and make edge
+        #divide progress related to species B by total progress
+        #and make edge
         for ind in ri_partial:
             try:
-                both=ind.split('_', 1)
-                sp_A=both[0]
-                sp_B=both[1]
+                both = ind.split('_', 1)
+                sp_A = both[0]
+                sp_B = both[1]
                 weight = abs(float(ri_partial[ind])/float(ri_total[sp_A]))
                 #only add edge if > than edge value from previous timesteps
                 if weight >= threshold:
                     if G.has_edge(sp_A, sp_B):
-                        old_weight=G[sp_A][sp_B][0]['weight']
+                        old_weight = G[sp_A][sp_B][0]['weight']
                         if weight > old_weight:
                             G.add_edge(sp_A, sp_B, weight=weight)
                     else:
@@ -125,35 +103,33 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             except IndexError:
                 print ind
                 continue
-        progress= str(count) + '/40 timesteps'
+        progress =  str(count) + '/40 timesteps'
         #print progress
         #print("--- %s seconds ---" % (time.time() - start_time))
         #print (nm, G.number_of_edges())
 
     #get connected species
-    target=target_species
-    essential_nodes=list(nx.node_connected_component(G, target))
+    target = target_species
+    essential_nodes = list(nx.node_connected_component(G, target))
 
     #nx.draw(G, with_labels=True, width=.25)
 
     #get list of species to eliminate
-    exclusion_list=list()
-    ex_list=[]
+    exclusion_list = list()
+    ex_list = []
     for spec in solution.species():
-        ind_name=spec.name
+        ind_name = spec.name
         if ind_name not in essential_nodes:
             exclusion_list.append(spec.name)
             ex_list.append(spec.name)
-    exclusion_list_string='\''
+    exclusion_list_string = '\''
     for spc in exclusion_list:
         exclusion_list_string += spc + ', '
-    exclusion_list_string= exclusion_list_string.rstrip(',')
+    exclusion_list_string = exclusion_list_string.rstrip(',')
     plt.show(block=False)
     print G.number_of_edges()
     print G.number_of_nodes()
     f.close()
     return ex_list
-
-
 
 #make_graph('gri301.cti', 'production_rates.hdf5')
