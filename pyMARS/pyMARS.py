@@ -157,6 +157,7 @@ def readin(args='none', **argv):
                 drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
                 new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
                 #run second sim
+                args.initial_sim = False
                 sim_result_2 = run_sim(new_solution_objects[1], args)
                 #compare error
                 tau2 = sim_result_2.tau
