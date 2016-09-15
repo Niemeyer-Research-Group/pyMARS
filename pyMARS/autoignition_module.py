@@ -41,7 +41,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             initial_sim = True
         else:
             initial_sim = False
-
     if initial_sim is True:
         frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
         initial_temperature = float(raw_input('Enter Solution Temperature in (K):'))
@@ -53,6 +52,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     species = solution1.species()
     reactions = solution1.reactions()
 
+    #pretty sure this isn't being used at all
     class state:
         def __init__(self, time, species_list, reactions):
             self.time = time
@@ -64,10 +64,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
                         coeff[name] = (rxn.reactants.get(sp.name))
                     if sp.name in rxn.products.keys():
                         coeff[name] = (rxn.products.get(sp.name))
-
                 setattr(self, 'sp_'+ sp.name, coeff)
-
-
 
     """-------------------------------------------------------------------------
     run sim to find ignition delay from dT/dt max
@@ -80,81 +77,76 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     index1 = 0
     times1 = []
     temps = [] #first column is time, second is temperature
-    mass=r1.mass
-    sdata=np.zeros([0, len(r1.Y)])
-    production_data=np.zeros([0, len(solution1.net_production_rates)])
-    state_list=list()
+    mass = r1.mass
+    sdata = np.zeros([0, len(r1.Y)])
+    production_data = np.zeros([0, len(solution1.net_production_rates)])
+    state_list = list()
 
-    f1=h5py.File('mass_fractions.hdf5', 'w')
+    f1 = h5py.File('mass_fractions.hdf5', 'w')
     while tnow < tfinal:
         index1 += 1
         tnow = sim1.step(tfinal)
         times1.append(tnow)
         temps.append(r1.T)
-        species_data=r1.Y
+        species_data = r1.Y
 
-        grp=f1.create_group(str(index1))
+        grp = f1.create_group(str(index1))
         grp['Temp'] = r1.T
         grp['Time'] = tnow
-        grp['Pressure'] =r1.thermo.P
-        species_production_rates=r1.thermo.net_production_rates
+        grp['Pressure'] = r1.thermo.P
+        species_production_rates = r1.thermo.net_production_rates
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Species Net Production Rates Original', data=species_production_rates)
 
-        species_data=species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
-        sdata= np.vstack((sdata, species_data))
+        species_data = species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
+        sdata = np.vstack((sdata, species_data))
 
-        production_rates=np.array(solution1.net_production_rates)
-        production_rates=production_rates[:,np.newaxis].T
-        production_data=np.vstack((production_data, production_rates))
-
-
+        production_rates = np.array(solution1.net_production_rates)
+        production_rates = production_rates[:,np.newaxis].T
+        production_data = np.vstack((production_data, production_rates))
     print('\n')
     """-------------------------------------------------------------------------
     concatenate time, temp and coeff values
     -------------------------------------------------------------------------"""
-    times1=np.array(times1)
-    temps=np.array(temps)
-    timetemp=np.vstack((times1, temps)).T
-    sdata= np.hstack((timetemp, sdata))
-    production_data= np.hstack((timetemp, production_data))
-
-
+    times1 = np.array(times1)
+    temps = np.array(temps)
+    timetemp = np.vstack((times1, temps)).T
+    sdata = np.hstack((timetemp, sdata))
+    production_data = np.hstack((timetemp, production_data))
     #get ignition point from dT/dt
-    T=np.array(temps)
-    dt= np.ones(len(times1)-1)*(times1[1]-times1[0])
-    dT= np.diff(T)
-    deriv= dT/dt
-    i=deriv.argmax()
-    deriv_max=[times1[i], T[i], i]
-    tau= times1[i]
+    T =np.array(temps)
+    dt = np.ones(len(times1)-1)*(times1[1]-times1[0])
+    dT = np.diff(T)
+    deriv = dT/dt
+    i = deriv.argmax()
+    deriv_max = [times1[i], T[i], i]
+    tau = times1[i]
 
     """-------------------------------------------------------------------------
     find initial and final sample points
     -------------------------------------------------------------------------"""
     try:
-        initial_point=[times1[i-20], T[i-20], i-20]
+        initial_point = [times1[i-20], T[i-20], i-20]
     except IndexError:
-        initial_point=[times1[0], T[0], 0]
+        initial_point = [times1[0], T[0], 0]
         print 'not enough timesteps before ignition'
         print 'timesteps before ignition: %s' %i
         print 'total timesteps: %s' % len(T)
     try:
-        final_point=[times1[i+20], T[i+20], i+20]
+        final_point = [times1[i+20], T[i+20], i+20]
     except IndexError:
-        final_point=[times1[len(times1)-1], T[len(T)-1], (len(T)-1)]
+        final_point = [times1[len(times1)-1], T[len(T)-1], (len(T)-1)]
         print 'not enough timesteps after ignition'
         print 'timesteps after ignition: %s' %(len(T)-i)
         print 'total timesteps: %s' % len(T)
 
-
     """-------------------------------------------------------------------------
     remove unnecessary data points (slice)
     -------------------------------------------------------------------------"""
-    times_total=times1
-    temps_total=temps
-    sdata_total=sdata
-    production_data_total=production_data
+    times_total = times1
+    temps_total = temps
+    sdata_total = sdata
+    production_data_total = production_data
 
     for grp in f1.keys():
         if int(grp) not in range((i-20), (i+20)):
@@ -162,11 +154,10 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     f1.close()
 
-    times1=times1[ i-20:i+20 ]
-    temps=temps[i-20:i+20 ]
-    sdata=sdata[i-20:i+20, :]
-    production_data=production_data[i-20:i+20, :]
-
+    times1 = times1[ i-20:i+20 ]
+    temps = temps[i-20:i+20 ]
+    sdata = sdata[i-20:i+20, :]
+    production_data = production_data[i-20:i+20, :]
 
     """-------------------------------------------------------------------------
     utility functions
@@ -176,7 +167,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     def plot():
         import matplotlib.pyplot as plt
         plt.clf()
-
         #plot combustion point
         plt.plot(deriv_max[0], deriv_max[1], 'ro', ms=7, label= 'ignition point')
         #plot initial and final sample points
@@ -184,7 +174,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
         #plot temp vs time
         plt.plot(times_total, temps_total)
-
         plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
         plt.legend()
@@ -194,15 +183,15 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     def writecsv(sdata):
         #format matrix for csv
-        names=str(solution1.species_names)
-        tt=['Time (s)', 'Temp (K)']
+        names = str(solution1.species_names)
+        tt = ['Time (s)', 'Temp (K)']
         names = solution1.species_names
         name_array = np.append(tt, names)
-        sdata=sdata.astype('|S10')
-        file_data= np.vstack((name_array, sdata))
+        sdata = sdata.astype('|S10')
+        file_data = np.vstack((name_array, sdata))
         #open and write to file
-        input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.join(input_file_name_stripped + '_species_data.csv')
+        input_file_name_stripped = os.path.splitext(data_file)[0]
+        output_file_name = os.path.join(input_file_name_stripped + '_species_data.csv')
         print output_file_name
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
@@ -210,21 +199,19 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     def writehdf5(sdata):
         #format matrix for hdf5
-        names=str(solution1.species_names)
-        tt=['Time (s)', 'Temp (K)']
+        names = str(solution1.species_names)
+        tt = ['Time (s)', 'Temp (K)']
         names = solution1.species_names
         name_array = np.append(tt, names)
-        sdata=sdata.astype('|S10')
-        file_data= np.vstack((name_array, sdata))
-
+        sdata = sdata.astype('|S10')
+        file_data = np.vstack((name_array, sdata))
         #open and write to file
-        input_file_name_stripped=os.path.splitext(data_file)[0]
-        output_file_name=os.path.join(input_file_name_stripped + '_species_data.hdf5')
+        input_file_name_stripped = os.path.splitext(data_file)[0]
+        output_file_name = os.path.join(input_file_name_stripped + '_species_data.hdf5')
         with h5py.File(output_file_name, 'w') as f:
             Times = f.create_dataset("Times", data=times1)
             Temps = f.create_dataset("Temps", data=temps)
             sgroup= f.create_group('Species_Data')
-
             for i, sp in enumerate(solution1.species_names):
                     sgroup.create_dataset(sp, data=sdata[:,i+2])
 
@@ -263,11 +250,11 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     class return_obj:
         def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
-            self.time=time
-            self.temp=temp
-            self.sp_data=sp_data
-            self.test=f1
-            self.tau=tau
+            self.time = time
+            self.temp = temp
+            self.sp_data = sp_data
+            self.test = f1
+            self.tau = tau
             self.Temp = initial_temperature
             self.frac = frac
 
