@@ -163,7 +163,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     utility functions
     -------------------------------------------------------------------------"""
 
-
     def plot():
         import matplotlib.pyplot as plt
         plt.clf()
@@ -223,10 +222,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
                 + "     " + "Ignition point")
         print( str(final_point[0]) +  "       " + str("{0:.2f}".format(final_point[1]))\
          + "       " + str(final_point[2]) + "     " + "Final sample point")
-
-
-
-
 
     if sys_args is not 'none':
         if sys_args.plot:
