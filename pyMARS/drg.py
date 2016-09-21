@@ -25,7 +25,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     solution = solution_object
     species_objects = solution.species()
     reaction_objects = solution.reactions()
-    graph = nx.MultiGraph()
+    graph = nx.Graph()
     count = 0
     start_time = time.time()
 
