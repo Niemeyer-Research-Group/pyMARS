@@ -91,7 +91,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                 #only add edge if > than edge value from previous timesteps
                 if weight >= threshold_value:
                     if graph.has_edge(sp_A, sp_B):
-                        old_weight = graph[sp_A][sp_B][0]['weight']
+                        old_weight = graph[sp_A][sp_B]['weight']
                         if weight > old_weight:
                             graph.add_edge(sp_A, sp_B, weight=weight)
                     else:
