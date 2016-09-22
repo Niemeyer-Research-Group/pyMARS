@@ -113,7 +113,6 @@ def readin(args='none', **argv):
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
             sim_result=run_sim(solution_object, args)
-
         if args.run_drg is True:
             #get user input
             target_species = str(raw_input('Enter target starting species: '))
@@ -147,8 +146,7 @@ def readin(args='none', **argv):
                     #print 'original ignition delay: ' + str(tau1)
                     #print 'new ignition delay: ' + str(tau2)
                     error = float((abs((tau1-tau2)/tau1))*100.0)
-                    print 'error: ' + str(error) + ' %'
-                    #print 'Loop number: ' + str(loop_number)
+                    print 'Loop number: ' + str(loop_number) + '|| error: ' + str(error) + ' %'
                 print 'Number of loops: %s' %loop_number
                 print 'Final max threshold value: %s' %threshold
                 print 'Error: %s ' %error
@@ -163,7 +161,7 @@ def readin(args='none', **argv):
                 tau2 = sim_result_2.tau
                 #print 'original ignition delay: ' + str(tau1)
                 #print 'new ignition delay: ' + str(tau2)
-                error = float(abs((tau1-tau2)/tau1))
+                error = float(abs((tau1-tau2)/tau1)*100.0)
                 print 'error: ' + str(error) + ' %'
             n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
             print 'Number of species eliminated: %s' %n_species_eliminated
