@@ -106,7 +106,8 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
 
     #get connected species
     target = target_species
-    essential_nodes = list(nx.node_connected_component(graph, target))
+    #essential_nodes = list(nx.node_connected_component(graph, target))
+    essential_nodes = list(nx.dfs_preorder_nodes(graph, target))
 
     #nx.draw(graph, with_labels=True, width=.25)
 
