@@ -25,20 +25,21 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     solution = solution_object
     species_objects = solution.species()
     reaction_objects = solution.reactions()
-    graph = nx.Graph()
+    graph = nx.DiGraph()
     count = 0
     start_time = time.time()
 
     #add nodes to graph
     for species in species_objects:
         graph.add_node(species.name)
+    ri_total = {}
+    ri_partial = {}
     #iterate through each timestep
     for nm, grp in rate_file.iteritems():
         count += 1
         rxn_prod_rates = np.array(grp['Reaction Production Rates'])
         #generate dict of sum production Rates
-        ri_total = {}
-        ri_partial = {}
+
         for species in species_objects:
             ri_total[species.name] = 0
         #iterate through reactions and build weights
@@ -55,12 +56,14 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                 for spx in all_species:
                     species_A = spx
                     molar_coeff_A = float(all_species[species_A])
+                    #this is denominator
                     ri_total[species_A] += abs(reaction_production_rate* molar_coeff_A)
                     for spy in all_species:
                         species_B = spy
                         partial_name = species_A + '_' + species_B
                         if spy == spx:
                             continue
+                        #this is numerator
                         try:
                             ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
                         except KeyError:
@@ -93,9 +96,9 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                     if graph.has_edge(sp_A, sp_B):
                         old_weight = graph[sp_A][sp_B]['weight']
                         if weight > old_weight:
-                            graph.add_edge(sp_A, sp_B, weight=weight)
+                            graph.add_weighted_edges_from([(sp_A, sp_B, weight)])
                     else:
-                        graph.add_edge(sp_A, sp_B, weight=weight)
+                        graph.add_weighted_edges_from([(sp_A, sp_B, weight)])
             except IndexError:
                 print ind
                 continue
@@ -106,10 +109,10 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
 
     #get connected species
     target = target_species
-    #essential_nodes = list(nx.node_connected_component(graph, target))
+    #essential_nodes = list(nx.node_connected_component(graph, target)) #not for directed graphs
     essential_nodes = list(nx.dfs_preorder_nodes(graph, target))
 
-    #nx.draw(graph, with_labels=True, width=.25)
+    nx.draw(graph, with_labels=True, width=.25)
 
     #get list of species to eliminate
     exclusion_list = list()
@@ -123,7 +126,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     for spc in exclusion_list:
         exclusion_list_string += spc + ', '
     exclusion_list_string = exclusion_list_string.rstrip(',')
-    plt.show(block=False)
+    plt.show()
     print graph.number_of_edges()
     print graph.number_of_nodes()
     rate_file.close()
