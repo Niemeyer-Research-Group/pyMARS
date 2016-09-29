@@ -13,29 +13,33 @@ from drg import make_graph
 def readin(args='none', **argv):
     """Main function for pyMARS
 
-    Arguments
-        file: Input mechanism file (ex. file='gri30.cti')
-        species: Species to eliminate (ex. species='H, OH')
-        thermo: Thermo data file if Chemkin format (ex. thermo= 'thermo.dat')
-        transport: Transport data file if Chemkin format
-        plot: plot ignition curve (ex. plot='y')
-        points: print ignition point and sample range (ex. points='y')
-        writecsv: write data to csv (ex. writecsv='y')
-        writehdf5: write data to hdf5 (ex. writehdf5='y')
-        run_drg: run DRG
+    :param file:
+        Input mechanism file (ex. file='gri30.cti')
+    :param species:
+        Species to eliminate (ex. species='H, OH')
+    :param thermo:
+        Thermo data file if Chemkin format (ex. thermo= 'thermo.dat')
+    :param transport:
+        Transport data file if Chemkin format
+    :param plot:
+        plot ignition curve (ex. plot='y')
+    :param points:
+        print ignition point and sample range (ex. points='y')
+    :param writecsv:
+        write data to csv (ex. writecsv='y')
+    :param writehdf5:
+        write data to hdf5 (ex. writehdf5='y')
+    :param run_drg:
+        Run DRG model reduction
 
-    ----------
-    Returns
+    :returns:
         Converted mechanism file
         Trimmed Solution Object
         Trimmed Mechanism file
-    ----------
-    Example
-        readin(file='gri30.cti', plot='y', species='OH, H')
+
+    >>>readin(file='gri30.cti', plot='y', species='OH, H')
     """
 
-    "--------------------------------------------------------------------------"
-    "--------------------------------------------------------------------------"
 
     class args():
         #direct use case
