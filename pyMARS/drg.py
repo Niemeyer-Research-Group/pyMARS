@@ -28,8 +28,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     species_objects = solution.species()
     reaction_objects = solution.reactions()
     graph = nx.DiGraph()
-    count = 0
-    start_time = time.time()
 
     #add nodes to graph
     for species in species_objects:
@@ -38,10 +36,8 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     ri_partial = {}
     #iterate through each timestep
     for timestep, data_group in rate_file.iteritems():
-        count += 1
         rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
         #generate dict of sum production Rates
-
         for species in species_objects:
             ri_total[species.name] = 0
         #iterate through reactions and build weights
