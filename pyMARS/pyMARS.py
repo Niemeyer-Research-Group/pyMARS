@@ -134,10 +134,10 @@ def readin(args='none', **argv):
                 error = 0.0
                 threshold = 0.00
                 loop_number = 0
-                error_limit = float(raw_input('Acceptable Error Limit: '))
+                error_limit = float(raw_input('Acceptable Error Limit (%): '))
                 while error < error_limit:
                     loop_number += 1
-                    threshold +=.05
+                    threshold +=.01
                     #run DRG
                     drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
                     new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
@@ -148,7 +148,18 @@ def readin(args='none', **argv):
                     #print 'original ignition delay: ' + str(tau1)
                     #print 'new ignition delay: ' + str(tau2)
                     error = float((abs((tau1-tau2)/tau1))*100.0)
-                    print 'Loop number: ' + str(loop_number) + '|| error: ' + str(error) + ' %'
+                threshold -= .01
+                #run DRG
+                drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
+                new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
+                #run second sim
+                sim_result_2 = run_sim(new_solution_objects[1], args)
+                #compare error
+                tau2 = sim_result_2.tau
+                #print 'original ignition delay: ' + str(tau1)
+                #print 'new ignition delay: ' + str(tau2)
+                error = float((abs((tau1-tau2)/tau1))*100.0)
+                print 'Loop number: ' + str(loop_number) + '|| error: ' + str(error) + ' %'
                 print 'Number of loops: %s' %loop_number
                 print 'Final max threshold value: %s' %threshold
                 print 'Error: %s ' %error

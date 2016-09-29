@@ -101,7 +101,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     for spcecies in exclusion_list:
         exclusion_list_string += str(species) + ', '
     exclusion_list_string = exclusion_list_string.rstrip(',')
-    plt.show()
+    #plt.show()
     rate_file.close()
     return ex_list
 
