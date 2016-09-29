@@ -42,15 +42,15 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
         for species in species_objects:
             ri_total[species.name] = 0
         #build weights
-        for i, reac in enumerate(reaction_objects):
-            products = reac.products
-            product_names = reac.products.keys()
-            reactants = reac.reactants
-            reactant_names = reac.reactants.keys()
+        for reaction_number, reaction in enumerate(reaction_objects):
+            products = reaction.products
+            product_names = reaction.products.keys()
+            reactants = reaction.reactants
+            reactant_names = reaction.reactants.keys()
             #generate list of all species
-            all_species = reac.products
-            all_species.update(reac.reactants)
-            reaction_production_rate = float(rxn_prod_rates[i])
+            all_species = reaction.products
+            all_species.update(reaction.reactants)
+            reaction_production_rate = float(rxn_prod_rates[reaction_number])
             if reaction_production_rate != 0:
                 for spx in all_species:
                     species_A = spx
@@ -116,7 +116,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             ex_list.append(species.name)
     exclusion_list_string = '\''
     for spcecies in exclusion_list:
-        exclusion_list_string += spc + ', '
+        exclusion_list_string += str(species) + ', '
     exclusion_list_string = exclusion_list_string.rstrip(',')
     plt.show()
     rate_file.close()
