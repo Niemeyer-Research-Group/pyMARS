@@ -103,13 +103,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     for species in exclusion_list:
         exclusion_list_string += str(species) + ', '
     exclusion_list_string = exclusion_list_string.rstrip(',')
-    edges = nx.get_edge_attributes(graph, 'weight')
-    for edge in edges.items():
-        species_names = str(edge[0])
-        weight = edge[1]
-        edge_string = species_names + '   ' + str(weight) + '\n'
-        if weight < .1:
-            print edge_string
+
     #plt.show()
     rate_file.close()
     if len(error_list) != 0:
