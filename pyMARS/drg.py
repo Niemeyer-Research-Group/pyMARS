@@ -35,6 +35,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
         graph.add_node(species.name)
     ri_total = {}
     ri_partial = {}
+    error_list ={}
     #iterate through each timestep
     for timestep, data_group in rate_file.iteritems():
         rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
@@ -49,7 +50,10 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             #generate list of all species
             all_species = reaction.products
             all_species.update(reaction.reactants)
-
+            for species_a in reactants:
+                if species_a in products:
+                    if reactants[species_a] != products[species_a]:
+                        error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
             if reaction_production_rate != 0:
                 for species_a in all_species:
                     molar_coeff_A = float(all_species[species_a])
@@ -89,7 +93,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     target = target_species
     essential_nodes = list(nx.dfs_preorder_nodes(graph, target))
     nx.draw(graph, with_labels=True, width=.25)
-
     #get list of species to eliminate
     exclusion_list = list()
     ex_list = []
@@ -98,11 +101,21 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             exclusion_list.append(species.name)
             ex_list.append(species.name)
     exclusion_list_string = '\''
-    for spcecies in exclusion_list:
+    for species in exclusion_list:
         exclusion_list_string += str(species) + ', '
     exclusion_list_string = exclusion_list_string.rstrip(',')
+    edges = nx.get_edge_attributes(graph, 'weight')
+    for edge in edges.items():
+        species_names = str(edge[0])
+        weight = edge[1]
+        edge_string = species_names + '   ' + str(weight) + '\n'
+        if weight < .1:
+            print edge_string
     #plt.show()
     rate_file.close()
+    if len(error_list) != 0:
+        print 'error list'
+        print error_list
     return ex_list
 
 #make_graph('gri301.cti', 'production_rates.hdf5')

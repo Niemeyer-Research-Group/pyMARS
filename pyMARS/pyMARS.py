@@ -185,12 +185,13 @@ def readin(args='none', **argv):
         #convert file to cti
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
-        solution_objects = trim(converted_file_name, args.exclusion_list)
+        converted_file_object = ct.Solution(converted_file_name)
+        solution_objects = trim(converted_file_object, args.exclusion_list, args.data_file)
         trimmed_file = write(solution_objects[1])
 
         if "plot" or "points" or "writecsv" or "writehdf5" in args:
             print 'running sim'
-            run_sim(converted_file_name, args)
+            #run_sim(converted_file_name, args)
 
         if 'run_drg' in args:
             print 'running sim'
