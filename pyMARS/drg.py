@@ -9,16 +9,17 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     """ Use the Direct Relation Graph (DRG) method to choose species to
     eliminate from reaction mechanism.
 
-    Parameters:
-    -------------
-    data_file: Mechanism file in the form of .cti
-    hdf5_file: data file containing individual reaction production rates
-    threshold_value: an edge weight threshold value
-    target_species: species to start graph search from (usually the fuel)
+    :param data_file:
+        Mechanism file in the form of .cti
+    :param hdf5_file:
+        data file containing individual reaction production rates
+    :param threshold_value:
+        an edge weight threshold value
+    :param target_species:
+        species to start graph search from (usually the fuel)
 
-    Returns:
-    -------------
-    exclusion_list: List of species to trim from mechanism
+    :return exclusion_list:
+        List of species to trim from mechanism
     """
 
     rate_file = h5py.File(hdf5_file, 'r')
@@ -109,18 +110,15 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     #get list of species to eliminate
     exclusion_list = list()
     ex_list = []
-    for spec in solution.species():
-        ind_name = spec.name
-        if ind_name not in essential_nodes:
-            exclusion_list.append(spec.name)
-            ex_list.append(spec.name)
+    for species in solution.species():
+        if species.name not in essential_nodes:
+            exclusion_list.append(species.name)
+            ex_list.append(species.name)
     exclusion_list_string = '\''
-    for spc in exclusion_list:
+    for spcecies in exclusion_list:
         exclusion_list_string += spc + ', '
     exclusion_list_string = exclusion_list_string.rstrip(',')
     plt.show()
-    print graph.number_of_edges()
-    print graph.number_of_nodes()
     rate_file.close()
     return ex_list
 
