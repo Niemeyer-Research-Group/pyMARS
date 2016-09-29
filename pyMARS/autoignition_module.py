@@ -29,8 +29,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
 
     """
-
-    solution1 = solution_object
+    solution = solution_object
     # temporary fix, allow initial conditions to be carried in if already set from previous
     #sim.
     if sys_args is 'none':
@@ -42,17 +41,17 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         else:
             initial_sim = False
     if initial_sim is True:
-        frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ') # (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich)and 100 for TPY where Y is mass fractions
+        frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ')
         initial_temperature = float(raw_input('Enter Solution Temperature in (K):'))
-        initial_temperature = initial_temperature#+273.0 #convert to kelvin
+        initial_temperature = initial_temperature
     else:
         frac = sys_args.frac
         initial_temperature = sys_args.Temp
-    solution1.TPX = initial_temperature, ct.one_atm, frac #1001.0
-    species = solution1.species()
-    reactions = solution1.reactions()
+    solution.TPX = initial_temperature, ct.one_atm, frac #1001.325 kPa
+    species = solution.species()
+    reactions = solution.reactions()
 
-    #pretty sure this isn't being used at all
+    #not being used, but an example of how autoignition data could be stored
     class state:
         def __init__(self, time, species_list, reactions):
             self.time = time
@@ -70,16 +69,16 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     run sim to find ignition delay from dT/dt max
     -------------------------------------------------------------------------"""
 
-    r1 = ct.Reactor(solution1)
-    sim1 = ct.ReactorNet([r1])
+    reactor = ct.Reactor(solution)
+    sim1 = ct.ReactorNet([reactor])
     tnow = 0.0
     tfinal = 5.0e-3
     index1 = 0
     times1 = []
     temps = [] #first column is time, second is temperature
-    mass = r1.mass
-    sdata = np.zeros([0, len(r1.Y)])
-    production_data = np.zeros([0, len(solution1.net_production_rates)])
+    mass = reactor.mass
+    sdata = np.zeros([0, len(reactor.Y)])
+    production_data = np.zeros([0, len(solution.net_production_rates)])
     state_list = list()
 
     f1 = h5py.File('mass_fractions.hdf5', 'w')
@@ -87,21 +86,21 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         index1 += 1
         tnow = sim1.step(tfinal)
         times1.append(tnow)
-        temps.append(r1.T)
-        species_data = r1.Y
+        temps.append(reactor.T)
+        species_data = reactor.Y
 
         grp = f1.create_group(str(index1))
-        grp['Temp'] = r1.T
+        grp['Temp'] = reactor.T
         grp['Time'] = tnow
-        grp['Pressure'] = r1.thermo.P
-        species_production_rates = r1.thermo.net_production_rates
+        grp['Pressure'] = reactor.thermo.P
+        species_production_rates = reactor.thermo.net_production_rates
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Species Net Production Rates Original', data=species_production_rates)
 
         species_data = species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
         sdata = np.vstack((sdata, species_data))
 
-        production_rates = np.array(solution1.net_production_rates)
+        production_rates = np.array(solution.net_production_rates)
         production_rates = production_rates[:,np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
     print('\n')
@@ -182,9 +181,9 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     def writecsv(sdata):
         #format matrix for csv
-        names = str(solution1.species_names)
+        names = str(solution.species_names)
         tt = ['Time (s)', 'Temp (K)']
-        names = solution1.species_names
+        names = solution.species_names
         name_array = np.append(tt, names)
         sdata = sdata.astype('|S10')
         file_data = np.vstack((name_array, sdata))
@@ -198,9 +197,9 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     def writehdf5(sdata):
         #format matrix for hdf5
-        names = str(solution1.species_names)
+        names = str(solution.species_names)
         tt = ['Time (s)', 'Temp (K)']
-        names = solution1.species_names
+        names = solution.species_names
         name_array = np.append(tt, names)
         sdata = sdata.astype('|S10')
         file_data = np.vstack((name_array, sdata))
@@ -211,7 +210,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             Times = f.create_dataset("Times", data=times1)
             Temps = f.create_dataset("Temps", data=temps)
             sgroup= f.create_group('Species_Data')
-            for i, sp in enumerate(solution1.species_names):
+            for i, sp in enumerate(solution.species_names):
                     sgroup.create_dataset(sp, data=sdata[:,i+2])
 
     def points():
@@ -223,6 +222,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         print( str(final_point[0]) +  "       " + str("{0:.2f}".format(final_point[1]))\
          + "       " + str(final_point[2]) + "     " + "Final sample point")
 
+    #terminal use case
     if sys_args is not 'none':
         if sys_args.plot:
             plot()
@@ -232,6 +232,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             writehdf5(sdata)
         if sys_args.points:
             points()
+    #individual use case
     if sys_args is 'none':
         if 'plot' in usr_args:
             plot()
