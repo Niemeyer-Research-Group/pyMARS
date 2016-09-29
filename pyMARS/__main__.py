@@ -3,10 +3,6 @@ from pyMARS import readin
 import argparse
 
 
-
-"""-------------------------------------------------------------------------
-Get details from command line
--------------------------------------------------------------------------"""
 def main(args=None):
     """
     Arguments
