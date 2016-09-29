@@ -64,20 +64,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                             ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
                         except KeyError:
                             ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
-        #clean up duplicate edges
-        ri_partial_temp = dict(ri_partial)
-        for ik in ri_partial:
-            value_one = ri_partial[ik]
-            split_name = ik.split('_', 1)
-            switched_name = str(split_name[1]) + '_' + str(split_name[0])
-            for il in ri_partial:
-                value_two = ri_partial[il]
-                if il == switched_name:
-                    ri_partial_temp[ik] = value_one + value_two
-                    del ri_partial_temp[il]
-                else:
-                    continue
-        ri_partial = dict(ri_partial_temp)
 
         #divide progress related to species B by total progress
         #and make edge
