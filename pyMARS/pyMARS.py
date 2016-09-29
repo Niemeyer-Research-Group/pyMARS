@@ -40,7 +40,6 @@ def readin(args='none', **argv):
     >>>readin(file='gri30.cti', plot='y', species='OH, H')
     """
 
-
     class args():
         #direct use case
             if args is 'none':
@@ -90,43 +89,42 @@ def readin(args='none', **argv):
                 writehdf5 = args.writehdf5
                 data_file= args.file
                 thermo_file = args.thermo
-                transport_file=args.transport
-                run_drg=args.run_drg
+                transport_file = args.transport
+                run_drg = args.run_drg
                 initial_sim = True
                 iterate = args.iterate
                 if args.species is None:
-                    exclusion_list=[]
+                    exclusion_list = []
                 else:
-                    exclusion_list=[str(item) for item in args.species.split(',')]
+                    exclusion_list = [str(item) for item in args.species.split(',')]
                     #strip spaces
                     for i, sp in enumerate(exclusion_list):
                         exclusion_list[i]=sp.strip()
                 x='args_not_none'
 
+    file_extension= os.path.splitext(args.data_file)[1]
 
-    ext= os.path.splitext(args.data_file)[1]
-
-    if ext == ".cti" or ext == ".xml":
+    if file_extension == ".cti" or file_extension == ".xml":
         print("\n\nThis is an Cantera xml or cti file\n")
-        solution_object=ct.Solution(args.data_file)
+        solution_object = ct.Solution(args.data_file)
         #trims file
         #need case if no trim necessary
-        solution_objects=trim(solution_object, args.exclusion_list, args.data_file)
+        solution_objects = trim(solution_object, args.exclusion_list, args.data_file)
         if args.run_drg is False:
-            trimmed_file=write(solution_objects[1])
+            trimmed_file = write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
-            sim_result=run_sim(solution_object, args)
+            sim_result = run_sim(solution_object, args)
         if args.run_drg is True:
             #get user input
             target_species = str(raw_input('Enter target starting species: '))
             #run first sim
             args.initial_sim = True
-            sim_result_1=run_sim(solution_object, args)
+            sim_result_1 = run_sim(solution_object, args)
             #retain sim initial conditions
-            tau1=sim_result_1.tau
-            args.frac=sim_result_1.frac
-            args.Temp=sim_result_1.Temp
+            tau1 = sim_result_1.tau
+            args.frac = sim_result_1.frac
+            args.Temp = sim_result_1.Temp
             get_rates('mass_fractions.hdf5', solution_object)
             args.initial_sim = False
 
@@ -171,13 +169,13 @@ def readin(args='none', **argv):
             print 'Number of species eliminated: %s' %n_species_eliminated
             drg_trimmed_file = write(new_solution_objects[1])
 
-    elif ext == ".inp" or ext == ".dat" or ext == ".txt":
+    elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")
         #convert file to cti
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
         #trims newly converted file
-        solution_objects=trim(converted_file_name, args.exclusion_list)
-        trimmed_file=write(solution_objects[1])
+        solution_objects = trim(converted_file_name, args.exclusion_list)
+        trimmed_file = write(solution_objects[1])
 
         if "plot" or "points" or "writecsv" or "writehdf5" in args:
             print 'running sim'
@@ -188,11 +186,9 @@ def readin(args='none', **argv):
             run_sim(converted_file_name, args)
             get_rates('mass_fractions.hdf5', converted_file_name)
             print 'running DRG'
-            drg_exclusion_list=make_graph(converted_file_name, 'production_rates.hdf5')
-            new_solution_objects=trim(converted_file_name, drg_exclusion_list)
-            args.data_file=write(new_solution_objects[1])
-
-        #run_sim(converted_file_name, args)
+            drg_exclusion_list = make_graph(converted_file_name, 'production_rates.hdf5')
+            new_solution_objects = trim(converted_file_name, drg_exclusion_list)
+            args.data_file = write(new_solution_objects[1])
 
 
     else:
