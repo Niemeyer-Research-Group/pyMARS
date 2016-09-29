@@ -70,10 +70,10 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     -------------------------------------------------------------------------"""
 
     reactor = ct.Reactor(solution)
-    sim1 = ct.ReactorNet([reactor])
-    tnow = 0.0
-    tfinal = 5.0e-3
-    index1 = 0
+    simulation = ct.ReactorNet([reactor])
+    current_time = 0.0
+    stop_time = 5.0e-3
+    group_index = 0
     times1 = []
     temps = [] #first column is time, second is temperature
     mass = reactor.mass
@@ -82,16 +82,16 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     state_list = list()
 
     f1 = h5py.File('mass_fractions.hdf5', 'w')
-    while tnow < tfinal:
-        index1 += 1
-        tnow = sim1.step(tfinal)
-        times1.append(tnow)
+    while current_time < stop_time:
+        group_index += 1
+        current_time = simulation.step(stop_time)
+        times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
 
-        grp = f1.create_group(str(index1))
+        grp = f1.create_group(str(group_index))
         grp['Temp'] = reactor.T
-        grp['Time'] = tnow
+        grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
         species_production_rates = reactor.thermo.net_production_rates
         grp.create_dataset('Species Mass Fractions', data=species_data)
