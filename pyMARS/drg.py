@@ -37,9 +37,9 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     ri_total = {}
     ri_partial = {}
     #iterate through each timestep
-    for nm, grp in rate_file.iteritems():
+    for timestep, data_group in rate_file.iteritems():
         count += 1
-        rxn_prod_rates = np.array(grp['Reaction Production Rates'])
+        rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
         #generate dict of sum production Rates
 
         for species in species_objects:
