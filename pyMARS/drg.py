@@ -43,24 +43,21 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             ri_total[species.name] = 0
         #build weights
         for reaction_number, reaction in enumerate(reaction_objects):
+            reaction_production_rate = float(rxn_prod_rates[reaction_number])
             products = reaction.products
-            product_names = reaction.products.keys()
             reactants = reaction.reactants
-            reactant_names = reaction.reactants.keys()
             #generate list of all species
             all_species = reaction.products
             all_species.update(reaction.reactants)
-            reaction_production_rate = float(rxn_prod_rates[reaction_number])
+
             if reaction_production_rate != 0:
-                for spx in all_species:
-                    species_A = spx
-                    molar_coeff_A = float(all_species[species_A])
+                for species_a in all_species:
+                    molar_coeff_A = float(all_species[species_a])
                     #this is denominator
-                    ri_total[species_A] += abs(reaction_production_rate* molar_coeff_A)
-                    for spy in all_species:
-                        species_B = spy
-                        partial_name = species_A + '_' + species_B
-                        if spy == spx:
+                    ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
+                    for species_b in all_species:
+                        partial_name = species_a + '_' + species_b
+                        if species_a == species_b:
                             continue
                         #this is numerator
                         try:
