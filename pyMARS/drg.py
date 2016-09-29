@@ -40,7 +40,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
         #generate dict of sum production Rates
         for species in species_objects:
             ri_total[species.name] = 0
-        #iterate through reactions and build weights
+        #build weights
         for i, reac in enumerate(reaction_objects):
             products = reac.products
             product_names = reac.products.keys()
@@ -100,16 +100,10 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
             except IndexError:
                 print ind
                 continue
-        progress =  str(count) + '/40 timesteps'
-        #print progress
-        #print("--- %s seconds ---" % (time.time() - start_time))
-        #print (nm, graph.number_of_edges())
 
     #get connected species
     target = target_species
-    #essential_nodes = list(nx.node_connected_component(graph, target)) #not for directed graphs
     essential_nodes = list(nx.dfs_preorder_nodes(graph, target))
-
     nx.draw(graph, with_labels=True, width=.25)
 
     #get list of species to eliminate
