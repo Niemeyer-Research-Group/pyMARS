@@ -13,6 +13,8 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     -------------
     data_file: Mechanism file in the form of .cti
     hdf5_file: data file containing individual reaction production rates
+    threshold_value: an edge weight threshold value
+    target_species: species to start graph search from (usually the fuel)
 
     Returns:
     -------------
