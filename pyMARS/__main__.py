@@ -10,15 +10,27 @@ Get details from command line
 def main(args=None):
     """
     Arguments
-        --file: Input mechanism file (ex. --file=gri30.cti)
-        --species: Species to eliminate (ex. --species='H, OH')
-        --thermo: Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
-        --transport: Transport data file if Chemkin format
-        --plot
-        --points
-        --writecsv
-        --writehdf5
-        --run_drg
+        :param file:
+            Input mechanism file (ex. --file=gri30.cti)
+        :param species:
+            Species to eliminate (ex. --species='H, OH')
+        :param thermo:
+            Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
+        :param transport:
+            Transport data file if Chemkin format
+        :param plot:
+            Plot a temperature profile of autoignition
+        :param points:
+            Return sampling and ignition points
+        :param writecsv:
+            Write autoignition data to a csv file
+        :param writehdf5:
+            Write autoignition to a hdf5 file
+        :param run_drg:
+            Run Direct Relation Graphing model reduction based on
+            a given threshold value
+        :param iterate:
+            Run DRG function up to specified error limit
 
     """
     #gets arguments from terminal
@@ -72,15 +84,26 @@ def main(args=None):
         Python Model Automated Reduction Software (pyMARS)
 
         Arguments
-            --file: Input mechanism file (ex. --file=gri30.cti)
-            --species: Species to eliminate (ex. --species='H, OH')
-            --thermo: Thermo data file if Chemkin format(ex.--thermo= thermo.dat)
-            --transport: Transport data file if Chemkin format
-            --plot
-            --points
-            --writecsv
-            --writehdf5
-            --run_drg
-            --iterate: Insead, iterate DRG up to acceptable error limit
+            --file:
+                Input mechanism file (ex. --file=gri30.cti)
+            --species:
+                Species to eliminate (ex. --species='H, OH')
+            --thermo:
+                Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
+            --transport:
+                Transport data file if Chemkin format
+            --plot:
+                Plot a temperature profile of autoignition
+            --points:
+                Return sampling and ignition points
+            --writecsv:
+                Write autoignition data to a csv file
+            --writehdf5:
+                Write autoignition to a hdf5 file
+            --run_drg:
+                Run Direct Relation Graphing model reduction based on
+                a given threshold value
+            --iterate:
+                Run DRG function up to specified error limit
 
         """
