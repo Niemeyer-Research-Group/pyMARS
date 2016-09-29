@@ -65,10 +65,8 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
                         coeff[name] = (rxn.products.get(sp.name))
                 setattr(self, 'sp_'+ sp.name, coeff)
 
-    """-------------------------------------------------------------------------
-    run sim to find ignition delay from dT/dt max
-    -------------------------------------------------------------------------"""
 
+    #run sim to find ignition delay from dT/dt max
     reactor = ct.Reactor(solution)
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
@@ -104,9 +102,8 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         production_rates = production_rates[:,np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
     print('\n')
-    """-------------------------------------------------------------------------
-    concatenate time, temp and coeff values
-    -------------------------------------------------------------------------"""
+
+    #concatenate time, temp and coeff values
     times1 = np.array(times1)
     temps = np.array(temps)
     timetemp = np.vstack((times1, temps)).T
@@ -121,9 +118,8 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     deriv_max = [times1[i], T[i], i]
     tau = times1[i]
 
-    """-------------------------------------------------------------------------
-    find initial and final sample points
-    -------------------------------------------------------------------------"""
+
+    #find initial and final sample points
     try:
         initial_point = [times1[i-20], T[i-20], i-20]
     except IndexError:
@@ -139,9 +135,8 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         print 'timesteps after ignition: %s' %(len(T)-i)
         print 'total timesteps: %s' % len(T)
 
-    """-------------------------------------------------------------------------
-    remove unnecessary data points (slice)
-    -------------------------------------------------------------------------"""
+
+    #remove unnecessary data points (slice)
     times_total = times1
     temps_total = temps
     sdata_total = sdata
@@ -152,16 +147,13 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             f1.__delitem__(str(grp))
 
     f1.close()
-
     times1 = times1[ i-20:i+20 ]
     temps = temps[i-20:i+20 ]
     sdata = sdata[i-20:i+20, :]
     production_data = production_data[i-20:i+20, :]
 
-    """-------------------------------------------------------------------------
-    utility functions
-    -------------------------------------------------------------------------"""
 
+    #utility functions
     def plot():
         import matplotlib.pyplot as plt
         plt.clf()
