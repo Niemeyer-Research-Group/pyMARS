@@ -67,22 +67,22 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
 
         #divide progress related to species B by total progress
         #and make edge
-        for ind in ri_partial:
+        for edge in ri_partial:
             try:
-                both = ind.split('_', 1)
-                sp_A = both[0]
-                sp_B = both[1]
-                weight = abs(float(ri_partial[ind])/float(ri_total[sp_A]))
+                edge_name = edge.split('_', 1)
+                species_a_name = edge_name[0]
+                species_b_name = edge_name[1]
+                weight = abs(float(ri_partial[edge])/float(ri_total[species_a_name]))
                 #only add edge if > than edge value from previous timesteps
                 if weight >= threshold_value:
-                    if graph.has_edge(sp_A, sp_B):
-                        old_weight = graph[sp_A][sp_B]['weight']
+                    if graph.has_edge(species_a_name, species_b_name):
+                        old_weight = graph[species_a_name][species_b_name]['weight']
                         if weight > old_weight:
-                            graph.add_weighted_edges_from([(sp_A, sp_B, weight)])
+                            graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
                     else:
-                        graph.add_weighted_edges_from([(sp_A, sp_B, weight)])
+                        graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
             except IndexError:
-                print ind
+                print edge
                 continue
 
     #get connected species
