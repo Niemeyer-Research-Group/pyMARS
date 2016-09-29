@@ -3,7 +3,6 @@ import cantera as ct
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-import time
 
 def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     """ Use the Direct Relation Graph (DRG) method to choose species to
