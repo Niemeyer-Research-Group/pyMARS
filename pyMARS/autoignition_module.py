@@ -207,19 +207,3 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
-
-    """
-    #not being used, but an example of how autoignition data could be stored
-    class state:
-        def __init__(self, time, species_list, reactions):
-            self.time = time
-            for sp in species_list:
-                coeff={}
-                for i, rxn in enumerate(reactions):
-                    name = 'Reaction ' + str(i)
-                    if sp.name in rxn.reactants.keys():
-                        coeff[name] = (rxn.reactants.get(sp.name))
-                    if sp.name in rxn.products.keys():
-                        coeff[name] = (rxn.products.get(sp.name))
-                setattr(self, 'sp_'+ sp.name, coeff)
-    """
