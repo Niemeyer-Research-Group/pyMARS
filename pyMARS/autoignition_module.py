@@ -88,24 +88,11 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         production_data = np.vstack((production_data, production_rates))
     print('\n')
 
-    function_data = get_range(times1,temps,sdata, production_data)
+    sample = get_range(times1,temps,sdata, production_data)
 
-    tau = function_data.tau
-    i = function_data.index
-    times1 = function_data.times
-    temps = function_data.temps
-    sdata = function_data.species_data
-    production_data = function_data.production_data
-    times_total = function_data.times_total
-    temps_total = function_data.temps_total
-    sdata_total = function_data.species_data_total
-    production_data_total = function_data.production_data_total
-    deriv_max =function_data.derivative_max
-    initial_point = function_data.initial_point
-    final_point = function_data.final_point
 
     for grp in f1.keys():
-        if int(grp) not in range((i-20), (i+20)):
+        if int(grp) not in range((sample.index-20), (sample.index+20)):
             f1.__delitem__(str(grp))
 
     f1.close()
@@ -115,12 +102,12 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         import matplotlib.pyplot as plt
         plt.clf()
         #plot combustion point
-        plt.plot(deriv_max[0], deriv_max[1], 'ro', ms=7, label= 'ignition point')
+        plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label= 'ignition point')
         #plot initial and final sample points
-        plt.plot(initial_point[0], initial_point[1], 'rx', ms=5, mew=2)
-        plt.plot(final_point[0], final_point[1], 'rx', ms=5, mew=2)
+        plt.plot(sample.initial_point[0], sample.initial_point[1], 'rx', ms=5, mew=2)
+        plt.plot(sample.final_point[0], sample.final_point[1], 'rx', ms=5, mew=2)
         #plot temp vs time
-        plt.plot(times_total, temps_total)
+        plt.plot(sample.times_total, sample.temps_total)
         plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
         plt.legend()
@@ -156,29 +143,29 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         input_file_name_stripped = os.path.splitext(data_file)[0]
         output_file_name = os.path.join(input_file_name_stripped + '_species_data.hdf5')
         with h5py.File(output_file_name, 'w') as f:
-            Times = f.create_dataset("Times", data=times1)
-            Temps = f.create_dataset("Temps", data=temps)
+            Times = f.create_dataset("Times", data=sample.times)
+            Temps = f.create_dataset("Temps", data=sample.temps)
             sgroup= f.create_group('Species_Data')
             for i, sp in enumerate(solution.species_names):
                     sgroup.create_dataset(sp, data=sdata[:,i+2])
 
     def points():
         print("\nTime[s]            Temp[K]        Index        Point")
-        print( str(initial_point[0]) +  "       " + str("{0:.2f}".format(initial_point[1]))\
-         + "       " + str(initial_point[2]) + "     " + "Initial sample point")
-        print(str(tau) + "        " + str("{0:.2f}".format(deriv_max[1])) + "       " + str(deriv_max[2])\
+        print( str(sample.initial_point[0]) +  "       " + str("{0:.2f}".format(sample.initial_point[1]))\
+         + "       " + str(sample.initial_point[2]) + "     " + "Initial sample point")
+        print(str(sample.tau) + "        " + str("{0:.2f}".format(sample.derivative_max[1])) + "       " + str(sample.derivative_max[2])\
                 + "     " + "Ignition point")
-        print( str(final_point[0]) +  "       " + str("{0:.2f}".format(final_point[1]))\
-         + "       " + str(final_point[2]) + "     " + "Final sample point")
+        print( str(sample.final_point[0]) +  "       " + str("{0:.2f}".format(sample.final_point[1]))\
+         + "       " + str(sample.final_point[2]) + "     " + "Final sample point")
 
     #terminal use case
     if sys_args is not 'none':
         if sys_args.plot:
             plot()
         if sys_args.writecsv:
-            writecsv(sdata)
+            writecsv(sample.species_data)
         if sys_args.writehdf5:
-            writehdf5(sdata)
+            writehdf5(sample.species_data)
         if sys_args.points:
             points()
     #individual use case
@@ -186,9 +173,9 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         if 'plot' in usr_args:
             plot()
         if 'writecsv' in usr_args:
-            writecsv(sdata)
+            writecsv(sample.species_data)
         if 'writehdf5' in usr_args:
-            writehdf5(sdata)
+            writehdf5(sample.species_data)
         if 'points' in usr_args:
             points()
 
@@ -203,7 +190,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             self.Temp = initial_temperature
             self.frac = frac
 
-    return return_obj(times1, temps, sdata, f1, tau, initial_temperature, frac)
+    return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
     "mass fractions at that instant"
