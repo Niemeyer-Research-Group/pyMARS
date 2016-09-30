@@ -8,6 +8,7 @@ from soln2cti import write
 from autoignition_module import run_sim
 from get_rate_data import get_rates
 from drg import make_graph
+from drg_loop_control import loop_control
 
 
 def readin(args='none', **argv):
@@ -116,66 +117,7 @@ def readin(args='none', **argv):
             print 'running sim'
             sim_result = run_sim(solution_object, args)
         if args.run_drg is True:
-            #get user input
-            target_species = str(raw_input('Enter target starting species: '))
-            #run first sim
-            args.initial_sim = True
-            sim_result_1 = run_sim(solution_object, args)
-            #retain sim initial conditions
-            tau1 = sim_result_1.tau
-            args.frac = sim_result_1.frac
-            args.Temp = sim_result_1.Temp
-            get_rates('mass_fractions.hdf5', solution_object)
-            args.initial_sim = False
-
-            if args.iterate is True:
-                print 'iterate is true'
-                #set initial 0 cases
-                error = 0.0
-                threshold = 0.00
-                loop_number = 0
-                error_limit = float(raw_input('Acceptable Error Limit (%): '))
-                while error < error_limit:
-                    loop_number += 1
-                    threshold +=.01
-                    #run DRG
-                    drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
-                    new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-                    #run second sim
-                    sim_result_2 = run_sim(new_solution_objects[1], args)
-                    #compare error
-                    tau2 = sim_result_2.tau
-                    #print 'original ignition delay: ' + str(tau1)
-                    #print 'new ignition delay: ' + str(tau2)
-                    error = float((abs((tau1-tau2)/tau1))*100.0)
-                threshold -= .01
-                #run DRG
-                drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
-                new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-                #run second sim
-                sim_result_2 = run_sim(new_solution_objects[1], args)
-                #compare error
-                tau2 = sim_result_2.tau
-                #print 'original ignition delay: ' + str(tau1)
-                #print 'new ignition delay: ' + str(tau2)
-                error = float((abs((tau1-tau2)/tau1))*100.0)
-                print 'Loop number: ' + str(loop_number) + '|| error: ' + str(error) + ' %'
-                print 'Number of loops: %s' %loop_number
-                print 'Final max threshold value: %s' %threshold
-                print 'Error: %s ' %error
-            else:
-                threshold = float(raw_input('Enter threshold value: '))
-                drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
-                new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-                #run second sim
-                args.initial_sim = False
-                sim_result_2 = run_sim(new_solution_objects[1], args)
-                #compare error
-                tau2 = sim_result_2.tau
-                #print 'original ignition delay: ' + str(tau1)
-                #print 'new ignition delay: ' + str(tau2)
-                error = float(abs((tau1-tau2)/tau1)*100.0)
-                print 'error: ' + str(error) + ' %'
+            new_solution_objects = loop_control(solution_object, args)
             n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
             print 'Number of species eliminated: %s' %n_species_eliminated
             drg_trimmed_file = write(new_solution_objects[1])
