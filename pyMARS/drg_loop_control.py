@@ -21,8 +21,6 @@ def loop_control(solution_object, args):
     #get user input
     target_species = str(raw_input('Enter target starting species: '))
 
-
-
     #run first sim and retain initial conditions
     args.initiial_sim = True
     sim1_result = run_sim(solution_object, args)
@@ -31,7 +29,6 @@ def loop_control(solution_object, args):
     args.Temp = sim1_result.Temp
     get_rates('mass_fractions.hdf5', solution_object)
     args.initial_sim = False
-
 
     if args.iterate is True:
         #set initial 0 cases
@@ -44,10 +41,11 @@ def loop_control(solution_object, args):
             threshold +=.01
             drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
             new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-            #run second sim
+            #run second sim with skeletal model to compare ignition delay
             sim2_result = run_sim(new_solution_objects[1], args)
             tau2 = sim2_result.tau
             error = float((abs((tau1-tau2)/tau1))*100.0)
+        #re-run auotignition and drg .01 below threshold to get skeletal within acceptable error
         threshold -= .01
         drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
         new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
@@ -59,7 +57,15 @@ def loop_control(solution_object, args):
         print 'Loop number: ' + str(loop_number) + '|| error: ' + str(error) + ' %'
         print 'Number of loops: %s' %loop_number
         print 'Final max threshold value: %s' %threshold
-        print 'Error: %s ' %error
+        print 'Error: %s%% ' %"{0:.2f}".format(error)
     else:
         threshold = float(raw_input('Enter threshold value: '))
+        drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
+        new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
+        sim2_result = run_sim(new_solution_objects[1], args)
+        tau2 = sim2_result.tau
+        error = float((abs((tau1-tau2)/tau1))*100.0)
+        print 'Error: %s%%' %"{0:.2f}".format(error)
+    n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
+    print 'Number of species eliminated: %s' %n_species_eliminated
     return new_solution_objects
