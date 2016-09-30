@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import cantera as ct
 import os
-#import progressbar as pb
+from get_sample_range import get_range
 import h5py
 
 
@@ -88,55 +88,27 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         production_data = np.vstack((production_data, production_rates))
     print('\n')
 
-    #concatenate time, temp and coeff values
-    times1 = np.array(times1)
-    temps = np.array(temps)
-    timetemp = np.vstack((times1, temps)).T
-    sdata = np.hstack((timetemp, sdata))
-    production_data = np.hstack((timetemp, production_data))
-    #get ignition point from dT/dt
-    T =np.array(temps)
-    dt = np.ones(len(times1)-1)*(times1[1]-times1[0])
-    dT = np.diff(T)
-    deriv = dT/dt
-    i = deriv.argmax()
-    deriv_max = [times1[i], T[i], i]
-    tau = times1[i]
+    function_data = get_range(times1,temps,sdata, production_data)
 
-
-    #find initial and final sample points
-    try:
-        initial_point = [times1[i-20], T[i-20], i-20]
-    except IndexError:
-        initial_point = [times1[0], T[0], 0]
-        print 'not enough timesteps before ignition'
-        print 'timesteps before ignition: %s' %i
-        print 'total timesteps: %s' % len(T)
-    try:
-        final_point = [times1[i+20], T[i+20], i+20]
-    except IndexError:
-        final_point = [times1[len(times1)-1], T[len(T)-1], (len(T)-1)]
-        print 'not enough timesteps after ignition'
-        print 'timesteps after ignition: %s' %(len(T)-i)
-        print 'total timesteps: %s' % len(T)
-
-
-    #remove unnecessary data points (slice)
-    times_total = times1
-    temps_total = temps
-    sdata_total = sdata
-    production_data_total = production_data
+    tau = function_data.tau
+    i = function_data.index
+    times1 = function_data.times
+    temps = function_data.temps
+    sdata = function_data.species_data
+    production_data = function_data.production_data
+    times_total = function_data.times_total
+    temps_total = function_data.temps_total
+    sdata_total = function_data.species_data_total
+    production_data_total = function_data.production_data_total
+    deriv_max =function_data.derivative_max
+    initial_point = function_data.initial_point
+    final_point = function_data.final_point
 
     for grp in f1.keys():
         if int(grp) not in range((i-20), (i+20)):
             f1.__delitem__(str(grp))
 
     f1.close()
-    times1 = times1[ i-20:i+20 ]
-    temps = temps[i-20:i+20 ]
-    sdata = sdata[i-20:i+20, :]
-    production_data = production_data[i-20:i+20, :]
-
 
     #utility functions
     def plot():
