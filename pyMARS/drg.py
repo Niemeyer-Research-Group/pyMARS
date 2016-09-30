@@ -1,5 +1,4 @@
 import networkx as nx
-import cantera as ct
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
@@ -35,7 +34,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
         graph.add_node(species.name)
     ri_total = {}
     ri_partial = {}
-    error_list ={}
+    error_list = {}
     #iterate through each timestep
     for timestep, data_group in rate_file.iteritems():
         rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
@@ -91,7 +90,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
 
     #get connected species
     target = target_species
-
     exclusion_list = graph_search(solution, graph)
     #plt.show()
     rate_file.close()
