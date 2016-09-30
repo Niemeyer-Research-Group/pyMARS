@@ -2,7 +2,7 @@ import networkx as nx
 import cantera as ct
 import h5py
 
-def graph_search(solution_object, nx_graph):
+def graph_search(solution_object, nx_graph, target_species):
     """Search nodal graph and generate list of species to exclude
 
     :param solution_object:
@@ -15,7 +15,6 @@ def graph_search(solution_object, nx_graph):
         String containing names of species to exclude
     """
 
-    target_species = str(raw_input('Enter target starting species: '))
     essential_nodes = list(nx.dfs_preorder_nodes(nx_graph, target_species))
 
     exclusion_list = []
