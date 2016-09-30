@@ -3,6 +3,7 @@ import cantera as ct
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
+from graph_search import graph_search
 
 def make_graph(solution_object, hdf5_file, threshold_value, target_species):
     """ Use the Direct Relation Graph (DRG) method to choose species to
@@ -90,25 +91,13 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
 
     #get connected species
     target = target_species
-    essential_nodes = list(nx.dfs_preorder_nodes(graph, target))
-    nx.draw(graph, with_labels=True, width=.25)
-    #get list of species to eliminate
-    exclusion_list = list()
-    ex_list = []
-    for species in solution.species():
-        if species.name not in essential_nodes:
-            exclusion_list.append(species.name)
-            ex_list.append(species.name)
-    exclusion_list_string = '\''
-    for species in exclusion_list:
-        exclusion_list_string += str(species) + ', '
-    exclusion_list_string = exclusion_list_string.rstrip(',')
 
+    exclusion_list = graph_search(solution, graph)
     #plt.show()
     rate_file.close()
     if len(error_list) != 0:
         print 'error list'
         print error_list
-    return ex_list
+    return exclusion_list
 
 #make_graph('gri301.cti', 'production_rates.hdf5')
