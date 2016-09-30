@@ -89,8 +89,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                 continue
 
     #get connected species
-    target = target_species
-    exclusion_list = graph_search(solution, graph)
+    exclusion_list = graph_search(solution, graph, target_species)
     #plt.show()
     rate_file.close()
     if len(error_list) != 0:
