@@ -23,7 +23,6 @@ def drg_loop_control(solution_object, args):
 
     #run first sim and retain initial conditions
     args.initiial_sim = True
-    print dir(args)
     sim1_result = autoignition_loop_control(solution_object, args)
     tau1 = sim1_result.tau
     args.frac = sim1_result.frac
