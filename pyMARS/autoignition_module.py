@@ -32,21 +32,9 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     solution = solution_object
     # temporary fix, allow initial conditions to be carried in if already set from previous
     #sim.
-    if sys_args is 'none':
-        if 'initial_sim' in usr_args:
-            initial_sim = True
-    else:
-        if sys_args.initial_sim is True:
-            initial_sim = True
-        else:
-            initial_sim = False
-    if initial_sim is True:
-        frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ')
-        initial_temperature = float(raw_input('Enter Solution Temperature in (K):'))
-        initial_temperature = initial_temperature
-    else:
-        frac = sys_args.frac
-        initial_temperature = sys_args.Temp
+
+    frac = sys_args.frac
+    initial_temperature = sys_args.Temp
     solution.TPX = initial_temperature, ct.one_atm, frac #1001.325 kPa
     species = solution.species()
     reactions = solution.reactions()
@@ -89,7 +77,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     print('\n')
 
     sample = get_range(times1,temps,sdata, production_data)
-
 
     for grp in f1.keys():
         if int(grp) not in range((sample.index-20), (sample.index+20)):
