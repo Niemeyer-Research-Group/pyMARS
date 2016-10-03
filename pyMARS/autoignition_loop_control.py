@@ -31,7 +31,7 @@ def autoignition_loop_control(solution_object, args='none'):
     t_low = float(args.Temp.split('-')[0])
     t_high = float(args.Temp.split('-')[1])
     t_array = [t_low]
-    combined_rates = h5py.File('combined_rate_file.hdf5'. 'w')
+    combined_rates = h5py.File('combined_rate_file.hdf5', 'w')
     while t_low <= (t_high-100.0):
         t_low += 100.0
         t_array.append(t_low)
