@@ -1,7 +1,7 @@
 from create_trimmed_model import trim
 from convert_chemkin_file import convert
 from soln2cti import write
-from autoignition_module import run_sim
+from autoignition_loop_control import autoignition_loop_control
 from get_rate_data import get_rates
 from drg import make_graph
 
@@ -23,7 +23,8 @@ def drg_loop_control(solution_object, args):
 
     #run first sim and retain initial conditions
     args.initiial_sim = True
-    sim1_result = run_sim(solution_object, args)
+    print dir(args)
+    sim1_result = autoignition_loop_control(solution_object, args)
     tau1 = sim1_result.tau
     args.frac = sim1_result.frac
     args.Temp = sim1_result.Temp
@@ -42,7 +43,7 @@ def drg_loop_control(solution_object, args):
             drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
             new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
             #run second sim with skeletal model to compare ignition delay
-            sim2_result = run_sim(new_solution_objects[1], args)
+            sim2_result = autoignition_loop_control(new_solution_objects[1], args)
             tau2 = sim2_result.tau
             error = float((abs((tau1-tau2)/tau1))*100.0)
         #re-run auotignition and drg .01 below threshold to get skeletal within acceptable error
@@ -50,7 +51,7 @@ def drg_loop_control(solution_object, args):
         drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
         new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
         #run second sim
-        sim2_result = run_sim(new_solution_objects[1], args)
+        sim2_result = autoignition_loop_control(new_solution_objects[1], args)
         #compare error
         tau2 = sim2_result.tau
         error = float((abs((tau1-tau2)/tau1))*100.0)
@@ -62,7 +63,7 @@ def drg_loop_control(solution_object, args):
         threshold = float(raw_input('Enter threshold value: '))
         drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
         new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-        sim2_result = run_sim(new_solution_objects[1], args)
+        sim2_result = autoignition_loop_control(new_solution_objects[1], args)
         tau2 = sim2_result.tau
         error = float((abs((tau1-tau2)/tau1))*100.0)
         print 'Error: %s%%' %"{0:.2f}".format(error)
