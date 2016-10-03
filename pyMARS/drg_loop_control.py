@@ -5,7 +5,7 @@ from autoignition_module import run_sim
 from get_rate_data import get_rates
 from drg import make_graph
 
-def loop_control(solution_object, args):
+def drg_loop_control(solution_object, args):
     """ Controls repeated use of drg Function
 
         :param solution_object:

@@ -117,11 +117,14 @@ def readin(args='none', **argv):
             print 'running sim'
             sim_result = run_sim(solution_object, args)
         if args.run_drg is True:
-            new_solution_objects = loop_control(solution_object, args)
+            new_solution_objects = drg_loop_control(solution_object, args)
             #n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
             #print 'Number of species eliminated: %s' %n_species_eliminated
             drg_trimmed_file = write(new_solution_objects[1])
 
+
+
+    #tbelow section not tested with new updates
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")
         #convert file to cti
