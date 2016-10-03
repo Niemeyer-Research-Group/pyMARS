@@ -3,9 +3,9 @@ import h5py
 import numpy as np
 
 def get_rates(hdf5_file, solution_object):
-    """ Takes hdf5 file of species mole fractions at a point in time, and
-        initalizes a cantera solution object to get species production rates
-        at that point
+    """ Takes mass_fractions hdf5 file of species mole fractions at a point in
+        time, and initalizes a cantera solution object to get species production
+        rates at that point
 
     :param hdf5_file:
         A hdf5 file containing time, temp and species mole fractions used to
