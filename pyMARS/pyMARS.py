@@ -8,7 +8,8 @@ from soln2cti import write
 from autoignition_module import run_sim
 from get_rate_data import get_rates
 from drg import make_graph
-from drg_loop_control import loop_control
+from drg_loop_control import drg_loop_control
+from autoignition_loop_control import autoignition_loop_control
 
 
 def readin(args='none', **argv):
@@ -115,11 +116,12 @@ def readin(args='none', **argv):
             trimmed_file = write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
-            sim_result = run_sim(solution_object, args)
+            sim_result = autoignition_loop_control(solution_object, args)
         if args.run_drg is True:
-            new_solution_objects = loop_control(solution_object, args)
+            new_solution_objects = drg_loop_control(solution_object, args)
             drg_trimmed_file = write(new_solution_objects[1])
 
+    #below section not tested with new updates
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")
         #convert file to cti
