@@ -75,7 +75,14 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                 edge_name = edge.split('_', 1)
                 species_a_name = edge_name[0]
                 species_b_name = edge_name[1]
-                weight = abs(float(ri_partial[edge])/float(ri_total[species_a_name]))
+                try:
+                    weight = abs(float(ri_partial[edge])/float(ri_total[species_a_name]))
+                except ZeroDivisionError:
+                    if ri_partial > 0.001:
+                        print ri_partial[edge]
+                        continue
+                    else:
+                        continue
                 #only add edge if > than edge value from previous timesteps
                 if weight >= threshold_value:
                     if graph.has_edge(species_a_name, species_b_name):
