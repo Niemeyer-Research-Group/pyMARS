@@ -27,7 +27,7 @@ def drg_loop_control(solution_object, args):
     tau1 = sim1_result.tau
     args.frac = sim1_result.frac
     args.Temp = sim1_result.Temp
-    get_rates('mass_fractions.hdf5', solution_object)
+    get_rates('mass_fractions.hdf5', solution_object, sim1_result.Temp)
     args.initial_sim = False
 
     if args.iterate is True:
