@@ -2,7 +2,7 @@ import cantera as ct
 import h5py
 import numpy as np
 
-def get_rates(hdf5_file, solution_object):
+def get_rates(hdf5_file, solution_object, initial_temperature):
     """ Takes mass_fractions hdf5 file of species mole fractions at a point in
         time, and initalizes a cantera solution object to get species production
         rates at that point
@@ -14,6 +14,9 @@ def get_rates(hdf5_file, solution_object):
     :param solution_object:
         A Cantera solution object used to get net production rates
 
+    :param initial_temperature:
+        Initial temperature used in autoignition
+
     """
 
     #read in data file
@@ -23,10 +26,11 @@ def get_rates(hdf5_file, solution_object):
     g=h5py.File('production_rates.hdf5', 'w')
     #initialize solution
     solution=solution_object
+    ind = str(initial_temperature)
     #iterate through all 40 timesteps
-    for grp in f:
+    for grp in f[str(initial_temperature)]:
         #get solution data at individual timestep
-        group=f[str(grp)]
+        group=f[ind][str(grp)]
         time=group['Time'].value
         temp=group['Temp'].value
         pressure=group['Pressure'].value
