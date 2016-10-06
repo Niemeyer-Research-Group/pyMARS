@@ -121,6 +121,11 @@ def readin(args='none', **argv):
             new_solution_objects = drg_loop_control(solution_object, args)
             drg_trimmed_file = write(new_solution_objects[1])
 
+
+
+
+
+
     #below section not tested with new updates
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")
