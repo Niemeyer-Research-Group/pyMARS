@@ -1,6 +1,7 @@
 import cantera as ct
 import h5py
 import numpy as np
+import os
 
 def get_rates(hdf5_file, solution_object, initial_temperature):
     """ Takes mass_fractions hdf5 file of species mole fractions at a point in
@@ -27,27 +28,33 @@ def get_rates(hdf5_file, solution_object, initial_temperature):
     #initialize solution
     solution=solution_object
     ind = str(initial_temperature)
-    #iterate through all 40 timesteps
-    for grp in f[str(initial_temperature)]:
+    #iterate through all initial conditions
+    for grp in f.iterkeys():
         #get solution data at individual timestep
-        group=f[ind][str(grp)]
-        time=group['Time'].value
-        temp=group['Temp'].value
-        pressure=group['Pressure'].value
-        mass_fractions=np.array(group['Species Mass Fractions'])
-        #set solution state
-        solution.TPY= temp, pressure, mass_fractions
+        ic_group = f[grp]
+        print ic_group
+        print 'rates converted'
+        #iterate through all timesteps
+        for tstep in ic_group.iterkeys():
+            group=f[str(grp)][str(tstep)]
+            time=group['Time'].value
+            temp=group['Temp'].value
+            pressure=group['Pressure'].value
+            mass_fractions=np.array(group['Species Mass Fractions'])
+            #set solution state
+            solution.TPY= temp, pressure, mass_fractions
 
-        #create groups and write production data to new file
-        species_production_rates=solution.net_production_rates
-        species_production_rates_original=group['Species Net Production Rates Original']
-        reaction_production_rates=solution.net_rates_of_progress
-        new_grp=g.create_group(str(grp))
-        new_grp['Temp'] = solution.T
-        new_grp['Time'] = time
-        #net production rates for each species (kmol/m^3/s for bulk phases, or kmol/m^2/s for surface)
-        new_grp.create_dataset('Species Net Production Rates', data=species_production_rates)
-        #net rates of progress for each reaction  (kmol/m^3/s for bulk phases, or kmol/m^2/s for surface)
-        new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
-        new_grp.create_dataset('Species Net Production Rates Original', data=species_production_rates_original)
+            #create groups and write production data to new file
+            species_production_rates=solution.net_production_rates
+            species_production_rates_original=group['Species Net Production Rates Original']
+            reaction_production_rates=solution.net_rates_of_progress
+            new_grp=g.create_group(str(grp)+'_'+str(tstep))
+            new_grp['Temp'] = solution.T
+            new_grp['Time'] = time
+            #net production rates for each species (kmol/m^3/s for bulk phases, or kmol/m^2/s for surface)
+            new_grp.create_dataset('Species Net Production Rates', data=species_production_rates)
+            #net rates of progress for each reaction  (kmol/m^3/s for bulk phases, or kmol/m^2/s for surface)
+            new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
+            new_grp.create_dataset('Species Net Production Rates Original', data=species_production_rates_original)
     g.close()
+    os.system('rm mass_fractions.hdf5')
