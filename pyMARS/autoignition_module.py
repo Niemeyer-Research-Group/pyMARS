@@ -52,7 +52,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     production_data = np.zeros([0, len(solution.net_production_rates)])
     state_list = list()
 
-    f1 = h5py.File('mass_fractions.hdf5', 'w')
+    f1 = h5py.File('mass_fractions.hdf5', 'a')
     individual = f1.create_group(str(initial_temperature))
     while current_time < stop_time:
         group_index += 1
@@ -60,7 +60,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
-
         grp = individual.create_group(str(group_index))
         grp['Temp'] = reactor.T
         grp['Time'] = current_time
