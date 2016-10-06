@@ -32,7 +32,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     solution = solution_object
     # temporary fix, allow initial conditions to be carried in if already set from previous
     #sim.
-
+    print 'running sim from initial_temp %s' %sys_args.Temp
     frac = sys_args.frac
     initial_temperature = sys_args.Temp
     solution.TPX = initial_temperature, ct.one_atm, frac #1001.325 kPa
@@ -53,6 +53,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     state_list = list()
 
     f1 = h5py.File('mass_fractions.hdf5', 'w')
+    individual = f1.create_group(str(initial_temperature))
     while current_time < stop_time:
         group_index += 1
         current_time = simulation.step(stop_time)
@@ -60,7 +61,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         temps.append(reactor.T)
         species_data = reactor.Y
 
-        grp = f1.create_group(str(group_index))
+        grp = individual.create_group(str(group_index))
         grp['Temp'] = reactor.T
         grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
@@ -78,9 +79,9 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
 
     sample = get_range(times1,temps,sdata, production_data)
 
-    for grp in f1.keys():
+    for grp in f1[str(initial_temperature)].keys():
         if int(grp) not in range((sample.index-20), (sample.index+20)):
-            f1.__delitem__(str(grp))
+            f1[str(initial_temperature)].__delitem__(str(grp))
 
     f1.close()
 
