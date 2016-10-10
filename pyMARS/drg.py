@@ -79,7 +79,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                     weight = abs(float(ri_partial[edge])/float(ri_total[species_a_name]))
                 except ZeroDivisionError:
                     if ri_partial > 0.001:
-                        print ri_partial[edge]
+                        #print ri_partial[edge]
                         continue
                     else:
                         continue
