@@ -11,7 +11,6 @@ def autoignition_loop_control(solution_object, args='none'):
     :param args:
         Arguments from terminal
     """
-    print dir(args)
     if args is 'none':
         if 'initial_sim' in args:
             initial_sim = True
