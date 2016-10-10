@@ -15,8 +15,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         User arguments (plot='y',
                         points='y',
                         writehdf5='y',
-                        writecsv='y',
-                        initial_sim='y')
+                        writecsv='y',)
         *User argument initial_sim needed if running module independently
     ----------
     Output
@@ -24,6 +23,14 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         Points of interest
         CSV file
         Hdf5 file
+        mass_fractions.hdf5 : [initial_temp]
+                                    [index]
+                                        [Temp]
+                                        [Time]
+                                        [Pressure]
+                                        [Species Mass Fractions]
+                                        [Species Net Production Rates Original]
+
     ----------
     Example
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
