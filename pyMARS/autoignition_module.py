@@ -63,7 +63,12 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     individual = f1.create_group(str(initial_temperature))
     while current_time < stop_time:
         group_index += 1
-        current_time = simulation.step(stop_time)
+        try:
+            current_time = simulation.step(stop_time)
+        except Exception:
+            error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
+            print error_string
+            return 
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
