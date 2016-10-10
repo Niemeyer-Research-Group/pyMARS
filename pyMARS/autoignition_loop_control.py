@@ -40,10 +40,4 @@ def autoignition_loop_control(solution_object, args='none'):
         initial_temperature = args.Temp
         args.Temp = float(raw_input(' else case Enter Solution Temperature Range in (K) (ex. 800-1000):'))
         sim_result = run_sim(solution_object, args)
-
-
-
-    #print sim_result.test
-    #sim_result.test.close()
-    #print sim_result.test
     return sim_result
