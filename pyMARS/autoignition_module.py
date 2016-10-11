@@ -68,7 +68,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         except Exception:
             error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
             print error_string
-            return 
+            return
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
@@ -94,7 +94,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         if int(grp) not in range((sample.index-20), (sample.index+20)):
             f1[str(initial_temperature)].__delitem__(str(grp))
 
-    f1.close()
+    #f1.close()
 
     #utility functions
     def plot():
