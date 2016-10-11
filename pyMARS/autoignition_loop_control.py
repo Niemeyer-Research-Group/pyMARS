@@ -35,6 +35,8 @@ def autoignition_loop_control(solution_object, args='none'):
             args.Temp = float(condition)
             print args.Temp
             sim_result = run_sim(solution_object, args)
+            print sim_result.test.keys()
+            print dir(sim_result.test)
     else:
         frac = args.frac
         initial_temperature = args.Temp
