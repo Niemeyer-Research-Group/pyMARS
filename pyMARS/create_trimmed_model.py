@@ -22,9 +22,6 @@ def trim(solution_object, exclusion_list, file_name):
         or
         trim('gri30.cti', []) to trim no species
     """
-    print('species to exclude: ')
-    print(exclusion_list)
-    print ('\n')
 
     # define initial solution objects
     initial_solution = solution_object
