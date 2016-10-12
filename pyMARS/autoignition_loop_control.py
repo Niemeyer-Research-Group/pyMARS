@@ -3,7 +3,7 @@ import h5py
 from autoignition_module import run_sim
 
 
-def autoignition_loop_control(solution_object, args='none'):
+def autoignition_loop_control(solution_object, args):
     """Controls autoignition module
 
     :param solution_object:
@@ -11,17 +11,7 @@ def autoignition_loop_control(solution_object, args='none'):
     :param args:
         Arguments from terminal
     """
-    if args is 'none':
-        if 'initial_sim' in args:
-            initial_sim = True
-        else:
-            initial_sim = False
-    else:
-        if args.initial_sim is True:
-            initial_sim = True
-        else:
-            initial_sim = False
-    if initial_sim is True:
+    if args.initial_sim is True:
         args.frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ')
         args.Temp = str(raw_input('Enter Solution Temperature Range in (K) (ex. 800-1000):'))
         t_low = float(args.Temp.split('-')[0])
