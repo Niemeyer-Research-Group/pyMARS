@@ -23,7 +23,6 @@ def autoignition_loop_control(solution_object, args):
         args.temperature_range = t_array
         for condition in t_array:
             args.Temp = float(condition)
-            print args.Temp
             sim_result = run_sim(solution_object, args)
             #sim_result.test.keys() results in [u'1700.0', u'1800.0']
     else:

@@ -86,7 +86,6 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         production_rates = np.array(solution.net_production_rates)
         production_rates = production_rates[:,np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
-    print('\n')
 
     sample = get_range(times1,temps,sdata, production_data)
 

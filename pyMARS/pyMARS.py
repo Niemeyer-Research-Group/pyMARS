@@ -126,6 +126,7 @@ def readin(args='none', **argv):
 
 
 
+
     #below section not tested with new updates
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")

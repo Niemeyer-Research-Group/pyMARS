@@ -68,6 +68,7 @@ def drg_loop_control(solution_object, args):
         os.system('rm mass_fractions.hdf5')
         error = float((abs((tau1-tau2)/tau1))*100.0)
         print 'Error: %s%%' %"{0:.2f}".format(error)
+    os.system('rm production_rates.hdf5')
     n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
     print 'Number of species eliminated: %s' %n_species_eliminated
     return new_solution_objects
