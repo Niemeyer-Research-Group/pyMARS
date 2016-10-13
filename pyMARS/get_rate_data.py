@@ -54,4 +54,3 @@ def get_rates(hdf5_file, solution_object, initial_temperature):
             new_grp.create_dataset('Species Net Production Rates Original', data=species_production_rates_original)
     g.close()
     f.close()
-    os.system('rm mass_fractions.hdf5')
