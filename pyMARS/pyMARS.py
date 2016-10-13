@@ -107,7 +107,7 @@ def readin(args='none', **argv):
     file_extension= os.path.splitext(args.data_file)[1]
 
     if file_extension == ".cti" or file_extension == ".xml":
-        print("\n\nThis is an Cantera xml or cti file\n")
+        print("\nThis is an Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
         #trims file
         #need case if no trim necessary
