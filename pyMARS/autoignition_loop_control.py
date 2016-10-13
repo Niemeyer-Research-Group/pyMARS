@@ -20,7 +20,7 @@ def autoignition_loop_control(solution_object, args):
         while t_low <= (t_high-100.0):
             t_low += 100.0
             t_array.append(t_low)
-        print t_array
+        args.temperature_range = t_array
         for condition in t_array:
             args.Temp = float(condition)
             print args.Temp
