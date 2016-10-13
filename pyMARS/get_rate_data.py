@@ -30,7 +30,6 @@ def get_rates(hdf5_file, solution_object, initial_temperature):
     for grp in f.iterkeys():
         #get solution data at individual timestep
         ic_group = f[grp]
-        print 'rates converted'
         #iterate through all timesteps
         for tstep in ic_group.iterkeys():
             group = f[str(grp)][str(tstep)]
