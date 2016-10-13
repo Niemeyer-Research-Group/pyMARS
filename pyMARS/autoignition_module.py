@@ -31,6 +31,17 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
                                         [Species Mass Fractions]
                                         [Species Net Production Rates Original]
 
+    ---------
+    returns:
+        sim result
+            .time
+            .temp
+            .initial_temperature_array
+            .sp_data
+            .test (h5py object)
+            .tau
+            .Temp
+            .frac
     ----------
     Example
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
@@ -182,6 +193,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
         def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
             self.time = time
             self.temp = temp
+            self.initial_temperature_array =[]
             self.sp_data = sp_data
             self.test = f1
             self.tau = tau
