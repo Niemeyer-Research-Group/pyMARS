@@ -14,7 +14,7 @@ def autoignition_loop_control(solution_object, args):
     if args.initial_sim is True:
         args.frac = raw_input('Enter mole fractions (ex.CH4:1, O2:2, N2:7.52 for Gri30 Stoich) :  ')
         args.Temp = str(raw_input('Enter Solution Temperature Range in (K) (ex. 800-1000):'))
-        tau_array=[]
+        args.tau_array=[]
         if '-' in args.Temp:
             t_low = float(args.Temp.split('-')[0])
             t_high = float(args.Temp.split('-')[1])
@@ -25,9 +25,12 @@ def autoignition_loop_control(solution_object, args):
             for condition in t_array:
                 args.Temp = float(condition)
                 sim_result = run_sim(solution_object, args)
-                tau_array.append(sim_result.tau)
+                try:
+                    args.tau_array.append(sim_result.tau)
+                except AttributeError:
+                    args.tau_array.append(0.0)
                 #sim_result.test.keys() results in [u'1700.0', u'1800.0']
-            sim_result.tau_array = tau_array
+            sim_result.tau_array = args.tau_array
             sim_result.initial_temperature_array = t_array
         else:
             args.Temp = float(args.Temp)
@@ -37,6 +40,5 @@ def autoignition_loop_control(solution_object, args):
     else:
         frac = args.frac
         initial_temperature = args.Temp
-        args.Temp = float(raw_input(' else case Enter Solution Temperature to test error in (K) (ex. 800-1000):'))
         sim_result = run_sim(solution_object, args)
     return sim_result
