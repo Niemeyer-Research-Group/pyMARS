@@ -5,6 +5,7 @@ from autoignition_loop_control import autoignition_loop_control
 from get_rate_data import get_rates
 from drg import make_graph
 import os
+from get_error import get_error
 
 def drg_loop_control(solution_object, args):
     """ Controls repeated use of drg Function
@@ -27,6 +28,7 @@ def drg_loop_control(solution_object, args):
     sim1_result = autoignition_loop_control(solution_object, args)
     sim1_result.test.close()
     tau1 = sim1_result.tau
+    args.initial_temperature_array = sim1_result.initial_temperature_array
     args.frac = sim1_result.frac
     args.Temp = sim1_result.Temp
     get_rates('mass_fractions.hdf5', solution_object, sim1_result.Temp)
@@ -36,11 +38,12 @@ def drg_loop_control(solution_object, args):
         threshold = float(raw_input('Enter threshold value: '))
         drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
         new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-        sim2_result = autoignition_loop_control(new_solution_objects[1], args)
-        tau2 = sim2_result.tau
+        #sim2_result = autoignition_loop_control(new_solution_objects[1], args)
+        #tau2 = sim2_result.tau
+        #error = float((abs((tau1-tau2)/tau1))*100.0)
+        #print 'Error: %s%%' %"{0:.2f}".format(error)
         os.system('rm mass_fractions.hdf5')
-        error = float((abs((tau1-tau2)/tau1))*100.0)
-        print 'Error: %s%%' %"{0:.2f}".format(error)
+        get_error(new_solution_objects[1], args)
 
     else:
         #set initial 0 cases
