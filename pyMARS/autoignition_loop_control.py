@@ -24,16 +24,17 @@ def autoignition_loop_control(solution_object, args):
                 t_array.append(t_low)
             for condition in t_array:
                 args.Temp = float(condition)
-
+                sim_result = run_sim(solution_object, args)
                 tau_array.append(sim_result.tau)
                 #sim_result.test.keys() results in [u'1700.0', u'1800.0']
-            sim_result.tau = tau_array
+            sim_result.tau_array = tau_array
             sim_result.initial_temperature_array = t_array
         else:
             args.Temp = float(args.Temp)
             sim_result = run_sim(solution_object, args)
-    else:
+            print sim_result.tau_array
 
+    else:
         frac = args.frac
         initial_temperature = args.Temp
         args.Temp = float(raw_input(' else case Enter Solution Temperature to test error in (K) (ex. 800-1000):'))
