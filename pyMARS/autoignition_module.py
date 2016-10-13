@@ -199,7 +199,7 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
             self.tau = tau
             self.Temp = initial_temperature
             self.frac = frac
-            sim_result.tau_array = []
+            self.tau_array = []
 
     return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
