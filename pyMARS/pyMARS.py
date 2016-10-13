@@ -120,7 +120,11 @@ def readin(args='none', **argv):
         if args.run_drg is True:
             new_solution_objects = drg_loop_control(solution_object, args)
             drg_trimmed_file = write(new_solution_objects[1])
-
+            try:
+                os.system('rm production_rates.hdf5')
+                os.system('rm mass_fractions.hdf5')
+            except Exception:
+                pass
 
 
 
