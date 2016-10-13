@@ -31,7 +31,18 @@ def drg_loop_control(solution_object, args):
     args.Temp = sim1_result.Temp
     get_rates('mass_fractions.hdf5', solution_object, sim1_result.Temp)
     args.initial_sim = False
-    if args.iterate is True:
+
+    if args.iterate is False:
+        threshold = float(raw_input('Enter threshold value: '))
+        drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
+        new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
+        sim2_result = autoignition_loop_control(new_solution_objects[1], args)
+        tau2 = sim2_result.tau
+        os.system('rm mass_fractions.hdf5')
+        error = float((abs((tau1-tau2)/tau1))*100.0)
+        print 'Error: %s%%' %"{0:.2f}".format(error)
+
+    else:
         #set initial 0 cases
         error = 0.0
         threshold = 0.00
@@ -59,16 +70,7 @@ def drg_loop_control(solution_object, args):
         print 'Number of loops: %s' %loop_number
         print 'Final max threshold value: %s' %threshold
         print 'Error: %s%% ' %"{0:.2f}".format(error)
-    else:
-        threshold = float(raw_input('Enter threshold value: '))
-        drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
-        new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
-        sim2_result = autoignition_loop_control(new_solution_objects[1], args)
-        tau2 = sim2_result.tau
-        os.system('rm mass_fractions.hdf5')
-        error = float((abs((tau1-tau2)/tau1))*100.0)
-        print 'Error: %s%%' %"{0:.2f}".format(error)
-    os.system('rm production_rates.hdf5')
+
     n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
     print 'Number of species eliminated: %s' %n_species_eliminated
     return new_solution_objects
