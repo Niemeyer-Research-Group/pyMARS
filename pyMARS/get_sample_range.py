@@ -32,14 +32,14 @@ def get_range(times, temps, sdata, production_data):
         error_string = ('not enough timesteps before ignition\n',
                         'timesteps before ignition: ' + str(index) +'\n',
                         'total timesteps: ' + str(len(T)))
-    
+
         print error_string
     try:
         final_point = [times[index+20], T[index+20], index+20]
     except IndexError:
         final_point = [times[len(times)-1], T[len(T)-1], (len(T)-1)]
         error_string = ('not enough timesteps after ignition\n' +
-                        'timesteps after ignition' + str(len((T))-index) +'\n' +
+                        'timesteps after ignition: ' + str(len((T))-index) +'\n' +
                         'total timesteps: ' + str(len(T)))
         print error_string
 
