@@ -122,7 +122,6 @@ def readin(args='none', **argv):
             drg_trimmed_file = write(new_solution_objects[1])
             try:
                 os.system('rm production_rates.hdf5')
-                os.system('rm mass_fractions.hdf5')
             except Exception:
                 pass
 
