@@ -6,6 +6,7 @@ from get_rate_data import get_rates
 from drg import make_graph
 import os
 from get_error import get_error
+from readin_initial_conditions import readin_conditions
 
 def drg_loop_control(solution_object, args):
     """ Controls repeated use of drg Function
