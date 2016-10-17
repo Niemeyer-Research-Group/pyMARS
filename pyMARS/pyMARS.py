@@ -95,6 +95,7 @@ def readin(args='none', **argv):
                 run_drg = args.run_drg
                 initial_sim = True
                 iterate = args.iterate
+                conditions_file = args.conditions_file
                 if args.species is None:
                     exclusion_list = []
                 else:
