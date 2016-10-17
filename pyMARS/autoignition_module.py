@@ -6,7 +6,7 @@ from get_sample_range import get_range
 import h5py
 
 
-def run_sim(solution_object, sys_args='none', **usr_args ):
+def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     """
     Function to run Cantera reactor simulation
 
@@ -50,10 +50,12 @@ def run_sim(solution_object, sys_args='none', **usr_args ):
     solution = solution_object
     # temporary fix, allow initial conditions to be carried in if already set from previous
     #sim.
-    print 'running sim from initial_temp %s' %sys_args.Temp
-    frac = sys_args.frac
-    initial_temperature = sys_args.Temp
-    solution.TPX = initial_temperature, ct.one_atm, frac #1001.325 kPa
+    print 'running sim from initial_temp %s' %condition.temperature
+    frac = condition.moles
+    initial_temperature = float(condition.temperature)
+    pressure = float(condition.pressure)*float(ct.one_atm)
+    print frac
+    solution.TPX = initial_temperature, pressure, frac #1001.325 kPa
     species = solution.species()
     reactions = solution.reactions()
 
