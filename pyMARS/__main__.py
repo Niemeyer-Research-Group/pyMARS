@@ -35,6 +35,9 @@ def main(args=None):
     parser.add_argument('--file', \
                         help='input mechanism file name', \
                         type=str)
+    parser.add_argument('--conditions_file', \
+                        help='initial conditions file name', \
+                        type=str)
 
     parser.add_argument('--species',  \
                         help='comma separated list input of species to exclude',\
