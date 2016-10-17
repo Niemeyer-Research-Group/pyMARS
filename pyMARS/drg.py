@@ -41,6 +41,11 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
         #generate dict of sum production Rates
         for species in species_objects:
             ri_total[species.name] = 0
+        for pre_defined_edge in ri_partial:
+            try:
+                ri_partial[str(pre_defined_edge)] = 0.0
+            except Exception:
+                continue
         #build weights
         for reaction_number, reaction in enumerate(reaction_objects):
             reaction_production_rate = float(rxn_prod_rates[reaction_number])
