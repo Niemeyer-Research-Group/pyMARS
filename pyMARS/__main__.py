@@ -27,6 +27,8 @@ def main(args=None):
             a given threshold value
         :param iterate:
             Run DRG function up to specified error limit
+        :param conditions_file:
+            File of initial conditions for autoignition
 
     """
     #gets arguments from terminal
@@ -104,5 +106,6 @@ def main(args=None):
                 a given threshold value
             --iterate:
                 Run DRG function up to specified error limit
-
+            --conditions_file:
+                File of initial conditions for autoignition
         """
