@@ -28,15 +28,16 @@ def drg_loop_control(solution_object, args):
     args.initiial_sim = True
     sim1_result = autoignition_loop_control(solution_object, args)
     sim1_result.test.close()
-    tau1 = sim1_result.tau
-    args.initial_temperature_array = sim1_result.initial_temperature_array
-    args.frac = sim1_result.frac
-    args.Temp = sim1_result.Temp
-    get_rates('mass_fractions.hdf5', solution_object, sim1_result.Temp)
+    print sim1_result.tau_array
+    get_rates('mass_fractions.hdf5', solution_object)
     args.initial_sim = False
 
     if args.iterate is False:
-        threshold = float(raw_input('Enter threshold value: '))
+        try:
+            threshold = float(raw_input('Enter threshold value: '))
+        except ValueError:
+            print 'try again'
+            threshold = float(raw_input('Enter threshold value: '))
         drg_exclusion_list = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
         new_solution_objects = trim(solution_object, drg_exclusion_list, args.data_file)
         #sim2_result = autoignition_loop_control(new_solution_objects[1], args)
@@ -44,7 +45,7 @@ def drg_loop_control(solution_object, args):
         #error = float((abs((tau1-tau2)/tau1))*100.0)
         #print 'Error: %s%%' %"{0:.2f}".format(error)
         os.system('rm mass_fractions.hdf5')
-        get_error(new_solution_objects[1], args)
+        #get_error(new_solution_objects[1], args)
 
     else:
         #set initial 0 cases
