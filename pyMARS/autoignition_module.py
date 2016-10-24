@@ -73,17 +73,8 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     state_list = list()
 
     f1 = h5py.File('mass_fractions.hdf5', 'a')
-    try:
-        individual = f1.create_group(str(initial_temperature))
-    except ValueError:
-        try:
-            individial = f1.create_group(str(initial_temperature) + '_1')
-        except ValueError:
-            try:
-                individial = f1.create_group(str(initial_temperature) + '_2')
-            except ValueError:
-                print 'temperature is %s' %initial_temperature
-                print str(raw_input('Give group a name:'))
+    group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
+    individual = f1.create_group(group_name)
     while current_time < stop_time:
         group_index += 1
         try:
@@ -112,9 +103,9 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
 
     sample = get_range(times1,temps,sdata, production_data)
 
-    for grp in f1[str(initial_temperature)].keys():
+    for grp in f1[group_name].keys():
         if int(grp) not in range((sample.index-20), (sample.index+20)):
-            f1[str(initial_temperature)].__delitem__(str(grp))
+            f1[group_name].__delitem__(str(grp))
 
     #f1.close()
 
