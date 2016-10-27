@@ -18,14 +18,16 @@ def readin_conditions(initial_conditions_text_file):
     with open(initial_conditions_text_file, 'r') as condition_file:
 
         class condition:
-            def __init__(self, pressure, temperature, moles, name):
+            def __init__(self, pressure, temperature, moles, name, species):
                 self.name = name
                 self.pressure = pressure
                 self.temperature = temperature
                 self.moles = moles
+                self.species = species
 
         name_index = 0
         instance =[]
+        species_list = {}
         for line in condition_file:
                     name_index += 1
                     if "CONV" in line:
@@ -39,10 +41,12 @@ def readin_conditions(initial_conditions_text_file):
                             t = str(line).translate(None, string.letters)
                         if 'REAC' in line:
                             reactants += line.replace('REAC ', '').replace(' ', ':').rstrip() + ','
-
+                            species = line.replace('REAC ', '').rsplit(' ', 1)[0]
+                            moles = line.replace('REAC ', '').rsplit(' ', 1)[1].rstrip()
+                            if species not in species_list.keys():
+                                species_list[species] = moles
                         if 'END' in line:
                             reactants = reactants[:-1]
-                            instance.append(condition(p, t, reactants, condition_name))
+                            instance.append(condition(p, t, reactants, condition_name, species_list))
                             start = False
-
     return instance
