@@ -4,7 +4,7 @@ import h5py
 import matplotlib.pyplot as plt
 from graph_search import graph_search
 
-def make_graph(solution_object, hdf5_file, threshold_value, target_species):
+def make_graph(solution_object, hdf5_file, threshold_value):
     """ Use the Direct Relation Graph (DRG) method to choose species to
     eliminate from reaction mechanism.
 
@@ -109,10 +109,9 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
         def __init__(self, detailed_solution, graph, target_species):
             self.detailed_solution = detailed_solution
             self.graph = graph
-            self.target_species = target_species
     if len(error_list) != 0:
         print 'error list'
         print error_list
-    return drg_results(solution, graph, target_species)
+    return drg_results(solution, graph)
 
 #make_graph('gri301.cti', 'production_rates.hdf5')
