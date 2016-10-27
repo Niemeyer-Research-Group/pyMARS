@@ -13,7 +13,6 @@ def autoignition_loop_control(solution_object, args):
         Arguments from terminal
     """
     conditions_array = readin_conditions(str(args.conditions_file))
-    print 'read in conditions'
     if args.initial_sim is True:
         tau_array = []
         initial_temperature_array = []
