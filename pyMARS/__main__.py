@@ -8,6 +8,8 @@ def main(args=None):
     Arguments
         :param file:
             Input mechanism file (ex. --file=gri30.cti)
+        :param conditions_file:
+            File of initial conditions for autoignition
         :param species:
             Species to eliminate (ex. --species='H, OH')
         :param thermo:
@@ -29,7 +31,6 @@ def main(args=None):
             Run DRG function up to specified error limit
         :param conditions_file:
             File of initial conditions for autoignition
-
     """
     #gets arguments from terminal
     parser=argparse.ArgumentParser(description='pyMARS main: \
