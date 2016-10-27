@@ -101,12 +101,18 @@ def make_graph(solution_object, hdf5_file, threshold_value, target_species):
                 continue
 
     #get connected species
-    exclusion_list = graph_search(solution, graph, target_species)
+    #exclusion_list = graph_search(solution, graph, target_species)
     #plt.show()
     rate_file.close()
+
+    class drg_results:
+        def __init__(self, detailed_solution, graph, target_species):
+            self.detailed_solution = detailed_solution
+            self.graph = graph
+            self.target_species = target_species
     if len(error_list) != 0:
         print 'error list'
         print error_list
-    return exclusion_list
+    return drg_results(solution, graph, target_species)
 
 #make_graph('gri301.cti', 'production_rates.hdf5')
