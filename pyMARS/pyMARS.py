@@ -38,7 +38,7 @@ def readin(args='none', **argv):
         Converted mechanism file
         Trimmed Solution Object
         Trimmed Mechanism file
-
+    
     >>>readin(file='gri30.cti', plot='y', species='OH, H')
     """
 
@@ -99,7 +99,7 @@ def readin(args='none', **argv):
                 if args.species is None:
                     exclusion_list = []
                 else:
-                    exclusion_list = [str(item) for item in args.species.split(',')]
+om                     exclusion_list = [str(item) for item in args.species.split(',')]
                     #strip spaces
                     for i, sp in enumerate(exclusion_list):
                         exclusion_list[i]=sp.strip()
