@@ -69,7 +69,7 @@ def drg_loop_control(solution_object, args):
             ignition_delay_reduced = np.array(reduced_result.tau_array)
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
             os.system('rm mass_fractions.hdf5')
-            printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species()) + '  '+  str(error) + '\n'
+            printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(error) + '\n'
 
         print printout
     return new_solution_objects
