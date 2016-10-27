@@ -30,7 +30,7 @@ def main(args=None):
         :param iterate:
             Run DRG function up to specified error limit
         :param conditions_file:
-            File of initial conditions for autoignition
+            File of conditions for autoignition
     """
     #gets arguments from terminal
     parser=argparse.ArgumentParser(description='pyMARS main: \
@@ -38,7 +38,7 @@ def main(args=None):
     parser.add_argument('--file', \
                         help='input mechanism file name', \
                         type=str)
-    parser.add_argument('--conditions_file', \
+    parser.add_argument('--conditions', \
                         help='initial conditions file name', \
                         type=str)
 
@@ -72,7 +72,10 @@ def main(args=None):
     parser.add_argument('--run_drg', \
                         help='run Direct Relation Graph method to reduce', \
                         action="store_true")
-    parser.add_argument('--iterate', \
+    parser.add_argument('--thresholds', \
+                        help='Iterate DRG up to acceptable error limit', \
+                        type=str)
+    parser.add_argument('--convert', \
                         help='Iterate DRG up to acceptable error limit', \
                         action="store_true")
 
@@ -88,12 +91,21 @@ def main(args=None):
         Arguments
             --file:
                 Input mechanism file (ex. --file=gri30.cti)
-            --species:
-                Species to eliminate (ex. --species='H, OH')
+            --run_drg:
+                Run Direct Relation Graphing model reduction based on
+                a given threshold value
+            --conditions:
+                Text file of initial conditions for autoignition
+            --thresholds:
+                csv file containing threshold values to test (usr prompted otherwise)
+            --convert:
+                Convert .cti <==> .inp
             --thermo:
                 Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
             --transport:
                 Transport data file if Chemkin format
+            --species:
+                Specific species to eliminate (ex. --species='H, OH')
             --plot:
                 Plot a temperature profile of autoignition
             --points:
@@ -102,11 +114,6 @@ def main(args=None):
                 Write autoignition data to a csv file
             --writehdf5:
                 Write autoignition to a hdf5 file
-            --run_drg:
-                Run Direct Relation Graphing model reduction based on
-                a given threshold value
-            --iterate:
-                Run DRG function up to specified error limit
-            --conditions_file:
-                File of initial conditions for autoignition
+
+
         """
