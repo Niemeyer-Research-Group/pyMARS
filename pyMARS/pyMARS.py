@@ -1,10 +1,10 @@
 import os, sys, argparse
 import cantera as ct
 os.environ['Cantera_Data'] =os.getcwd()
-
 from create_trimmed_model import trim
 from convert_chemkin_file import convert
-from soln2cti import write
+import soln2ck
+import soln2cti
 from autoignition_module import run_sim
 from get_rate_data import get_rates
 from drg import make_graph
@@ -38,72 +38,32 @@ def readin(args='none', **argv):
         Converted mechanism file
         Trimmed Solution Object
         Trimmed Mechanism file
-    
+
     >>>readin(file='gri30.cti', plot='y', species='OH, H')
     """
 
     class args():
-        #direct use case
-            if args is 'none':
-                argparse.Namespace()
-                plot = False
-                points = False
-                writecsv = False
-                writehdf5 = False
-                data_file = argv['file']
-                thermo_file = None
-                transport_file = None
-                run_drg = None
-                initial_sim = True
-                iterate = False
-
-                if 'thermo' in argv:
-                    thermo_file = argv['thermo']
-                if 'transport' in argv:
-                    transport_file = argv['transport']
-                if 'species' in argv:
-                    species = argv['species']
-                    exclusion_list = [str(item) for item in species.split(',')]
-                    #strip spaces
-                    for i, sp in enumerate(exclusion_list):
-                        exclusion_list[i]=sp.strip()
-                if 'species' not in argv:
-                    exclusion_list=[]
-                if 'plot' in argv:
-                    plot = True
-                if 'writecsv' in argv:
-                    writecsv = True
-                if 'writehdf5' in argv:
-                    writehdf5 = True
-                if 'points' in argv:
-                    points = True
-                if 'run_drg' in argv:
-                    run_drg = True
-                if 'iterate' in argv:
-                    iterate = True
-                x ='arg_none'
 
         #package from terminal use case
-            if args is not 'none':
-                plot = args.plot
-                points = args.points
-                writecsv = args.writecsv
-                writehdf5 = args.writehdf5
-                data_file= args.file
-                thermo_file = args.thermo
-                transport_file = args.transport
-                run_drg = args.run_drg
-                initial_sim = True
-                iterate = args.iterate
-                conditions_file = args.conditions_file
-                if args.species is None:
-                    exclusion_list = []
-                else:
-om                     exclusion_list = [str(item) for item in args.species.split(',')]
-                    #strip spaces
-                    for i, sp in enumerate(exclusion_list):
-                        exclusion_list[i]=sp.strip()
-                x='args_not_none'
+        if args is not 'none':
+            plot = args.plot
+            points = args.points
+            writecsv = args.writecsv
+            writehdf5 = args.writehdf5
+            data_file= args.file
+            thermo_file = args.thermo
+            transport_file = args.transport
+            run_drg = args.run_drg
+            multiple_conditions = True
+            threshold_values = args.thresholds
+            conditions_file = args.conditions
+            if args.species is None:
+                exclusion_list = []
+            else:
+                exclusion_list = [str(item) for item in args.species.split(',')]
+                #strip spaces
+                for i, sp in enumerate(exclusion_list):
+                    exclusion_list[i]=sp.strip()
 
     file_extension= os.path.splitext(args.data_file)[1]
 
@@ -112,7 +72,7 @@ om                     exclusion_list = [str(item) for item in args.species.spli
         solution_object = ct.Solution(args.data_file)
         #trims file
         #need case if no trim necessary
-        solution_objects = trim(solution_object, args.exclusion_list, args.data_file)
+        #solution_objects = trim(solution_object, args.exclusion_list, args.data_file)
         if args.run_drg is False:
             trimmed_file = write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
@@ -120,40 +80,22 @@ om                     exclusion_list = [str(item) for item in args.species.spli
             sim_result = autoignition_loop_control(solution_object, args)
         if args.run_drg is True:
             new_solution_objects = drg_loop_control(solution_object, args)
-            drg_trimmed_file = write(new_solution_objects[1])
+            os.system('rm production_rates.hdf5')
+            os.system('rm mass_fractions.hdf5')
+            drg_trimmed_file = soln2cti.write(new_solution_objects[1])
+
             try:
                 os.system('rm production_rates.hdf5')
             except Exception:
                 pass
+        if args.convert is True:
+            soln2ck.write(solution_object)
 
 
-
-
-
-
-    #below section not tested with new updates
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")
         #convert file to cti
         converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
-        #trims newly converted file
-        converted_file_object = ct.Solution(converted_file_name)
-        solution_objects = trim(converted_file_object, args.exclusion_list, args.data_file)
-        trimmed_file = write(solution_objects[1])
-
-        if "plot" or "points" or "writecsv" or "writehdf5" in args:
-            print 'running sim'
-            #run_sim(converted_file_name, args)
-
-        if 'run_drg' in args:
-            print 'running sim'
-            run_sim(converted_file_name, args)
-            get_rates('mass_fractions.hdf5', converted_file_name)
-            print 'running DRG'
-            drg_exclusion_list = make_graph(converted_file_name, 'production_rates.hdf5')
-            new_solution_objects = trim(converted_file_name, drg_exclusion_list)
-            args.data_file = write(new_solution_objects[1])
-
 
     else:
         print("\n\nFile type not supported")
