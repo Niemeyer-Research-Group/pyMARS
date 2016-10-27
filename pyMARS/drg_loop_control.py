@@ -56,6 +56,7 @@ def drg_loop_control(solution_object, args):
     else:
         threshold_values = genfromtxt(args.threshold_values, delimiter=',')
         species_retained = []
+        printout = ''
         print 'Threshold     Species in Mech      Error'
         for threshold in threshold_values:
             drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
@@ -68,7 +69,7 @@ def drg_loop_control(solution_object, args):
             ignition_delay_reduced = np.array(reduced_result.tau_array)
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
             os.system('rm mass_fractions.hdf5')
-            print threshold, len(new_solution_objects[1].species()), error
+            printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species()) + '  '+  str(error) + '\n'
 
-        print species_retained
+        print printout
     return new_solution_objects
