@@ -57,6 +57,7 @@ def readin(args='none', **argv):
             multiple_conditions = True
             threshold_values = args.thresholds
             conditions_file = args.conditions
+            convert = args.convert
             if args.species is None:
                 exclusion_list = []
             else:
