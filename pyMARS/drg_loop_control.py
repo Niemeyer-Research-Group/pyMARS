@@ -6,8 +6,9 @@ from get_rate_data import get_rates
 from drg import make_graph
 import os
 from get_error import get_error
-from readin_initial_conditions import readin_conditions
 from graph_search import graph_search
+from numpy import genfromtxt
+import numpy as np
 
 def drg_loop_control(solution_object, args):
     """ Controls repeated use of drg Function
@@ -25,13 +26,13 @@ def drg_loop_control(solution_object, args):
     #get user input
     target_species = str(raw_input('Enter target starting species: '))
 
-    #run first sim and retain initial conditions
-    args.initiial_sim = True
-    sim1_result = autoignition_loop_control(solution_object, args)
-    sim1_result.test.close()
-    print sim1_result.tau_array
+    #run detailed mechanism and retain initial conditions
+    args.multiple_conditions = True
+    detailed_result = autoignition_loop_control(solution_object, args)
+    detailed_result.test.close()
+    ignition_delay_detailed = np.array(detailed_result.tau_array)
     get_rates('mass_fractions.hdf5', solution_object)
-    args.initial_sim = False
+    os.system('rm mass_fractions.hdf5')
 
     if args.threshold_values is None:
         try:
@@ -39,16 +40,35 @@ def drg_loop_control(solution_object, args):
         except ValueError:
             print 'try again'
             threshold = float(raw_input('Enter threshold value: '))
-        graph = make_graph(solution_object, 'production_rates.hdf5', threshold)
-        exclusion_list = graph_search(graph.detailed_solution, graph.graph, target_species)
+        drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
+        exclusion_list = graph_search(solution_object, drg, target_species)
         new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
-        #sim2_result = autoignition_loop_control(new_solution_objects[1], args)
-        #tau2 = sim2_result.tau
-        #error = float((abs((tau1-tau2)/tau1))*100.0)
-        #print 'Error: %s%%' %"{0:.2f}".format(error)
-        os.system('rm mass_fractions.hdf5')
-        #get_error(new_solution_objects[1], args)
 
-    n_species_eliminated = len(solution_object.species())-len(new_solution_objects[1].species())
-    print 'Number of species eliminated: %s' %n_species_eliminated
+        reduced_result = autoignition_loop_control(new_solution_objects[1], args)
+        reduced_result.test.close()
+        ignition_delay_reduced = np.array(reduced_result.tau_array)
+        error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
+        print 'Maximum error: %s%' % max(error)
+        #get_error()
+        n_species_retained = len(new_solution_objects[1].species())
+        print 'Number of species in reduced model: %s' %n_species_retained
+        os.system('rm mass_fractions.hdf5')
+    else:
+        threshold_values = genfromtxt(args.threshold_values, delimiter=',')
+        species_retained = []
+        print 'Threshold     Species in Mech      Error'
+        for threshold in threshold_values:
+            drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
+            exclusion_list = graph_search(solution_object, drg, target_species)
+            new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
+            species_retained.append(len(new_solution_objects[1].species()))
+
+            reduced_result = autoignition_loop_control(new_solution_objects[1], args)
+            reduced_result.test.close()
+            ignition_delay_reduced = np.array(reduced_result.tau_array)
+            error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
+            os.system('rm mass_fractions.hdf5')
+            print threshold, len(new_solution_objects[1].species()), error
+
+        print species_retained
     return new_solution_objects
