@@ -39,8 +39,8 @@ def drg_loop_control(solution_object, args):
         except ValueError:
             print 'try again'
             threshold = float(raw_input('Enter threshold value: '))
-        graph = make_graph(solution_object, 'production_rates.hdf5', threshold, target_species)
-        exclusion_list = graph_search(graph.detailed_solution, graph.graph, graph.target_species)
+        graph = make_graph(solution_object, 'production_rates.hdf5', threshold)
+        exclusion_list = graph_search(graph.detailed_solution, graph.graph, target_species)
         new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
         #sim2_result = autoignition_loop_control(new_solution_objects[1], args)
         #tau2 = sim2_result.tau
