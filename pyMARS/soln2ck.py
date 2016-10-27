@@ -10,7 +10,7 @@ import os
 from string import Template
 
 import cantera as ct
-from cantera.test.test_mechanism_from_solution import test
+#from test.test_mechanism_from_solution import test
 import ck2cti
 
 
@@ -370,7 +370,7 @@ def write(solution):
     new_solution = ct.Solution(outName)
 
     #test new solution vs original solutoin
-    test(original_solution, new_solution)
+    #test(original_solution, new_solution)
     os.remove(outName)
     return output_file_name
 
