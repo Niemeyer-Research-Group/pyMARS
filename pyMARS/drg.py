@@ -84,7 +84,6 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                     weight = abs(float(ri_partial[edge])/float(ri_total[species_a_name]))
                 except ZeroDivisionError:
                     if ri_partial > 0.001:
-                        #print ri_partial[edge]
                         continue
                     else:
                         continue
@@ -100,18 +99,9 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 print edge
                 continue
 
-    #get connected species
-    #exclusion_list = graph_search(solution, graph, target_species)
-    #plt.show()
     rate_file.close()
 
-    class drg_results:
-        def __init__(self, detailed_solution, graph, target_species):
-            self.detailed_solution = detailed_solution
-            self.graph = graph
     if len(error_list) != 0:
         print 'error list'
         print error_list
-    return drg_results(solution, graph)
-
-#make_graph('gri301.cti', 'production_rates.hdf5')
+    return graph
