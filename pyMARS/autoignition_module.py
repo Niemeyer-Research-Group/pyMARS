@@ -10,13 +10,14 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     """
     Function to run Cantera reactor simulation
 
-    Arguments
-        Cantera mechanism file
-        User arguments (plot='y',
-                        points='y',
-                        writehdf5='y',
-                        writecsv='y',)
-        *User argument initial_sim needed if running module independently
+
+
+    :param solution_object:
+        Cantera solution object
+    :param condition:
+        Condition class containing initial temp, pressure, mole fractions
+
+    :returns
     ----------
     Output
         Plot of Temp vs Time
@@ -48,17 +49,16 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
 
     """
     solution = solution_object
-    frac = condition.moles
     initial_temperature = float(condition.temperature)
     pressure = float(condition.pressure)*float(ct.one_atm)
     #check if species in solution
-    frac1 = ''
+    frac = ''
     for reactant in condition.species.iteritems():
         if reactant[0] in solution.species_names:
-            frac1 += str(reactant[0]) + ':' + str(reactant[1]) + ','
-    frac1 = frac1[:-1]
+            frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
+    frac = frac[:-1]
 
-    solution.TPX = initial_temperature, pressure, frac1 #1001.325 kPa
+    solution.TPX = initial_temperature, pressure, frac #1001.325 kPa
     species = solution.species()
     reactions = solution.reactions()
 
