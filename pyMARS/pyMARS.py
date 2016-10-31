@@ -71,11 +71,6 @@ def readin(args='none', **argv):
     if file_extension == ".cti" or file_extension == ".xml":
         print("\nThis is an Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
-        #trims file
-        #need case if no trim necessary
-        #solution_objects = trim(solution_object, args.exclusion_list, args.data_file)
-        if args.run_drg is False:
-            trimmed_file = soln2cti.write(solution_objects[1])
         if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             print 'running sim'
             sim_result = autoignition_loop_control(solution_object, args)
@@ -84,7 +79,6 @@ def readin(args='none', **argv):
             os.system('rm production_rates.hdf5')
             os.system('rm mass_fractions.hdf5')
             drg_trimmed_file = soln2cti.write(new_solution_objects[1])
-
             try:
                 os.system('rm production_rates.hdf5')
             except Exception:
