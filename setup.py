@@ -17,6 +17,6 @@ setup(name='pyMARS',
         'console_scripts': [
                     'pyMARS= pyMARS.__main__:main']},
       install_requires=['argparse', 'h5py' , 'numpy',
-                    'Cantera>=2.3.0a2', 'matplotlib', 'networkx', 'astropy']
+                    'Cantera>=2.3.0a2', 'matplotlib', 'networkx']
 
         )
