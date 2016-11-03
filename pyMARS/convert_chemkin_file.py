@@ -1,26 +1,22 @@
 #converts Chemkin file to Cantera format
-
 import os
 
 def convert(mech_file, thermo_file=None, transport_file=None):
     """Function to convert chemkin mechanism files to CTI.
 
-    Arguments
-        Chemkin mechanism file
-    (Optional)
-        Thermo file
-        Transport file
+    Parameters
     ----------
+        Chemkin mechanism file (string)
+        Thermo file (string)
+        Transport file (string)
     Returns
+    -------
         Converted Cantera mechanism file
-    ----------
+
     Example
+    -------
         convert('gri30.inp')
     """
-
-
-
-
 
     #make file save path
     current_dir=os.path.dirname(os.path.abspath("~"))
