@@ -8,16 +8,16 @@ import h5py
 
 def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     """
-    Function to run Cantera reactor simulation
+    Function to run Cantera reactor simulation for autoigntion conditions
 
-
-
-    :param solution_object:
+    Parameters
+    ----------
+    solution_object
         Cantera solution object
-    :param condition:
-        Condition class containing initial temp, pressure, mole fractions
+    condition
+        An object contining initial conditions (temperature, pressure, mole fractions)
 
-    :returns
+    Returns
     ----------
     Output
         Plot of Temp vs Time
@@ -25,15 +25,12 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         CSV file
         Hdf5 file
         mass_fractions.hdf5 : [initial_temp]
-                                    [index]
-                                        [Temp]
-                                        [Time]
-                                        [Pressure]
-                                        [Species Mass Fractions]
-                                        [Species Net Production Rates Original]
-
-    ---------
-    returns:
+                                [index]
+                                    [Temp]
+                                    [Time]
+                                    [Pressure]
+                                    [Species Mass Fractions]
+                                    [Species Net Production Rates Original]
         sim result
             .time
             .temp
@@ -43,8 +40,9 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             .tau
             .Temp
             .frac
-    ----------
+
     Example
+    -------
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
 
     """
