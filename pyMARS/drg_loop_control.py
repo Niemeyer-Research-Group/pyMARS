@@ -20,6 +20,10 @@ def drg_loop_control(solution_object, args):
         args : obj
             function arguments object
 
+        Returns
+        -------
+        new_solution_objects : obj
+            Cantera solution object with skeletal mechanism
         """
     #get user input
     target_species = str(raw_input('Enter target starting species: '))
