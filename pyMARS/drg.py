@@ -5,19 +5,21 @@ import matplotlib.pyplot as plt
 from graph_search import graph_search
 
 def make_graph(solution_object, hdf5_file, threshold_value):
-    """ Use the Direct Relation Graph (DRG) method to choose species to
-    eliminate from reaction mechanism.
+    """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
+        species and their edge-weights above a certain threshold value
 
-    :param data_file:
-        Mechanism file in the form of .cti
-    :param hdf5_file:
+    Parameters
+    ----------
+    solution_object : obj
+        Cantera Solution object
+    hdf5_file : str
         data file containing individual reaction production rates
-    :param threshold_value:
+    threshold_value : int
         an edge weight threshold value
-    :param target_species:
-        species to start graph search from (usually the fuel)
 
-    :return exclusion_list:
+    Returns
+    -------
+    exclusion_list : list
         List of species to trim from mechanism
     """
 
