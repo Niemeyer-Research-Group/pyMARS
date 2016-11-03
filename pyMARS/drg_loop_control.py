@@ -17,8 +17,6 @@ def drg_loop_control(solution_object, args):
         ----------
         solution_object : obj
             Cantera solution object
-        hdf5_file : str
-            string of hdf5 file containing production rates
         args : obj
             function arguments object
 
