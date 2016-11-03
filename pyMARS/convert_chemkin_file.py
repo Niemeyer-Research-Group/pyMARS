@@ -6,9 +6,12 @@ def convert(mech_file, thermo_file=None, transport_file=None):
 
     Parameters
     ----------
-        Chemkin mechanism file (string)
-        Thermo file (string)
-        Transport file (string)
+        mech_file : str
+            Chemkin mechanism file
+        Thermo file : str
+            Chemkin thermodynamic properties file
+        Transport file : str
+            Chemkin transport data file
     Returns
     -------
         Converted Cantera mechanism file

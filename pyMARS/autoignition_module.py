@@ -12,7 +12,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
 
     Parameters
     ----------
-    solution_object
+    solution_object : obj
         Cantera solution object
     condition
         An object contining initial conditions (temperature, pressure, mole fractions)
