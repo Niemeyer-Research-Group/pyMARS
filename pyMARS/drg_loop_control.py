@@ -46,7 +46,7 @@ def drg_loop_control(solution_object, args):
         reduced_result.test.close()
         ignition_delay_reduced = np.array(reduced_result.tau_array)
         error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-        print 'Maximum error: %s%' % max(error)
+        print 'Error index: %s' %error
         #get_error()
         n_species_retained = len(new_solution_objects[1].species())
         print 'Number of species in reduced model: %s' %n_species_retained
