@@ -16,13 +16,19 @@ import cantera as ct
 def write(solution):
     """Function to write cantera solution object to cti file.
 
-    :param solution:
+    Parameters
+    ----------
+    solution : obj
         Cantera solution object
 
-    :return output_file_name:
+    Returns
+    -------
+    output_file_name : str
         Name of trimmed mechanism file (.cti)
 
-    >>> soln2cti.write(gas)
+    Examples
+    --------
+        soln2cti.write(gas)
     """
 
     trimmed_solution = solution

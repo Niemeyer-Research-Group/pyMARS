@@ -11,9 +11,27 @@ def get_range(times, temps, sdata, production_data):
         Autoigntion temperatures
     sdata : numpy matrix
         Species mass fraction data at a point in time
-    production_data:
+    production_data : numpy matrix
+        Species total production data  at a point in time
 
+    Returns
+    -------
+    sample_data : obj
+        .tau
+        .index
+        .derivative_max
+        .initial_point
+        .final_point
 
+        .times_total
+        .temps_total
+        .species_data_total
+        .production_data_total
+
+        .times
+        .temps
+        .species_data
+        .production_data
     """
     times = np.array(times)
     temps = np.array(temps)

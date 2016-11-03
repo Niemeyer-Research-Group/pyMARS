@@ -5,32 +5,35 @@ import argparse
 
 def main(args=None):
     """
-    Arguments
-        :param file:
+    Parameters
+    ----------
+        file : str
             Input mechanism file (ex. --file=gri30.cti)
-        :param conditions_file:
+        conditions_file : str
             File of initial conditions for autoignition
-        :param species:
+        species : str
             Species to eliminate (ex. --species='H, OH')
-        :param thermo:
+        thermo : str
             Thermo data file if Chemkin format (ex. --thermo= thermo.dat)
-        :param transport:
+        transport : str
             Transport data file if Chemkin format
-        :param plot:
-            Plot a temperature profile of autoignition
-        :param points:
-            Return sampling and ignition points
-        :param writecsv:
-            Write autoignition data to a csv file
-        :param writehdf5:
-            Write autoignition to a hdf5 file
-        :param run_drg:
+        conditions :
+            Text file of initial conditions for autoignition
+        thresholds :
+            csv file containing threshold values to test (usr prompted otherwise)
+        run_drg :
             Run Direct Relation Graphing model reduction based on
             a given threshold value
-        :param iterate:
-            Run DRG function up to specified error limit
-        :param conditions_file:
-            File of conditions for autoignition
+
+        plot :
+            Plot a temperature profile of autoignition
+        points :
+            Return sampling and ignition points
+        writecsv :
+            Write autoignition data to a csv file
+        writehdf5 :
+            Write autoignition to a hdf5 file
+
     """
     #gets arguments from terminal
     parser=argparse.ArgumentParser(description='pyMARS main: \
@@ -73,10 +76,10 @@ def main(args=None):
                         help='run Direct Relation Graph method to reduce', \
                         action="store_true")
     parser.add_argument('--thresholds', \
-                        help='Iterate DRG up to acceptable error limit', \
+                        help='csv file containing threshold values to test (usr prompted otherwise)', \
                         type=str)
     parser.add_argument('--convert', \
-                        help='Iterate DRG up to acceptable error limit', \
+                        help='Only conver selected file from .cti <====> .inp', \
                         action="store_true")
 
 

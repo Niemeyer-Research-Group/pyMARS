@@ -5,13 +5,16 @@ import h5py
 def graph_search(solution_object, nx_graph, target_species):
     """Search nodal graph and generate list of species to exclude
 
-    :param solution_object:
+    Parameters
+    ----------
+    solution_object : obj
         Original Cantera solution Object
+    nx_graph : obj
+        networkx graph object of solution
 
-    :param nx_graph:
-        networkx graph object
-
-    :returns exclusion_list:
+    Returns
+    -------
+    exclusion_list : str
         String containing names of species to exclude
     """
 

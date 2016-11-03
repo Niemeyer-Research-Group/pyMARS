@@ -17,13 +17,17 @@ import ck2cti
 def write(solution):
     """Function to write cantera solution object to inp file.
 
-    :param solution
+    Parameters
+    ----------
+    solution : obj
         Cantera solution object
 
-    :return
+    Returns : str
         Name of trimmed Mechanism file (.inp)
 
-    >>> soln2ck.write(gas)
+    Example
+    -------
+        soln2ck.write(gas)
     """
     trimmed_solution = solution
     input_file_name_stripped = trimmed_solution.name

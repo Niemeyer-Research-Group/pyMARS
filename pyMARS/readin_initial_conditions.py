@@ -1,9 +1,11 @@
 import string
 
 def readin_conditions(initial_conditions_text_file):
-    """
-        Get initial conditions from text file
-        :param initial_conditoins_text_file:
+    """Get initial conditions from text file
+
+        Parameters
+        ----------
+        initial_conditoins_text_file : str
             Text file containing conditions in the format
             CONV
             PRES 1.0
@@ -12,8 +14,16 @@ def readin_conditions(initial_conditions_text_file):
             REAC o2 11.0
             REAC n2 41.36
             END
-        :return instance:
-            Array of objects representing initial state
+
+        Returns
+        -------
+        instance : obj
+            Represents initial state
+            .name
+            .pressure
+            .temperature
+            .moles
+            .species
         """
     with open(initial_conditions_text_file, 'r') as condition_file:
 
@@ -51,5 +61,3 @@ def readin_conditions(initial_conditions_text_file):
                             instance.append(condition(p, t, reactants, condition_name, species_list))
                             start = False
     return instance
-
-readin_conditions('input.txt')
