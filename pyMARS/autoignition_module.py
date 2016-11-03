@@ -31,15 +31,16 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
                                     [Pressure]
                                     [Species Mass Fractions]
                                     [Species Net Production Rates Original]
-        sim result
-            .time
-            .temp
-            .initial_temperature_array
-            .sp_data
-            .test (h5py object)
-            .tau
-            .Temp
-            .frac
+        return_obj : obj
+            sim result
+                .time
+                .temp
+                .initial_temperature_array
+                .sp_data
+                .test (h5py object)
+                .tau
+                .Temp
+                .frac
 
     Example
     -------
