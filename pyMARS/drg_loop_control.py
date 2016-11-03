@@ -13,13 +13,13 @@ import numpy as np
 def drg_loop_control(solution_object, args):
     """ Controls repeated use of drg Function
 
-        :param solution_object:
+        Parameters
+        ----------
+        solution_object : obj
             Cantera solution object
-
-        :param hdf5_file:
+        hdf5_file : str
             string of hdf5 file containing production rates
-
-        :param args:
+        args : obj
             function arguments object
 
         """
