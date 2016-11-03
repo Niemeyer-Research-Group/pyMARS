@@ -56,7 +56,6 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]
-
     solution.TPX = initial_temperature, pressure, frac #1001.325 kPa
     species = solution.species()
     reactions = solution.reactions()
