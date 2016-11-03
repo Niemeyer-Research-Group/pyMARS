@@ -3,24 +3,19 @@ import cantera as ct
 import os
 
 def trim(solution_object, exclusion_list, file_name):
-
     """ Function to reduce list of species and corresponding reactions.
 
-    Arguments
-
-    data_file:
-        local .cti or .xml data file containing mechanism information
-    exclusion_list:
-        List of species that will be trimmed
+    Parameters
     ----------
+    solution_object : obj
+        Cantera solution object
+    exclusion_list : list
+        List of species that will be trimmed
+
     Returns
+    -------
         Original Cantera Solution Object
         Trimmed Cantera Solution Object
-    ----------
-    Example
-        trim('gri30.cti', ['OH', 'H'])
-        or
-        trim('gri30.cti', []) to trim no species
     """
 
     # define initial solution objects
