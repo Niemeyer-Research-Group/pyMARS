@@ -15,11 +15,10 @@ def get_range(times, temps, sdata, production_data):
 
 
     """
-
     times = np.array(times)
     temps = np.array(temps)
     time_temperature = np.vstack((times,temps)).T
-    species_data = np.hstack((time_temperature, production_data))
+    species_data = np.hstack((time_temperature, sdata)) #was production_data
 
     T = np.array(temps)
     dt = np.ones(len(times)-1)*(times[1]-times[0])
