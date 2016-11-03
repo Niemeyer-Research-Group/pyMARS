@@ -15,31 +15,36 @@ from autoignition_loop_control import autoignition_loop_control
 def readin(args='none', **argv):
     """Main function for pyMARS
 
-    :param file:
+    Parameters
+    ----------
+    file:
         Input mechanism file (ex. file='gri30.cti')
-    :param species:
+    species:
         Species to eliminate (ex. species='H, OH')
-    :param thermo:
+    thermo:
         Thermo data file if Chemkin format (ex. thermo= 'thermo.dat')
-    :param transport:
+    transport:
         Transport data file if Chemkin format
-    :param plot:
+    plot:
         plot ignition curve (ex. plot='y')
-    :param points:
+    points:
         print ignition point and sample range (ex. points='y')
-    :param writecsv:
+    writecsv:
         write data to csv (ex. writecsv='y')
-    :param writehdf5:
+    writehdf5:
         write data to hdf5 (ex. writehdf5='y')
-    :param run_drg:
+    run_drg:
         Run DRG model reduction
 
-    :returns:
+    Returns
+    -------
         Converted mechanism file
         Trimmed Solution Object
         Trimmed Mechanism file
 
-    >>>readin(file='gri30.cti', plot='y', species='OH, H')
+    Examples
+    --------
+    readin(file='gri30.cti', plot='y', species='OH, H')
     """
 
     class args():
