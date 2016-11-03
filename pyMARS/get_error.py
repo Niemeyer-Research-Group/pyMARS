@@ -1,7 +1,9 @@
 from autoignition_loop_control import autoignition_loop_control
 
 def get_error(solution_object, args):
-    """Get error from ignition delay
+    """Get error from comparison between ignition delay for detailed and
+        skeletal models. Uses tau array from detailed simulations, and makes
+        new array of ignition delays from the reduced mechanism. 
 
     Parameters
     ----------
