@@ -16,8 +16,16 @@ def autoignition_loop_control(solution_object, args):
 
     Returns
     -------
-    sim_result
+    sim_result : obj
         Object containing autoignition results
+            .time
+            .temp
+            .initial_temperature_array
+            .sp_data
+            .test (h5py object)
+            .tau
+            .Temp
+            .frac
     """
     try:
         conditions_array = readin_conditions(str(args.conditions_file))

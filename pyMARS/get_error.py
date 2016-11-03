@@ -3,9 +3,12 @@ from autoignition_loop_control import autoignition_loop_control
 def get_error(solution_object, args):
     """Get error from ignition delay
 
-
-
-
+    Parameters
+    ----------
+    solution_object : obj
+        Cantera solution object
+    args : obj
+        Terminal argumens
     """
     args.initial_sim = False
     if args.tau_array:
