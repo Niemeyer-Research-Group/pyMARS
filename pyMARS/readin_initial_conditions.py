@@ -27,10 +27,11 @@ def readin_conditions(initial_conditions_text_file):
 
         name_index = 0
         instance =[]
-        species_list = {}
+
         for line in condition_file:
                     name_index += 1
                     if "CONV" in line:
+                        species_list = {}
                         start = True
                         reactants =''
                         condition_name = 'Condition #' + str(name_index)
@@ -50,3 +51,5 @@ def readin_conditions(initial_conditions_text_file):
                             instance.append(condition(p, t, reactants, condition_name, species_list))
                             start = False
     return instance
+
+readin_conditions('input.txt')
