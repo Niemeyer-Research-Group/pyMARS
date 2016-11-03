@@ -8,16 +8,21 @@ def get_rates(hdf5_file, solution_object):
         time, and initalizes a cantera solution object to get species production
         rates at that point
 
-    :param hdf5_file:
+    Parameters
+    ----------
+    hdf5_file : str
         A hdf5 file containing time, temp and species mole fractions used to
         set solution state
-
-    :param solution_object:
+    solution_object : obj
         A Cantera solution object used to get net production rates
 
-    :param initial_temperature:
-        Initial temperature used in autoignition
-
+    Returns
+    -------
+        production_rates.hdf5
+            [group # + timestep]
+                [temperature array]
+                [time array]
+                [Reaction Production rates dataset]
     """
     #read in data file
     f = h5py.File(hdf5_file, 'r')
