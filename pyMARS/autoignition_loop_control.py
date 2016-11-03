@@ -15,6 +15,9 @@ def autoignition_loop_control(solution_object, args):
         Arguments from terminal
 
     Returns
+    -------
+    sim_result
+        Object containing autoignition results
     """
     try:
         conditions_array = readin_conditions(str(args.conditions_file))
