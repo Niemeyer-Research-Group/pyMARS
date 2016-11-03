@@ -3,13 +3,17 @@ import numpy as np
 def get_range(times, temps, sdata, production_data):
     """Get sample range information from autoignition data
 
-    :param times:
+    Parameters
+    ----------
+    times : numpy matrix
+        Times from autoignition
+    temps : numpy matrix
+        Autoigntion temperatures
+    sdata : numpy matrix
+        Species mass fraction data at a point in time
+    production_data:
 
-    :param temps:
 
-    :param sdata:
-
-    :param production_data:
     """
 
     times = np.array(times)
