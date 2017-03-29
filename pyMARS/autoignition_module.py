@@ -74,7 +74,10 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     state_list = list()
 
     f1 = h5py.File('mass_fractions.hdf5', 'a')
-    group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
+    try:
+        group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
+    except ValueError:
+        print "Duplicate initial conditions, or check to make sure mass fractions file isn't in directory. If it is, delete it"""
     individual = f1.create_group(group_name)
     while current_time < stop_time:
         group_index += 1
