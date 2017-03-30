@@ -37,17 +37,20 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     ri_total = {}
     ri_partial = {}
     error_list = {}
+    first_iteration = True
     #iterate through each timestep
     for timestep, data_group in rate_file.iteritems():
         rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
-        #generate dict of sum production Rates
-        for species in species_objects:
-            ri_total[species.name] = 0
-        for pre_defined_edge in ri_partial:
-            try:
-                ri_partial[str(pre_defined_edge)] = 0.0
-            except Exception:
-                continue
+        if first_iteration:
+            #generate dict of sum production Rates
+            for species in species_objects:
+                ri_total[species.name] = 0
+            for pre_defined_edge in ri_partial:
+                try:
+                    ri_partial[str(pre_defined_edge)] = 0.0
+                except Exception:
+                    continue
+            first_iteration = False 
         #build weights
         for reaction_number, reaction in enumerate(reaction_objects):
             reaction_production_rate = float(rxn_prod_rates[reaction_number])
