@@ -175,21 +175,12 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     if sys_args is not 'none':
         if sys_args.plot:
             plot()
+            print 'triggered terminal'
         if sys_args.writecsv:
             writecsv(sample.species_data)
         if sys_args.writehdf5:
             writehdf5(sample.species_data)
         if sys_args.points:
-            points()
-    #individual use case
-    if sys_args is 'none':
-        if 'plot' in usr_args:
-            plot()
-        if 'writecsv' in usr_args:
-            writecsv(sample.species_data)
-        if 'writehdf5' in usr_args:
-            writehdf5(sample.species_data)
-        if 'points' in usr_args:
             points()
 
 
