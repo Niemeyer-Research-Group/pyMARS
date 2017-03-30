@@ -175,7 +175,6 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     if sys_args is not 'none':
         if sys_args.plot:
             plot()
-            print 'triggered terminal'
         if sys_args.writecsv:
             writecsv(sample.species_data)
         if sys_args.writehdf5:
