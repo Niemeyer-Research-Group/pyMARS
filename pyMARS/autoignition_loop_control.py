@@ -30,7 +30,7 @@ def autoignition_loop_control(solution_object, args):
     class condition:
         def __init__(self, name):
             self.name = str(name)
-            self.pressure = float(raw_input('Initial Pressure (kPa): '))
+            self.pressure = float(raw_input('Initial Pressure (atm): '))
             self.temperature = float(raw_input('Initial Temperature (K): '))
             self.reactants = str(raw_input('List of reactants and mole fractions (ex.Ch4:1,o2:11): '))
             self.reactant_list = self.reactants.split(',')
