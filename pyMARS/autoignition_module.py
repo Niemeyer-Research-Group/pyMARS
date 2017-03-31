@@ -64,7 +64,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     reactor = ct.Reactor(solution)
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
-    t_step = 1e-4
+    t_step = 1.0e-6
     stop_time = 5.0e-3
     n_steps = int(stop_time/t_step)
     group_index = 0
@@ -81,8 +81,9 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     #while current_time < stop_time:
     for i in range(n_steps):
         group_index += 1
-        current_time += t_step
         simulation.advance(current_time)
+        current_time += t_step
+
         """
         try:
             current_time = simulation.step(stop_time)
@@ -108,7 +109,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         production_rates = np.array(solution.net_production_rates)
         production_rates = production_rates[:,np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
-
+    print len(times1)
     sample = get_range(times1,temps,sdata, production_data)
 
     for grp in f1[group_name].keys():
