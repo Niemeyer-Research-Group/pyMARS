@@ -129,7 +129,8 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         plt.show()
 
     def writecsv(sdata):
-        #format matrix for csv
+
+
         names = str(solution.species_names)
         tt = ['Time (s)', 'Temp (K)']
         names = solution.species_names
