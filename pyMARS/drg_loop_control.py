@@ -87,8 +87,6 @@ def drg_loop_control(solution_object, args):
                 error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
                 printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
         else:
-            print 'in else statement'
-            print threshold_values
             try:
                 os.system('rm mass_fractions.hdf5')
             except Exception:
