@@ -34,7 +34,6 @@ def readin_conditions(initial_conditions_text_file):
                 self.temperature = temperature
                 self.moles = moles
                 self.species = species
-
         name_index = 0
         instance =[]
 
