@@ -36,45 +36,59 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     ri_partial = {}
     error_list = {}
     first_iteration = True
-    #iterate through each timestep
-    for timestep, data_group in rate_file.iteritems():
-        rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
-        if first_iteration:
-            #generate dict of sum production Rates
-            for species in species_objects:
-                ri_total[species.name] = 0
-            for pre_defined_edge in ri_partial:
-                try:
-                    ri_partial[str(pre_defined_edge)] = 0.0
-                except Exception:
-                    continue
-            first_iteration = False
-        #build weights
-        for reaction_number, reaction in enumerate(reaction_objects):
-            reaction_production_rate = float(rxn_prod_rates[reaction_number])
-            products = reaction.products
-            reactants = reaction.reactants
-            #generate list of all species
-            all_species = reaction.products
-            all_species.update(reaction.reactants)
-            for species_a in reactants:
-                if species_a in products:
-                    if reactants[species_a] != products[species_a]:
-                        error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
-            if reaction_production_rate != 0:
-                for species_a in all_species:
-                    molar_coeff_A = float(all_species[species_a])
-                    #this is denominator
-                    ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
-                    for species_b in all_species:
-                        partial_name = species_a + '_' + species_b
-                        if species_a == species_b:
-                            continue
-                        #this is numerator
-                        try:
-                            ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
-                        except KeyError:
-                            ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
+    #iterate through each initial condition set
+    for initial_condition, data_group in rate_file.iteritems():
+        #generate dict of sum production Rates, and make zero before evaluating
+        #each initial condition set
+        for species in species_objects:
+            ri_total[species.name] = 0
+        for pre_defined_edge in ri_partial:
+            try:
+                ri_partial[str(pre_defined_edge)] = 0.0
+            except Exception:
+                continue
+        #iterate through every timestep for the initial condition
+        for timestep, data_group in rate_file[initial_condition]:
+
+            rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
+            """
+            if first_iteration:
+                #generate dict of sum production Rates
+                for species in species_objects:
+                    ri_total[species.name] = 0
+                for pre_defined_edge in ri_partial:
+                    try:
+                        ri_partial[str(pre_defined_edge)] = 0.0
+                    except Exception:
+                        continue
+                first_iteration = False
+            """
+            #build weights by iterating over every reaction
+            for reaction_number, reaction in enumerate(reaction_objects):
+                reaction_production_rate = float(rxn_prod_rates[reaction_number])
+                products = reaction.products
+                reactants = reaction.reactants
+                #generate list of all species
+                all_species = reaction.products
+                all_species.update(reaction.reactants)
+                for species_a in reactants:
+                    if species_a in products:
+                        if reactants[species_a] != products[species_a]:
+                            error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
+                if reaction_production_rate != 0:
+                    for species_a in all_species:
+                        molar_coeff_A = float(all_species[species_a])
+                        #this is denominator
+                        ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
+                        for species_b in all_species:
+                            partial_name = species_a + '_' + species_b
+                            if species_a == species_b:
+                                continue
+                            #this is numerator
+                            try:
+                                ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
+                            except KeyError:
+                                ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
 
         #divide progress related to species B by total progress
         #and make edge
