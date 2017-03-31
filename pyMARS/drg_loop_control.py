@@ -1,6 +1,4 @@
 from create_trimmed_model import trim
-from convert_chemkin_file import convert
-from soln2cti import write
 from autoignition_loop_control import autoignition_loop_control
 from get_rate_data import get_rates
 from drg import make_graph
