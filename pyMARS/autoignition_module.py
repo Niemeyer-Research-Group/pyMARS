@@ -64,7 +64,9 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     reactor = ct.Reactor(solution)
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
+    t_step = 1e-4
     stop_time = 5.0e-3
+    n_steps = int(stop_time/t_step)
     group_index = 0
     times1 = []
     temps = [] #first column is time, second is temperature
@@ -76,14 +78,19 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     f1 = h5py.File('mass_fractions.hdf5', 'a')
     group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     individual = f1.create_group(group_name)
-    while current_time < stop_time:
+    #while current_time < stop_time:
+    for i in range(n_steps):
         group_index += 1
+        current_time += t_step
+        simulation.advance(current_time)
+        """
         try:
             current_time = simulation.step(stop_time)
         except Exception:
             error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
             print error_string
             return
+        """
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
