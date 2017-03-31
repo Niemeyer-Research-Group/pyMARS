@@ -14,6 +14,7 @@ def get_error(solution_object, args):
         Terminal arguments
     """
     args.initial_sim = False
+    print 'get_error triggered'
     if args.tau_array:
         detailed_tau_array = args.tau_array
         error_array = []
