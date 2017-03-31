@@ -59,7 +59,6 @@ def readin(args='none', **argv):
             thermo_file = args.thermo
             transport_file = args.transport
             run_drg = args.run_drg
-            multiple_conditions = True
             threshold_values = args.thresholds
             conditions_file = args.conditions
             convert = args.convert
@@ -80,6 +79,7 @@ def readin(args='none', **argv):
             print 'running sim'
             sim_result = autoignition_loop_control(solution_object, args)
         if args.run_drg is True:
+            print args.threshold_values
             new_solution_objects = drg_loop_control(solution_object, args)
             os.system('rm production_rates.hdf5')
             os.system('rm mass_fractions.hdf5')

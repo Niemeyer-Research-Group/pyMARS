@@ -34,7 +34,8 @@ def drg_loop_control(solution_object, args):
     detailed_result.test.close()
     ignition_delay_detailed = np.array(detailed_result.tau_array)
     get_rates('mass_fractions.hdf5', solution_object)
-
+    #print 'triggered'
+    #print args.threshold_values
 
     if args.threshold_values is None:
         try:
@@ -67,13 +68,33 @@ def drg_loop_control(solution_object, args):
             os.system('rm mass_fractions.hdf5')
         except Exception:
             pass
-        for threshold in threshold_values:
+        if type(threshold_values) is list:
+            for threshold in threshold_values:
+                try:
+                    os.system('rm mass_fractions.hdf5')
+                except Exception:
+                    pass
+                #run DRG and create new reduced solution
+                drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
+                exclusion_list = graph_search(solution_object, drg, target_species)
+                new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
+                species_retained.append(len(new_solution_objects[1].species()))
+
+                #simulated reduced solution
+                reduced_result = autoignition_loop_control(new_solution_objects[1], args)
+                reduced_result.test.close()
+                ignition_delay_reduced = np.array(reduced_result.tau_array)
+                error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
+                printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
+        else:
+            print 'in else statement'
+            print threshold_values
             try:
                 os.system('rm mass_fractions.hdf5')
             except Exception:
                 pass
             #run DRG and create new reduced solution
-            drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
+            drg = make_graph(solution_object, 'production_rates.hdf5', threshold_values)
             exclusion_list = graph_search(solution_object, drg, target_species)
             new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
             species_retained.append(len(new_solution_objects[1].species()))
@@ -83,6 +104,6 @@ def drg_loop_control(solution_object, args):
             reduced_result.test.close()
             ignition_delay_reduced = np.array(reduced_result.tau_array)
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-            printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
+            printout += str(threshold_values) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
         print printout
     return new_solution_objects
