@@ -79,7 +79,6 @@ def readin(args='none', **argv):
             print 'running sim'
             sim_result = autoignition_loop_control(solution_object, args)
         if args.run_drg is True:
-            print args.threshold_values
             new_solution_objects = drg_loop_control(solution_object, args)
             os.system('rm production_rates.hdf5')
             os.system('rm mass_fractions.hdf5')
