@@ -99,3 +99,8 @@ def readin(args='none', **argv):
 
     else:
         print("\n\nFile type not supported")
+    try:
+        os.system('rm mass_fractions.hdf5')
+        os.system('rm production_rates.hdf5')
+    except Exception:
+        pass
