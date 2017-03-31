@@ -28,24 +28,20 @@ def trim(solution_object, exclusion_list, file_name):
     initial_reaction_objects = initial_solution.reactions
 
     # Remove reactions that use trimmed species
-    final_reaction_objects=[]
+    final_reaction_objects = []
     for i, reaction in enumerate(initial_reaction_list):
         reaction_species = reaction.products.keys() + reaction.reactants.keys()
         difference = set(reaction_species).intersection(exclusion_list)
         if len(difference) == 0:
             final_reaction_objects.append(reaction)
 
-    final_T=initial_solution.T
-    final_P=initial_solution.P
-
     # Remove Species
-    final_species_names=initial_species_names
+    final_species_names = initial_species_names
     for n in exclusion_list:
         if n in initial_species_names:
             final_species_names.remove(n)
-
-    final_species_objects =   [initial_solution.species(name) for name in final_species_names]
-
+    final_species_objects = [initial_solution.species(name) \
+                                for name in final_species_names]
     # New solution definition
     new_solution= ct.Solution(  species=final_species_objects,
                                 reactions=final_reaction_objects,
