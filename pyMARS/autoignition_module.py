@@ -64,7 +64,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     reactor = ct.Reactor(solution)
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
-    t_step = 1.0e-6
+    t_step = .5e-5
     stop_time = 5.0e-3
     n_steps = int(stop_time/t_step)
     group_index = 0
@@ -78,20 +78,14 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     f1 = h5py.File('mass_fractions.hdf5', 'a')
     group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     individual = f1.create_group(group_name)
-    #while current_time < stop_time:
-    for i in range(n_steps):
+    while current_time < stop_time:
         group_index += 1
-        simulation.advance(current_time)
-        current_time += t_step
-
-        """
         try:
-            current_time = simulation.step(stop_time)
+            current_time = simulation.step()
         except Exception:
             error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
             print error_string
             return
-        """
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
@@ -103,14 +97,14 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Species Net Production Rates Original', data=species_production_rates)
 
-        species_data = species_data[:,np.newaxis].T #translate from [n, 1] to [1,n]
+        species_data = species_data[:, np.newaxis].T #translate from [n, 1] to [1,n]
         sdata = np.vstack((sdata, species_data))
 
         production_rates = np.array(solution.net_production_rates)
-        production_rates = production_rates[:,np.newaxis].T
+        production_rates = production_rates[:, np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
     print len(times1)
-    sample = get_range(times1,temps,sdata, production_data)
+    sample = get_range(times1, temps, sdata, production_data)
 
     for grp in f1[group_name].keys():
         if int(grp) not in range((sample.index-20), (sample.index+20)):
@@ -123,7 +117,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         import matplotlib.pyplot as plt
         plt.clf()
         #plot combustion point
-        plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label= 'ignition point')
+        plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label='ignition point')
         #plot initial and final sample points
         plt.plot(sample.initial_point[0], sample.initial_point[1], 'rx', ms=5, mew=2)
         plt.plot(sample.final_point[0], sample.final_point[1], 'rx', ms=5, mew=2)
@@ -150,7 +144,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         output_file_name = os.path.join(input_file_name_stripped + '_species_data.csv')
         print output_file_name
         with open(output_file_name, 'wb') as f:
-            np.savetxt(f, file_data, fmt=('%+12s'),  delimiter=',')
+            np.savetxt(f, file_data, fmt=('%+12s'), delimiter=',')
         #os.system('atom '+ output_file_name)
 
     def writehdf5(sdata):
@@ -167,17 +161,17 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         with h5py.File(output_file_name, 'w') as f:
             Times = f.create_dataset("Times", data=sample.times)
             Temps = f.create_dataset("Temps", data=sample.temps)
-            sgroup= f.create_group('Species_Data')
+            sgroup = f.create_group('Species_Data')
             for i, sp in enumerate(solution.species_names):
-                    sgroup.create_dataset(sp, data=sdata[:,i+2])
+                sgroup.create_dataset(sp, data=sdata[:, i+2])
 
     def points():
         print("\nTime[s]            Temp[K]        Index        Point")
-        print( str(sample.initial_point[0]) +  "       " + str("{0:.2f}".format(sample.initial_point[1]))\
+        print(str(sample.initial_point[0]) +  "       " + str("{0:.2f}".format(sample.initial_point[1]))\
          + "       " + str(sample.initial_point[2]) + "     " + "Initial sample point")
         print(str(sample.tau) + "        " + str("{0:.2f}".format(sample.derivative_max[1])) + "       " + str(sample.derivative_max[2])\
                 + "     " + "Ignition point")
-        print( str(sample.final_point[0]) +  "       " + str("{0:.2f}".format(sample.final_point[1]))\
+        print(str(sample.final_point[0]) +  "       " + str("{0:.2f}".format(sample.final_point[1]))\
          + "       " + str(sample.final_point[2]) + "     " + "Final sample point")
 
     #terminal use case
