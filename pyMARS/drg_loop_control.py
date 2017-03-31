@@ -85,10 +85,8 @@ def drg_loop_control(solution_object, args):
                 error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
                 printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
         else:
-            try:
+            if os.path.exists('mass_fractions.hdf5')
                 os.system('rm mass_fractions.hdf5')
-            except Exception:
-                pass
             #run DRG and create new reduced solution
             drg = make_graph(solution_object, 'production_rates.hdf5', threshold_values)
             exclusion_list = graph_search(solution_object, drg, target_species)
@@ -102,4 +100,6 @@ def drg_loop_control(solution_object, args):
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
             printout += str(threshold_values) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
         print printout
+        print 'Detailed soln ign delay %0.05f'  %ignition_delay_detailed
+        print 'Reduced soln ign delay %0.05f'   %ignition_delay_reduced
     return new_solution_objects
