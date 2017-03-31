@@ -18,7 +18,7 @@ def trim(solution_object, exclusion_list, file_name):
         Trimmed Cantera Solution Object
     """
 
-    # define initial solution objects
+    # define initial solution/species/reaction objects
     initial_solution = solution_object
 
     initial_species_objects = initial_solution.species
@@ -27,7 +27,7 @@ def trim(solution_object, exclusion_list, file_name):
     initial_reaction_list = initial_solution.reactions()
     initial_reaction_objects = initial_solution.reactions
 
-    # Remove reactions
+    # Remove reactions that use trimmed species
     final_reaction_objects=[]
     for i, reaction in enumerate(initial_reaction_list):
         reaction_species = reaction.products.keys() + reaction.reactants.keys()
