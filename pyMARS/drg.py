@@ -1,8 +1,6 @@
 import networkx as nx
 import numpy as np
 import h5py
-import matplotlib.pyplot as plt
-from graph_search import graph_search
 
 def make_graph(solution_object, hdf5_file, threshold_value):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
@@ -50,7 +48,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                     ri_partial[str(pre_defined_edge)] = 0.0
                 except Exception:
                     continue
-            first_iteration = False 
+            first_iteration = False
         #build weights
         for reaction_number, reaction in enumerate(reaction_objects):
             reaction_production_rate = float(rxn_prod_rates[reaction_number])
