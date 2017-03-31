@@ -1,5 +1,3 @@
-import cantera as ct
-import h5py
 from autoignition_module import run_sim
 from readin_initial_conditions import readin_conditions
 
@@ -27,7 +25,7 @@ def autoignition_loop_control(solution_object, args):
             .Temp
             .frac
     """
-    class condition:
+    class condition(object):
         def __init__(self, name):
             self.name = str(name)
             self.pressure = float(raw_input('Initial Pressure (atm): '))
