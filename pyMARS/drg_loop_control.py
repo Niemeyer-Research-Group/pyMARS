@@ -100,6 +100,8 @@ def drg_loop_control(solution_object, args):
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
             printout += str(threshold_values) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
         print printout
-        print 'Detailed soln ign delay %0.05f'  %ignition_delay_detailed
-        print 'Reduced soln ign delay %0.05f'   %ignition_delay_reduced
+        print 'Detailed soln ign delay:'
+        print ignition_delay_detailed
+        print 'Reduced soln ign delay:'
+        print ignition_delay_reduced
     return new_solution_objects
