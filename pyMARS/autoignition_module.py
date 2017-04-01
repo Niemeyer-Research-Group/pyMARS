@@ -56,7 +56,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]
-    solution.TPX = initial_temperature, pressure, frac #1001.325 kPa
+    solution.TPX = initial_temperature, pressure, frac #101.325 kPa
     species = solution.species()
     reactions = solution.reactions()
 
@@ -101,7 +101,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         production_rates = np.array(solution.net_production_rates)
         production_rates = production_rates[:, np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
-    print len(times1)
+
     sample = get_range(times1, temps, sdata, production_data)
 
     for grp in f1[group_name].keys():
