@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import h5py
+from collections import Counter
 
 def make_graph(solution_object, hdf5_file, threshold_value):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
@@ -41,7 +42,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
         #generate dict of sum production Rates, and make zero before evaluating
         #each initial condition set
         for species in species_objects:
-            ri_total[species.name] = 0
+            ri_total[species.name] = 0.0
         for pre_defined_edge in ri_partial:
             try:
                 ri_partial[str(pre_defined_edge)] = 0.0
@@ -66,11 +67,16 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             #build weights by iterating over every reaction
             for reaction_number, reaction in enumerate(reaction_objects):
                 reaction_production_rate = float(rxn_prod_rates[reaction_number])
-                products = reaction.products
                 reactants = reaction.reactants
+                products = reaction.products
+                A = Counter(reactants)
+                B = Counter(products)
+                for key in B:
+                    B[key] *= -1
+                all_species = A + B
                 #generate list of all species
-                all_species = reaction.products
-                all_species.update(reaction.reactants)
+                #all_species = reaction.products
+                #all_species.update(reaction.reactants)
                 for species_a in reactants:
                     if species_a in products:
                         if reactants[species_a] != products[species_a]:
