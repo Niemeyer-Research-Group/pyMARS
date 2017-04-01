@@ -19,7 +19,6 @@ def graph_search(solution_object, nx_graph, target_species):
     """
 
     essential_nodes = list(nx.dfs_preorder_nodes(nx_graph, target_species))
-
     exclusion_list = []
     for species in solution_object.species():
         if species.name not in essential_nodes:
