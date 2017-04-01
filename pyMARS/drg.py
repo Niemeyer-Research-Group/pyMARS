@@ -48,7 +48,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             except Exception:
                 continue
         #iterate through every timestep for the initial condition
-        for timestep, data_group in rate_file[initial_condition]:
+        for timestep, data_group in rate_file[initial_condition].iteritems():
 
             rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
             """

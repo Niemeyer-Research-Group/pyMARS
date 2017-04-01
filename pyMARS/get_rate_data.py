@@ -53,6 +53,7 @@ def get_rates(hdf5_file, solution_object):
             new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
         """
         for tstep in f[grp].iterkeys():
+            #reading from mass fractions file
             group = f[grp][tstep]
             time = group['Time'].value
             temp = group['Temp'].value
@@ -63,7 +64,7 @@ def get_rates(hdf5_file, solution_object):
             reaction_production_rates = solution.net_rates_of_progress
 
             #create new groups and datasets in production rates file
-            new_grp = g.create_group(str(tstep))
+            new_grp = ic_group.create_group(str(tstep))
             new_grp['Temp'] = solution.T
             new_grp['Time'] = time
             new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
