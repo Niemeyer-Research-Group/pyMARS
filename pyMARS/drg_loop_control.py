@@ -89,7 +89,8 @@ def drg_loop_control(solution_object, args):
                 os.system('rm mass_fractions.hdf5')
             #run DRG and create new reduced solution
             drg = make_graph(solution_object, 'production_rates.hdf5', threshold_values)
-            exclusion_list = graph_search(solution_object, drg, target_species)
+            #exclusion_list = graph_search(solution_object, drg, target_species)
+            exclusion_list = drg
             new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
             species_retained.append(len(new_solution_objects[1].species()))
 
