@@ -81,10 +81,10 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 #generate list of all species
                 all_species = reaction.reactants
                 all_species.update(reaction.products)
-                for species_a in reactants:
-                    if species_a in products:
-                        if reactants[species_a] != products[species_a]:
-                            error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
+                #for species_a in reactants:
+                #    if species_a in products:
+                #        if reactants[species_a] != products[species_a]:
+                #            error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
                 if reaction_production_rate != 0:
                     #for species_a in all_species:
                     for species_a in products:
@@ -108,8 +108,11 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 if abs(ri_total[value] - original_sp_npr[value].value) > .01:
                     #print ('species: %s and amount %0.5f')  %(value, abs(ri_total[value] - original_sp_npr[value].value))
                     continue
+                ri_total[value] = original_sp_npr[value].value
                 #print value
                 #print ri_total[value]
+
+
         #divide progress related to species B by total progress
         #and make edge
         for edge in ri_partial:
