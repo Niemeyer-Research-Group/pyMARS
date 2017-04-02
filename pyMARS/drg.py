@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 import h5py
 from collections import Counter
+from graph_search import graph_search
 
 def make_graph(solution_object, hdf5_file, threshold_value):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
@@ -37,6 +38,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     ri_partial = {}
     error_list = {}
     first_iteration = True
+    core_species = []
     #iterate through each initial condition set
     for initial_condition, data_group in rate_file.iteritems():
         #generate dict of sum production Rates, and make zero before evaluating
@@ -51,8 +53,9 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 continue
         #iterate through every timestep for the initial condition
         for timestep, data_group in rate_file[initial_condition].iteritems():
-
             rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
+            original_sp_npr = rate_file[initial_condition][timestep]['Species Net Production Rates Original']
+            #print original_sp_npr['nc7h16'].value
             """
             if first_iteration:
                 #generate dict of sum production Rates
@@ -83,9 +86,9 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                         if reactants[species_a] != products[species_a]:
                             error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
                 if reaction_production_rate != 0:
-                    for species_a in all_species:
-                    #for species_a in reactants:
-                        molar_coeff_A = float(all_species[species_a])
+                    #for species_a in all_species:
+                    for species_a in products:
+                        molar_coeff_A = float(products[species_a])
                         #molar_coeff_A = float(reactants[species_a])
                         #this is denominator
                         ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
@@ -99,7 +102,14 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                                 ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
                             except KeyError:
                                 ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
-
+            #check to make sure calculated net production rate is correct
+            # this is numerator
+            for value in ri_total:
+                if abs(ri_total[value] - original_sp_npr[value].value) > .01:
+                    #print ('species: %s and amount %0.5f')  %(value, abs(ri_total[value] - original_sp_npr[value].value))
+                    continue
+                #print value
+                #print ri_total[value]
         #divide progress related to species B by total progress
         #and make edge
         for edge in ri_partial:
@@ -126,12 +136,29 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             except IndexError:
                 print edge
                 continue
-    print 'MOAR changes made'
-    print '-------------'
-    print '-------------'
+        #search the compiled graph
+        #temporarily input target species
+        essential_species = graph_search(solution, graph, 'nc7h16')
+        for sp in essential_species:
+            if sp not in core_species:
+                core_species.append(sp)
+
+        #clear the graph for next individual set
+        graph.clear()
+
+
+    #temporarily performs part of the graph search function, by finding
+    #dicsonnected species
+    exclusion_list = []
+    for species in solution.species():
+        if species.name not in core_species:
+            exclusion_list.append(species.name)
+    #return exclusion_list
+
     rate_file.close()
 
     if len(error_list) != 0:
         print 'error list'
         print error_list
-    return graph
+    #return graph
+    return exclusion_list
