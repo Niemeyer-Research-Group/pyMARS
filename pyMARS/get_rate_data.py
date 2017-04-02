@@ -24,6 +24,9 @@ def get_rates(hdf5_file, solution_object):
                     [temperature array]
                     [time array]
                     [Reaction Production rates dataset]
+                    [Species Net Production Rates Original]
+                        ['H2'] = -3.47
+                        ['CO2'] = 0
     """
     #read in data file
     f = h5py.File(hdf5_file, 'r')
@@ -59,14 +62,32 @@ def get_rates(hdf5_file, solution_object):
             temp = group['Temp'].value
             pressure = group['Pressure'].value
             mass_fractions = np.array(group['Species Mass Fractions'])
+            original_species_prod_rates=np.array(group['Species Net Production Rates Original'])
             #set solution state and get rates of progress of reactions
             solution.TPY = temp, pressure, mass_fractions
             reaction_production_rates = solution.net_rates_of_progress
+
+            #check that species net production rates are the same
+            new_species_prod_rates=solution.net_production_rates
+            for i, n in enumerate(original_species_prod_rates):
+                #if new_species_prod_rates[i] != n:
+                #    print ('old %0.7f, new %0.7f') %(n, new_species_prod_rates[i])
+                assert abs(n - new_species_prod_rates[i]) <= .001
+            #assert abs(original_species_prod_rates == new_species_prod_rates
+
 
             #create new groups and datasets in production rates file
             new_grp = ic_group.create_group(str(tstep))
             new_grp['Temp'] = solution.T
             new_grp['Time'] = time
+
+            species_production_list = {}
+            for i, n in enumerate(solution.species()):
+                species_production_list[solution.species(i).name] = solution.net_production_rates[i]
+            sp_data = new_grp.create_group('Species Net Production Rates Original')
+            for j in species_production_list:
+                sp_data[str(j)] = species_production_list[str(j)]
+            #new_grp['Species Net Production Rates Original'] = species_production_list
             new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
 
     g.close()
