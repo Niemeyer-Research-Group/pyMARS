@@ -72,7 +72,9 @@ def get_rates(hdf5_file, solution_object):
             for i, n in enumerate(original_species_prod_rates):
                 #if new_species_prod_rates[i] != n:
                 #    print ('old %0.7f, new %0.7f') %(n, new_species_prod_rates[i])
-                assert abs(n - new_species_prod_rates[i]) <= .001
+                #assert abs(n - new_species_prod_rates[i]) <= .001
+                if abs(n - new_species_prod_rates[i]) > .001:
+                    print ic_group
             #assert abs(original_species_prod_rates == new_species_prod_rates
 
 
