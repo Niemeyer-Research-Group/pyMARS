@@ -98,7 +98,7 @@ def readin(args='none', **argv):
 
     else:
         print("\n\nFile type not supported")
-    if os.path.exists('mass_fractions.hdf5'):
-        os.system('rm mass_fractions.hdf5')
+    #if os.path.exists('mass_fractions.hdf5'):
+    #    os.system('rm mass_fractions.hdf5')
     #if os.path.exists('production_rates.hdf5'):
         #os.system('rm production_rates.hdf5')
