@@ -47,6 +47,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             try:
                 ri_partial[str(pre_defined_edge)] = 0.0
             except Exception:
+                print pre_defined_edge
                 continue
         #iterate through every timestep for the initial condition
         for timestep, data_group in rate_file[initial_condition].iteritems():
@@ -69,24 +70,27 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 reaction_production_rate = float(rxn_prod_rates[reaction_number])
                 reactants = reaction.reactants
                 products = reaction.products
-                A = Counter(reactants)
-                B = Counter(products)
-                for key in B:
-                    B[key] *= -1
-                all_species = A + B
+                #A = Counter(reactants)
+                #B = Counter(products)
+                #for key in A:
+                #    A[key] *= -1
+                #all_species = A + B
                 #generate list of all species
-                #all_species = reaction.products
-                #all_species.update(reaction.reactants)
+                all_species = reaction.reactants
+                all_species.update(reaction.products)
                 for species_a in reactants:
                     if species_a in products:
                         if reactants[species_a] != products[species_a]:
                             error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
                 if reaction_production_rate != 0:
                     for species_a in all_species:
+                    #for species_a in reactants:
                         molar_coeff_A = float(all_species[species_a])
+                        #molar_coeff_A = float(reactants[species_a])
                         #this is denominator
                         ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
                         for species_b in all_species:
+                        #for species_b in products:
                             partial_name = species_a + '_' + species_b
                             if species_a == species_b:
                                 continue
@@ -112,6 +116,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                         continue
                 #only add edge if > than edge value from previous timesteps
                 if weight >= threshold_value:
+                    #print weight
                     if graph.has_edge(species_a_name, species_b_name):
                         old_weight = graph[species_a_name][species_b_name]['weight']
                         if weight > old_weight:
@@ -121,7 +126,9 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             except IndexError:
                 print edge
                 continue
-
+    print 'MOAR changes made'
+    print '-------------'
+    print '-------------'
     rate_file.close()
 
     if len(error_list) != 0:

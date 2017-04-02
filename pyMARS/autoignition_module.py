@@ -104,6 +104,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
 
     sample = get_range(times1, temps, sdata, production_data)
 
+    #strips all data except that within a 40 point sample range around ignition
     for grp in f1[group_name].keys():
         if int(grp) not in range((sample.index-20), (sample.index+20)):
             f1[group_name].__delitem__(str(grp))
