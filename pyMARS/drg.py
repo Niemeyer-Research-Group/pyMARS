@@ -87,26 +87,73 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 #            error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
                 if reaction_production_rate != 0:
                     #for species_a in all_species:
-                    for species_a in products:
-                        molar_coeff_A = float(products[species_a])
-                        #molar_coeff_A = float(reactants[species_a])
-                        #this is denominator
-                        ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
-                        for species_b in all_species:
-                        #for species_b in products:
-                            partial_name = species_a + '_' + species_b
-                            if species_a == species_b:
-                                continue
-                            #this is numerator
-                            try:
-                                ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
-                            except KeyError:
-                                ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
+                    #for species_a in products:
+                    #    molar_coeff_A = float(products[species_a])
+                    #    #molar_coeff_A = float(reactants[species_a])
+                    #    #this is denominator
+                    #    ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
+                    #    for species_b in all_species:
+                    #    #for species_b in products:
+                    #        partial_name = species_a + '_' + species_b
+                    #        if species_a == species_b:
+                    #            continue
+                    #        #this is numerator
+                    #        try:
+                    #            ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
+                    #        except KeyError:
+                    #            ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
+
+                    if reaction_production_rate > 0:
+                        for species_a in products:
+                            mcA = float(products[species_a])
+                            ri_total[species_a] +=(reaction_production_rate*mcA)
+                            for species_b in all_species:
+                                if species_a != species_b:
+                                    partial_name = species_a + '_' + species_b
+                                    try:
+                                        ri_partial[partial_name] += (reaction_production_rate*mcA)
+                                    except KeyError:
+                                        ri_partial[partial_name] = (reaction_production_rate*mcA)
+                        for species_a in reactants:
+                            mcA = float(reactants[species_a])
+                            ri_total[species_a] +=(reaction_production_rate*-mcA)
+                            for species_b in all_species:
+                                if species_a != species_b:
+                                    partial_name = species_a + '_' + species_b
+                                    try:
+                                        ri_partial[partial_name] += (reaction_production_rate*-mcA)
+                                    except KeyError:
+                                        ri_partial[partial_name] = (reaction_production_rate*-mcA)
+
+                    if reaction_production_rate < 0:
+                        for species_a in products:
+                            mcA = float(products[species_a])
+                            ri_total[species_a] +=(reaction_production_rate*mcA)
+                            for species_b in all_species:
+                                if species_a != species_b:
+                                    partial_name = species_a + '_' + species_b
+                                    try:
+                                        ri_partial[partial_name] += (reaction_production_rate*mcA)
+                                    except KeyError:
+                                        ri_partial[partial_name] = (reaction_production_rate*mcA)
+                        for species_a in reactants:
+                            mcA = float(reactants[species_a])
+                            ri_total[species_a] +=(reaction_production_rate*-mcA)
+                            for species_b in all_species:
+                                if species_a != species_b:
+                                    partial_name = species_a + '_' + species_b
+                                    try:
+                                        ri_partial[partial_name] += (reaction_production_rate*-mcA)
+                                    except KeyError:
+                                        ri_partial[partial_name] = (reaction_production_rate*-mcA)
+
+
+
             #check to make sure calculated net production rate is correct
             # this is numerator
             for value in ri_total:
-                if abs(ri_total[value] - original_sp_npr[value].value) > .01:
-                    #print ('species: %s and amount %0.5f')  %(value, abs(ri_total[value] - original_sp_npr[value].value))
+                if abs(ri_total[value] - original_sp_npr[value].value) > 2.0:
+                    #print ('species: %s and amount %0.5f')  %(value, ri_total[value] - original_sp_npr[value].value)
                     continue
                 ri_total[value] = original_sp_npr[value].value
                 #print value
