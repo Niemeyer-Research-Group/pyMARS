@@ -1,5 +1,8 @@
 # pyMARS
 
+[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 Python-based (chemical kinetic) Model Automatic Reduction Software (MARS), which consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.
 
 pyMARS currently consists of two stages:
