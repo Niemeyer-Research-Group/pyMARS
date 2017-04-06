@@ -102,6 +102,19 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                                 ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
                             except KeyError:
                                 ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
+                    #alternate method for calculating total production rate
+                    if reaction_production_rate > 0:
+                        for species in products:
+                            ri_total[species] += float(reaction_production_rate*products[species])
+                        for species in reactants:
+                            ri_total[species] += float(-reaction_production_rate*reactants[species])
+                    if reaction_production_rate < 0:
+                            for species in products:
+                                ri_total[species] += float(reaction_production_rate*products[species])
+                            for species in reactants:
+                                ri_total[species] += float(reaction_production_rate*reactants[species])
+
+
             #check to make sure calculated net production rate is correct
             # this is numerator
             for value in ri_total:

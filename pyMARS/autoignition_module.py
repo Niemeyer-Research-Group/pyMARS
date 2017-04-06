@@ -4,6 +4,7 @@ import cantera as ct
 import os
 from get_sample_range import get_range
 import h5py
+import time
 
 
 def run_sim(solution_object, condition, sys_args='none', **usr_args ):
@@ -76,6 +77,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     f1 = h5py.File('mass_fractions.hdf5', 'a')
     group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     individual = f1.create_group(group_name)
+    timer_start =time.time()
     while current_time < stop_time:
         group_index += 1
         try:
@@ -103,6 +105,8 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         production_data = np.vstack((production_data, production_rates))
 
     sample = get_range(times1, temps, sdata, production_data)
+    timer_stop = time.time()
+    
 
     #strips all data except that within a 40 point sample range around ignition
     for grp in f1[group_name].keys():
