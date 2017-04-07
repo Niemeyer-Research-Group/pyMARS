@@ -65,7 +65,7 @@ def get_rates(hdf5_file, solution_object):
             original_species_prod_rates=np.array(group['Species Net Production Rates Original'])
             #set solution state and get rates of progress of reactions
             solution.TPY = temp, pressure, mass_fractions
-            reaction_production_rates = solution.net_production_rates
+            reaction_production_rates = solution.net_rates_of_progress
 
             #check that species net production rates are the same
             new_species_prod_rates=solution.net_production_rates
