@@ -39,12 +39,14 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     error_list = {}
     first_iteration = True
     core_species = []
+    ri_total_test = {}
     #iterate through each initial condition set
     for initial_condition, data_group in rate_file.iteritems():
         #generate dict of sum production Rates, and make zero before evaluating
         #each initial condition set
         for species in species_objects:
             ri_total[species.name] = 0.0
+            ri_total_test[species.name] = 0.0
         for pre_defined_edge in ri_partial:
             try:
                 ri_partial[str(pre_defined_edge)] = 0.0
@@ -55,53 +57,20 @@ def make_graph(solution_object, hdf5_file, threshold_value):
         for timestep, data_group in rate_file[initial_condition].iteritems():
             rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
             original_sp_npr = rate_file[initial_condition][timestep]['Species Net Production Rates Original']
-            #print original_sp_npr['nc7h16'].value
-            """
-            if first_iteration:
-                #generate dict of sum production Rates
-                for species in species_objects:
-                    ri_total[species.name] = 0
-                for pre_defined_edge in ri_partial:
-                    try:
-                        ri_partial[str(pre_defined_edge)] = 0.0
-                    except Exception:
-                        continue
-                first_iteration = False
-            """
+            for species in species_objects:
+                ri_total[species.name] = 0.0
+                ri_total_test[species.name] = 0
+
             #build weights by iterating over every reaction
             for reaction_number, reaction in enumerate(reaction_objects):
                 reaction_production_rate = float(rxn_prod_rates[reaction_number])
                 reactants = reaction.reactants
                 products = reaction.products
-                #A = Counter(reactants)
-                #B = Counter(products)
-                #for key in A:
-                #    A[key] *= -1
-                #all_species = A + B
-                #generate list of all species
-                all_species = reaction.reactants
-                all_species.update(reaction.products)
-                #for species_a in reactants:
-                #    if species_a in products:
-                #        if reactants[species_a] != products[species_a]:
-                #            error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
+                all_species = reactants
+                all_species.update(products)
+
+
                 if reaction_production_rate != 0:
-                    #for species_a in all_species:
-                    #for species_a in products:
-                    #    molar_coeff_A = float(products[species_a])
-                    #    #molar_coeff_A = float(reactants[species_a])
-                    #    #this is denominator
-                    #    ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
-                    #    for species_b in all_species:
-                    #    #for species_b in products:
-                    #        partial_name = species_a + '_' + species_b
-                    #        if species_a == species_b:
-                    #            continue
-                    #        #this is numerator
-                    #        try:
-                    #            ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
-                    #        except KeyError:
-                    #            ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
 
                     if reaction_production_rate > 0:
                         for species_a in products:
@@ -149,23 +118,38 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                     #alternate method for calculating total production rate
                     if reaction_production_rate > 0:
                         for species in products:
-                            ri_total[species] += float(reaction_production_rate*products[species])
+                            ri_total_test[species] += float(reaction_production_rate*products[species])
                         for species in reactants:
-                            ri_total[species] += float(-reaction_production_rate*reactants[species])
+                            ri_total_test[species] += float(-reaction_production_rate*reactants[species])
                     if reaction_production_rate < 0:
                             for species in products:
-                                ri_total[species] += float(reaction_production_rate*products[species])
+                                ri_total_test[species] += float(-reaction_production_rate*products[species])
                             for species in reactants:
-                                ri_total[species] += float(reaction_production_rate*reactants[species])
+                                ri_total_test[species] += float(reaction_production_rate*reactants[species])
+
+
+
             #check to make sure calculated net production rate is correct
             # this is numerator
-            for value in ri_total:
-                if abs(ri_total[value] - original_sp_npr[value].value) > 2.0:
-                    #print ('species: %s and amount %0.5f')  %(value, ri_total[value] - original_sp_npr[value].value)
+            names_list ={}
+            total_error = 0
+            for i, j in enumerate(species_objects):
+                names_list[j.name] = original_sp_npr[j.name].value
+            for value in ri_total_test:
+                if abs(ri_total_test[value] - names_list[value]) > .01:
+                    #print '-----------------'
+                    #print ('species: %s and amount %0.5f')  %(value, ri_total_test[value] - original_sp_npr[value].value)
+                    #print 'original: %0.5f, mine: %0.5f'    %(original_sp_npr[value].value, ri_total_test[value])
+                    print 'species: %0.5s, error %0.5f' %(value, float(ri_total_test[value] - names_list[value]))
                     continue
+                    total_error += float(ri_total_test[value] - names_list[value])
                 ri_total[value] = original_sp_npr[value].value
+            print '------------'
+            print total_error
+            print '------------'
                 #print value
                 #print ri_total[value]
+
 
 
         #divide progress related to species B by total progress

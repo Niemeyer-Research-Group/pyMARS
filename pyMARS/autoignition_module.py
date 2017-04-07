@@ -93,7 +93,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         grp['Temp'] = reactor.T
         grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
-        species_production_rates = reactor.thermo.net_production_rates
+        species_production_rates = reactor.kinetics.net_production_rates
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Species Net Production Rates Original', data=species_production_rates)
 
@@ -106,7 +106,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
 
     sample = get_range(times1, temps, sdata, production_data)
     timer_stop = time.time()
-    
+
 
     #strips all data except that within a 40 point sample range around ignition
     for grp in f1[group_name].keys():
