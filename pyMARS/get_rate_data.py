@@ -23,8 +23,7 @@ def get_rates(hdf5_file, solution_object):
                 [timesteps]
                     [temperature array]
                     [time array]
-                    [Reaction Production rates dataset]
-                    [Species Net Production Rates Original]
+                    [Reaction Production Rates Original]
                         ['H2'] = -3.47
                         ['CO2'] = 0
     """
@@ -33,64 +32,74 @@ def get_rates(hdf5_file, solution_object):
     #create file for production rates
     g = h5py.File('production_rates.hdf5', 'w')
     #initialize solution
-    solution = solution_object
+    old_solution = solution_object
     #iterate through all initial conditions
     for grp in f.iterkeys():
         #get solution data at individual timestep
         ic_group = g.create_group(grp.title())
-        """
-        #iterate through all timesteps
-        for tstep in ic_group.iterkeys():
-            group = f[str(grp)][str(tstep)]
-            time = group['Time'].value
-            temp = group['Temp'].value
-            pressure = group['Pressure'].value
-            mass_fractions = np.array(group['Species Mass Fractions'])
-            #set solution state
-            solution.TPY = temp, pressure, mass_fractions
-
-            reaction_production_rates = solution.net_rates_of_progress
-            new_grp = g.create_group(str(grp)+'_'+str(tstep))
-            new_grp['Temp'] = solution.T
-            new_grp['Time'] = time
-            new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
-        """
         for tstep in f[grp].iterkeys():
+            #--------------------------------
             #reading from mass fractions file
+            #--------------------------------
             group = f[grp][tstep]
             time = group['Time'].value
             temp = group['Temp'].value
             pressure = group['Pressure'].value
             mass_fractions = np.array(group['Species Mass Fractions'])
-            original_species_prod_rates=np.array(group['Species Net Production Rates Original'])
+            old_species_prod_rates=np.array(group['Species Net Production Rates Original'])
+            old_reaction_rates_of_progress=np.array(group['Reaction Rates of Progress'])
+            #---------------------------------------------------------
             #set solution state and get rates of progress of reactions
-            solution.TPY = temp, pressure, mass_fractions
-            reaction_production_rates = solution.net_rates_of_progress
+            #---------------------------------------------------------
+            new_solution = old_solution
+            new_solution.TPY = temp, pressure, mass_fractions
+            new_reaction_production_rates = new_solution.net_rates_of_progress
+            new_species_prod_rates=new_solution.net_production_rates
 
+            #----------------------------------------------------
+            #check that reaction_rates_of_progress are same
+            #----------------------------------------------------
+            for i, n in enumerate(old_reaction_rates_of_progress):
+                if abs(old_reaction_rates_of_progress[i] - new_reaction_production_rates[i]) > .0001:
+                    print '-----------------------'
+                    print 'reaction rate of progress is off'
+                    print solution.reaction(i)
+
+            #----------------------------------------------------
             #check that species net production rates are the same
-            new_species_prod_rates=solution.net_production_rates
-            for i, n in enumerate(original_species_prod_rates):
-                #if new_species_prod_rates[i] != n:
-                #    print ('old %0.7f, new %0.7f') %(n, new_species_prod_rates[i])
-                #assert abs(n - new_species_prod_rates[i]) <= .001
-                if abs(n - new_species_prod_rates[i]) > .01:
+            #----------------------------------------------------
+
+            for i, n in enumerate(old_species_prod_rates):
+                if abs(n - new_species_prod_rates[i]) > .0001:
+                    print '------------------------------------------'
+                    print 'species production rates did not match in: '
                     print ic_group
-            #assert abs(original_species_prod_rates == new_species_prod_rates
 
 
+            #----------------------------------------------------
+            #check that species mass fractions are the same
+            #----------------------------------------------------
+            for i, n in enumerate(mass_fractions):
+                if abs(mass_fractions[i]-new_solution.Y[i]) > .0001:
+                    print '------------------------------------------'
+                    print 'species mass fractions did not match for: '
+                    print solution.species(i).name
+
+            #-------------------------------------------------------
             #create new groups and datasets in production rates file
+            #-------------------------------------------------------
             new_grp = ic_group.create_group(str(tstep))
-            new_grp['Temp'] = solution.T
+            new_grp['Temp'] = new_solution.T
             new_grp['Time'] = time
 
             species_production_list = {}
-            for i, n in enumerate(solution.species()):
-                species_production_list[solution.species(i).name] = solution.net_production_rates[i]
+            for i, n in enumerate(new_solution.species()):
+                species_production_list[new_solution.species(i).name] = new_solution.net_production_rates[i]
             sp_data = new_grp.create_group('Species Net Production Rates Original')
             for j in species_production_list:
                 sp_data[str(j)] = species_production_list[str(j)]
             #new_grp['Species Net Production Rates Original'] = species_production_list
-            new_grp.create_dataset('Reaction Production Rates', data=reaction_production_rates)
+            new_grp.create_dataset('Reaction Production Rates', data=new_reaction_production_rates)
 
     g.close()
     f.close()

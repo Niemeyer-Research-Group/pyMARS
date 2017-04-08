@@ -32,6 +32,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
                                     [Pressure]
                                     [Species Mass Fractions]
                                     [Species Net Production Rates Original]
+                                    [Reaction Rates of Progress]
         return_obj : obj
             sim result
                 .time
@@ -94,7 +95,9 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
         species_production_rates = reactor.kinetics.net_production_rates
+        net_rates_of_progress = reactor.kinetics.net_rates_of_progress
         grp.create_dataset('Species Mass Fractions', data=species_data)
+        grp.create_dataset('Reaction Rates of Progress', data=net_rates_of_progress)
         grp.create_dataset('Species Net Production Rates Original', data=species_production_rates)
 
         species_data = species_data[:, np.newaxis].T #translate from [n, 1] to [1,n]

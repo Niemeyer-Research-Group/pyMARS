@@ -133,13 +133,14 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             # this is numerator
             names_list ={}
             total_error = 0
-            for i, j in enumerate(species_objects):
-                names_list[j.name] = original_sp_npr[j.name].value
-            for value in ri_total_test:
-                if abs(ri_total_test[value] - names_list[value]) > .01:
-                    #print '-----------------'
-                    #print ('species: %s and amount %0.5f')  %(value, ri_total_test[value] - original_sp_npr[value].value)
-                    #print 'original: %0.5f, mine: %0.5f'    %(original_sp_npr[value].value, ri_total_test[value])
+
+            #original_sp_npr is a dict written to the h5py file
+            #ri_total_test is compiled above starting on line 118
+            #this means there is an error in how reaction_production_rate is stored?
+            #or how original_sp_npr is stored?
+            for sp_name in ri_total_test:
+                if abs(ri_total_test[sp_name] - original_sp_npr[sp_name]) > .01:
+                    print '-----------------'
                     print 'species: %0.5s, error %0.5f' %(value, float(ri_total_test[value] - names_list[value]))
                     continue
                     total_error += float(ri_total_test[value] - names_list[value])
