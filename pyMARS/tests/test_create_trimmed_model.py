@@ -13,14 +13,15 @@ test parameters:
 
 #import modules
 import cantera as ct
-from .. import create_trimmed_model as func
+from pyMARS import create_trimmed_model as func
 
 #define function inputs
 data_file = ('gri30.xml')
 exclusion_list = ['O2', 'CO2']
-
+#def trim(solution_object, exclusion_list, file_name):
+soln = ct.Solution('gri30.xml')
 #call function
-result = func.create_trimmed_model(data_file, exclusion_list)
+result = func.trim(soln, exclusion_list, data_file,)
 initial_solution = result[0]
 new_solution = result[1]
 

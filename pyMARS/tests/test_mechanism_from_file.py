@@ -74,6 +74,7 @@ def test(original_file, new_file):
     def test_reactions():
         c=4184.0
         num = 0
+        print 'Any errors shown below:\n'
         for k, name1 in enumerate(new.reaction_equations()):
             num += 1
             new_reaction=new.reaction(k)
@@ -91,7 +92,7 @@ def test(original_file, new_file):
             except AttributeError:
                 pass
             #assert new_reaction.efficiencies == original_reaction.efficiencies
-        print ('done with testing equation info ')
+        print ('\ndone with testing equation info ')
     test_species_def()
     test_reactions()
 
