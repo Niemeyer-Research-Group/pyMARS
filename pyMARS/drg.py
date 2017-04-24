@@ -41,7 +41,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     core_species = []
     ri_total_test = {}
     #iterate through each initial condition set
-    for initial_condition, data_group in rate_file.iteritems():
+    for initial_condition, data_grp in rate_file.iteritems():
         #generate dict of sum production Rates, and make zero before evaluating
         #each initial condition set
         for species in species_objects:
@@ -54,12 +54,14 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                 print pre_defined_edge
                 continue
         #iterate through every timestep for the initial condition
-        for timestep, data_group in rate_file[initial_condition].iteritems():
+        error_dict = {}
+        for timestep, data_group in data_grp.iteritems():
             rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
-            original_sp_npr = rate_file[initial_condition][timestep]['Species Net Production Rates Original']
+            #original_sp_npr = rate_file[initial_condition][timestep]['Species Net Production Rates Original']
+            original_sp_npr = data_group['Species Net Production Rates Original']
             for species in species_objects:
                 ri_total[species.name] = 0.0
-                ri_total_test[species.name] = 0
+                ri_total_test[species.name] = 0.0
 
             #build weights by iterating over every reaction
             for reaction_number, reaction in enumerate(reaction_objects):
@@ -71,7 +73,6 @@ def make_graph(solution_object, hdf5_file, threshold_value):
 
 
                 if reaction_production_rate != 0:
-
                     if reaction_production_rate > 0:
                         for species_a in products:
                             mcA = float(products[species_a])
@@ -123,9 +124,9 @@ def make_graph(solution_object, hdf5_file, threshold_value):
                             ri_total_test[species] += float(-reaction_production_rate*reactants[species])
                     if reaction_production_rate < 0:
                             for species in products:
-                                ri_total_test[species] += float(-reaction_production_rate*products[species])
+                                ri_total_test[species] += float(reaction_production_rate*products[species])
                             for species in reactants:
-                                ri_total_test[species] += float(reaction_production_rate*reactants[species])
+                                ri_total_test[species] += float(-reaction_production_rate*reactants[species])
 
 
 
@@ -138,16 +139,26 @@ def make_graph(solution_object, hdf5_file, threshold_value):
             #ri_total_test is compiled above starting on line 118
             #this means there is an error in how reaction_production_rate is stored?
             #or how original_sp_npr is stored?
+            #now know this is not correct, and the issue lies in either in how the value is calculated, or the molar coeff
+            #right now, all of the computed values are below correct values
+            error_list = []
+            error_dict = {}
             for sp_name in ri_total_test:
-                if abs(ri_total_test[sp_name] - original_sp_npr[sp_name]) > .01:
-                    print '-----------------'
-                    print 'species: %0.5s, error %0.5f' %(value, float(ri_total_test[value] - names_list[value]))
-                    continue
-                    total_error += float(ri_total_test[value] - names_list[value])
-                ri_total[value] = original_sp_npr[value].value
-            print '------------'
-            print total_error
-            print '------------'
+                if abs(ri_total_test[sp_name] - original_sp_npr[sp_name].value) > .01:
+                    if sp_name not in error_dict:
+                        error_dict[sp_name] = ri_total_test[sp_name] - original_sp_npr[sp_name].value
+                    else:
+                        error_dict[sp_name] += ri_total_test[sp_name] - original_sp_npr[sp_name].value
+                    #print '-----------------'
+                    #print 'species: %0.5s, error %0.5f' %(sp_name, float(ri_total_test[sp_name] - original_sp_npr[sp_name].value))
+                    total_error += float(ri_total_test[sp_name] - original_sp_npr[sp_name].value)
+                ri_total[sp_name] = original_sp_npr[sp_name].value
+                error_list.append(total_error)
+            error_list.sort()
+        print error_dict.keys()
+            #print '------------'
+            #print 'Total Error %0.5f' %error_list[0]
+            #print '------------'
                 #print value
                 #print ri_total[value]
 
@@ -197,11 +208,11 @@ def make_graph(solution_object, hdf5_file, threshold_value):
         if species.name not in core_species:
             exclusion_list.append(species.name)
     #return exclusion_list
-
+    assert 'nc7h16' not in exclusion_list
     rate_file.close()
 
-    if len(error_list) != 0:
-        print 'error list'
-        print error_list
+    #if len(error_list) != 0:
+    #    print 'error list'
+    #    print error_list
     #return graph
     return exclusion_list

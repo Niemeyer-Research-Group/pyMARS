@@ -48,6 +48,7 @@ def get_rates(hdf5_file, solution_object):
             mass_fractions = np.array(group['Species Mass Fractions'])
             old_species_prod_rates=np.array(group['Species Net Production Rates Original'])
             old_reaction_rates_of_progress=np.array(group['Reaction Rates of Progress'])
+
             #---------------------------------------------------------
             #set solution state and get rates of progress of reactions
             #---------------------------------------------------------
@@ -91,15 +92,52 @@ def get_rates(hdf5_file, solution_object):
             new_grp = ic_group.create_group(str(tstep))
             new_grp['Temp'] = new_solution.T
             new_grp['Time'] = time
+            sp_data = new_grp.create_group('Species Net Production Rates Original')
 
+            #generate list of net species production rates
             species_production_list = {}
             for i, n in enumerate(new_solution.species()):
                 species_production_list[new_solution.species(i).name] = new_solution.net_production_rates[i]
-            sp_data = new_grp.create_group('Species Net Production Rates Original')
+
+            #write list of net species produciton rates to hdf5 object
             for j in species_production_list:
                 sp_data[str(j)] = species_production_list[str(j)]
             #new_grp['Species Net Production Rates Original'] = species_production_list
+
+            #write reaction produciton rates to hdf5 object
             new_grp.create_dataset('Reaction Production Rates', data=new_reaction_production_rates)
+
+            #some extra stuff that is going to slow everything down, but I need right now for troubleshooting
+            #checking method for calculating species production rates
+            #list_A = species_production_list
+            list_A = sp_data
+            list_B = {}
+            for spc in new_solution.species():
+                list_B[spc.name] = 0
+            #calculate species production rates as in the DRG. I've proven this method
+            #to work in a few other test functions
+            for i, reac in enumerate(old_solution.reactions()):
+                reac_prod_rate = float(new_reaction_production_rates[i])
+                reactants = reac.reactants
+                products = reac.products
+                if reac_prod_rate != 0:
+                    if reac_prod_rate > 0:
+                        for species in products:
+                            list_B[species] += float(reac_prod_rate*products[species])
+                        for species in reactants:
+                            list_B[species] += float(-reac_prod_rate*reactants[species])
+                    if reac_prod_rate < 0:
+                        for species in products:
+                            list_B[species] += float(reac_prod_rate*products[species])
+                        for species in reactants:
+                            list_B[species] += float(-reac_prod_rate*reactants[species])
+            for blah in list_A:
+                if abs(list_A[blah].value - list_B[blah]) > .01:
+                    print '--------------'
+                    print blah
+                    print list_A[blah] - list_B[blah]
+                    print '---------------'
+                    print '---------------'
 
     g.close()
     f.close()
