@@ -4,7 +4,7 @@ import cantera as ct
 import os
 from get_sample_range import get_range
 import h5py
-import time
+import time as tm
 
 
 def run_sim(solution_object, condition, sys_args='none', **usr_args ):
@@ -25,14 +25,15 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         Points of interest
         CSV file
         Hdf5 file
-        mass_fractions.hdf5 : [initial_temp]
+        mass_fractions.hdf5 : [initial_condition]
                                 [index]
-                                    [Temp]
-                                    [Time]
                                     [Pressure]
+                                    [Reaction Rates of Progress]
                                     [Species Mass Fractions]
                                     [Species Net Production Rates Original]
-                                    [Reaction Rates of Progress]
+                                    [Temp]
+                                    [Time]
+
         return_obj : obj
             sim result
                 .time
@@ -49,6 +50,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
 
     """
+    func_start_time = tm.time()
     solution = solution_object
     initial_temperature = float(condition.temperature)
     pressure = float(condition.pressure)*float(ct.one_atm)
@@ -78,7 +80,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     f1 = h5py.File('mass_fractions.hdf5', 'a')
     group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     individual = f1.create_group(group_name)
-    timer_start =time.time()
+    timer_start =tm.time()
     while current_time < stop_time:
         group_index += 1
         try:
@@ -108,7 +110,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         production_data = np.vstack((production_data, production_rates))
 
     sample = get_range(times1, temps, sdata, production_data)
-    timer_stop = time.time()
+    timer_stop = tm.time()
 
 
     #strips all data except that within a 40 point sample range around ignition
@@ -203,7 +205,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             self.Temp = initial_temperature
             self.frac = frac
             self.tau_array = []
-
+    print 'autoignition time: %0.5f'    %(tm.time()-func_start_time)
     return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"
