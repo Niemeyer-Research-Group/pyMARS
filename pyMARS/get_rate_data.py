@@ -62,11 +62,11 @@ def get_rates(hdf5_file, solution_object):
             #----------------------------------------------------
             #check that reaction_rates_of_progress are same
             #----------------------------------------------------
-            for i, n in enumerate(old_reaction_rates_of_progress):
-                if abs(old_reaction_rates_of_progress[i] - new_reaction_production_rates[i]) > .0001:
-                    print '-----------------------'
-                    print 'reaction rate of progress is off'
-                    print solution.reaction(i)
+            # for i, n in enumerate(old_reaction_rates_of_progress):
+            #     if abs(old_reaction_rates_of_progress[i] - new_reaction_production_rates[i]) > .0001:
+            #         print '-----------------------'
+            #         print 'reaction rate of progress is off'
+            #         print solution.reaction(i)
 
             #----------------------------------------------------
             #check that species net production rates are the same
@@ -111,7 +111,7 @@ def get_rates(hdf5_file, solution_object):
 
 
             #writes reaction ID and products/reactants with coeffs to hdf5 object
-            rxn_groups = new_grp.create_group('Reactions') #= str([rx.ID for rx in new_solution.reactions()])
+            rxn_groups = new_grp.create_group('Reactions')
             for rx in new_solution.reactions():
                 rxi = rxn_groups.create_group(rx.ID)
                 rxiReactants = rxi.create_group('Reactants')
@@ -120,8 +120,6 @@ def get_rates(hdf5_file, solution_object):
                     rxiProducts[spi] = rx.products[spi]
                 for spi in rx.reactants:
                     rxiReactants[spi] = rx.reactants[spi]
-
-            #some extra stuff that is going to slow everything down, but I need right now for troubleshooting
             #checking method for calculating species production rates
             #list_A = species_production_list
             list_A = sp_data
@@ -188,12 +186,7 @@ def get_rates(hdf5_file, solution_object):
 
             ic_edge_data[tstep] = [list_A, list_B, list_C]
         total_edge_data[grp.title()] = ic_edge_data
-    #print total_edge_data['1400.0_101325.0_N2:41.36,O2:11.0,Nc7H16:1.0'].keys()
-    # print total_edge_data['1400.0_101325.0_N2:41.36,O2:11.0,Nc7H16:1.0']['1423']
-    # print len(total_edge_data['1400.0_101325.0_N2:41.36,O2:11.0,Nc7H16:1.0']['1423'])
     return total_edge_data
-
-
 
     g.close()
     f.close()

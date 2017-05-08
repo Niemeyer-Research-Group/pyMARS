@@ -4,7 +4,7 @@ import h5py
 from collections import Counter
 from graph_search import graph_search
 
-def make_graph(solution_object, hdf5_file, threshold_value, total_edge_data):
+def make_graph(solution_object, threshold_value, total_edge_data, target_species):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
         species and their edge-weights above a certain threshold value
 
@@ -23,8 +23,6 @@ def make_graph(solution_object, hdf5_file, threshold_value, total_edge_data):
         List of species to trim from mechanism
     """
 
-    rate_file = h5py.File(hdf5_file, 'r')
-
     #initalize solution and components
     solution = solution_object
     species_objects = solution.species()
@@ -41,6 +39,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, total_edge_data):
     core_species = []
     ri_total_test = {}
 
+    #this code has been moved to the get rate data file
     #iterate through each initial condition set
     # for initial_condition, data_grp in rate_file.iteritems():
     #     #generate dict of sum production Rates, and make zero before evaluating
@@ -228,9 +227,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, total_edge_data):
     #         graph.clear()
     #
 
-    #----------------------------------------------------------
-    #temporarily brought this outside of the standard function
-
+    #calculate edge weights based on list received from get_rate_data
     #initial condition
     for ic in total_edge_data.iterkeys():
         for species in species_objects:
@@ -260,7 +257,7 @@ def make_graph(solution_object, hdf5_file, threshold_value, total_edge_data):
                     continue
         #search the compiled graph
         #temporarily input target species
-        essential_species = graph_search(graph, 'nc7h16')
+        essential_species = graph_search(graph, target_species)
         for sp in essential_species:
             if sp not in core_species:
                 core_species.append(sp)
@@ -283,14 +280,8 @@ def make_graph(solution_object, hdf5_file, threshold_value, total_edge_data):
             exclusion_list.append(species.name)
     #return exclusion_list
     assert 'nc7h16' not in exclusion_list
-    rate_file.close()
     print '----------exclusion list-------'
     print len(exclusion_list)
     print '-------------------------------'
 
-
-    #if len(error_list) != 0:
-    #    print 'error list'
-    #    print error_list
-    #return graph
     return exclusion_list
