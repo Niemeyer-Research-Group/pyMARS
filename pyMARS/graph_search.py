@@ -2,7 +2,7 @@ import networkx as nx
 import cantera as ct
 import h5py
 
-def graph_search(solution_object, nx_graph, target_species):
+def graph_search(nx_graph, target_species):
     """Search nodal graph and generate list of species to exclude
 
     Parameters

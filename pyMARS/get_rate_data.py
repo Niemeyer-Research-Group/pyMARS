@@ -34,9 +34,11 @@ def get_rates(hdf5_file, solution_object):
     #initialize solution
     old_solution = solution_object
     #iterate through all initial conditions
+    total_edge_data = {}
     for grp in f.iterkeys():
         #get solution data at individual timestep
         ic_group = g.create_group(grp.title())
+        ic_edge_data = {}
         for tstep in f[grp].iterkeys():
             #--------------------------------
             #reading from mass fractions file
@@ -69,22 +71,22 @@ def get_rates(hdf5_file, solution_object):
             #----------------------------------------------------
             #check that species net production rates are the same
             #----------------------------------------------------
-
-            for i, n in enumerate(old_species_prod_rates):
-                if abs(n - new_species_prod_rates[i]) > .0001:
-                    print '------------------------------------------'
-                    print 'species production rates did not match in: '
-                    print ic_group
+            #
+            #for i, n in enumerate(old_species_prod_rates):
+            #    if abs(n - new_species_prod_rates[i]) > .0001:
+            #        print '------------------------------------------'
+            #        print 'species production rates did not match in: '
+            #        print ic_group
 
 
             #----------------------------------------------------
             #check that species mass fractions are the same
             #----------------------------------------------------
-            for i, n in enumerate(mass_fractions):
-                if abs(mass_fractions[i]-new_solution.Y[i]) > .0001:
-                    print '------------------------------------------'
-                    print 'species mass fractions did not match for: '
-                    print solution.species(i).name
+            #for i, n in enumerate(mass_fractions):
+            #    if abs(mass_fractions[i]-new_solution.Y[i]) > .0001:
+            #        print '------------------------------------------'
+            #        print 'species mass fractions did not match for: '
+            #        print solution.species(i).name
 
             #-------------------------------------------------------
             #create new groups and datasets in production rates file
@@ -97,47 +99,101 @@ def get_rates(hdf5_file, solution_object):
             #generate list of net species production rates
             species_production_list = {}
             for i, n in enumerate(new_solution.species()):
-                species_production_list[new_solution.species(i).name] = new_solution.net_production_rates[i]
+                species_production_list[new_solution.species(i).name] = new_species_prod_rates[i]
 
-            #write list of net species produciton rates to hdf5 object
+            #write list of net species production rates to hdf5 object
             for j in species_production_list:
                 sp_data[str(j)] = species_production_list[str(j)]
             #new_grp['Species Net Production Rates Original'] = species_production_list
 
-            #write reaction produciton rates to hdf5 object
+            #write reaction production rates to hdf5 object
             new_grp.create_dataset('Reaction Production Rates', data=new_reaction_production_rates)
+
+
+            #writes reaction ID and products/reactants with coeffs to hdf5 object
+            rxn_groups = new_grp.create_group('Reactions') #= str([rx.ID for rx in new_solution.reactions()])
+            for rx in new_solution.reactions():
+                rxi = rxn_groups.create_group(rx.ID)
+                rxiReactants = rxi.create_group('Reactants')
+                rxiProducts = rxi.create_group('Products')
+                for spi in rx.products:
+                    rxiProducts[spi] = rx.products[spi]
+                for spi in rx.reactants:
+                    rxiReactants[spi] = rx.reactants[spi]
 
             #some extra stuff that is going to slow everything down, but I need right now for troubleshooting
             #checking method for calculating species production rates
             #list_A = species_production_list
             list_A = sp_data
             list_B = {}
+            list_C = {}
             for spc in new_solution.species():
                 list_B[spc.name] = 0
             #calculate species production rates as in the DRG. I've proven this method
             #to work in a few other test functions
-            for i, reac in enumerate(old_solution.reactions()):
+            for i, reac in enumerate(new_solution.reactions()):
                 reac_prod_rate = float(new_reaction_production_rates[i])
                 reactants = reac.reactants
                 products = reac.products
+                all_species = reac.reactants
+                all_species.update(reac.products)
                 if reac_prod_rate != 0:
                     if reac_prod_rate > 0:
                         for species in products:
-                            list_B[species] += float(reac_prod_rate*products[species])
+                            list_B[species] += abs(float(reac_prod_rate*products[species]))
+
+                            for species_b in all_species:
+                                if species_b != species:
+                                    partial_name = species + '_' + species_b
+                                    if partial_name in list_C:
+                                        list_C[partial_name] += abs(float(reac_prod_rate*products[species]))
+                                    else:
+                                        list_C[partial_name] = abs(float(reac_prod_rate*products[species]))
                         for species in reactants:
-                            list_B[species] += float(-reac_prod_rate*reactants[species])
+                            list_B[species] += abs(float(-reac_prod_rate*reactants[species]))
+                            for species_b in all_species:
+                                if species_b != species:
+                                    partial_name = species + '_' + species_b
+                                    if partial_name in list_C:
+                                        list_C[partial_name] += abs(float(-reac_prod_rate*reactants[species]))
+                                    else:
+                                        list_C[partial_name] = abs(float(-reac_prod_rate*reactants[species]))
                     if reac_prod_rate < 0:
                         for species in products:
                             list_B[species] += float(reac_prod_rate*products[species])
+                            for species_b in all_species:
+                                if species_b != species:
+                                    partial_name = species + '_' + species_b
+                                    if partial_name in list_C:
+                                        list_C[partial_name] += abs(float(reac_prod_rate*products[species]))
+                                    else:
+                                        list_C[partial_name] = abs(float(reac_prod_rate*products[species]))
                         for species in reactants:
                             list_B[species] += float(-reac_prod_rate*reactants[species])
-            for blah in list_A:
-                if abs(list_A[blah].value - list_B[blah]) > .01:
-                    print '--------------'
-                    print blah
-                    print list_A[blah] - list_B[blah]
-                    print '---------------'
-                    print '---------------'
+
+                            for species_b in all_species:
+                                if species_b != species:
+                                    partial_name = species + '_' + species_b
+                                    if partial_name in list_C:
+                                        list_C[partial_name] += abs(float(-reac_prod_rate*reactants[species]))
+                                    else:
+                                        list_C[partial_name] = abs(float(-reac_prod_rate*reactants[species]))
+            # for blah in list_A:
+            #     if abs(float(list_A[blah].value) - np.float64(list_B[blah])) > .0001:
+            #         print '--------//------'
+            #         print blah
+            #         print list_A[blah] - list_B[blah]
+            #         print '--------//-------'
+            #         print '---------------'
+
+            ic_edge_data[tstep] = [list_A, list_B, list_C]
+        total_edge_data[grp.title()] = ic_edge_data
+    #print total_edge_data['1400.0_101325.0_N2:41.36,O2:11.0,Nc7H16:1.0'].keys()
+    # print total_edge_data['1400.0_101325.0_N2:41.36,O2:11.0,Nc7H16:1.0']['1423']
+    # print len(total_edge_data['1400.0_101325.0_N2:41.36,O2:11.0,Nc7H16:1.0']['1423'])
+    return total_edge_data
+
+
 
     g.close()
     f.close()
