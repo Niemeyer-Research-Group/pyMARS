@@ -24,7 +24,7 @@ def drg_loop_control(solution_object, args):
             Cantera solution object with skeletal mechanism
         """
     #get user input
-    target_species = str(raw_input('Enter target starting species: '))
+    target_species = str(raw_input('\nEnter target starting species: '))
 
     #run detailed mechanism and retain initial conditions
     args.multiple_conditions = True
@@ -73,9 +73,11 @@ def drg_loop_control(solution_object, args):
                     os.system('rm mass_fractions.hdf5')
                 except Exception:
                     pass
+                print 'thresholds is list'
                 #run DRG and create new reduced solution
-                drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
-                exclusion_list = graph_search(solution_object, drg, target_species)
+                drg = make_graph(solution_object, threshold, rate_edge_data, target_species)
+                #exclusion_list = graph_search(solution_object, drg, target_species)
+
                 new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
                 species_retained.append(len(new_solution_objects[1].species()))
 
@@ -89,7 +91,8 @@ def drg_loop_control(solution_object, args):
             #if os.path.exists('mass_fractions.hdf5'):
             #    os.system('rm mass_fractions.hdf5')
             #run DRG and create new reduced solution
-            drg = make_graph(solution_object, 'production_rates.hdf5', threshold_values, rate_edge_data)
+            print 'thresholds not list'
+            drg = make_graph(solution_object, threshold_values, rate_edge_data, target_species)
             #exclusion_list = graph_search(solution_object, drg, target_species)
             exclusion_list = drg
             new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
