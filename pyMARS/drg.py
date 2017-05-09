@@ -3,6 +3,7 @@ import numpy as np
 import h5py
 from collections import Counter
 from graph_search import graph_search
+import time as tm
 
 def make_graph(solution_object, threshold_value, total_edge_data, target_species):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
@@ -22,7 +23,7 @@ def make_graph(solution_object, threshold_value, total_edge_data, target_species
     exclusion_list : list
         List of species to trim from mechanism
     """
-
+    start_time = tm.time()
     #initalize solution and components
     solution = solution_object
     species_objects = solution.species()
@@ -283,5 +284,5 @@ def make_graph(solution_object, threshold_value, total_edge_data, target_species
     print '----------exclusion list-------'
     print len(exclusion_list)
     print '-------------------------------'
-
+    print 'drg time: %0.5f' %(tm.time() - start_time)
     return exclusion_list
