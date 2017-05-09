@@ -2,6 +2,7 @@ import cantera as ct
 import h5py
 import numpy as np
 import os
+import time as tm
 
 def get_rates(hdf5_file, solution_object):
     """ Takes mass_fractions hdf5 file of species mole fractions at a point in
@@ -20,13 +21,15 @@ def get_rates(hdf5_file, solution_object):
     -------
         production_rates.hdf5
             [initial condition]
-                [timesteps]
-                    [temperature array]
-                    [time array]
+                [timesteps 1x40]
+                    [temperature 1x1]
+                    [time 1x1]
                     [Reaction Production Rates Original]
                         ['H2'] = -3.47
                         ['CO2'] = 0
     """
+
+    start_time = tm.time()
     #read in data file
     f = h5py.File(hdf5_file, 'r')
     #create file for production rates
@@ -97,13 +100,13 @@ def get_rates(hdf5_file, solution_object):
             sp_data = new_grp.create_group('Species Net Production Rates Original')
 
             #generate list of net species production rates
-            species_production_list = {}
-            for i, n in enumerate(new_solution.species()):
-                species_production_list[new_solution.species(i).name] = new_species_prod_rates[i]
+            ##species_production_list = {}
+            ##for i, n in enumerate(new_solution.species()):
+            ##    species_production_list[new_solution.species(i).name] = new_species_prod_rates[i]
 
             #write list of net species production rates to hdf5 object
-            for j in species_production_list:
-                sp_data[str(j)] = species_production_list[str(j)]
+            ##for j in species_production_list:
+            ##    sp_data[str(j)] = species_production_list[str(j)]
             #new_grp['Species Net Production Rates Original'] = species_production_list
 
             #write reaction production rates to hdf5 object
@@ -122,7 +125,8 @@ def get_rates(hdf5_file, solution_object):
                     rxiReactants[spi] = rx.reactants[spi]
             #checking method for calculating species production rates
             #list_A = species_production_list
-            list_A = sp_data
+            ##list_A = sp_data
+            list_A = {}
             list_B = {}
             list_C = {}
             for spc in new_solution.species():
@@ -186,7 +190,8 @@ def get_rates(hdf5_file, solution_object):
 
             ic_edge_data[tstep] = [list_A, list_B, list_C]
         total_edge_data[grp.title()] = ic_edge_data
-    return total_edge_data
+        print 'get_rate_data time: %0.5f'   %(tm.time()-start_time)
 
     g.close()
     f.close()
+    return total_edge_data
