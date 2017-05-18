@@ -7,15 +7,15 @@ def graph_search(nx_graph, target_species):
 
     Parameters
     ----------
-    solution_object : obj
-        Original Cantera solution Object
     nx_graph : obj
-        networkx graph object of solution
+        networkx graph object of solution\
+    target_species : list
+        List of target species to search from
 
     Returns
     -------
-    exclusion_list : str
-        String containing names of species to exclude
+    essential_nodes : str
+        String containing names of essential species
     """
 
     if len(target_species) > 1:
@@ -28,11 +28,4 @@ def graph_search(nx_graph, target_species):
     else:
         essential_nodes = list(nx.dfs_preorder_nodes(nx_graph, target_species[0]))
 
-
-    #print len(essential_nodes)
-    #exclusion_list = []
-    #for species in solution_object.species():
-    #    if species.name not in essential_nodes:
-    #        exclusion_list.append(species.name)
-    #return exclusion_list
     return essential_nodes
