@@ -29,7 +29,7 @@ def get_rates(hdf5_file, solution_object):
                         ['CO2'] = 0
     """
 
-    start_time = tm.time()
+
     #read in data file
     f = h5py.File(hdf5_file, 'r')
     #create file for production rates
@@ -39,10 +39,12 @@ def get_rates(hdf5_file, solution_object):
     #iterate through all initial conditions
     total_edge_data = {}
     for grp in f.iterkeys():
+        start_time = tm.time()
         #get solution data at individual timestep
         ic_group = g.create_group(grp.title())
         ic_edge_data = {}
         for tstep in f[grp].iterkeys():
+
             #--------------------------------
             #reading from mass fractions file
             #--------------------------------
