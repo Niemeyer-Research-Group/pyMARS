@@ -256,6 +256,7 @@ def make_graph(solution_object, threshold_value, total_edge_data, target_species
                 except IndexError:
                     print edge
                     continue
+
         #search the compiled graph
         #temporarily input target species
         essential_species = graph_search(graph, target_species)
@@ -265,24 +266,32 @@ def make_graph(solution_object, threshold_value, total_edge_data, target_species
 
         #clear the graph for next individual set
         graph.clear()
+    #specific to nc7h_16_mech.cti
+    #retained_species = ['n2', 'c5h11o2h-2','c5h11o-2','ic4ketit','ic5ketdb','o2c2h4o2h','ch2o2hcho','ch3choohcoch3','ic3h7coc2h5','ic3h6coc2h5','tc3h6coc2h5','ic3h7coc2h4p','ic3h7coc2h4s','ic3h5coc2h5','ac3h4coc2h5','ic3h5coc2h4p','ic3h5coc2h4s','nc6ket26','ar']
 
+    #specific to gri30
+    retained_species = ['n2', 'co2', 'h20']
+    #should also have targets of CH4 and O2
+    for sp in retained_species:
+        if sp not in core_species:
+            core_species.append(sp)
 
     #temporarily performs part of the graph search function, by finding
     #dicsonnected species
     exclusion_list = []
-    print '----core species----'
-    print len(core_species)
-    print '--------------------'
-    print '----solution species-----'
-    print len(solution.species())
-    print '--------------------------'
+    # print '----core species----'
+    # print len(core_species)
+    # print '--------------------'
+    # print '----solution species-----'
+    # print len(solution.species())
+    # print '--------------------------'
     for species in solution.species():
         if species.name not in core_species:
             exclusion_list.append(species.name)
     #return exclusion_list
-    assert 'nc7h16' not in exclusion_list
-    print '----------exclusion list-------'
-    print len(exclusion_list)
-    print '-------------------------------'
-    print 'drg time: %0.5f' %(tm.time() - start_time)
+    # assert 'nc7h16' not in exclusion_list
+    # print '----------exclusion list-------'
+    # print len(exclusion_list)
+    # print '-------------------------------'
+    # print 'drg time: %0.5f' %(tm.time() - start_time)
     return exclusion_list
