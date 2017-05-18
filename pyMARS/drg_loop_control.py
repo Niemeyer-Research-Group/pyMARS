@@ -84,8 +84,7 @@ def drg_loop_control(solution_object, args):
                 print printout
 
         else:
-            #if os.path.exists('mass_fractions.hdf5'):
-            #    os.system('rm mass_fractions.hdf5')
+
             #run DRG and create new reduced solution
             drg = make_graph(solution_object, threshold_values, rate_edge_data, target_species)
             #exclusion_list = graph_search(solution_object, drg, target_species)
