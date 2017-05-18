@@ -18,7 +18,17 @@ def graph_search(nx_graph, target_species):
         String containing names of species to exclude
     """
 
-    essential_nodes = list(nx.dfs_preorder_nodes(nx_graph, target_species))
+    if len(target_species) > 1:
+        essential_nodes = list()
+        for target in target_species:
+            essential = list(nx.dfs_preorder_nodes(nx_graph, target))
+            for sp in essential:
+                if sp not in essential_nodes:
+                    essential_nodes.append(sp)
+    else:
+        essential_nodes = list(nx.dfs_preorder_nodes(nx_graph, target_species[0]))
+
+
     #print len(essential_nodes)
     #exclusion_list = []
     #for species in solution_object.species():
