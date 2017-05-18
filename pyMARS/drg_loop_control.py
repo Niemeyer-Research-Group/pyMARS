@@ -24,7 +24,7 @@ def drg_loop_control(solution_object, args):
             Cantera solution object with skeletal mechanism
         """
     #get user input
-    target_species = str(raw_input('\nEnter target starting species: '))
+    target_species = raw_input('\nEnter target starting species: ').split(',')
 
     #run detailed mechanism and retain initial conditions
     args.multiple_conditions = True
@@ -35,7 +35,6 @@ def drg_loop_control(solution_object, args):
     #get-rate data called here
     #--------------------------
     rate_edge_data = get_rates('mass_fractions.hdf5', solution_object)
-
     if args.threshold_values is None:
         try:
             threshold = float(raw_input('Enter threshold value: '))
@@ -67,31 +66,27 @@ def drg_loop_control(solution_object, args):
             os.system('rm mass_fractions.hdf5')
         except Exception:
             pass
-        if type(threshold_values) is list:
+        if threshold_values.size > 1:
             for threshold in threshold_values:
-                try:
-                    os.system('rm mass_fractions.hdf5')
-                except Exception:
-                    pass
-                print 'thresholds is list'
                 #run DRG and create new reduced solution
                 drg = make_graph(solution_object, threshold, rate_edge_data, target_species)
                 #exclusion_list = graph_search(solution_object, drg, target_species)
-
+                exclusion_list = drg
                 new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
                 species_retained.append(len(new_solution_objects[1].species()))
-
+                os.system('rm mass_fractions.hdf5')
                 #simulated reduced solution
                 reduced_result = autoignition_loop_control(new_solution_objects[1], args)
                 reduced_result.test.close()
                 ignition_delay_reduced = np.array(reduced_result.tau_array)
                 error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
                 printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
+                print printout
+
         else:
             #if os.path.exists('mass_fractions.hdf5'):
             #    os.system('rm mass_fractions.hdf5')
             #run DRG and create new reduced solution
-            print 'thresholds not list'
             drg = make_graph(solution_object, threshold_values, rate_edge_data, target_species)
             #exclusion_list = graph_search(solution_object, drg, target_species)
             exclusion_list = drg
@@ -105,8 +100,8 @@ def drg_loop_control(solution_object, args):
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
             printout += str(threshold_values) + '        ' + str(len(new_solution_objects[1].species())) + '        '+  str(np.max(error)) + '\n'
         print printout
-        print 'Detailed soln ign delay:'
-        print ignition_delay_detailed
-        print 'Reduced soln ign delay:'
-        print ignition_delay_reduced
+        # print 'Detailed soln ign delay:'
+        # print ignition_delay_detailed
+        # print 'Reduced soln ign delay:'
+        # print ignition_delay_reduced
     return new_solution_objects
