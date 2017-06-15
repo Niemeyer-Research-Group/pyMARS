@@ -36,7 +36,6 @@ def make_graph(solution_object, threshold_value, total_edge_data, target_species
     ri_total = {}
     ri_partial = {}
     error_list = {}
-    first_iteration = True
     core_species = []
 
     #calculate edge weights based on list received from get_rate_data
@@ -54,8 +53,9 @@ def make_graph(solution_object, threshold_value, total_edge_data, target_species
                     edge_name = edge.split('_', 1)
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
+                    #dge weight between two species
                     weight = abs(float(numerator[edge])/float(denominator[species_a_name]))
-                    #only add edge if > than edge value from previous timesteps
+                    #only add edge if greater than edge value from previous timesteps
                     if weight >= threshold_value:
                         #print weight
                         if graph.has_edge(species_a_name, species_b_name):

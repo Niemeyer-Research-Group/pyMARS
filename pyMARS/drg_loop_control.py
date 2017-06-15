@@ -80,7 +80,7 @@ def drg_loop_control(solution_object, args):
                 reduced_result.test.close()
                 ignition_delay_reduced = np.array(reduced_result.tau_array)
                 error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-                printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(np.max(error)) + '\n'
+                printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(round(np.max(error), 2))+'%' + '\n'
                 print printout
 
         else:
@@ -97,7 +97,7 @@ def drg_loop_control(solution_object, args):
             reduced_result.test.close()
             ignition_delay_reduced = np.array(reduced_result.tau_array)
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-            printout += str(threshold_values) + '        ' + str(len(new_solution_objects[1].species())) + '        '+  str(np.max(error)) + '\n'
+            printout += str(threshold_values) + '        ' + str(len(new_solution_objects[1].species())) + '        '+  str(round(np.max(error), 2)) +'%' + '\n'
         print printout
         # print 'Detailed soln ign delay:'
         # print ignition_delay_detailed
