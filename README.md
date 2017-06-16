@@ -19,9 +19,12 @@ See the following publications for more detail:
 
 Usage
 -----
-To install: '''sudo python setup.py install'''
-Called from terminal via '''pyMARS --args'''
-example: '''pyMARS --file=gri30.cti --run_drg --conditions=example_input.txt --thresholds=example_thresholds.txt'''
+To install:
+     `sudo python setup.py install`
+Called from terminal via
+`pyMARS --args`
+example:
+    `pyMARS --file=gri30.cti --run_drg --conditions=example_input.txt --thresholds=example_thresholds.txt`
 
 
 Options
