@@ -13,7 +13,7 @@ test parameters:
 
 import os
 import cantera as ct
-from .. import convert_chemkin_file
+from pyMARS import convert_chemkin_file
 
 
 

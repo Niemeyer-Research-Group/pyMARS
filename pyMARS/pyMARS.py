@@ -59,7 +59,6 @@ def readin(args='none', **argv):
             thermo_file = args.thermo
             transport_file = args.transport
             run_drg = args.run_drg
-            multiple_conditions = True
             threshold_values = args.thresholds
             conditions_file = args.conditions
             convert = args.convert
@@ -99,3 +98,7 @@ def readin(args='none', **argv):
 
     else:
         print("\n\nFile type not supported")
+    #if os.path.exists('mass_fractions.hdf5'):
+    #    os.system('rm mass_fractions.hdf5')
+    #if os.path.exists('production_rates.hdf5'):
+        #os.system('rm production_rates.hdf5')

@@ -41,39 +41,23 @@ def test(original_file, new_file):
 
             assert original_species.thermo.coeffs.all() == new_species.thermo.coeffs.all()
 
-            try:
-                assert original_species.transport.geometry == new_species.transport.geometry
-            except AttributeError:
-                pass
+            assert original_species.transport.geometry == new_species.transport.geometry
 
-            try:
-                assert original_species.transport.diameter == new_species.transport.diameter
-            except AttributeError:
-                pass
+            assert original_species.transport.diameter == new_species.transport.diameter
 
-            try:
-                assert original_species.transport.well_depth == new_species.transport.well_depth
-            except AttributeError:
-                pass
+            assert original_species.transport.well_depth == new_species.transport.well_depth
 
-            try:
-                assert original_species.transport.polarizability == new_species.transport.polarizability
-            except AttributeError:
-                pass
-            try:
-                assert original_species.transport.rotational_relaxation == new_species.transport.rotational_relaxation
-            except AttributeError:
-                pass
+            assert original_species.transport.polarizability == new_species.transport.polarizability
 
-            try:
-                assert original_species.transport.dipole == new_species.transport.dipole
-            except AttributeError:
-                pass
+            assert original_species.transport.rotational_relaxation == new_species.transport.rotational_relaxation
 
-        print ('done with testing species definition into \n\n\n')
+            assert original_species.transport.dipole == new_species.transport.dipole
+
+        print ('done with testing species definition info \n\n\n')
     def test_reactions():
         c=4184.0
         num = 0
+        print 'Any errors shown below:\n'
         for k, name1 in enumerate(new.reaction_equations()):
             num += 1
             new_reaction=new.reaction(k)
@@ -88,10 +72,13 @@ def test(original_file, new_file):
                 if new_reaction.rate.pre_exponential_factor != original_reaction.rate.pre_exponential_factor:
                     #if new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor > .004:
                     print (k, (new_reaction.rate.pre_exponential_factor/ original_reaction.rate.pre_exponential_factor), new_reaction.reaction_type, new_reaction.rate.temperature_exponent, (new_reaction.rate.activation_energy/c) , new_reaction )
-            except AttributeError:
-                pass
+            except AttributeError as e:
+                if str(e) == '\'cantera._cantera.FalloffReaction\' object has no attribute \'rate\'':
+                    continue
+
+
             #assert new_reaction.efficiencies == original_reaction.efficiencies
-        print ('done with testing equation info ')
+        print ('\ndone with testing equation info ')
     test_species_def()
     test_reactions()
 

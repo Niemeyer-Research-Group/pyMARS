@@ -1,10 +1,11 @@
 import networkx as nx
 import numpy as np
 import h5py
-import matplotlib.pyplot as plt
+from collections import Counter
 from graph_search import graph_search
+import time as tm
 
-def make_graph(solution_object, hdf5_file, threshold_value):
+def make_graph(solution_object, threshold_value, total_edge_data, target_species):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
         species and their edge-weights above a certain threshold value
 
@@ -22,9 +23,7 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     exclusion_list : list
         List of species to trim from mechanism
     """
-
-    rate_file = h5py.File(hdf5_file, 'r')
-
+    start_time = tm.time()
     #initalize solution and components
     solution = solution_object
     species_objects = solution.species()
@@ -37,76 +36,63 @@ def make_graph(solution_object, hdf5_file, threshold_value):
     ri_total = {}
     ri_partial = {}
     error_list = {}
-    first_iteration = True
-    #iterate through each timestep
-    for timestep, data_group in rate_file.iteritems():
-        rxn_prod_rates = np.array(data_group['Reaction Production Rates'])
-        #generate dict of sum production Rates
-        if first_iteration:
-            for species in species_objects:
-                ri_total[species.name] = 0
-            for pre_defined_edge in ri_partial:
-                try:
-                    ri_partial[str(pre_defined_edge)] = 0.0
-                except Exception:
-                    continue
-            first_iteration = False
-        #build weights
-        for reaction_number, reaction in enumerate(reaction_objects):
-            reaction_production_rate = float(rxn_prod_rates[reaction_number])
-            products = reaction.products
-            reactants = reaction.reactants
-            #generate list of all species
-            all_species = reaction.products
-            all_species.update(reaction.reactants)
-            for species_a in reactants:
-                if species_a in products:
-                    if reactants[species_a] != products[species_a]:
-                        error_list[reaction] = [reaction_number, reactants[species_a], products[species_a]]
-            if reaction_production_rate != 0:
-                for species_a in all_species:
-                    molar_coeff_A = float(all_species[species_a])
-                    #this is denominator
-                    ri_total[species_a] += abs(reaction_production_rate* molar_coeff_A)
-                    for species_b in all_species:
-                        partial_name = species_a + '_' + species_b
-                        if species_a == species_b:
-                            continue
-                        #this is numerator
-                        try:
-                            ri_partial[partial_name] += abs((reaction_production_rate*molar_coeff_A))
-                        except KeyError:
-                            ri_partial[partial_name] = abs((reaction_production_rate*molar_coeff_A))
+    core_species = []
 
-        #divide progress related to species B by total progress
-        #and make edge
-        for edge in ri_partial:
-            try:
-                edge_name = edge.split('_', 1)
-                species_a_name = edge_name[0]
-                species_b_name = edge_name[1]
+    #calculate edge weights based on list received from get_rate_data
+    #initial condition
+    for ic in total_edge_data.iterkeys():
+        for species in species_objects:
+            graph.add_node(species.name)
+        #timestep
+        for tstep in total_edge_data[ic].iterkeys():
+            numerator = total_edge_data[ic][tstep][2]
+            denominator = total_edge_data[ic][tstep][1]
+            #each species
+            for edge in numerator:
                 try:
-                    weight = abs(float(ri_partial[edge])/float(ri_total[species_a_name]))
-                except ZeroDivisionError:
-                    if ri_partial > 0.001:
-                        continue
-                    else:
-                        continue
-                #only add edge if > than edge value from previous timesteps
-                if weight >= threshold_value:
-                    if graph.has_edge(species_a_name, species_b_name):
-                        old_weight = graph[species_a_name][species_b_name]['weight']
-                        if weight > old_weight:
+                    edge_name = edge.split('_', 1)
+                    species_a_name = edge_name[0]
+                    species_b_name = edge_name[1]
+                    #dge weight between two species
+                    weight = abs(float(numerator[edge])/float(denominator[species_a_name]))
+                    #only add edge if greater than edge value from previous timesteps
+                    if weight >= threshold_value:
+                        #print weight
+                        if graph.has_edge(species_a_name, species_b_name):
+                            old_weight = graph[species_a_name][species_b_name]['weight']
+                            if weight > old_weight:
+                                graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
+                        else:
                             graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-                    else:
-                        graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-            except IndexError:
-                print edge
-                continue
+                except IndexError:
+                    print edge
+                    continue
 
-    rate_file.close()
+        #search the compiled graph
+        #temporarily input target species
+        essential_species = graph_search(graph, target_species)
+        for sp in essential_species:
+            if sp not in core_species:
+                core_species.append(sp)
 
-    if len(error_list) != 0:
-        print 'error list'
-        print error_list
-    return graph
+        #clear the graph for next individual set
+        graph.clear()
+    #specific to nc7h_16_mech.cti
+    #retained_species = ['n2', 'c5h11o2h-2','c5h11o-2','ic4ketit','ic5ketdb','o2c2h4o2h','ch2o2hcho','ch3choohcoch3','ic3h7coc2h5','ic3h6coc2h5','tc3h6coc2h5','ic3h7coc2h4p','ic3h7coc2h4s','ic3h5coc2h5','ac3h4coc2h5','ic3h5coc2h4p','ic3h5coc2h4s','nc6ket26','ar']
+
+    #specific to gri30
+    retained_species = ['n2', 'co2', 'h20']
+    #should also have targets of CH4 and O2
+    for sp in retained_species:
+        if sp not in core_species:
+            core_species.append(sp)
+
+    #temporarily performs part of the graph search function, by finding
+    #dicsonnected species
+    exclusion_list = []
+
+    for species in solution.species():
+        if species.name not in core_species:
+            exclusion_list.append(species.name)
+
+    return exclusion_list

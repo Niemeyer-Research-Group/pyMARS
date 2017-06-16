@@ -3,7 +3,6 @@ import cantera as ct
 import os
 
 parent_dir=os.path.dirname(os.getcwd())
-print(parent_dir)
 
 
 def test_solution_object():
