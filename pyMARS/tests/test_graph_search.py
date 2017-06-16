@@ -23,7 +23,7 @@ subgraph = nx.DiGraph([(u,v,d) for u,v,d in graph.edges(data=True) if d['weight'
 
 #temporary solution
 soln = ct.Solution('pym_gri30.cti')
-essential_nodes = graph_search.graph_search(soln, subgraph, 'A')
+essential_nodes = graph_search.graph_search(subgraph, 'A')
 
 assert 'A' in essential_nodes
 assert [n in essential_nodes for n in ['A', 'C', 'D', 'I', 'O', 'F', 'E', 'H']]
