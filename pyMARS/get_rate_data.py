@@ -192,7 +192,7 @@ def get_rates(hdf5_file, solution_object):
 
             ic_edge_data[tstep] = [list_A, list_B, list_C]
         total_edge_data[grp.title()] = ic_edge_data
-        print 'get_rate_data time: %0.5f'   %(tm.time()-start_time)
+        #print 'get_rate_data time: %0.5f'   %(tm.time()-start_time)
 
     g.close()
     f.close()

@@ -205,7 +205,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             self.Temp = initial_temperature
             self.frac = frac
             self.tau_array = []
-    print 'autoignition time: %0.5f'    %(tm.time()-func_start_time)
+    #print 'autoignition time: %0.5f'    %(tm.time()-func_start_time)
     return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"

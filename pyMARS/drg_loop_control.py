@@ -56,16 +56,21 @@ def drg_loop_control(solution_object, args):
         #get_error()
         n_species_retained = len(new_solution_objects[1].species())
         print 'Number of species in reduced model: %s' %n_species_retained
-        os.system('rm mass_fractions.hdf5')
+        try:
+            os.system('rm mass_fractions.hdf5')
+        except Exception:
+            pass
     else:
         threshold_values = genfromtxt(args.threshold_values, delimiter=',')
         species_retained = []
         printout = ''
         print 'Threshold     Species in Mech      Error'
+        print 'flag'
         try:
             os.system('rm mass_fractions.hdf5')
         except Exception:
             pass
+
         if threshold_values.size > 1:
             for threshold in threshold_values:
                 #run DRG and create new reduced solution
@@ -74,13 +79,16 @@ def drg_loop_control(solution_object, args):
                 exclusion_list = drg
                 new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
                 species_retained.append(len(new_solution_objects[1].species()))
-                os.system('rm mass_fractions.hdf5')
+                try:
+                    os.system('rm mass_fractions.hdf5')
+                except Exception:
+                    pass
                 #simulated reduced solution
                 reduced_result = autoignition_loop_control(new_solution_objects[1], args)
                 reduced_result.test.close()
                 ignition_delay_reduced = np.array(reduced_result.tau_array)
                 error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-                printout += str(threshold) + '  ' + str(len(new_solution_objects[1].species())) + '  '+  str(round(np.max(error), 2))+'%' + '\n'
+                printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2))+'%' + '\n'
                 print printout
 
         else:
@@ -97,8 +105,8 @@ def drg_loop_control(solution_object, args):
             reduced_result.test.close()
             ignition_delay_reduced = np.array(reduced_result.tau_array)
             error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-            printout += str(threshold_values) + '        ' + str(len(new_solution_objects[1].species())) + '        '+  str(round(np.max(error), 2)) +'%' + '\n'
-        print printout
+            printout += str(threshold_values) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+            print printout
         # print 'Detailed soln ign delay:'
         # print ignition_delay_detailed
         # print 'Reduced soln ign delay:'
