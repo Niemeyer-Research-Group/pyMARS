@@ -1,5 +1,7 @@
-pyMARS
-===============
+# pyMARS
+
+[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Python-based (chemical kinetic) Model Automatic Reduction Software (MARS), which consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.
 
@@ -17,23 +19,22 @@ See the following publications for more detail:
  * KE Niemeyer and CJ Sung. Mechanism reduction for multicomponent surrogates: A case study using toluene reference fuels.  *Combust. Flame*, in press, 2014. doi:[10.1016/j.combustflame.2014.05.001](http://dx.doi.org/10.1016/j.combustflame.2014.05.001)
  * TF Lu and CK Law. *Combustion and Flame*, 154:153--163, 2008. doi:[10.1016/j.combustflame.2007.11.013](http://dx.doi.org/10.1016/j.combustflame.2007.11.013)
 
-Usage
------
+## Usage
+
 To install:
-     `sudo python setup.py install`
-Called from terminal via
-`pyMARS --args`
+     `python setup.py install`
+
+pyMARS is called from terminal via `pyMARS --args`
+
 example:
     `pyMARS --file=gri30.cti --run_drg --conditions=example_input.txt --thresholds=example_thresholds.txt`
 
 
-Options
--------
+## Options
 
 
 
-License
--------
+## License
 
 pyMARS is released under the MIT license, see LICENSE for details.
 
@@ -43,7 +44,8 @@ If you use this package as part of a scholarly publication, please cite the foll
  * KE Niemeyer and CJ Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. *Combust. Flame*, 158(8):1439--1443, 2011. doi:[10.1016/j.combustflflame.2010.12.010](http://dx.doi.org/10.1016/j.combustflflame.2010.12.010).
  * KE Niemeyer and CJ Sung. Mechanism reduction for multicomponent surrogates: A case study using toluene reference fuels.  *Combust. Flame*, in press, 2014. doi:[10.1016/j.combustflame.2014.05.001](http://dx.doi.org/10.1016/j.combustflame.2014.05.001)
 
-Authors
--------
-Kyle E. Niemeyer, Oregon State University
-[Kyle.Niemeyer@oregonstate.edu](mailto:Kyle.Niemeyer@oregonstate.edu)
+## Code of Conduct
+
+In order to have a more open and welcoming community, pyMARS adheres to a code of conduct adapted from the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+
+Please adhere to this code of conduct in any interactions you have in the pyMARS community. It is strictly enforced on all official PyKED repositories, websites, and resources. If you encounter someone violating these terms, please let the project lead (@kyleniemeyer) know via email at <kyle.niemeyer@gmail.com>) know and we will address it as soon as possible.
