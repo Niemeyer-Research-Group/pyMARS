@@ -21,9 +21,14 @@ def main(args=None):
             Text file of initial conditions for autoignition
         thresholds :
             csv file containing threshold values to test (usr prompted otherwise)
+	error:
+	    A float representing the maximum ammount of error allowed to be introcued to the model (0-100).
         run_drg :
             Run Direct Relation Graphing model reduction based on
             a given threshold value
+        run_drgep :
+            Run Direct Relation Graphing with Error Propogation model reduction based on
+            a given allowed error.
 
         plot :
             Plot a temperature profile of autoignition
@@ -46,7 +51,7 @@ def main(args=None):
                         type=str)
 
     parser.add_argument('--species',  \
-                        help='comma separated list input of species to exclude',\
+                        help='comma separated list input of species to never exclude',\
                         type=str)
 
     parser.add_argument('--thermo', \
@@ -79,9 +84,17 @@ def main(args=None):
                         help='csv file containing threshold values to test (usr prompted otherwise)', \
                         type=str)
     parser.add_argument('--convert', \
-                        help='Only conver selected file from .cti <====> .inp', \
+                        help='Only convet selected file from .cti <====> .inp', \
                         action="store_true")
-
+    parser.add_argument('--run_drgep', \
+			help='run Direct Relation Graph with Error Propigation method to reduce', \
+			action="store_true")
+    parser.add_argument('--error', \
+                        help='Maximum allowed error indtroducted by the reduced simulation', \
+                        type=float)
+    parser.add_argument('--target', \
+			help='target species for the model reduction.  Comma seperated list.', \
+			type=str)
 
     args=parser.parse_args()
     if args.file is not None:
@@ -108,7 +121,7 @@ def main(args=None):
             --transport:
                 Transport data file if Chemkin format
             --species:
-                Specific species to eliminate (ex. --species='H, OH')
+                Specific species to not eliminate (ex. --species='H, OH')
             --plot:
                 Plot a temperature profile of autoignition
             --points:
@@ -117,6 +130,14 @@ def main(args=None):
                 Write autoignition data to a csv file
             --writehdf5:
                 Write autoignition to a hdf5 file
+            --run_drgep :
+                Run Direct Relation Graphing with Error Propogation model reduction based on
+                a given allowed error.
+	    --error:
+	        A float representing the maximum ammount of error allowed to be introcued to the model (0-100).
+	    --target:
+		Comma seperated list of species to use as targets for model reduction.
 
 
         """
+main()

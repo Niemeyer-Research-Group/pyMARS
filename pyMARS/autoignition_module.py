@@ -100,6 +100,10 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
         species_production_rates = reactor.kinetics.net_production_rates
+	try:
+            net_rates_of_progress = reactor.kinetics.net_rates_of_progress
+	except Exception:
+	    return 0
         net_rates_of_progress = reactor.kinetics.net_rates_of_progress
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Reaction Rates of Progress', data=net_rates_of_progress)

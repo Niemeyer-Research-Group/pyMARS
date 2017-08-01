@@ -57,6 +57,8 @@ def autoignition_loop_control(solution_object, args):
     if args.multiple_conditions is True:
         for condition in conditions_array:
             sim_result = run_sim(solution_object, condition, args)
+	    if (sim_result == 0):
+	        return 0
             initial_temperature_array.append(condition.temperature)
             try:
                 tau_array.append(sim_result.tau)

@@ -132,7 +132,9 @@ def get_rates(hdf5_file, solution_object):
             list_B = {}
             list_C = {}
             for spc in new_solution.species():
-                list_B[spc.name] = 0
+                list_B[spc.name] = []
+		list_B[spc.name].append(0)
+		list_B[spc.name].append(0)
             #calculate species production rates as in the DRG. I've proven this method
             #to work in a few other test functions
             for i, reac in enumerate(new_solution.reactions()):
@@ -142,46 +144,44 @@ def get_rates(hdf5_file, solution_object):
                 all_species = reac.reactants
                 all_species.update(reac.products)
                 if reac_prod_rate != 0:
-                    if reac_prod_rate > 0:
+		    if reac_prod_rate > 0:
                         for species in products:
-                            list_B[species] += abs(float(reac_prod_rate*products[species]))
-
+                            list_B[species][0] += abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
                                 if species_b != species:
                                     partial_name = species + '_' + species_b
                                     if partial_name in list_C:
-                                        list_C[partial_name] += abs(float(reac_prod_rate*products[species]))
+                                        list_C[partial_name] += float(reac_prod_rate*products[species])
                                     else:
-                                        list_C[partial_name] = abs(float(reac_prod_rate*products[species]))
+                                        list_C[partial_name] = float(reac_prod_rate*products[species])
                         for species in reactants:
-                            list_B[species] += abs(float(-reac_prod_rate*reactants[species]))
+                            list_B[species][1] += abs(float(reac_prod_rate*reactants[species]))
                             for species_b in all_species:
                                 if species_b != species:
                                     partial_name = species + '_' + species_b
                                     if partial_name in list_C:
-                                        list_C[partial_name] += abs(float(-reac_prod_rate*reactants[species]))
+                                        list_C[partial_name] += float(-reac_prod_rate*reactants[species])
                                     else:
-                                        list_C[partial_name] = abs(float(-reac_prod_rate*reactants[species]))
+                                        list_C[partial_name] = float(-reac_prod_rate*reactants[species])
                     if reac_prod_rate < 0:
                         for species in products:
-                            list_B[species] += float(reac_prod_rate*products[species])
+                            list_B[species][1] += abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
                                 if species_b != species:
                                     partial_name = species + '_' + species_b
                                     if partial_name in list_C:
-                                        list_C[partial_name] += abs(float(reac_prod_rate*products[species]))
+                                        list_C[partial_name] += float(reac_prod_rate*products[species])
                                     else:
-                                        list_C[partial_name] = abs(float(reac_prod_rate*products[species]))
+                                        list_C[partial_name] = float(reac_prod_rate*products[species])
                         for species in reactants:
-                            list_B[species] += float(-reac_prod_rate*reactants[species])
-
+                            list_B[species][0] += abs(float(reac_prod_rate*reactants[species]))
                             for species_b in all_species:
                                 if species_b != species:
                                     partial_name = species + '_' + species_b
                                     if partial_name in list_C:
-                                        list_C[partial_name] += abs(float(-reac_prod_rate*reactants[species]))
+                                        list_C[partial_name] += float(-reac_prod_rate*reactants[species])
                                     else:
-                                        list_C[partial_name] = abs(float(-reac_prod_rate*reactants[species]))
+                                        list_C[partial_name] = float(-reac_prod_rate*reactants[species])
             # for blah in list_A:
             #     if abs(float(list_A[blah].value) - np.float64(list_B[blah])) > .0001:
             #         print '--------//------'
@@ -189,7 +189,13 @@ def get_rates(hdf5_file, solution_object):
             #         print list_A[blah] - list_B[blah]
             #         print '--------//-------'
             #         print '---------------'
-
+	    for species in new_solution.species():
+	        if abs(list_B[species.name][0]) > abs(list_B[species.name][1]):
+	            list_B[species.name] = abs(list_B[species.name][0])
+	        else:
+	            list_B[species.name] = abs(list_B[species.name][1])
+	    for name in list_C:
+		list_C[name] = abs(list_C[name])
             ic_edge_data[tstep] = [list_A, list_B, list_C]
         total_edge_data[grp.title()] = ic_edge_data
         #print 'get_rate_data time: %0.5f'   %(tm.time()-start_time)
