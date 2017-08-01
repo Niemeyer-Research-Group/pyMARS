@@ -9,7 +9,7 @@ from numpy import genfromtxt
 import numpy as np
 
 def drgep_loop_control(solution_object, args, stored_error, threshold, done, graph):
-    """ Controls repeated use of drg Function
+    """ Controls the trimming and error calculation of a solution with the graph already created using the DRGEP method.   
 
         Parameters
         ----------

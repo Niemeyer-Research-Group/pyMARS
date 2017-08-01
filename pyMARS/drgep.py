@@ -34,8 +34,8 @@ def make_graph_drgep(solution_object, threshold_value, total_edge_data, target_s
     reaction_objects = solution.reactions()
     graph = nx.DiGraph() #Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
 
-    #add nodes to graph
-    for species in species_objects:
+    #add nodes for all species to graph
+    for species in species_objects: 
         graph.add_node(species.name)
     ri_total = {}
     ri_partial = {}
@@ -44,7 +44,7 @@ def make_graph_drgep(solution_object, threshold_value, total_edge_data, target_s
 
     #calculate edge weights based on list received from get_rate_data
     #initial condition
-    for ic in total_edge_data.iterkeys():
+    for ic in total_edge_data.iterkeys(): 
         for species in species_objects:
             graph.add_node(species.name)
         #timestep

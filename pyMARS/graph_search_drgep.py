@@ -28,13 +28,13 @@ def graph_search_drgep(nx_graph, target_species, threshold, species,done):
     essential_nodes = []
     for target in target_species:
         dic = ss_dijkstra_path_length_modified(nx_graph, target) #Get dictionary of each values maximum path
-        for sp in species:
-	    if sp.name in dic:
+        for sp in species: 
+	    if sp.name in dic: #For all species in the dictionary, if the greatest path to them is greater than the threshold, add them to the essential species list.
                 if dic[sp.name] > threshold and sp not in essential_nodes:
                     essential_nodes.append(sp)
 	done[0] = True
 	for sp in species:
-	    if sp.name in dic:
+	    if sp.name in dic: #If more could be cut out in the future, set done to false.  
       	        if dic[sp.name] > threshold:
 	            done[0] = False
     return essential_nodes
