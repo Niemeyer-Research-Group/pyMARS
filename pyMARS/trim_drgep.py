@@ -83,20 +83,22 @@ def trim_drgep(args, solution_object):
 	sol_new = solution_object
 	past = 0 #An integer representing the error introduced in the past simulation.  
 	done[0] = False
-	while error[0] < args.error and (not done[0]): #Run the simulation until the error is too great.
-		sol_saved = sol_new #Store previous simulation.
+        max_error = 0
+	while not done[0]: #Run the simulation until nothing else can be cut. 
+        	sol_new = drgep_loop_control( solution_object, args, error, threshold, done, max_dic) #Trim at this threshold value and calculate error.
+                if args.error > error[0] and error[0] > max_error: #If a new max errow without exceeding what is allowed is reached, save those values.  
+                        max_t = threshold
+			max_error = error[0]
 		if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
 			threshold = threshold + .04
 		past = error[0]
-        	sol_new = drgep_loop_control( solution_object, args, error, threshold, done, max_dic) #Trim at this threshold value and calculate error. 
         	threshold = threshold + .01
-	
+        
+        print "\nGreatest result: "
+        sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic)
 	os.system('rm production_rates.hdf5')
 	os.system('rm mass_fractions.hdf5')
-	if error[0] < args.error:
-		drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
-	else:
-		drgep_trimmed_file = soln2cti.write(sol_saved) #If the error doesn't go over the allowed limit, use the new one.
+	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
 	try:
 		os.system('rm production_rates.hdf5')
 	except Exception:
