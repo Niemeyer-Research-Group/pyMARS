@@ -1,8 +1,7 @@
 from create_trimmed_model import trim
 from autoignition_loop_control import autoignition_loop_control
 from get_rate_data import get_rates
-from drgep import make_graph_drgep
-from drgep import run_drgep
+from drgep import trim_drgep
 import os
 from get_error import get_error
 from numpy import genfromtxt
@@ -48,7 +47,7 @@ def drgep_loop_control(solution_object, args, stored_error, threshold, done, max
     except Exception:
         pass
     #run DRG and create new reduced solution
-    drgep = run_drgep(max_dic, solution_object, threshold, args.keepers, done) #Find out what to cut from the model
+    drgep = trim_drgep(max_dic, solution_object, threshold, args.keepers, done) #Find out what to cut from the model
     exclusion_list = drgep
     new_solution_objects = trim(solution_object, exclusion_list, args.data_file) #Cut the exclusion list from the model.
     species_retained.append(len(new_solution_objects[1].species()))

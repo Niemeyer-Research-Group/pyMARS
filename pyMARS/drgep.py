@@ -5,7 +5,7 @@ from collections import Counter
 from graph_search_drgep import graph_search_drgep
 import time as tm
 
-def make_graph_drgep(solution_object, total_edge_data, target_species):
+def make_dic_drgep(solution_object, total_edge_data, target_species):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
         species and their edge-weights above a certain threshold value
 
@@ -83,7 +83,7 @@ def make_graph_drgep(solution_object, total_edge_data, target_species):
     return max_dic
  
 
-def run_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
+def trim_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
     """ Use the dictionary created by the drgep method to determine what should
         be cut out of the model at a specific threshold value.         
 

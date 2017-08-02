@@ -11,10 +11,8 @@ from drg import make_graph
 from drg_loop_control import drg_loop_control
 from drgep_loop_control import drgep_loop_control
 from autoignition_loop_control import autoignition_loop_control
-from drgep import make_graph_drgep
-from drgep import run_drgep
 import numpy as np
-from trim_drgep import trim_drgep
+from run_drgep import run_drgep
 
 def readin(args='none', **argv):
     """Main function for pyMARS
@@ -120,7 +118,7 @@ def readin(args='none', **argv):
             soln2ck.write(solution_object)
 	
 	if args.run_drgep is True: #If the user wants to run drgep and specifies it as a command line argument.
-		trim_drgep(args, solution_object)
+		run_drgep(args, solution_object)
 
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")
