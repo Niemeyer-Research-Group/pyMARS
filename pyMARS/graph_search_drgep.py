@@ -3,8 +3,8 @@ import cantera as ct
 import h5py
 from dijkstra import ss_dijkstra_path_length_modified
 
-def graph_search_drgep(nx_graph, target_species, threshold, species,done):
-    """Search nodal graph and generate list of species to exclude
+def graph_search_drgep(nx_graph, target_species):
+    """Search nodal graph and generate a dictionary of the greatest paths to all species from one of the targets.  
 
     Parameters
     ----------
@@ -12,29 +12,19 @@ def graph_search_drgep(nx_graph, target_species, threshold, species,done):
         networkx graph object of solution\
     target_species : list
         List of target species to search from
-    threshold: float
-	The threshold for when to cut species out of the solution.
-    species: list
-	A list of the species in the model.
-    done: singleton
-	A singleton boolean value that represents wether the graph has more species on it that have not been cut out or not.  
-
+    
     Returns
     -------
-    essential_nodes : str
-        String containing names of essential species
+    max_dic : dictionary
+        Values of the greatest possible path to each species from one of the targets on this graph keyed by species name.  
     """
 
-    essential_nodes = []
-    for target in target_species:
+    max_dic = {} #A dictionary holding the maximum path to each species.  
+    for target in target_species: 
         dic = ss_dijkstra_path_length_modified(nx_graph, target) #Get dictionary of each values maximum path
-        for sp in species: 
-	    if sp.name in dic: #For all species in the dictionary, if the greatest path to them is greater than the threshold, add them to the essential species list.
-                if dic[sp.name] > threshold and sp not in essential_nodes:
-                    essential_nodes.append(sp)
-	done[0] = True
-	for sp in species:
-	    if sp.name in dic: #If more could be cut out in the future, set done to false.  
-      	        if dic[sp.name] > threshold:
-	            done[0] = False
-    return essential_nodes
+        for sp in dic:    #If the species are not in the max dictionary or the new value for that species is greater than the one in the max dictionary, add it to the max dictionary.  
+	    if sp not in max_dic:                                                                                                                                         
+                max_dic[sp] = dic[sp]
+	    elif max_dic[sp] < dic[sp]:
+                max_dic[sp] = dic[sp]
+    return max_dic

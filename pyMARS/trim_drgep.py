@@ -71,13 +71,13 @@ def trim_drgep(args, solution_object):
 	detailed_result.test.close()
 	ignition_delay_detailed = np.array(detailed_result.tau_array)
 	rate_edge_data = get_rates('mass_fractions.hdf5', solution_object) #Get edge weight calculation data. 
-	graph = make_graph_drgep(solution_object, threshold, rate_edge_data, args.target, done) #Make the graph
+	max_dic = make_graph_drgep(solution_object, rate_edge_data, args.target) #Make the graph
 	
 	print "Testing for starting threshold value"
-	drgep_loop_control(solution_object, args, error, threshold, done, graph) #Trim the solution at that threshold and find the error.
+	drgep_loop_control(solution_object, args, error, threshold, done, max_dic) #Trim the solution at that threshold and find the error.
 	while error[0] > args.error: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
-		drgep_loop_control(solution_object, args, error, threshold, done, graph )
+		drgep_loop_control(solution_object, args, error, threshold, done, max_dic)
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
@@ -88,7 +88,7 @@ def trim_drgep(args, solution_object):
 		if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
 			threshold = threshold + .04
 		past = error[0]
-        	sol_new = drgep_loop_control( solution_object, args, error, threshold, done, graph) #Trim at this threshold value and calculate error. 
+        	sol_new = drgep_loop_control( solution_object, args, error, threshold, done, max_dic) #Trim at this threshold value and calculate error. 
         	threshold = threshold + .01
 	
 	os.system('rm production_rates.hdf5')
