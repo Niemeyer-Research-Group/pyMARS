@@ -3,11 +3,14 @@ import numpy as np
 import cantera as ct
 import os
 from get_sample_range import get_range
+from get_sample_range_drgep import get_range_drgep
 import h5py
 import time as tm
+import matplotlib
+matplotlib.use("Agg")
 
 
-def run_sim(solution_object, condition, sys_args='none', **usr_args ):
+def run_sim(solution_object, condition, sys_args='none', **usr_args):
     """
     Function to run Cantera reactor simulation for autoigntion conditions
 
@@ -60,15 +63,15 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]
-    solution.TPX = initial_temperature, pressure, frac #101.325 kPa
+    solution.TPX = initial_temperature, pressure, frac #101325 Pa
     species = solution.species()
     reactions = solution.reactions()
 
     #run sim to find ignition delay from dT/dt max
-    reactor = ct.Reactor(solution)
+    reactor = ct.IdealGasReactor(solution)
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
-    stop_time = 5.0e-3
+    stop_time = 25
     group_index = 0
     times1 = []
     temps = [] #first column is time, second is temperature
@@ -116,13 +119,14 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         production_rates = production_rates[:, np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
 
-    sample = get_range(times1, temps, sdata, production_data)
+    #sample = get_range(times1, temps, sdata, production_data)
+    sample = get_range_drgep(times1, temps, sdata, production_data)
     timer_stop = tm.time()
 
 
     #strips all data except that within a 40 point sample range around ignition
     for grp in f1[group_name].keys():
-        if int(grp) not in range((sample.index-20), (sample.index+20)):
+        if int(grp) not in sample.index:
             f1[group_name].__delitem__(str(grp))
 
     #f1.close()
@@ -132,18 +136,19 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         import matplotlib.pyplot as plt
         plt.clf()
         #plot combustion point
-        plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label='ignition point')
+        #plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label='ignition point')
         #plot initial and final sample points
-        plt.plot(sample.initial_point[0], sample.initial_point[1], 'rx', ms=5, mew=2)
-        plt.plot(sample.final_point[0], sample.final_point[1], 'rx', ms=5, mew=2)
+        #plt.plot(sample.initial_point[0], sample.initial_point[1], 'rx', ms=5, mew=2)
+        #plt.plot(sample.final_point[0], sample.final_point[1], 'rx', ms=5, mew=2)
         #plot temp vs time
         plt.plot(sample.times_total, sample.temps_total)
         plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
         plt.legend()
         plt.ylabel('Temperature (C)')
-        #plt.axis([0, 1.2, 900, 2800])
-        plt.show()
+        plt.axis([0, .1, 1000, 3000])
+        plt.savefig("fig.png", bbox_inches='tight')
+	plt.close()
 
     def writecsv(sdata):
 
@@ -199,7 +204,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             writehdf5(sample.species_data)
         if sys_args.points:
             points()
-
+    
 
     class return_obj:
         def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
@@ -213,6 +218,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             self.frac = frac
             self.tau_array = []
     #print 'autoignition time: %0.5f'    %(tm.time()-func_start_time)
+    #print sample.production_data
     return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
     "sdata is an array of 40 timesteps, with each instance containing an array of species"

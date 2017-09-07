@@ -73,13 +73,16 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
                     print edge
                     continue
         
-        dic = graph_search_drgep(graph, target_species) #Search graph for max values to each species based on targets
-        for sp in dic: #Add to max dictionary if it is new or greater than the value already there. 
-            if sp not in max_dic:
-                max_dic[sp] = dic[sp]
-            elif dic[sp] > max_dic[sp]:
-                max_dic[sp] = dic[sp]
-        graph.clear() #Reset graph
+      	    dic = graph_search_drgep(graph, target_species) #Search graph for max values to each species based on targets
+       	    print dic
+            for sp in dic: #Add to max dictionary if it is new or greater than the value already there. 
+                if sp not in max_dic:
+                    max_dic[sp] = dic[sp]
+                elif dic[sp] > max_dic[sp]:
+                    max_dic[sp] = dic[sp]
+            graph.clear() #Reset graph
+    print len(max_dic)
+    print max_dic
     return max_dic
  
 

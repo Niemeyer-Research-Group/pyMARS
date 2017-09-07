@@ -54,6 +54,7 @@ def autoignition_loop_control(solution_object, args):
     initial_temperature_array = []
 
     #send initial conditions to autoignition script
+    args.multiple_conditions = True
     if args.multiple_conditions is True:
         for condition in conditions_array:
             sim_result = run_sim(solution_object, condition, args)

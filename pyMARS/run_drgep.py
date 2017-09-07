@@ -60,7 +60,8 @@ def run_drgep(args, solution_object):
 	done = [] #Singleton to hold wether or not any more species can be cut from the simulation.  
 	done.append(False)
 	threshold = .1 #Starting threshold value
-	error = [0.0] #Singleton to hold the error value of the previously ran simulation.
+        threshold_i = .1
+	error = [10.0] #Singleton to hold the error value of the previously ran simulation.
 	try:
 		os.system('rm mass_fractions.hdf5')
 	except Exception:
@@ -75,23 +76,25 @@ def run_drgep(args, solution_object):
 	
 	print "Testing for starting threshold value"
 	drgep_loop_control(solution_object, args, error, threshold, done, max_dic) #Trim the solution at that threshold and find the error.
-	while error[0] > args.error: #While the error for trimming with that threshold value is greater than allowed.
+	while error[0] != 0: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
+                threshold_i = threshold_i / 10
 		drgep_loop_control(solution_object, args, error, threshold, done, max_dic)
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
 	past = 0 #An integer representing the error introduced in the past simulation.  
 	done[0] = False
-	while not done[0]: #Run the simulation until nothing else can be cut. 
+	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut. 
         	sol_new = drgep_loop_control( solution_object, args, error, threshold, done, max_dic) #Trim at this threshold value and calculate error.
                 if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
                         max_t = threshold
-		if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
-			threshold = threshold + .04
-		past = error[0]
-        	threshold = threshold + .01
-        
+		#if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
+		#	threshold = threshold + (threshold_i * 4)
+		past = error[0] 
+		#if (threshold >= .01):
+                #        threshold_i = .01
+       		threshold = threshold + threshold_i
         print "\nGreatest result: "
         sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic)
 	os.system('rm production_rates.hdf5')

@@ -1,8 +1,10 @@
+import math
 import cantera as ct
 import h5py
 import numpy as np
 import os
 import time as tm
+import irrev_reaction_cantera as irv
 
 def get_rates(hdf5_file, solution_object):
     """ Takes mass_fractions hdf5 file of species mole fractions at a point in
@@ -145,25 +147,7 @@ def get_rates(hdf5_file, solution_object):
                 all_species.update(reac.products)
                 if reac_prod_rate != 0:
 		    if reac_prod_rate > 0:
-                        for species in products:
-                            list_B[species][0] += abs(float(reac_prod_rate*products[species]))
-                            for species_b in all_species:
-                                if species_b != species:
-                                    partial_name = species + '_' + species_b
-                                    if partial_name in list_C:
-                                        list_C[partial_name] += float(reac_prod_rate*products[species])
-                                    else:
-                                        list_C[partial_name] = float(reac_prod_rate*products[species])
-                        for species in reactants:
-                            list_B[species][1] += abs(float(reac_prod_rate*reactants[species]))
-                            for species_b in all_species:
-                                if species_b != species:
-                                    partial_name = species + '_' + species_b
-                                    if partial_name in list_C:
-                                        list_C[partial_name] += float(-reac_prod_rate*reactants[species])
-                                    else:
-                                        list_C[partial_name] = float(-reac_prod_rate*reactants[species])
-                    if reac_prod_rate < 0:
+                        print(str(i)  + ":  " + str(reac_prod_rate))
                         for species in products:
                             list_B[species][1] += abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
@@ -175,6 +159,37 @@ def get_rates(hdf5_file, solution_object):
                                         list_C[partial_name] = float(reac_prod_rate*products[species])
                         for species in reactants:
                             list_B[species][0] += abs(float(reac_prod_rate*reactants[species]))
+                            for species_b in all_species:
+                                if species_b != species:
+                                    partial_name = species + '_' + species_b
+                                    if partial_name in list_C:
+                                        list_C[partial_name] += float(-reac_prod_rate*reactants[species])
+                                    else:
+                                        list_C[partial_name] = float(-reac_prod_rate*reactants[species])
+                    if reac_prod_rate < 0:
+			"""coeff = irv.create_reverse_reaction(new_solution, i)
+                        if type(reac) == ct._cantera.FalloffReaction:
+			    if new_solution.T > 1000:
+			        reac_prod_rate = coeff[1][0] * (math.pow(new_solution.T,coeff[1][1])) * ( math.exp(-coeff[1][2]/(8.314 * new_solution.T)))
+				reac_prod_rate = -abs(reac_prod_rate)
+			    else:
+			        reac_prod_rate = coeff[0][0] * (math.pow(new_solution.T,coeff[0][1])) * ( math.exp((-coeff[0][2]/(8.314 * new_solution.T))))
+				reac_prod_rate = -abs(reac_prod_rate)
+        	        else:
+			    reac_prod_rate = coeff[0] * (math.pow(new_solution.T,coeff[1])) * ( math.exp(-coeff[2]/(8.314 * new_solution.T)))
+			    reac_prod_rate = -abs(reac_prod_rate)"""
+                        print(str(i)  + ":  " + str(reac_prod_rate))
+                        for species in products:
+                            list_B[species][0] += abs(float(reac_prod_rate*products[species]))
+                            for species_b in all_species:
+                                if species_b != species:
+                                    partial_name = species + '_' + species_b
+                                    if partial_name in list_C:
+                                        list_C[partial_name] += float(reac_prod_rate*products[species])
+                                    else:
+                                        list_C[partial_name] = float(reac_prod_rate*products[species])
+                        for species in reactants:
+                            list_B[species][1] += abs(float(reac_prod_rate*reactants[species]))
                             for species_b in all_species:
                                 if species_b != species:
                                     partial_name = species + '_' + species_b

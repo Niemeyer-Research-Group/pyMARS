@@ -100,9 +100,9 @@ def readin(args='none', **argv):
         print("\nThis is an Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
         
-	if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
-            print 'running sim'
-            sim_result = autoignition_loop_control(solution_object, args)
+	#if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
+        #    print 'running sim'
+        #    sim_result = autoignition_loop_control(solution_object, args)
         
 	if args.run_drg is True:
             new_solution_objects = drg_loop_control(solution_object, args)
