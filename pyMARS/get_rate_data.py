@@ -4,7 +4,6 @@ import h5py
 import numpy as np
 import os
 import time as tm
-import irrev_reaction_cantera as irv
 
 def get_rates(hdf5_file, solution_object):
     """ Takes mass_fractions hdf5 file of species mole fractions at a point in
