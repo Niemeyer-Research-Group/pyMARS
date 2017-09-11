@@ -30,17 +30,9 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
     reaction_objects = solution.reactions()
     graph = nx.DiGraph() #Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
 
-    #add nodes for all species to graph
-    #for species in species_objects: 
-    #    graph.add_node(species.name)
-    #ri_total = {}
-    #ri_partial = {}
-    #error_list = {}
-    #core_species = []
-    
     max_dic = {} #Dictionary holding the maximum values for the iteration
+    
     #calculate edge weights based on list received from get_rate_data
-    #initial condition
     for ic in total_edge_data.iterkeys(): #For each initial condition
         for species in species_objects: #Make graph
             graph.add_node(species.name)
@@ -54,7 +46,7 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
                     edge_name = edge.split('_', 1)
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
-                    #dge weight between two species
+                    #dgep weight between two species
 	            if denominator[species_a_name] != 0:
                         weight = abs(float(numerator[edge])/float(denominator[species_a_name]))
                         if graph.has_edge(species_a_name, species_b_name):
@@ -74,15 +66,12 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
                     continue
         
       	    dic = graph_search_drgep(graph, target_species) #Search graph for max values to each species based on targets
-       	    print dic
             for sp in dic: #Add to max dictionary if it is new or greater than the value already there. 
                 if sp not in max_dic:
                     max_dic[sp] = dic[sp]
                 elif dic[sp] > max_dic[sp]:
                     max_dic[sp] = dic[sp]
             graph.clear() #Reset graph
-    print len(max_dic)
-    print max_dic
     return max_dic
  
 
@@ -129,13 +118,6 @@ def trim_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
         if sp not in core_species:
             core_species.append(sp.name)
 
-        #clear the graph for next individual set
-        #graph.clear()
-	#specific to nc7h_16_mech.cti
-        #retained_species = ['n2', 'c5h11o2h-2','c5h11o-2','ic4ketit','ic5ketdb','o2c2h4o2h','ch2o2hcho','ch3choohcoch3','ic3h7coc2h5','ic3h6coc2h5','tc3h6coc2h5','ic3h7coc2h4p','ic3h7coc2h4s','ic3h5coc2h5','ac3h4coc2h5','ic3h5coc2h4p','ic3h5coc2h4s','nc6ket26','ar']
-    #specific to gri30 N2 CO2 H2O
-    #should also have targets of CH4 and O2
-    
     retained_species = keeper_list #Specified by the user.  A list of species that also need to be kept.
     for sp in retained_species:
         if sp not in core_species:

@@ -7,12 +7,12 @@ import soln2ck
 import soln2cti
 from autoignition_module import run_sim
 from get_rate_data import get_rates
-from drg import make_graph
 from drg_loop_control import drg_loop_control
 from drgep_loop_control import drgep_loop_control
 from autoignition_loop_control import autoignition_loop_control
 import numpy as np
 from run_drgep import run_drgep
+from run_drg import run_drg
 
 def readin(args='none', **argv):
     """Main function for pyMARS
@@ -96,6 +96,10 @@ def readin(args='none', **argv):
         os.system('rm production_rates.hdf5')
     except Exception:
         pass
+    try:
+        os.system('rm mass_fractions.hdf5')
+    except Exception:
+        pass
     if file_extension == ".cti" or file_extension == ".xml": #If the file is a Cantera file.
         print("\nThis is an Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
@@ -105,15 +109,8 @@ def readin(args='none', **argv):
         #    sim_result = autoignition_loop_control(solution_object, args)
         
 	if args.run_drg is True:
-            new_solution_objects = drg_loop_control(solution_object, args)
-            os.system('rm production_rates.hdf5')
-            os.system('rm mass_fractions.hdf5')
-            drg_trimmed_file = soln2cti.write(new_solution_objects[1])
-            try:
-                os.system('rm production_rates.hdf5')
-            except Exception:
-                pass
-        
+        	run_drg(args, solution_object)
+	
 	if args.convert is True:
             soln2ck.write(solution_object)
 	

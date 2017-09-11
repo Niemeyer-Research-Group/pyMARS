@@ -1,15 +1,14 @@
 from create_trimmed_model import trim
 from autoignition_loop_control import autoignition_loop_control
-from get_rate_data import get_rates
-from drg import make_graph
+from get_rate_data_drg import get_rates_drg
+from drg import trim_drg
 import os
 from get_error import get_error
-from graph_search import graph_search
 from numpy import genfromtxt
 import numpy as np
 
-def drg_loop_control(solution_object, args):
-    """ Controls repeated use of drg Function
+def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_edge_data):
+    """ Controls the trimming and error calculation of a solution with the graph already created using the DRGEP method.   
 
         Parameters
         ----------
@@ -17,98 +16,60 @@ def drg_loop_control(solution_object, args):
             Cantera solution object
         args : obj
             function arguments object
+	stored_error: float singleton
+	    The error introduced by the last simulation (to be replaced with this simulation).
+	done: singleton
+	    a singleton boolean value that represnts wether or not more species can be excluded from the graph or not. 
+	max_dic: dictionary  
+	    a dictionary keyed by species name that represents the species importance to the model.  
 
         Returns
         -------
         new_solution_objects : obj
-            Cantera solution object with skeletal mechanism
+            Cantera solution object That has been reduced.  
         """
-    #get user input
-    target_species = raw_input('\nEnter target starting species: ').split(',')
+    target_species = args.target                                                
 
+    try:
+        os.system('rm mass_fractions.hdf5')
+    except Exception:
+        pass
     #run detailed mechanism and retain initial conditions
     args.multiple_conditions = True
-    detailed_result = autoignition_loop_control(solution_object, args)
+    detailed_result = autoignition_loop_control(solution_object, args) #Run simulation
     detailed_result.test.close()
     ignition_delay_detailed = np.array(detailed_result.tau_array)
-    #--------------------------
-    #get-rate data called here
-    #--------------------------
-    rate_edge_data = get_rates('mass_fractions.hdf5', solution_object)
-    if args.threshold_values is None:
-        try:
-            threshold = float(raw_input('Enter threshold value: '))
-        except ValueError:
-            print 'try again'
-            threshold = float(raw_input('Enter threshold value: '))
+    species_retained = []
+    printout = ''
+    print 'Threshold     Species in Mech      Error'
+    try:
+        os.system('rm mass_fractions.hdf5')
+    except Exception:
+        pass
+    #run DRG and create new reduced solution
+    drgep = trim_drg(rate_edge_data, solution_object, threshold, args.keepers, done,target_species) #Find out what to cut from the model
+    exclusion_list = drgep
+    new_solution_objects = trim(solution_object, exclusion_list, args.data_file) #Cut the exclusion list from the model.
+    species_retained.append(len(new_solution_objects[1].species()))
 
-        #run DRG and create new reduced solution
-        drg = make_graph(solution_object, 'production_rates.hdf5', threshold)
-        exclusion_list = graph_search(solution_object, drg, target_species)
-        new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
-
-        #simulate reduced solution
-        reduced_result = autoignition_loop_control(new_solution_objects[1], args)
-        reduced_result.test.close()
-        ignition_delay_reduced = np.array(reduced_result.tau_array)
-        error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-        print 'Error index: %s' %error
-        #get_error()
-        n_species_retained = len(new_solution_objects[1].species())
-        print 'Number of species in reduced model: %s' %n_species_retained
-        try:
-            os.system('rm mass_fractions.hdf5')
-        except Exception:
-            pass
-    else:
-        threshold_values = genfromtxt(args.threshold_values, delimiter=',')
-        species_retained = []
-        printout = ''
-        print 'Threshold     Species in Mech      Error'
-        print 'flag'
-        try:
-            os.system('rm mass_fractions.hdf5')
-        except Exception:
-            pass
-
-        if threshold_values.size > 1:
-            for threshold in threshold_values:
-                #run DRG and create new reduced solution
-                drg = make_graph(solution_object, threshold, rate_edge_data, target_species)
-                #exclusion_list = graph_search(solution_object, drg, target_species)
-                exclusion_list = drg
-                new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
-                species_retained.append(len(new_solution_objects[1].species()))
-                try:
-                    os.system('rm mass_fractions.hdf5')
-                except Exception:
-                    pass
-                #simulated reduced solution
-                reduced_result = autoignition_loop_control(new_solution_objects[1], args)
-                reduced_result.test.close()
-                ignition_delay_reduced = np.array(reduced_result.tau_array)
-                error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-                printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2))+'%' + '\n'
-                print printout
-
-        else:
-
-            #run DRG and create new reduced solution
-            drg = make_graph(solution_object, threshold_values, rate_edge_data, target_species)
-            #exclusion_list = graph_search(solution_object, drg, target_species)
-            exclusion_list = drg
-            new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
-            species_retained.append(len(new_solution_objects[1].species()))
-
-            #simulated reduced solution
-            reduced_result = autoignition_loop_control(new_solution_objects[1], args)
-            reduced_result.test.close()
-            ignition_delay_reduced = np.array(reduced_result.tau_array)
-            error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100
-            printout += str(threshold_values) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
-            print printout
-        # print 'Detailed soln ign delay:'
-        # print ignition_delay_detailed
-        # print 'Reduced soln ign delay:'
-        # print ignition_delay_reduced
+    #simulated reduced solution
+    reduced_result = autoignition_loop_control(new_solution_objects[1], args) #Run simulation on reduced model
+    if (reduced_result == 0):
+        stored_error[0] = 100
+	error = 100
+    	printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+    	print printout
+        return new_solution_objects
+    reduced_result.test.close()
+    ignition_delay_reduced = np.array(reduced_result.tau_array)
+    print detailed_result.tau_array
+    error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 #Calculate error
+    printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+    print printout
+    stored_error[0] = round(np.max(error), 2)
+    # print 'Detailed soln ign delay:'
+    # print ignition_delay_detailed
+    # print 'Reduced soln ign delay:'
+    # print ignition_delay_reduced
+    new_solution_objects = new_solution_objects[1]
     return new_solution_objects

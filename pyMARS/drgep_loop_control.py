@@ -1,9 +1,7 @@
 from create_trimmed_model import trim
 from autoignition_loop_control import autoignition_loop_control
-from get_rate_data import get_rates
 from drgep import trim_drgep
 import os
-from get_error import get_error
 from numpy import genfromtxt
 import numpy as np
 
@@ -62,7 +60,6 @@ def drgep_loop_control(solution_object, args, stored_error, threshold, done, max
         return new_solution_objects
     reduced_result.test.close()
     ignition_delay_reduced = np.array(reduced_result.tau_array)
-    print detailed_result.tau_array
     error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 #Calculate error
     printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
     print printout

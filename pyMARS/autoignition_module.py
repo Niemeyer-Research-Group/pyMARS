@@ -2,7 +2,6 @@ import sys
 import numpy as np
 import cantera as ct
 import os
-from get_sample_range import get_range
 from get_sample_range_drgep import get_range_drgep
 import h5py
 import time as tm

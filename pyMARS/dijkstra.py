@@ -4,6 +4,8 @@ from itertools import count
 import networkx as nx
 from networkx.utils import generate_unique_node
 
+#The following functions were taken from the networkx source code and modified for this project. 
+ 
 def ss_dijkstra_path_length_modified(G, source, cutoff=None,
                                        weight='weight'):
     """Compute the greatest path length via multiplication between source and all other

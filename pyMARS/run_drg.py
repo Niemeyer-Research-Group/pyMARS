@@ -6,15 +6,12 @@ from convert_chemkin_file import convert
 import soln2ck
 import soln2cti
 from autoignition_module import run_sim
-from get_rate_data import get_rates
+from get_rate_data_drg import get_rates_drg
 from drg_loop_control import drg_loop_control
-from drgep_loop_control import drgep_loop_control
 from autoignition_loop_control import autoignition_loop_control
-from drgep import make_dic_drgep
-from drgep import trim_drgep
 import numpy as np
 
-def run_drgep(args, solution_object):           
+def run_drg(args, solution_object):           
 	"""
     Function to run the drgep method for model reduction
 
@@ -70,22 +67,21 @@ def run_drgep(args, solution_object):
 	detailed_result = autoignition_loop_control(solution_object, args) #The simulation needs to be ran to make the mass_fractions file which has the info to calucalte edge weights I think?
 	detailed_result.test.close()
 	ignition_delay_detailed = np.array(detailed_result.tau_array)
-	rate_edge_data = get_rates('mass_fractions.hdf5', solution_object) #Get edge weight calculation data. 
-	max_dic = make_dic_drgep(solution_object, rate_edge_data, args.target) #Make the graph
+	rate_edge_data = get_rates_drg('mass_fractions.hdf5', solution_object) #Get edge weight calculation data. 
 	
 	print "Testing for starting threshold value"
-	drgep_loop_control(solution_object, args, error, threshold, done, max_dic) #Trim the solution at that threshold and find the error.
+	drg_loop_control(solution_object, args, error, threshold, done, rate_edge_data) #Trim the solution at that threshold and find the error.
 	while error[0] != 0: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
                 threshold_i = threshold_i / 10
-		drgep_loop_control(solution_object, args, error, threshold, done, max_dic)
+		drg_loop_control(solution_object, args, error, threshold, done, rate_edge_data)
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
 	past = 0 #An integer representing the error introduced in the past simulation.  
 	done[0] = False
 	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut. 
-        	sol_new = drgep_loop_control( solution_object, args, error, threshold, done, max_dic) #Trim at this threshold value and calculate error.
+        	sol_new = drg_loop_control( solution_object, args, error, threshold, done, rate_edge_data) #Trim at this threshold value and calculate error.
                 if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
                         max_t = threshold
 		#if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
@@ -95,7 +91,7 @@ def run_drgep(args, solution_object):
                 #        threshold_i = .01
        		threshold = threshold + threshold_i
         print "\nGreatest result: "
-        sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic)
+        sol_new = drg_loop_control( solution_object, args, error, max_t, done, rate_edge_data)
 	os.system('rm production_rates.hdf5')
 	os.system('rm mass_fractions.hdf5')
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
