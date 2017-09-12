@@ -19,8 +19,6 @@ def main(args=None):
             Transport data file if Chemkin format
         conditions :
             Text file of initial conditions for autoignition
-        thresholds :
-            csv file containing threshold values to test (usr prompted otherwise)
 	error:
 	    A float representing the maximum ammount of error allowed to be introcued to the model (0-100).
         run_drg :
@@ -112,8 +110,6 @@ def main(args=None):
                 a given threshold value
             --conditions:
                 Text file of initial conditions for autoignition
-            --thresholds:
-                csv file containing threshold values to test (usr prompted otherwise)
             --convert:
                 Convert .cti <==> .inp
             --thermo:

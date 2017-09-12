@@ -3,7 +3,6 @@ from autoignition_loop_control import autoignition_loop_control
 from get_rate_data_drg import get_rates_drg
 from drg import trim_drg
 import os
-from get_error import get_error
 from numpy import genfromtxt
 import numpy as np
 
@@ -18,34 +17,39 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
             function arguments object
 	stored_error: float singleton
 	    The error introduced by the last simulation (to be replaced with this simulation).
+        threshold: int
+            The threshold value at this point in the iteration.
 	done: singleton
 	    a singleton boolean value that represnts wether or not more species can be excluded from the graph or not. 
-	max_dic: dictionary  
-	    a dictionary keyed by species name that represents the species importance to the model.  
+	rate_edge_data: array      
+	    A 3D array that holds information from the simulation for calculating DRG interaction coefficients.  
 
         Returns
         -------
         new_solution_objects : obj
             Cantera solution object That has been reduced.  
         """
+    
     target_species = args.target                                                
 
     try:
         os.system('rm mass_fractions.hdf5')
     except Exception:
         pass
+    
     #run detailed mechanism and retain initial conditions
-    args.multiple_conditions = True
     detailed_result = autoignition_loop_control(solution_object, args) #Run simulation
     detailed_result.test.close()
     ignition_delay_detailed = np.array(detailed_result.tau_array)
     species_retained = []
     printout = ''
     print 'Threshold     Species in Mech      Error'
+    
     try:
         os.system('rm mass_fractions.hdf5')
     except Exception:
         pass
+    
     #run DRG and create new reduced solution
     drgep = trim_drg(rate_edge_data, solution_object, threshold, args.keepers, done,target_species) #Find out what to cut from the model
     exclusion_list = drgep
@@ -62,14 +66,13 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
         return new_solution_objects
     reduced_result.test.close()
     ignition_delay_reduced = np.array(reduced_result.tau_array)
-    print detailed_result.tau_array
+    
+    #Calculate error
     error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 #Calculate error
     printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
     print printout
     stored_error[0] = round(np.max(error), 2)
-    # print 'Detailed soln ign delay:'
-    # print ignition_delay_detailed
-    # print 'Reduced soln ign delay:'
-    # print ignition_delay_reduced
+   
+    #Return new model.  
     new_solution_objects = new_solution_objects[1]
     return new_solution_objects

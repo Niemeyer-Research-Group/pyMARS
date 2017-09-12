@@ -6,15 +6,15 @@ from graph_search_drgep import graph_search_drgep
 import time as tm
 
 def make_dic_drgep(solution_object, total_edge_data, target_species):
-    """ Use the Direct Relation Graph (DRG) method to build a nodal graph of
-        species and their edge-weights above a certain threshold value
+    """ Use the Direct Relation Graph with Error Propegation (DRGEP) method to build a nodal graph of
+        species and use the graph to determine each species overall interaction coefficents.  
 
     Parameters
     ----------
     solution_object : obj
         Cantera Solution object
-    hdf5_file : str
-        data file containing individual reaction production rates
+    total_edge_data : array
+        A 3-D array containing information for calculating direct interaction coeffiecnets which will serve as edge weights on the graphs.  
     target_species: list of strings
 	a list containing the names of the target species.
 
@@ -24,6 +24,7 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
         A Dictionary keyed by species name with values that represent that species importance to the system.  
     """
     start_time = tm.time()
+    
     #initalize solution and components
     solution = solution_object
     species_objects = solution.species()
@@ -32,16 +33,15 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
 
     max_dic = {} #Dictionary holding the maximum values for the iteration
     
-    #calculate edge weights based on list received from get_rate_data
+    #calculate edge weights based on list received from get_rate_data and use them to create a graph
     for ic in total_edge_data.iterkeys(): #For each initial condition
         for species in species_objects: #Make graph
             graph.add_node(species.name)
         #timestep
-        for tstep in total_edge_data[ic].iterkeys(): #Set edge values for the graph
-            numerator = total_edge_data[ic][tstep][2]
+        for tstep in total_edge_data[ic].iterkeys(): #Make a graph at each timestep
+            numerator = total_edge_data[ic][tstep][2] #DRGEP calculations of direct interaction coeffients are done in the total_edge_data function.
             denominator = total_edge_data[ic][tstep][1]
-            #each species
-            for edge in numerator:
+            for edge in numerator: #For each edge, determine its weight amnd add it to the graph
                 try:
                     edge_name = edge.split('_', 1)
                     species_a_name = edge_name[0]
@@ -64,7 +64,8 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
                 except IndexError:
                     print edge
                     continue
-        
+            
+            #Search the graph for overall interaction coefficents and add them to max_dic if they belong 
       	    dic = graph_search_drgep(graph, target_species) #Search graph for max values to each species based on targets
             for sp in dic: #Add to max dictionary if it is new or greater than the value already there. 
                 if sp not in max_dic:

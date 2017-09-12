@@ -26,25 +26,28 @@ def drgep_loop_control(solution_object, args, stored_error, threshold, done, max
         new_solution_objects : obj
             Cantera solution object That has been reduced.  
         """
+   
     target_species = args.target                                                
-
-    try:
+    
+    try: 
         os.system('rm mass_fractions.hdf5')
     except Exception:
         pass
+
     #run detailed mechanism and retain initial conditions
-    args.multiple_conditions = True
     detailed_result = autoignition_loop_control(solution_object, args) #Run simulation
     detailed_result.test.close()
     ignition_delay_detailed = np.array(detailed_result.tau_array)
     species_retained = []
     printout = ''
     print 'Threshold     Species in Mech      Error'
-    try:
+    
+    try: 
         os.system('rm mass_fractions.hdf5')
     except Exception:
         pass
-    #run DRG and create new reduced solution
+    
+    #run DRGEP and create new reduced solution
     drgep = trim_drgep(max_dic, solution_object, threshold, args.keepers, done) #Find out what to cut from the model
     exclusion_list = drgep
     new_solution_objects = trim(solution_object, exclusion_list, args.data_file) #Cut the exclusion list from the model.
@@ -60,13 +63,13 @@ def drgep_loop_control(solution_object, args, stored_error, threshold, done, max
         return new_solution_objects
     reduced_result.test.close()
     ignition_delay_reduced = np.array(reduced_result.tau_array)
+     
+    #Calculate and print error.
     error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 #Calculate error
     printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
     print printout
     stored_error[0] = round(np.max(error), 2)
-    # print 'Detailed soln ign delay:'
-    # print ignition_delay_detailed
-    # print 'Reduced soln ign delay:'
-    # print ignition_delay_reduced
+    
+    #Return new model
     new_solution_objects = new_solution_objects[1]
     return new_solution_objects

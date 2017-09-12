@@ -43,7 +43,6 @@ def get_range_drgep(times, temps, sdata, production_data):
     dT = np.diff(T)
     derivative = dT/dt
     index = 0
-    print temps[0]
     for i in range (0, len(temps)):
         if index == 0 and temps[i] >= temps[0] + 400:
 		index = i
@@ -79,7 +78,7 @@ def get_range_drgep(times, temps, sdata, production_data):
     prod_trim.append(production_data[0])
     ind_trim.append(0)
     i = .05
-    while i < 1:
+    while i < 1: #store values every time the tempreture reaches five percent more of its total change for 20 total data points
         j = 0
         while temps[j] < temps[0] + (delta * i):
             j = j + 1

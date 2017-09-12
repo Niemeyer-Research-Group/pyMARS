@@ -54,25 +54,17 @@ def autoignition_loop_control(solution_object, args):
     initial_temperature_array = []
 
     #send initial conditions to autoignition script
-    args.multiple_conditions = True
-    if args.multiple_conditions is True:
-        for condition in conditions_array:
-            sim_result = run_sim(solution_object, condition, args)
-	    if (sim_result == 0):
-	        return 0
-            initial_temperature_array.append(condition.temperature)
-            try:
-                tau_array.append(sim_result.tau)
-            except AttributeError:
-                tau_array.append(0.0)
-    else:
-        sim_result = run_sim(solution_object, conditions_array[0], args)
-        initial_temperature_array.append(conditions_array[0].temperature)
+    for condition in conditions_array:
+        sim_result = run_sim(solution_object, condition, args)
+        if (sim_result == 0):
+            return 0
+        initial_temperature_array.append(condition.temperature)
         try:
             tau_array.append(sim_result.tau)
         except AttributeError:
             tau_array.append(0.0)
-
+    
+    #Store the information from the simulation in an object and return it.
     sim_result.tau_array = tau_array
     sim_result.initial_temperature_array = initial_temperature_array
     return sim_result

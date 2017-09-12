@@ -142,7 +142,6 @@ def get_rates_drg(hdf5_file, solution_object):
                 all_species.update(reac.products)
                 if reac_prod_rate != 0:
 		    if reac_prod_rate > 0:
-                        print(str(i)  + ":  " + str(reac_prod_rate))
                         
 			for species in products:
                             if species in list_B:
@@ -171,7 +170,6 @@ def get_rates_drg(hdf5_file, solution_object):
                                         list_C[partial_name] = abs(float(reac_prod_rate*reactants[species]))
 
                     if reac_prod_rate < 0:
-                        print(str(i)  + ":  " + str(reac_prod_rate))
 
                         for species in products:
                             if species in list_B:
@@ -199,16 +197,8 @@ def get_rates_drg(hdf5_file, solution_object):
                                     else:
                                         list_C[partial_name] = abs(float(reac_prod_rate*reactants[species]))
 
-            # for blah in list_A:
-            #     if abs(float(list_A[blah].value) - np.float64(list_B[blah])) > .0001:
-            #         print '--------//------'
-            #         print blah
-            #         print list_A[blah] - list_B[blah]
-            #         print '--------//-------'
-            #         print '---------------'
             ic_edge_data[tstep] = [list_A, list_B, list_C]
         total_edge_data[grp.title()] = ic_edge_data
-        #print 'get_rate_data time: %0.5f'   %(tm.time()-start_time)
 
     g.close()
     f.close()

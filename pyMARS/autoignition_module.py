@@ -52,22 +52,28 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
 
     """
+    #Set up variables
     func_start_time = tm.time()
     solution = solution_object
     initial_temperature = float(condition.temperature)
     pressure = float(condition.pressure)*float(ct.one_atm)
-    #check if species in solution
+    
+    #Set up species fractions
     frac = ''
     for reactant in condition.species.iteritems():
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]
+    
+    #Set up variables
     solution.TPX = initial_temperature, pressure, frac #101325 Pa
     species = solution.species()
     reactions = solution.reactions()
 
-    #run sim to find ignition delay from dT/dt max
-    reactor = ct.IdealGasReactor(solution)
+    #run sim to find ignition delay from when the tempurature first reaches 400 Kelvin above its original value.
+   
+    #Set up variables for the simulation.
+    reactor = ct.IdealGasReactor(solution) #Set up reactor
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
     stop_time = 25
@@ -78,13 +84,16 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
     sdata = np.zeros([0, len(reactor.Y)])
     production_data = np.zeros([0, len(solution.net_production_rates)])
     state_list = list()
-
+    
+    #Prepare mass_fractions.hdf5 file.
     f1 = h5py.File('mass_fractions.hdf5', 'a')
     try:
         group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     except ValueError:
         print "Duplicate initial conditions, or check to make sure mass fractions file isn't in directory. If it is, delete it"""
     individual = f1.create_group(group_name)
+    
+    #Run simulation 
     timer_start =tm.time()
     while current_time < stop_time:
         group_index += 1
@@ -94,6 +103,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
             error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
             print error_string
             return
+        #Store information at this timestep
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
@@ -117,8 +127,8 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
         production_rates = np.array(solution.net_production_rates)
         production_rates = production_rates[:, np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
-
-    #sample = get_range(times1, temps, sdata, production_data)
+    
+    #Organize information collected from the simulation
     sample = get_range_drgep(times1, temps, sdata, production_data)
     timer_stop = tm.time()
 
@@ -128,9 +138,8 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
         if int(grp) not in sample.index:
             f1[group_name].__delitem__(str(grp))
 
-    #f1.close()
 
-    #utility functions
+    #utility functions. Currently not active.  Work to be done here.  
     def plot():
         import matplotlib.pyplot as plt
         plt.clf()
@@ -204,7 +213,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
         if sys_args.points:
             points()
     
-
+    #Create and return an object that contains criticial information about the simulation.
     class return_obj:
         def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
             self.time = time
@@ -216,9 +225,5 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
             self.Temp = initial_temperature
             self.frac = frac
             self.tau_array = []
-    #print 'autoignition time: %0.5f'    %(tm.time()-func_start_time)
-    #print sample.production_data
     return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
-    "sdata is an array of 40 timesteps, with each instance containing an array of species"
-    "mass fractions at that instant"

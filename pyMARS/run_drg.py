@@ -58,12 +58,12 @@ def run_drg(args, solution_object):
 	threshold = .1 #Starting threshold value
         threshold_i = .1
 	error = [10.0] #Singleton to hold the error value of the previously ran simulation.
-	try:
+	
+        try:
 		os.system('rm mass_fractions.hdf5')
 	except Exception:
 		pass
 	
-	args.multiple_conditions = True
 	detailed_result = autoignition_loop_control(solution_object, args) #The simulation needs to be ran to make the mass_fractions file which has the info to calucalte edge weights I think?
 	detailed_result.test.close()
 	ignition_delay_detailed = np.array(detailed_result.tau_array)
@@ -80,6 +80,7 @@ def run_drg(args, solution_object):
 	sol_new = solution_object
 	past = 0 #An integer representing the error introduced in the past simulation.  
 	done[0] = False
+
 	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut. 
         	sol_new = drg_loop_control( solution_object, args, error, threshold, done, rate_edge_data) #Trim at this threshold value and calculate error.
                 if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
@@ -90,12 +91,12 @@ def run_drg(args, solution_object):
 		#if (threshold >= .01):
                 #        threshold_i = .01
        		threshold = threshold + threshold_i
+
         print "\nGreatest result: "
         sol_new = drg_loop_control( solution_object, args, error, max_t, done, rate_edge_data)
-	os.system('rm production_rates.hdf5')
-	os.system('rm mass_fractions.hdf5')
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
-	try:
+	
+        try:
 		os.system('rm production_rates.hdf5')
 	except Exception:
 		pass

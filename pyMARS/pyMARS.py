@@ -69,7 +69,6 @@ def readin(args='none', **argv):
             thermo_file = args.thermo
             transport_file = args.transport
             run_drg = args.run_drg
-            threshold_values = args.thresholds
             conditions_file = args.conditions
             convert = args.convert
             error = args.error
@@ -92,18 +91,11 @@ def readin(args='none', **argv):
 
     file_extension= os.path.splitext(args.data_file)[1]
 
-    try:
-        os.system('rm production_rates.hdf5')
-    except Exception:
-        pass
-    try:
-        os.system('rm mass_fractions.hdf5')
-    except Exception:
-        pass
     if file_extension == ".cti" or file_extension == ".xml": #If the file is a Cantera file.
-        print("\nThis is an Cantera xml or cti file\n")
+        print("\nThis is a Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
         
+        #needs to be worked on
 	#if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
         #    print 'running sim'
         #    sim_result = autoignition_loop_control(solution_object, args)
@@ -124,6 +116,7 @@ def readin(args='none', **argv):
 
     else:
         print("\n\nFile type not supported")
+    
     #if os.path.exists('mass_fractions.hdf5'):
     #    os.system('rm mass_fractions.hdf5')
     #if os.path.exists('production_rates.hdf5'):
