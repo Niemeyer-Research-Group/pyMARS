@@ -7,6 +7,7 @@ import soln2cti
 import numpy as np
 from run_drgep import run_drgep
 from run_drg import run_drg
+from autoignition_loop_control import autoignition_loop_control
 
 def readin(args='none', **argv):
     """Main function for pyMARS
@@ -67,6 +68,7 @@ def readin(args='none', **argv):
             convert = args.convert
             error = args.error
             run_drgep = args.run_drgep
+            write_ai_times = args.write_ai_times
 	    target = 0
             if args.species is None:
                 keepers = []
@@ -90,9 +92,14 @@ def readin(args='none', **argv):
         solution_object = ct.Solution(args.data_file)
         
         #needs to be worked on
-	#if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
-        #    print 'running sim'
-        #    sim_result = autoignition_loop_control(solution_object, args)
+	if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True or args.write_ai_times is True:
+            if os.path.exists('mass_fractions.hdf5'):
+                os.system('rm mass_fractions.hdf5')
+            if args.write_ai_times is True:
+                if os.path.exists('autoignition_times.txt'):
+                    os.system('rm autoignition_times.txt')
+            print 'running sim'
+            sim_result = autoignition_loop_control(solution_object, args, True)
         
 	if args.run_drg is True:
         	run_drg(args, solution_object)
@@ -111,7 +118,3 @@ def readin(args='none', **argv):
     else:
         print("\n\nFile type not supported")
     
-    #if os.path.exists('mass_fractions.hdf5'):
-    #    os.system('rm mass_fractions.hdf5')
-    #if os.path.exists('production_rates.hdf5'):
-        #os.system('rm production_rates.hdf5')

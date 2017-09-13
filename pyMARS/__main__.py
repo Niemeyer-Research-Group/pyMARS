@@ -87,6 +87,9 @@ def main(args=None):
     parser.add_argument('--run_drgep', \
 			help='run Direct Relation Graph with Error Propigation method to reduce', \
 			action="store_true")
+    parser.add_argument('--write_ai_times', \
+			help='Write the autoignition times from the simulations to a file.', \
+			action="store_true")
     parser.add_argument('--error', \
                         help='Maximum allowed error indtroducted by the reduced simulation', \
                         type=float)
@@ -126,6 +129,8 @@ def main(args=None):
                 Write autoignition data to a csv file
             --writehdf5:
                 Write autoignition to a hdf5 file
+            --write_ai_times:
+                Write the autoignition times to a file
             --run_drgep :
                 Run Direct Relation Graphing with Error Propogation model reduction based on
                 a given allowed error.

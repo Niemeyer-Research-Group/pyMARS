@@ -93,9 +93,9 @@ def get_range(times, temps, sdata, production_data):
     #spec_trim.append(species_data[len(times)-1])
     #prod_trim.append(production_data[len(times)-1])
     #ind_trim.append(len(times)-1)
-    #initial_point = [times[0], T[0], 0]
-    #f = len(times)-1
-    #final_point = [times[f], T[f], f]
+    initial_point = [times[0], T[0], 0]
+    f = len(times)-1
+    final_point = [times[f], T[f], f]
     class sample_data:
         def __init__(self, tau, index, times, temps, species_data,
                     production_data, derivative_max, initial_point, final_point,ti,te,sp,pr,i):
