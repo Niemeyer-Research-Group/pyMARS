@@ -3,7 +3,7 @@ import numpy as np
 import h5py
 from collections import Counter
 import time as tm
-from graph_search import graph_search
+from graph_search_drg import graph_search
 
 def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
     """ Use the Direct Relation Graph (DRG) method to build a nodal graph of

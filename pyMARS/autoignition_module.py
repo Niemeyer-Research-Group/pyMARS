@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import cantera as ct
 import os
-from get_sample_range_drgep import get_range_drgep
+from get_sample_range import get_range
 import h5py
 import time as tm
 import matplotlib
@@ -129,7 +129,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args):
         production_data = np.vstack((production_data, production_rates))
     
     #Organize information collected from the simulation
-    sample = get_range_drgep(times1, temps, sdata, production_data)
+    sample = get_range(times1, temps, sdata, production_data)
     timer_stop = tm.time()
 
 

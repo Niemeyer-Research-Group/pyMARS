@@ -6,7 +6,7 @@ from convert_chemkin_file import convert
 import soln2ck
 import soln2cti
 from autoignition_module import run_sim
-from get_rate_data import get_rates
+from get_rate_data_drgep import get_rates
 from drg_loop_control import drg_loop_control
 from drgep_loop_control import drgep_loop_control
 from autoignition_loop_control import autoignition_loop_control

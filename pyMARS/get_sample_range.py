@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_range_drgep(times, temps, sdata, production_data):
+def get_range(times, temps, sdata, production_data):
     """Get sample range information from autoignition data
 
     Parameters
