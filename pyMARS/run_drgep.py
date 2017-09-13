@@ -1,17 +1,12 @@
 import os, sys, argparse
 import cantera as ct
 os.environ['Cantera_Data'] =os.getcwd()
-from create_trimmed_model import trim
-from convert_chemkin_file import convert
 import soln2ck
 import soln2cti
-from autoignition_module import run_sim
 from get_rate_data_drgep import get_rates
-from drg_loop_control import drg_loop_control
 from drgep_loop_control import drgep_loop_control
 from autoignition_loop_control import autoignition_loop_control
 from drgep import make_dic_drgep
-from drgep import trim_drgep
 import numpy as np
 
 def run_drgep(args, solution_object):           

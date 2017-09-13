@@ -1,11 +1,8 @@
 import os, sys, argparse
 import cantera as ct
 os.environ['Cantera_Data'] =os.getcwd()
-from create_trimmed_model import trim
-from convert_chemkin_file import convert
 import soln2ck
 import soln2cti
-from autoignition_module import run_sim
 from get_rate_data_drg import get_rates_drg
 from drg_loop_control import drg_loop_control
 from autoignition_loop_control import autoignition_loop_control
