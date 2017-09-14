@@ -143,7 +143,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
             f1[group_name].__delitem__(str(grp))
 
 
-    #utility functions. Currently not active.  Work to be done here.  
+    #utility functions.   
     def plot(i):
         import matplotlib.pyplot as plt
         plt.clf()

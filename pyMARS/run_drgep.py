@@ -97,8 +97,10 @@ def run_drgep(args, solution_object):
         
         print "\nGreatest result: "
         sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic)
-	os.system('rm production_rates.hdf5')
-	os.system('rm mass_fractions.hdf5')
+        if os.path.exsists("production_rates.hdf5"):
+		os.system('rm production_rates.hdf5')
+	if os.path.exsists('mass_fractions.hdf5'):
+		os.system('rm mass_fractions.hdf5')
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
 	
         try:

@@ -93,7 +93,7 @@ def readin(args='none', **argv):
         print("\nThis is a Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
         
-        #needs to be worked on
+        #runs simulation once with additional features on
 	if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True or args.write_ai_times is True:
             if os.path.exists('mass_fractions.hdf5'):
                 os.system('rm mass_fractions.hdf5')
