@@ -13,7 +13,7 @@ You can find a [list of current issues](https://github.com/Niemeyer-Research-Gro
 ## Pull Requests
 
  * If you're unfamiliar with Pull Requests, please take a look at the [GitHub documentation for them](https://help.github.com/articles/proposing-changes-to-a-project-with-pull-requests/).
- * **Make sure the test suite passes** on your computer, and that test coverage doesn't go down. To do this, run `pytest -vv --cov=./` from the top-level directory.
+ * **Make sure the test suite passes** on your computer, and that test coverage doesn't go down. To do this, run `pytest -vv --cov=./` from the top-level directory. The test suite is currently a work in progess.
  * *Always* add tests and docs for your code.
  * The use of emoji in Pull Requests is encouraged with the format ":emoji: Commit summary". See [this list of suggested emoji.](https://github.com/slashsBin/styleguide-git-commit-message#suggested-emojis)
  * Please reference relevant GitHub issues in your commit messages using `GH123` or `#123`.

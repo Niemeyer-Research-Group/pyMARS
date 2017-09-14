@@ -36,6 +36,8 @@ def main(args=None):
             Write autoignition data to a csv file
         writehdf5 :
             Write autoignition to a hdf5 file
+        write_ai_times :
+            Write autoignition times to a .txt file
 
     """
     #gets arguments from terminal
@@ -78,9 +80,6 @@ def main(args=None):
     parser.add_argument('--run_drg', \
                         help='run Direct Relation Graph method to reduce', \
                         action="store_true")
-    parser.add_argument('--thresholds', \
-                        help='csv file containing threshold values to test (usr prompted otherwise)', \
-                        type=str)
     parser.add_argument('--convert', \
                         help='Only convet selected file from .cti <====> .inp', \
                         action="store_true")

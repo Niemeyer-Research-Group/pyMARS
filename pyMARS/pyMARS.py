@@ -30,6 +30,8 @@ def readin(args='none', **argv):
         write data to csv (ex. writecsv='y')
     writehdf5:
         write data to hdf5 (ex. writehdf5='y')
+    write_ai_times:
+        write autoignition times for each inital condition
     run_drg:
         Run DRG model reduction
     run_drgep:
@@ -98,7 +100,7 @@ def readin(args='none', **argv):
             if args.write_ai_times is True:
                 if os.path.exists('autoignition_times.txt'):
                     os.system('rm autoignition_times.txt')
-            print 'running sim'
+            print 'running simulation\n'
             sim_result = autoignition_loop_control(solution_object, args, True)
         
 	if args.run_drg is True:
