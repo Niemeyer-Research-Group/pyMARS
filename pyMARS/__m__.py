@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from pyMARS import readin
+from home import readin
 import argparse
 
 
-def main(args=None):
+def m(args=None):
     """
     Parameters
     ----------
@@ -32,10 +32,6 @@ def main(args=None):
             Plot a temperature profile of autoignition
         points :
             Return sampling and ignition points
-        writecsv :
-            Write autoignition data to a csv file
-        writehdf5 :
-            Write autoignition to a hdf5 file
         write_ai_times :
             Write autoignition times to a .txt file
 
@@ -68,14 +64,6 @@ def main(args=None):
 
     parser.add_argument('--points', \
                         help='print sim sample points', \
-                        action="store_true")
-
-    parser.add_argument('--writecsv', \
-                        help='write species data to csv', \
-                        action="store_true")
-
-    parser.add_argument('--writehdf5', \
-                        help='write species data to hdf5', \
                         action="store_true")
     parser.add_argument('--run_drg', \
                         help='run Direct Relation Graph method to reduce', \
@@ -124,10 +112,6 @@ def main(args=None):
                 Plot a temperature profile of autoignition
             --points:
                 Return sampling and ignition points
-            --writecsv:
-                Write autoignition data to a csv file
-            --writehdf5:
-                Write autoignition to a hdf5 file
             --write_ai_times:
                 Write the autoignition times to a file
             --run_drgep :
@@ -140,4 +124,3 @@ def main(args=None):
 
 
         """
-main()

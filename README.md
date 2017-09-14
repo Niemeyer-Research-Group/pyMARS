@@ -26,11 +26,11 @@ While running pyMARS, make sure that you are using an up to date version of Pyth
 To install:
      `python setup.py install`
 
-pyMARS is called from terminal via `__main__.py`
+pyMARS is called from terminal via `pyMARS.py`
 which can be found in the pyMARS directory.
 
 example:
-    `python __main__.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot --write_ai_times`
+    `python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot --write_ai_times`
 
 This will run pyMARS with the gri30.cti mechanism with the initial conditions listed in the example file.  pyMARS will give the autoignition times as well as a plot of the autignition simulation for each inital condition.  Then, pyMARS will reduce the mechanism using the DRGEP method with the given target species until the error reaches 5 percent.  The species listed under species will not be removed from the model under any circumstance. 
 
@@ -50,8 +50,6 @@ Running pyMARS without any options will show a list of all possible options.  Th
   * --run_drgep: This option will run the DRGEP method for model reduction on the given model.  It requires a given error and target species through the --error and --target options. 
   * --plot: Plots the autoignition simulations for all of the initial conditions for the original mechanism.  
   * --points: Prints the range of the sampling points on the screen. 
-  * --writecsv: This option will create csv files containing tempuratures and times from the autoignition simulations for each inital condition for the original mechanism.  
-  * --writehdf5: Writes hdf5 files for the autoignition simulations for each inital condition. 
   * --write_ai_times: Creates a file containing the autoignition times for the original mechanism.  
 
 ## License
