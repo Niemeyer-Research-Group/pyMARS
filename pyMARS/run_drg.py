@@ -47,7 +47,7 @@ def run_drg(args, solution_object):
 
 	"""
 
-	if args.target == 0: #If the target species are not specified, puke and die.
+	if len(args.target) == 0: #If the target species are not specified, puke and die.
 		print "Please specify a target species."
 		exit()
 	done = [] #Singleton to hold wether or not any more species can be cut from the simulation.  

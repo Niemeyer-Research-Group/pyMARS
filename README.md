@@ -3,7 +3,7 @@
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-Python-based (chemical kinetic) Model Automatic Reduction Software (MARS), which consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.  pyMARS requires mechanisms to be stored in the Cantera format to be reduced.  However, running pyMARS with a CHEMKIN file will convert it into a Cantera file that can then be used.  The --convert option can then be used to turn the reduced model back into a CHEMKIN file.  
+Python-based (chemical kinetic) Model Automatic Reduction Software (pyMARS) consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.  pyMARS requires mechanisms to be stored in the Cantera format to be reduced.  However, running pyMARS with a CHEMKIN file will convert it into a Cantera file that can then be used.  The --convert option can then be used to turn the reduced model back into the CHEMKIN format.  
 
 pyMARS currently consists of two methods for model reduction:
 
@@ -27,7 +27,7 @@ To install:
      `python setup.py install`
 
 pyMARS is called from terminal via `__main__.py`
-__main__.py can be found in the pyMARS directory.
+which can be found in the pyMARS directory.
 
 example:
     `python __main__.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot --write_ai_times`
