@@ -5,18 +5,24 @@ import os
 from get_sample_range import get_range
 import h5py
 import time as tm
+import matplotlib
+matplotlib.use("Agg")
 
 
-def run_sim(solution_object, condition, sys_args='none', **usr_args ):
+def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args):
     """
     Function to run Cantera reactor simulation for autoigntion conditions
 
     Parameters
     ----------
+    i : int
+        An integer value that represents which number initial condition the program is on
     solution_object : obj
         Cantera solution object
     condition
         An object contining initial conditions (temperature, pressure, mole fractions)
+    info : boolean
+        A boolean value that is true if additional features such as plotting or writing csv files will be used.  
 
     Returns
     ----------
@@ -50,25 +56,31 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         run_sim(gas_solution, points='y', plot='y', initial_sim='y')
 
     """
+    #Set up variables
     func_start_time = tm.time()
     solution = solution_object
     initial_temperature = float(condition.temperature)
     pressure = float(condition.pressure)*float(ct.one_atm)
-    #check if species in solution
+    
+    #Set up species fractions
     frac = ''
     for reactant in condition.species.iteritems():
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]
-    solution.TPX = initial_temperature, pressure, frac #101.325 kPa
+    
+    #Set up variables
+    solution.TPX = initial_temperature, pressure, frac #101325 Pa
     species = solution.species()
     reactions = solution.reactions()
 
-    #run sim to find ignition delay from dT/dt max
-    reactor = ct.Reactor(solution)
+    #run sim to find ignition delay from when the tempurature first reaches 400 Kelvin above its original value.
+   
+    #Set up variables for the simulation.
+    reactor = ct.IdealGasReactor(solution) #Set up reactor
     simulation = ct.ReactorNet([reactor])
     current_time = 0.0
-    stop_time = 5.0e-3
+    stop_time = 25
     group_index = 0
     times1 = []
     temps = [] #first column is time, second is temperature
@@ -76,13 +88,16 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
     sdata = np.zeros([0, len(reactor.Y)])
     production_data = np.zeros([0, len(solution.net_production_rates)])
     state_list = list()
-
+    
+    #Prepare mass_fractions.hdf5 file.
     f1 = h5py.File('mass_fractions.hdf5', 'a')
     try:
         group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     except ValueError:
         print "Duplicate initial conditions, or check to make sure mass fractions file isn't in directory. If it is, delete it"""
     individual = f1.create_group(group_name)
+    
+    #Run simulation 
     timer_start =tm.time()
     while current_time < stop_time:
         group_index += 1
@@ -92,6 +107,7 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
             print error_string
             return
+        #Store information at this timestep
         times1.append(current_time)
         temps.append(reactor.T)
         species_data = reactor.Y
@@ -100,6 +116,10 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
         species_production_rates = reactor.kinetics.net_production_rates
+	try:
+            net_rates_of_progress = reactor.kinetics.net_rates_of_progress
+	except Exception:
+	    return 0
         net_rates_of_progress = reactor.kinetics.net_rates_of_progress
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Reaction Rates of Progress', data=net_rates_of_progress)
@@ -111,70 +131,82 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
         production_rates = np.array(solution.net_production_rates)
         production_rates = production_rates[:, np.newaxis].T
         production_data = np.vstack((production_data, production_rates))
-
+    
+    #Organize information collected from the simulation
     sample = get_range(times1, temps, sdata, production_data)
     timer_stop = tm.time()
 
 
     #strips all data except that within a 40 point sample range around ignition
     for grp in f1[group_name].keys():
-        if int(grp) not in range((sample.index-20), (sample.index+20)):
+        if int(grp) not in sample.index:
             f1[group_name].__delitem__(str(grp))
 
-    #f1.close()
 
-    #utility functions
-    def plot():
+    #utility functions.   
+    def plot(i):
         import matplotlib.pyplot as plt
         plt.clf()
         #plot combustion point
-        plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label='ignition point')
+        #plt.plot(sample.derivative_max[0], sample.derivative_max[1], 'ro', ms=7, label='ignition point')
         #plot initial and final sample points
-        plt.plot(sample.initial_point[0], sample.initial_point[1], 'rx', ms=5, mew=2)
-        plt.plot(sample.final_point[0], sample.final_point[1], 'rx', ms=5, mew=2)
+        #plt.plot(sample.initial_point[0], sample.initial_point[1], 'rx', ms=5, mew=2)
+        #plt.plot(sample.final_point[0], sample.final_point[1], 'rx', ms=5, mew=2)
         #plot temp vs time
         plt.plot(sample.times_total, sample.temps_total)
         plt.xlabel('Time (s)')
         plt.title('Mixture Temperature vs Time')
-        plt.legend()
-        plt.ylabel('Temperature (C)')
-        #plt.axis([0, 1.2, 900, 2800])
-        plt.show()
+        plt.ylabel('Temperature (K)')
+        plt.axis([sample.times_total[0], sample.tau * 2, sample.temps_total[0] - 200, sample.temps_total[len(sample.temps_total) - 1] + 200])
+        #plt.legend()
+        plt.savefig("fig" + "_ic" + str(i) + ".png", bbox_inches='tight')
+	plt.close()
 
-    def writecsv(sdata):
-
-
+    def writecsv(sdata, i):
         names = str(solution.species_names)
         tt = ['Time (s)', 'Temp (K)']
         names = solution.species_names
         name_array = np.append(tt, names)
-        sdata = sdata.astype('|S10')
+        #sdata = sdata.astype('|S10')
         file_data = np.vstack((name_array, sdata))
         #open and write to file
-        input_file_name_stripped = os.path.splitext(data_file)[0]
-        output_file_name = os.path.join(input_file_name_stripped + '_species_data.csv')
-        print output_file_name
+        input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
+        output_file_name = os.path.join(input_file_name_stripped + '_species_data' + 'ic_' + str(i) + '.csv')
         with open(output_file_name, 'wb') as f:
             np.savetxt(f, file_data, fmt=('%+12s'), delimiter=',')
         #os.system('atom '+ output_file_name)
 
-    def writehdf5(sdata):
+    def writehdf5(sdata,i):
+        
+        input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
+        output_file_name = os.path.join(input_file_name_stripped + '_ic_' + str(i) + '.csv')
+        if not (os.path.exists("./hdf5_files")):
+	    os.system("mkdir hdf5_files")
+	os.system("cp mass_fractions.hdf5 mass_fractions_" + output_file_name)
+        os.system("mv mass_fractions_" + output_file_name + " ./hdf5_files")
+	os.system("cp production_rates.hdf5 production_rates_" + output_file_name)
+        os.system("mv production_rates_" + output_file_name + " ./hdf5_files")
         #format matrix for hdf5
-        names = str(solution.species_names)
-        tt = ['Time (s)', 'Temp (K)']
-        names = solution.species_names
-        name_array = np.append(tt, names)
-        sdata = sdata.astype('|S10')
-        file_data = np.vstack((name_array, sdata))
+        #names = str(solution.species_names)
+        #tt = ['Time (s)', 'Temp (K)']
+        #names = solution.species_names
+        #name_array = np.append(tt, names)
+        #sdata = sdata.astype('|S10')
+        #file_data = np.vstack((name_array, sdata))
         #open and write to file
-        input_file_name_stripped = os.path.splitext(data_file)[0]
-        output_file_name = os.path.join(input_file_name_stripped + '_species_data.hdf5')
-        with h5py.File(output_file_name, 'w') as f:
-            Times = f.create_dataset("Times", data=sample.times)
-            Temps = f.create_dataset("Temps", data=sample.temps)
-            sgroup = f.create_group('Species_Data')
-            for i, sp in enumerate(solution.species_names):
-                sgroup.create_dataset(sp, data=sdata[:, i+2])
+        #input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
+        #output_file_name = os.path.join(input_file_name_stripped + '_species_data.hdf5')
+        #with h5py.File(output_file_name, 'w') as f:
+            #Times = f.create_dataset("Times", data=sample.times_total)
+            #Temps = f.create_dataset("Temps", data=sample.temps_total)
+            #sgroup = f.create_group('Species_Data')
+            #for i, sp in enumerate(solution.species_names):
+                #sgroup.create_dataset(sp, data=sdata[i])
+
+    def write_ai_times():
+        f = open("autoignition_times.txt", "a")
+        f.write(str(sample.temps_total[0]) + ", " + str(sample.tau) + "\n")
+        f.close()
 
     def points():
         print("\nTime[s]            Temp[K]        Index        Point")
@@ -186,17 +218,19 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
          + "       " + str(sample.final_point[2]) + "     " + "Final sample point")
 
     #terminal use case
-    if sys_args is not 'none':
+    if sys_args is not 'none' and info:
         if sys_args.plot:
-            plot()
+            plot(i)
         if sys_args.writecsv:
-            writecsv(sample.species_data)
+            writecsv(sample.species_data,i)
         if sys_args.writehdf5:
-            writehdf5(sample.species_data)
+            writehdf5(sample.species_data,i)
         if sys_args.points:
             points()
-
-
+        if sys_args.write_ai_times:
+            write_ai_times()
+    
+    #Create and return an object that contains criticial information about the simulation.
     class return_obj:
         def __init__(self, time, temp, sp_data, f1, tau, Temp, frac):
             self.time = time
@@ -208,8 +242,5 @@ def run_sim(solution_object, condition, sys_args='none', **usr_args ):
             self.Temp = initial_temperature
             self.frac = frac
             self.tau_array = []
-    #print 'autoignition time: %0.5f'    %(tm.time()-func_start_time)
     return return_obj(sample.times, sample.temps, sample.species_data, f1, sample.tau, initial_temperature, frac)
 
-    "sdata is an array of 40 timesteps, with each instance containing an array of species"
-    "mass fractions at that instant"

@@ -2,7 +2,7 @@ from autoignition_module import run_sim
 from readin_initial_conditions import readin_conditions
 
 
-def autoignition_loop_control(solution_object, args):
+def autoignition_loop_control(solution_object, args, plot=False):
     """Controls autoignition module
 
     Parameters
@@ -11,6 +11,8 @@ def autoignition_loop_control(solution_object, args):
         Cantera solution object
     args : class
         Arguments from terminal
+    plot : boolean
+        A boolean value that represents if this run will use additional features such as making plots or csv files.  
 
     Returns
     -------
@@ -54,22 +56,19 @@ def autoignition_loop_control(solution_object, args):
     initial_temperature_array = []
 
     #send initial conditions to autoignition script
-    if args.multiple_conditions is True:
-        for condition in conditions_array:
-            sim_result = run_sim(solution_object, condition, args)
-            initial_temperature_array.append(condition.temperature)
-            try:
-                tau_array.append(sim_result.tau)
-            except AttributeError:
-                tau_array.append(0.0)
-    else:
-        sim_result = run_sim(solution_object, conditions_array[0], args)
-        initial_temperature_array.append(conditions_array[0].temperature)
+    i = 1 #iterate which condition number it is for file naming.
+    for condition in conditions_array:
+        sim_result = run_sim(i,solution_object, condition, args, plot)
+        if (sim_result == 0):
+            return 0
+        initial_temperature_array.append(condition.temperature)
+        i = i + 1
         try:
             tau_array.append(sim_result.tau)
         except AttributeError:
             tau_array.append(0.0)
-
+    
+    #Store the information from the simulation in an object and return it.
     sim_result.tau_array = tau_array
     sim_result.initial_temperature_array = initial_temperature_array
     return sim_result

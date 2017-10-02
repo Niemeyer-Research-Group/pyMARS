@@ -11,7 +11,7 @@ from string import Template
 
 import cantera as ct
 #from test.test_mechanism_from_solution import test
-import ck2cti
+from cantera import ck2cti
 
 
 def write(solution):
