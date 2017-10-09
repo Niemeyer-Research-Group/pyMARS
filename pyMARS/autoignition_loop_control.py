@@ -43,7 +43,7 @@ def autoignition_loop_control(solution_object, args, plot=False):
     if args.conditions_file:
         conditions_array = readin_conditions(str(args.conditions_file))
     elif not args.conditions_file:
-        print 'No initial conditions file found. Please enter below'
+        print('No initial conditions file found. Please enter below')
         number_conditions = int(float(raw_input('Enter # of initial conditions: ')))
         if number_conditions > 1.0:
             for i in range(number_conditions):

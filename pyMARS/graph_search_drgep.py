@@ -23,8 +23,8 @@ def graph_search_drgep(nx_graph, target_species):
     for target in target_species: 
         dic = ss_dijkstra_path_length_modified(nx_graph, target) #Get dictionary of each values maximum path
         for sp in dic:    #If the species are not in the max dictionary or the new value for that species is greater than the one in the max dictionary, add it to the max dictionary.  
-	    if sp not in max_dic:                                                                                                                                         
+            if sp not in max_dic:                                                                                                                                         
                 max_dic[sp] = dic[sp]
-	    elif max_dic[sp] < dic[sp]:
+            elif max_dic[sp] < dic[sp]:
                 max_dic[sp] = dic[sp]
     return max_dic

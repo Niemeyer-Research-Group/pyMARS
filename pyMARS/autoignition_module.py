@@ -94,7 +94,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
     try:
         group_name = str(initial_temperature) + '_' + str(pressure) + '_' + str(frac)
     except ValueError:
-        print "Duplicate initial conditions, or check to make sure mass fractions file isn't in directory. If it is, delete it"""
+        print("Duplicate initial conditions, or check to make sure mass fractions file isn't in directory. If it is, delete it")
     individual = f1.create_group(group_name)
     
     #Run simulation 
@@ -105,7 +105,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
             current_time = simulation.step()
         except Exception:
             error_string = 'Cantera autoignition_error @ %sK initial temperature' %initial_temperature
-            print error_string
+            print(error_string)
             return
         #Store information at this timestep
         times1.append(current_time)
@@ -116,10 +116,10 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
         grp['Time'] = current_time
         grp['Pressure'] = reactor.thermo.P
         species_production_rates = reactor.kinetics.net_production_rates
-	try:
+        try:
             net_rates_of_progress = reactor.kinetics.net_rates_of_progress
-	except Exception:
-	    return 0
+        except Exception:
+            return 0
         net_rates_of_progress = reactor.kinetics.net_rates_of_progress
         grp.create_dataset('Species Mass Fractions', data=species_data)
         grp.create_dataset('Reaction Rates of Progress', data=net_rates_of_progress)
@@ -160,7 +160,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
         plt.axis([sample.times_total[0], sample.tau * 2, sample.temps_total[0] - 200, sample.temps_total[len(sample.temps_total) - 1] + 200])
         #plt.legend()
         plt.savefig("fig" + "_ic" + str(i) + ".png", bbox_inches='tight')
-	plt.close()
+        plt.close()
 
     def writecsv(sdata, i):
         names = str(solution.species_names)
@@ -181,10 +181,10 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
         input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
         output_file_name = os.path.join(input_file_name_stripped + '_ic_' + str(i) + '.csv')
         if not (os.path.exists("./hdf5_files")):
-	    os.system("mkdir hdf5_files")
-	os.system("cp mass_fractions.hdf5 mass_fractions_" + output_file_name)
+            os.system("mkdir hdf5_files")
+        os.system("cp mass_fractions.hdf5 mass_fractions_" + output_file_name)
         os.system("mv mass_fractions_" + output_file_name + " ./hdf5_files")
-	os.system("cp production_rates.hdf5 production_rates_" + output_file_name)
+        os.system("cp production_rates.hdf5 production_rates_" + output_file_name)
         os.system("mv production_rates_" + output_file_name + " ./hdf5_files")
         #format matrix for hdf5
         #names = str(solution.species_names)

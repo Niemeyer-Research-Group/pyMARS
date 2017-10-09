@@ -4,7 +4,7 @@ import argparse
 
 
 def m(args=None):
-    """
+	'''
     Parameters
     ----------
         file : str
@@ -35,61 +35,69 @@ def m(args=None):
         write_ai_times :
             Write autoignition times to a .txt file
 
-    """
-    #gets arguments from terminal
-    parser=argparse.ArgumentParser(description='pyMARS main: \
-                converts and trims mechanism files \n')
-    parser.add_argument('--file', \
-                        help='input mechanism file name', \
-                        type=str)
-    parser.add_argument('--conditions', \
-                        help='initial conditions file name', \
-                        type=str)
+	'''
+	#gets arguments from terminal
+	parser=argparse.ArgumentParser(description='pyMARS main: \
+		converts and trims mechanism files \n')
+	
+	parser.add_argument('--file', \
+		help='input mechanism file name', \
+		type=str)
 
-    parser.add_argument('--species',  \
-                        help='comma separated list input of species to never exclude',\
-                        type=str)
+	parser.add_argument('--conditions', \
+		help='initial conditions file name', \
+		type=str)
 
-    parser.add_argument('--thermo', \
-                        help='thermodynamic data file', \
-                        type=str)
+	parser.add_argument('--species',  \
+		help='comma separated list input of species to never exclude',\
+		type=str)
 
-    parser.add_argument('--transport', \
-                        help='transport data file', \
-                        type=str)
+	parser.add_argument('--thermo', \
+		help='thermodynamic data file', \
+		type=str)
 
-    parser.add_argument('--plot', \
-                        help='plots ignition curve', \
-                        action="store_true")
+	parser.add_argument('--transport', \
+		help='transport data file', \
+		type=str)
 
-    parser.add_argument('--points', \
-                        help='print sim sample points', \
-                        action="store_true")
-    parser.add_argument('--run_drg', \
-                        help='run Direct Relation Graph method to reduce', \
-                        action="store_true")
-    parser.add_argument('--convert', \
-                        help='Only convet selected file from .cti <====> .inp', \
-                        action="store_true")
-    parser.add_argument('--run_drgep', \
-			help='run Direct Relation Graph with Error Propigation method to reduce', \
-			action="store_true")
-    parser.add_argument('--write_ai_times', \
-			help='Write the autoignition times from the simulations to a file.', \
-			action="store_true")
-    parser.add_argument('--error', \
-                        help='Maximum allowed error indtroducted by the reduced simulation', \
-                        type=float)
-    parser.add_argument('--target', \
-			help='target species for the model reduction.  Comma seperated list.', \
-			type=str)
+	parser.add_argument('--plot', \
+		help='plots ignition curve', \
+		action="store_true")
 
-    args=parser.parse_args()
-    if args.file is not None:
-        readin(args)
-    if args.file is None:
-        #readin(args)
-        print """
+	parser.add_argument('--points', \
+		help='print sim sample points', \
+		action="store_true")
+    
+	parser.add_argument('--run_drg', \
+		help='run Direct Relation Graph method to reduce', \
+		action="store_true")
+    
+	parser.add_argument('--convert', \
+		help='Only convet selected file from .cti <====> .inp', \
+		action="store_true")
+    
+	parser.add_argument('--run_drgep', \
+		help='run Direct Relation Graph with Error Propigation method to reduce', \
+		action="store_true")
+
+	parser.add_argument('--write_ai_times', \
+		help='Write the autoignition times from the simulations to a file.', \
+		action="store_true")
+
+	parser.add_argument('--error', \
+                       help='Maximum allowed error indtroducted by the reduced simulation', \
+                       type=float)
+
+	parser.add_argument('--target', \
+		help='target species for the model reduction.  Comma seperated list.', \
+		type=str)
+
+	args=parser.parse_args()
+	if args.file is not None:
+		readin(args)
+	if args.file is None:
+		#readin(args)
+		string = '''
         Python Model Automated Reduction Software (pyMARS)
 
         Arguments
@@ -123,4 +131,5 @@ def m(args=None):
 		Comma seperated list of species to use as targets for model reduction.
 
 
-        """
+        '''
+		print(string)

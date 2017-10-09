@@ -141,12 +141,12 @@ def get_rates_drg(hdf5_file, solution_object):
                 all_species = reac.reactants
                 all_species.update(reac.products)
                 if reac_prod_rate != 0:
-		    if reac_prod_rate > 0:
+                    if reac_prod_rate > 0:
                         
-			for species in products:
+                        for species in products:
                             if species in list_B:
                                 list_B[species] += abs(float(reac_prod_rate*products[species]))
-			    else:
+                            else:
                                 list_B[species] = abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
                                 if species_b != species:
@@ -156,10 +156,10 @@ def get_rates_drg(hdf5_file, solution_object):
                                     else:
                                         list_C[partial_name] = abs(float(reac_prod_rate*products[species]))
                         
-			for species in reactants:
+                        for species in reactants:
                             if species in list_B:
                                 list_B[species] += abs(float(reac_prod_rate*reactants[species]))
-			    else:
+                            else:
                                 list_B[species] = abs(float(reac_prod_rate*reactants[species]))
                             for species_b in all_species:
                                 if species_b != species:
@@ -174,7 +174,7 @@ def get_rates_drg(hdf5_file, solution_object):
                         for species in products:
                             if species in list_B:
                                 list_B[species] += abs(float(reac_prod_rate*products[species]))
-			    else:
+                            else:
                                 list_B[species] = abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
                                 if species_b != species:
@@ -187,7 +187,7 @@ def get_rates_drg(hdf5_file, solution_object):
                         for species in reactants:
                             if species in list_B:
                                 list_B[species] += abs(float(reac_prod_rate*reactants[species]))
-			    else:
+                            else:
                                 list_B[species] = abs(float(reac_prod_rate*reactants[species]))
                             for species_b in all_species:
                                 if species_b != species:

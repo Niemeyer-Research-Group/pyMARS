@@ -47,26 +47,26 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
                     #dgep weight between two species
-	            if denominator[species_a_name] != 0:
+                    if denominator[species_a_name] != 0:
                         weight = abs(float(numerator[edge])/float(denominator[species_a_name]))
                         if graph.has_edge(species_a_name, species_b_name):
                             old_weight = graph[species_a_name][species_b_name]['weight']
                             if weight > old_weight and weight <= 1:
                                 graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-			    elif weight > 1:
-			    	print "Error.  Edge weights should not be greater than one."
-			    	exit()
+                            elif weight > 1:
+                                print("Error.  Edge weights should not be greater than one.")
+                                exit()
                         elif weight <= 1:
                             graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-		        elif weight > 1:
-		    		print "Error.  Edge weights should not be greater than one."
-		     		exit()
+                        elif weight > 1:
+                            print("Error.  Edge weights should not be greater than one.")
+                            exit()
                 except IndexError:
-                    print edge
+                    print(edge)
                     continue
             
             #Search the graph for overall interaction coefficents and add them to max_dic if they belong 
-      	    dic = graph_search_drgep(graph, target_species) #Search graph for max values to each species based on targets
+            dic = graph_search_drgep(graph, target_species) #Search graph for max values to each species based on targets
             for sp in dic: #Add to max dictionary if it is new or greater than the value already there. 
                 if sp not in max_dic:
                     max_dic[sp] = dic[sp]

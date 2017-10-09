@@ -45,7 +45,7 @@ def get_range(times, temps, sdata, production_data):
     index = 0
     for i in range (0, len(temps)):
         if index == 0 and temps[i] >= temps[0] + 400:
-		index = i
+            index = i
     derivative_max = [times[index], T[index], index]
     tau = times[index]
 
@@ -114,6 +114,6 @@ def get_range(times, temps, sdata, production_data):
             self.temps = te
             self.species_data = sp
             self.production_data =pr
-	    self.index = i
+            self.index = i
     return sample_data(tau, index, times, temps, species_data, production_data,
                         derivative_max, initial_point, final_point,time_trim,temp_trim,spec_trim,prod_trim,ind_trim)

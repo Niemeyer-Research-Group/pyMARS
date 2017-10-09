@@ -134,8 +134,8 @@ def get_rates(hdf5_file, solution_object):
             list_C = {}
             for spc in new_solution.species():
                 list_B[spc.name] = []
-		list_B[spc.name].append(0)
-		list_B[spc.name].append(0)
+                list_B[spc.name].append(0)
+                list_B[spc.name].append(0)
             #calculate species interaction coefficeints as in DRGEP. I've proven this method
             #to work in a few other test functions
             for i, reac in enumerate(new_solution.reactions()):
@@ -145,7 +145,7 @@ def get_rates(hdf5_file, solution_object):
                 all_species = reac.reactants
                 all_species.update(reac.products)
                 if reac_prod_rate != 0:
-		    if reac_prod_rate > 0:
+                    if reac_prod_rate > 0:
                         for species in products:
                             list_B[species][1] += abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
@@ -188,13 +188,13 @@ def get_rates(hdf5_file, solution_object):
                                          list_C[partial_name] = float(-reac_prod_rate*reactants[species])
 	    
             for species in new_solution.species():
-	        if abs(list_B[species.name][0]) > abs(list_B[species.name][1]):
-	            list_B[species.name] = abs(list_B[species.name][0])
-	        else:
-	            list_B[species.name] = abs(list_B[species.name][1])
+                if abs(list_B[species.name][0]) > abs(list_B[species.name][1]):
+                    list_B[species.name] = abs(list_B[species.name][0])
+                else:
+                    list_B[species.name] = abs(list_B[species.name][1])
 	    
             for name in list_C:
-		list_C[name] = abs(list_C[name])
+                list_C[name] = abs(list_C[name])
             ic_edge_data[tstep] = [list_A, list_B, list_C]
         total_edge_data[grp.title()] = ic_edge_data
 
