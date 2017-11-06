@@ -9,6 +9,8 @@ from run_drgep import run_drgep
 from run_drg import run_drg
 from autoignition_loop_control import autoignition_loop_control
 
+ct.suppress_thermo_warnings()
+
 def readin(args='none', **argv):
     '''
     Main function for pyMARS
