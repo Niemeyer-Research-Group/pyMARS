@@ -39,12 +39,12 @@ def get_rates_drg(hdf5_file, solution_object):
     old_solution = solution_object
     #iterate through all initial conditions
     total_edge_data = {}
-    for grp in f.iterkeys():
+    for grp in f.keys():
         start_time = tm.time()
         #get solution data at individual timestep
         ic_group = g.create_group(grp.title())
         ic_edge_data = {}
-        for tstep in f[grp].iterkeys():
+        for tstep in f[grp].keys():
 
             #--------------------------------
             #reading from mass fractions file

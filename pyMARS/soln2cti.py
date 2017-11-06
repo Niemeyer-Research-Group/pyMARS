@@ -9,6 +9,7 @@ from __future__ import division
 import os
 import textwrap
 from string import Template
+from name_trim import name_trim
 
 import cantera as ct
 #from test_mechanism_from_solution import test
@@ -33,6 +34,7 @@ def write(solution):
 
     trimmed_solution = solution
     input_file_name_stripped = trimmed_solution.name
+    input_file_name_stripped = name_trim(input_file_name_stripped) #Change trim name to take out the .cti as well.  
     cwd = os.getcwd()
     output_file_name = os.path.join(
                                     cwd,
@@ -40,7 +42,7 @@ def write(solution):
                                     input_file_name_stripped +
                                     '.cti')
 
-    f = open(output_file_name, 'w+')
+    f = open(output_file_name, 'w')
 
 
     #Get solution temperature and pressure
@@ -402,7 +404,7 @@ def write(solution):
     section_break('Reaction Data')
 
     #write data for each reaction in the Solution Object
-    for eq_index in xrange(len(trimmed_solution.reaction_equations())):
+    for eq_index in range(len(trimmed_solution.reaction_equations())):
         equation_string = str(trimmed_solution.reaction_equation(eq_index))
         equation_object = trimmed_solution.reaction(eq_index)
         equation_type = type(equation_object).__name__

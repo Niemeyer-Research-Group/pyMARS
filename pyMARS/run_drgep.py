@@ -56,6 +56,7 @@ def run_drgep(args, solution_object):
 	done.append(False)
 	threshold = .1 #Starting threshold value
 	threshold_i = .1
+	n = 1
 	error = [10.0] #Singleton to hold the error value of the previously ran simulation.
 	
 	try:
@@ -76,7 +77,10 @@ def run_drgep(args, solution_object):
 	while error[0] != 0: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
 		threshold_i = threshold_i / 10
+		n = n + 1
 		drgep_loop_control(solution_object, args, error, threshold, done, max_dic)
+		if error[0] <= .02:
+			error[0] = 0
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
@@ -93,16 +97,17 @@ def run_drgep(args, solution_object):
 		        #if (threshold >= .01):
                         #threshold_i = .01
 			threshold = threshold + threshold_i
+			threshold = round(threshold, n)
         
 	print("\nGreatest result: ")
 	sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic)
-	if os.path.exsists("production_rates.hdf5"):
-		os.system('rm production_rates.hdf5')
-	if os.path.exsists('mass_fractions.hdf5'):
-		os.system('rm mass_fractions.hdf5')
+	#if os.path.exsists("production_rates.hdf5"):
+	#	os.system('rm production_rates.hdf5')
+	#if os.path.exsists('mass_fractions.hdf5'):
+	#	os.system('rm mass_fractions.hdf5')
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
 	
-	try:
-		os.system('rm production_rates.hdf5')
-	except Exception:
-		pass
+	#try:
+	#	os.system('rm production_rates.hdf5')
+	#except Exception:
+	#	pass

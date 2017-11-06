@@ -43,7 +43,7 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
     ignition_delay_detailed = np.array(detailed_result.tau_array)
     species_retained = []
     printout = ''
-    print 'Threshold     Species in Mech      Error'
+    print('Threshold     Species in Mech      Error')
     
     try:
         os.system('rm mass_fractions.hdf5')
@@ -60,9 +60,9 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
     reduced_result = autoignition_loop_control(new_solution_objects[1], args) #Run simulation on reduced model
     if (reduced_result == 0):
         stored_error[0] = 100
-	error = 100
-    	printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
-    	print printout
+        error = 100
+        printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+        print(printout)
         return new_solution_objects
     reduced_result.test.close()
     ignition_delay_reduced = np.array(reduced_result.tau_array)
@@ -70,7 +70,7 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
     #Calculate error
     error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 #Calculate error
     printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
-    print printout
+    print(printout)
     stored_error[0] = round(np.max(error), 2)
    
     #Return new model.  

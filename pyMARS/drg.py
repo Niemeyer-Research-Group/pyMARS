@@ -42,11 +42,11 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
     
     #calculate edge weights based on list received from get_rate_data
     #initial condition
-    for ic in total_edge_data.iterkeys(): #For each initial condition
+    for ic in total_edge_data.keys(): #For each initial condition
         for species in species_objects: #Make graph
             graph.add_node(species.name)
         #timestep
-        for tstep in total_edge_data[ic].iterkeys(): #Set edge values for the graph
+        for tstep in total_edge_data[ic].keys(): #Set edge values for the graph
             numerator = total_edge_data[ic][tstep][2]
             denominator = total_edge_data[ic][tstep][1]
             #each species
@@ -56,28 +56,28 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
                     #dge weight between two species
-	            if denominator[species_a_name] != 0:
+                    if denominator[species_a_name] != 0:
                         weight = abs(float(numerator[edge])/float(denominator[species_a_name]))
                         if graph.has_edge(species_a_name, species_b_name):
                             old_weight = graph[species_a_name][species_b_name]['weight']
                             if weight > old_weight and weight <= 1 and weight > threshold_value: #Only include the weight if it is greater than the threshold value.   
                                 graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-			    elif weight > 1:
-			    	print "Error.  Edge weights should not be greater than one."
-			    	exit()
+                            elif weight > 1:
+                                print("Error.  Edge weights should not be greater than one.")
+                                exit()
                         elif weight <= 1 and weight > threshold_value:
                             graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-		        elif weight > 1:
-		    		print "Error.  Edge weights should not be greater than one."
-		     		exit()
+                        elif weight > 1:
+                                print("Error.  Edge weights should not be greater than one.")
+                                exit()
                 except IndexError:
-                    print edge
+                    print(edge)
                     continue
-        
-      	    dic = graph_search(graph, target_species) #Search graph for max values to each species based on targets
+    	   
+            dic = graph_search(graph, target_species) #Search graph for max values to each species based on targets
             for sp in dic: #Add to max dictionary if it is new or greater than the value already there. 
                 if sp not in safe:
-			safe.append(sp)
+                    safe.append(sp)
             graph.clear() #Reset graph
 
     core_species = []

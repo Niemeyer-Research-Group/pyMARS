@@ -64,7 +64,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
     
     #Set up species fractions
     frac = ''
-    for reactant in condition.species.iteritems():
+    for reactant in condition.species.items():
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]

@@ -46,9 +46,9 @@ def readin_conditions(initial_conditions_text_file):
                         condition_name = 'Condition #' + str(name_index)
                     if start is True:
                         if "PRES" in line:
-                            p = str(line).translate(None, string.letters)
+                            p = str(line).strip(string.ascii_letters)
                         if 'TEMP' in line:
-                            t = str(line).translate(None, string.letters)
+                            t = str(line).strip(string.ascii_letters)
                         if 'REAC' in line:
                             reactants += line.replace('REAC ', '').replace(' ', ':').rstrip() + ','
                             species = line.replace('REAC ', '').rsplit(' ', 1)[0]

@@ -34,11 +34,11 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
     max_dic = {} #Dictionary holding the maximum values for the iteration
     
     #calculate edge weights based on list received from get_rate_data and use them to create a graph
-    for ic in total_edge_data.iterkeys(): #For each initial condition
+    for ic in total_edge_data.keys(): #For each initial condition
         for species in species_objects: #Make graph
             graph.add_node(species.name)
         #timestep
-        for tstep in total_edge_data[ic].iterkeys(): #Make a graph at each timestep
+        for tstep in total_edge_data[ic].keys(): #Make a graph at each timestep
             numerator = total_edge_data[ic][tstep][2] #DRGEP calculations of direct interaction coeffients are done in the total_edge_data function.
             denominator = total_edge_data[ic][tstep][1]
             for edge in numerator: #For each edge, determine its weight amnd add it to the graph
