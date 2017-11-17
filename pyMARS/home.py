@@ -33,8 +33,6 @@ def readin(args='none', **argv):
         write data to csv (ex. writecsv='y')
     writehdf5:
         write data to hdf5 (ex. writehdf5='y')
-    write_ai_times:
-        write autoignition times for each inital condition
     run_drg:
         Run DRG model reduction
     run_drgep:
@@ -73,7 +71,6 @@ def readin(args='none', **argv):
             convert = args.convert
             error = args.error
             run_drgep = args.run_drgep
-            write_ai_times = args.write_ai_times
             target = 0
             if args.species is None:
                 keepers = []
@@ -96,13 +93,27 @@ def readin(args='none', **argv):
         print("\nThis is a Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
     
-        #runs simulation once with additional features on
-        if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True or args.write_ai_times is True:
+        #runs simulation once with additional features on.  Always true since hdf5 and csv are always written now.  
+        if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
             if os.path.exists('mass_fractions.hdf5'):
                 os.system('rm mass_fractions.hdf5')
-            if args.write_ai_times is True:
-                if os.path.exists('autoignition_times.txt'):
-                    os.system('rm autoignition_times.txt')
+
+            if not (os.path.exists("./hdf5_files")): 
+                os.system("mkdir hdf5_files")
+            else:
+                os.system("rm -r -f hdf5_files")
+                os.system("mkdir hdf5_files")
+            
+            if args.plot is True:
+                if not (os.path.exists("./figures")): 
+                    os.system("mkdir figures")
+                else:
+                    os.system("rm -r -f figures")
+                    os.system("mkdir figures")
+                    
+            if os.path.exists("autoignition_data_original_model.csv"):
+                os.system("rm autoignition_data_original_model.csv")
+
             print('running simulation\n')
             sim_result = autoignition_loop_control(solution_object, args, True)
 	

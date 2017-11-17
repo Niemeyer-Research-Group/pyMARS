@@ -34,7 +34,7 @@ def write(solution):
 
     trimmed_solution = solution
     input_file_name_stripped = trimmed_solution.name
-    input_file_name_stripped = name_trim(input_file_name_stripped) #Change trim name to take out the .cti as well.  
+    input_file_name_stripped = name_trim(input_file_name_stripped) #Change trim name to take out the .cti as well. 
     cwd = os.getcwd()
     output_file_name = os.path.join(
                                     cwd,

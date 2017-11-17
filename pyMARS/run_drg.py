@@ -74,6 +74,8 @@ def run_drg(args, solution_object):
 		threshold_i = threshold_i / 10
 		n = n + 1
 		drg_loop_control(solution_object, args, error, threshold, done, rate_edge_data)
+		if error[0] <= .02:
+			error[0] = 0
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object

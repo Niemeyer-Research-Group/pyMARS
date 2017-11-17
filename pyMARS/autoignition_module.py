@@ -3,6 +3,7 @@ import numpy as np
 import cantera as ct
 import os
 from get_sample_range import get_range
+from name_trim import name_trim
 import h5py
 import time as tm
 import matplotlib
@@ -135,8 +136,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
     #Organize information collected from the simulation
     sample = get_range(times1, temps, sdata, production_data)
     timer_stop = tm.time()
-
-
+    
     #strips all data except that within a 40 point sample range around ignition
     for grp in f1[group_name].keys():
         if int(grp) not in sample.index:
@@ -144,7 +144,7 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
 
 
     #utility functions.   
-    def plot(i):
+    def plot(i): 
         import matplotlib.pyplot as plt
         plt.clf()
         #plot combustion point
@@ -160,28 +160,46 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
         plt.axis([sample.times_total[0], sample.tau * 2, sample.temps_total[0] - 200, sample.temps_total[len(sample.temps_total) - 1] + 200])
         #plt.legend()
         plt.savefig("fig" + "_ic" + str(i) + ".png", bbox_inches='tight')
+        os.system("mv fig_ic" + str(i) + ".png ./figures")
         plt.close()
 
     def writecsv(sdata, i):
-        names = str(solution.species_names)
-        tt = ['Time (s)', 'Temp (K)']
-        names = solution.species_names
-        name_array = np.append(tt, names)
+        f = open("autoignition_data_original_model.csv", "a")
+        
+        pres = condition.pressure #format pressure
+        new_pres = ""
+        for i in pres:
+             if i != "\n" and i != " ":
+                 new_pres = new_pres + i
+        
+        no_comma = "" #format equivilence ratio info
+        for i in frac:
+            if i != ",":
+                no_comma = no_comma + i
+            else:
+                no_comma = no_comma + " "
+
+        f.write(str(sample.temps_total[0]) + ", " + new_pres + ", " + no_comma + ", " + str(sample.tau) + ",\n")
+        f.close()
+        
+        #tt = ['Time (s)', 'Temp (K)']
+        #names = solution.species_names
+        #name_array = np.append(tt, names)
         #sdata = sdata.astype('|S10')
-        file_data = np.vstack((name_array, sdata))
+        #file_data = np.vstack((name_array, sdata))
         #open and write to file
-        input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
-        output_file_name = os.path.join(input_file_name_stripped + '_species_data' + 'ic_' + str(i) + '.csv')
-        with open(output_file_name, 'wb') as f:
-            np.savetxt(f, file_data, fmt=('%+12s'), delimiter=',')
+        #input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
+        #input_file_name_stripped = name_trim(sys_args.data_file)
+        #output_file_name = os.path.join(input_file_name_stripped + '_species_data_ic_' + str(i) + '.csv')
+        #with open(output_file_name, 'wb') as f:
+        #    np.savetxt(f, file_data, fmt=('%+12s'), delimiter=',')
         #os.system('atom '+ output_file_name)
 
-    def writehdf5(sdata,i):
+    def writehdf5(sdata,i):   
         
         input_file_name_stripped = os.path.splitext(sys_args.data_file)[0]
-        output_file_name = os.path.join(input_file_name_stripped + '_ic_' + str(i) + '.csv')
-        if not (os.path.exists("./hdf5_files")):
-            os.system("mkdir hdf5_files")
+        input_file_name_stripped = name_trim(input_file_name_stripped)
+        output_file_name = os.path.join(input_file_name_stripped + '_ic_' + str(i) + '.hdf5')
         os.system("cp mass_fractions.hdf5 mass_fractions_" + output_file_name)
         os.system("mv mass_fractions_" + output_file_name + " ./hdf5_files")
         os.system("cp production_rates.hdf5 production_rates_" + output_file_name)
@@ -203,11 +221,6 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
             #for i, sp in enumerate(solution.species_names):
                 #sgroup.create_dataset(sp, data=sdata[i])
 
-    def write_ai_times():
-        f = open("autoignition_times.txt", "a")
-        f.write(str(sample.temps_total[0]) + ", " + str(sample.tau) + "\n")
-        f.close()
-
     def points():
         print("\nTime[s]            Temp[K]        Index        Point")
         print(str(sample.initial_point[0]) +  "       " + str("{0:.2f}".format(sample.initial_point[1]))\
@@ -227,8 +240,6 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
             writehdf5(sample.species_data,i)
         if sys_args.points:
             points()
-        if sys_args.write_ai_times:
-            write_ai_times()
     
     #Create and return an object that contains criticial information about the simulation.
     class return_obj:

@@ -32,8 +32,6 @@ def m(args=None):
             Plot a temperature profile of autoignition
         points :
             Return sampling and ignition points
-        write_ai_times :
-            Write autoignition times to a .txt file
 
 	'''
 	#gets arguments from terminal
@@ -80,10 +78,6 @@ def m(args=None):
 		help='run Direct Relation Graph with Error Propigation method to reduce', \
 		action="store_true")
 
-	parser.add_argument('--write_ai_times', \
-		help='Write the autoignition times from the simulations to a file.', \
-		action="store_true")
-
 	parser.add_argument('--error', \
                        help='Maximum allowed error indtroducted by the reduced simulation', \
                        type=float)
@@ -120,8 +114,6 @@ def m(args=None):
                 Plot a temperature profile of autoignition
             --points:
                 Return sampling and ignition points
-            --write_ai_times:
-                Write the autoignition times to a file
             --run_drgep :
                 Run Direct Relation Graphing with Error Propogation model reduction based on
                 a given allowed error.
