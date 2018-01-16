@@ -9,7 +9,7 @@ from autoignition_loop_control import autoignition_loop_control
 from drgep import make_dic_drgep
 import numpy as np
 
-def run_drgep(args, solution_object):           
+def run_drgep(args, solution_object,error,past):           
 	"""
     Function to run the drgep method for model reduction
 
@@ -84,7 +84,7 @@ def run_drgep(args, solution_object):
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
-	past = 0 #An integer representing the error introduced in the past simulation.  
+	past[0] = 0 #An integer representing the error introduced in the past simulation.  
 	done[0] = False
 
 	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut. 
@@ -93,7 +93,7 @@ def run_drgep(args, solution_object):
 			max_t = threshold
                         #if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
 		        #threshold = threshold + (threshold_i * 4)
-			past = error[0] 
+			past[0] = error[0] 
 		        #if (threshold >= .01):
                         #threshold_i = .01
 			threshold = threshold + threshold_i
@@ -101,12 +101,12 @@ def run_drgep(args, solution_object):
         
 	print("\nGreatest result: ")
 	sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic)
-	#if os.path.exsists("production_rates.hdf5"):
+	#if os.path.exists("production_rates.hdf5"):
 	#	os.system('rm production_rates.hdf5')
-	#if os.path.exsists('mass_fractions.hdf5'):
+	#if os.path.exists('mass_fractions.hdf5'):
 	#	os.system('rm mass_fractions.hdf5')
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
-	
+	return sol_new[1]
 	#try:
 	#	os.system('rm production_rates.hdf5')
 	#except Exception:

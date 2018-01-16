@@ -8,6 +8,7 @@ import numpy as np
 from run_drgep import run_drgep
 from run_drg import run_drg
 from autoignition_loop_control import autoignition_loop_control
+from sensativity_analysis import run_sa
 
 ct.suppress_thermo_warnings()
 
@@ -43,7 +44,11 @@ def readin(args='none', **argv):
 	The string names of the species that should be kept in the model no matter what.
     targets: list of strings
 	The string names of the species that should be used as target species.
-
+    run_sa: Boolean
+        True if the user wants to run a sensativity analysis
+    ep_star: Int
+        An integer representing the ep star value for sensativity analysis.
+    
     Returns
     -------
         Converted mechanism file
@@ -70,6 +75,8 @@ def readin(args='none', **argv):
             conditions_file = args.conditions
             convert = args.convert
             error = args.error
+            sa = args.run_sa
+            ep_star = args.ep_star
             run_drgep = args.run_drgep
             target = 0
             if args.species is None:
@@ -118,13 +125,30 @@ def readin(args='none', **argv):
             sim_result = autoignition_loop_control(solution_object, args, True)
 	
         if args.run_drg is True:
-        	run_drg(args, solution_object)
+            error = [10.0]
+            past = [0]
+            reduced = run_drg(args, solution_object,error,past)
+            if args.sa:
+                if args.ep_star:
+                    final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
+                    sa_file = soln2cti.write(final)
+                else:
+                    print("Please provide an --ep_star arguement to run SA.")
+				
 	
         if args.convert is True:
             soln2ck.write(solution_object)
 	
         if args.run_drgep is True: #If the user wants to run drgep and specifies it as a command line argument.
-            run_drgep(args, solution_object)
+            error = [10.0]
+            past = [0]
+            reduced = run_drgep(args, solution_object,error,past)
+            if args.sa:
+                if args.ep_star:
+                    final = run_sa(solution_object,reduced,args.ep_star,past[0],args)
+                    sa_file = soln2cti.write(final)
+                else:
+                    print("Please provide an --ep_star arguement to run SA.")
 
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")

@@ -77,14 +77,22 @@ def m(args=None):
 	parser.add_argument('--run_drgep', \
 		help='run Direct Relation Graph with Error Propigation method to reduce', \
 		action="store_true")
+	
+	parser.add_argument('--run_sa', \
+		help='run a sensativity analysis after completing another method', \
+		action="store_true")
 
 	parser.add_argument('--error', \
                        help='Maximum allowed error indtroducted by the reduced simulation', \
                        type=float)
 
 	parser.add_argument('--target', \
-		help='target species for the model reduction.  Comma seperated list.', \
+		help='target species for the model reduction.  Comma seperated list', \
 		type=str)
+	
+	parser.add_argument('--ep_star', \
+                       help='Ep star value used in sensativity analysis.', \
+                       type=float)
 
 	args=parser.parse_args()
 	if args.file is not None:
@@ -121,6 +129,10 @@ def m(args=None):
 	        A float representing the maximum ammount of error allowed to be introcued to the model (0-100).
 	    --target:
 		Comma seperated list of species to use as targets for model reduction.
+	    --run_sa:
+		Run a senativity analysis after completing a method.
+	    --ep_star:
+		The ep_star value for completing a sensativity analysis.  
 
 
         '''

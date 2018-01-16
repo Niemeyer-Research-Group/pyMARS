@@ -8,7 +8,7 @@ from drg_loop_control import drg_loop_control
 from autoignition_loop_control import autoignition_loop_control
 import numpy as np
 
-def run_drg(args, solution_object):           
+def run_drg(args, solution_object,error,past):           
 	"""
     Function to run the drgep method for model reduction
 
@@ -79,16 +79,16 @@ def run_drg(args, solution_object):
 	
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
-	past = 0 #An integer representing the error introduced in the past simulation.  
+	past[0] = 0 #An integer representing the error introduced in the past simulation.  
 	done[0] = False
 
 	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut. 
 		sol_new = drg_loop_control( solution_object, args, error, threshold, done, rate_edge_data) #Trim at this threshold value and calculate error.
 		if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
-                        max_t = threshold
+			max_t = threshold
 		#if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate. 
 		#	threshold = threshold + (threshold_i * 4)
-		past = error[0] 
+			past[0] = error[0] 
 		#if (threshold >= .01):
                 #        threshold_i = .01
 		threshold = threshold + threshold_i
@@ -97,8 +97,8 @@ def run_drg(args, solution_object):
 	print("\nGreatest result: ")
 	sol_new = drg_loop_control( solution_object, args, error, max_t, done, rate_edge_data)
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
-	
 	try:
 		os.system('rm production_rates.hdf5')
 	except Exception:
 		pass
+	return sol_new[1]
