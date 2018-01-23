@@ -22,7 +22,7 @@ def create_limbo(reduced_model, ep_star, drgep_coeffs,safe):
 	for sp in species_objex:
 		reduc_species.append(sp.name)
 	for sp in reduc_species:
-		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
+		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe): #All species that fit the condition of being in limbo are added to a list.
 			limbo.append(sp)
 	return limbo
 
@@ -43,7 +43,7 @@ def get_limbo_dic(original_model,reduced_model,limbo,final_error,args):
 	detailed_result.test.close()
 	id_detailed = np.array(detailed_result.tau_array)
 	
-	og_excl = []
+	og_excl = [] #For information on how this is set up, refer to run_sa function.  
 	keep = []
 	og_sn = []
 	new_sn = []
@@ -64,15 +64,15 @@ def get_limbo_dic(original_model,reduced_model,limbo,final_error,args):
 		if not (sp.name in keep):
 			og_excl.append(sp.name)
 			
-	for sp in limbo:
+	for sp in limbo: #For all species in limbo
 		excluded = [sp]
 		for p in og_excl:
-			excluded.append(p)
-		new_sol_obs = trim(original_model,excluded,"sa_trim.cti")
+			excluded.append(p) #Add that species to the list of exclusion.  
+		new_sol_obs = trim(original_model,excluded,"sa_trim.cti") #Remove species from the model.  
 		new_sol = new_sol_obs[1]
 		if os.path.exists("mass_fractions.hdf5"):
 			os.system("rm mass_fractions.hdf5")
-		new_result = autoignition_loop_control(new_sol,args)
+		new_result = autoignition_loop_control(new_sol,args) #Find new autoignition results.  
 		if new_result != 0:
 			new_result.test.close()
 			id_new = np.array(new_result.tau_array)
@@ -80,7 +80,7 @@ def get_limbo_dic(original_model,reduced_model,limbo,final_error,args):
 			error = round(np.max(error), 2)
 			print(sp + ": " + str(error))
 			error = abs(error - final_error)
-			dic[sp] = error
+			dic[sp] = error #Add adjusted error to dictionary.  
 		else:
 			print(sp + ": error")
 	return dic
@@ -116,20 +116,20 @@ def run_sa(original_model,reduced_model,ep_star,final_error,args):
 	print(final_error)
 	if os.path.exists("mass_fractions.hdf5"):
 		os.system("rm mass_fractions.hdf5")
-	detailed_result = autoignition_loop_control(original_model,args)
+	detailed_result = autoignition_loop_control(original_model,args) #Run for rate edge data.
 	detailed_result.test.close()
 	id_detailed = np.array(detailed_result.tau_array)
 	rate_edge_data = get_rates('mass_fractions.hdf5',original_model)
-	drgep_coeffs = make_dic_drgep(original_model,rate_edge_data,args.target) #Must have target option on to run SA.  
+	drgep_coeffs = make_dic_drgep(original_model,rate_edge_data,args.target) #Gets DRGEP Coeffs.  Must have target option on to run SA.  
 	
 	old = reduced_model
 
 	while True:
 		
-		og_sn = []
-		new_sn = []
-		keep = []
-		og_excl = []
+		og_sn = [] #Original species names
+		new_sn = [] #Species names in current reduced model
+		keep = [] #Species retained from removals
+		og_excl = [] #Species that will be excluded from the final model (Reduction will be preformed on original model)
 
 		species_objex = old.species()
 		for sp in species_objex:
@@ -147,7 +147,7 @@ def run_sa(original_model,reduced_model,ep_star,final_error,args):
 			if not (sp.name in keep):
 				og_excl.append(sp.name)
 
-		limbo = create_limbo(old,ep_star,drgep_coeffs,args.keepers)
+		limbo = create_limbo(old,ep_star,drgep_coeffs,args.keepers) #Find all the species in limbo.  
 		
 		if len(limbo) == 0:
 			return old
@@ -155,16 +155,16 @@ def run_sa(original_model,reduced_model,ep_star,final_error,args):
 		print("In limbo:")
 		print(limbo)
 		
-		dic = get_limbo_dic(original_model,old,limbo,final_error,args)
-		rm = dic_lowest(dic)
+		dic = get_limbo_dic(original_model,old,limbo,final_error,args) #Calculate error for removing each limbo species.   
+		rm = dic_lowest(dic) #Species that should be removed (Lowest error).  
 		exclude = [rm]
 		
-		for sp in og_excl:
+		for sp in og_excl: #Add to list of species that should be excluded from final model.  
 			exclude.append(sp)
 	
 		print()
 		print("attempting to remove " + rm)	
-		new_sol_obs = trim(original_model,exclude,"sa_trim.cti")
+		new_sol_obs = trim(original_model,exclude,"sa_trim.cti") #Remove exclusion list from original model
 		new_sol = new_sol_obs[1]
 		
 		if os.path.exists("mass_fractions.hdf5"):
@@ -177,10 +177,10 @@ def run_sa(original_model,reduced_model,ep_star,final_error,args):
 		print("Error of: " + str(error))
 		print()
 
-		if error > args.error:
+		if error > args.error: #If error is greater than allowed, previous reduced model was final reduction.
 			print("Final Solution:")
 			print(str(old.n_species) + " Species")
 			return old
 		
-		else:
+		else: #If error is still within allowed limit, loop through again to further reduce.  
 			old = new_sol
