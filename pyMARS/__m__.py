@@ -24,6 +24,9 @@ def m(args=None):
         run_drg :
             Run Direct Relation Graphing model reduction based on
             a given threshold value
+        run_pfa:
+            Run Path Flux Analysis model reduction based on
+            a given threshold value
         run_drgep :
             Run Direct Relation Graphing with Error Propogation model reduction based on
             a given allowed error.
@@ -69,6 +72,10 @@ def m(args=None):
 	parser.add_argument('--run_drg', \
 		help='run Direct Relation Graph method to reduce', \
 		action="store_true")
+	
+	parser.add_argument('--run_pfa', \
+		help='run Path Flux Analysis method to reduce', \
+		action="store_true")
     
 	parser.add_argument('--convert', \
 		help='Only convet selected file from .cti <====> .inp', \
@@ -107,6 +114,9 @@ def m(args=None):
                 Input mechanism file (ex. --file=gri30.cti)
             --run_drg:
                 Run Direct Relation Graphing model reduction based on
+                a given threshold value
+            --run_pfa:
+                Run Path Flux Analysis model reduction based on
                 a given threshold value
             --conditions:
                 Text file of initial conditions for autoignition

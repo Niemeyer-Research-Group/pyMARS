@@ -7,6 +7,7 @@ import soln2cti
 import numpy as np
 from run_drgep import run_drgep
 from run_drg import run_drg
+from run_pfa import run_pfa
 from autoignition_loop_control import autoignition_loop_control
 from sensativity_analysis import run_sa
 
@@ -36,6 +37,8 @@ def readin(args='none', **argv):
         write data to hdf5 (ex. writehdf5='y')
     run_drg:
         Run DRG model reduction
+    run_pfa:
+        Run PFA model reduction
     run_drgep:
 	Run drgep model.
     error:
@@ -72,6 +75,7 @@ def readin(args='none', **argv):
             thermo_file = args.thermo
             transport_file = args.transport
             run_drg = args.run_drg
+            run_pfa = args.run_pfa
             conditions_file = args.conditions
             convert = args.convert
             error = args.error
@@ -128,6 +132,18 @@ def readin(args='none', **argv):
             error = [10.0]
             past = [0]
             reduced = run_drg(args, solution_object,error,past)
+            if args.sa:
+                if args.ep_star:
+                    final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
+                    sa_file = soln2cti.write(final)
+                else:
+                    print("Please provide an --ep_star arguement to run SA.")
+        
+
+        if args.run_pfa is True:
+            error = [10.0]
+            past = [0]
+            reduced = run_pfa(args, solution_object,error,past)
             if args.sa:
                 if args.ep_star:
                     final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
