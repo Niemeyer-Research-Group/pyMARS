@@ -31,7 +31,7 @@ pyMARS is called from terminal via `pyMARS.py`
 which can be found in the pyMARS directory.
 
 example:
-    `python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot`
+    `python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input_file.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot`
 
 This will run pyMARS with the gri30.cti mechanism with the initial conditions listed in the example file.  pyMARS will record data from the autignition simulation for each inital condition.  Then, pyMARS will reduce the mechanism using the DRGEP method with the given target species until the error reaches 5 percent.  The species listed under species will not be removed from the model under any circumstance. 
 
