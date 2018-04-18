@@ -69,9 +69,12 @@ def run_sim(i,solution_object, condition, sys_args='none', info=False,**usr_args
         if reactant[0] in solution.species_names:
             frac += str(reactant[0]) + ':' + str(reactant[1]) + ','
     frac = frac[:-1]
-    
+    #print(frac)
+    frac = condition.fuel + "," +  condition.oxid
+    #print(frac)
     #Set up variables
-    solution.TPX = initial_temperature, pressure, frac #101325 Pa
+    solution.TPX = initial_temperature, pressure,frac #101325 Pa
+    solution.set_equivalence_ratio(float(condition.equi),condition.fuel,condition.oxid)
     species = solution.species()
     reactions = solution.reactions()
 
