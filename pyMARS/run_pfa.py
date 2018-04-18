@@ -53,7 +53,7 @@ def run_pfa(args, solution_object,error,past):
 	done = [] #Singleton to hold wether or not any more species can be cut from the simulation.  
 	done.append(False)
 	threshold = .1 #Starting threshold value
-	threshold_i = .01
+	threshold_i = .1
 	n = 1
 	error = [10.0] #Singleton to hold the error value of the previously ran simulation.
 	
