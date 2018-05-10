@@ -32,7 +32,7 @@ which can be found in the pyMARS directory.
 example:
     `python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot --write_ai_times`
 
-This will run pyMARS with the gri30.cti mechanism with the initial conditions listed in the example file.  pyMARS will give the autoignition times as well as a plot of the autignition simulation for each inital condition.  Then, pyMARS will reduce the mechanism using the DRGEP method with the given target species until the error reaches 5 percent.  The species listed under species will not be removed from the model under any circumstance. 
+This will run pyMARS with the gri30.cti mechanism with the initial conditions listed in the example file.  pyMARS will give the autoignition times as well as a plot of the autignition simulation for each inital condition.  Then, pyMARS will reduce the mechanism using the DRGEP method with the given target species until the error reaches 5 percent.  The species listed under species will not be removed from the model under any circumstance.
 
 ## Options
 
@@ -47,16 +47,20 @@ Running pyMARS without any options will show a list of all possible options.  Th
   * --error:  This value is the maximum error level that will be allowed for the reduced model.  Error percentage is calulated by comparing autoignition delays from the original and reduced models.  
   * --target: Comma seperated list of target species for model reduction.  
   * --run_drg: This option will run the DRG method for model reduction on the given model.  It requires a given error and target species through the --error and --target options.  
-  * --run_drgep: This option will run the DRGEP method for model reduction on the given model.  It requires a given error and target species through the --error and --target options. 
+  * --run_drgep: This option will run the DRGEP method for model reduction on the given model.  It requires a given error and target species through the --error and --target options.
   * --plot: Plots the autoignition simulations for all of the initial conditions for the original mechanism.  
-  * --points: Prints the range of the sampling points on the screen. 
+  * --points: Prints the range of the sampling points on the screen.
   * --write_ai_times: Creates a file containing the autoignition times for the original mechanism.  
+
+## Citation
+
+Please refer to the CITATION file for information about citing pyMARS when used in a scholarly work.
 
 ## License
 
 pyMARS is released under the MIT license, see LICENSE for details.
 
-If you use this package as part of a scholarly publication, please cite the following papers in addition to this resource:
+If you use this package as part of a scholarly publication, it may be appropriate to cite the following papers in addition to this resource:
 
  * KE Niemeyer, CJ Sung, and MP Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. *Combust. Flame*, 157(9):1760--1770, 2010. doi:[10.1016/j.combustflflame.2009.12.022](http://dx.doi.org/10.1016/j.combustflflame.2009.12.022)
  * KE Niemeyer and CJ Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. *Combust. Flame*, 158(8):1439--1443, 2011. doi:[10.1016/j.combustflflame.2010.12.010](http://dx.doi.org/10.1016/j.combustflflame.2010.12.010).

@@ -55,9 +55,8 @@ setup(
     name='pymars',
     version=__version__,
     description=(
-        'Python-based (chemical kinetic) Model Automatic '
-        'Reduction Software (MARS), which consists of multiple techniques for '
-        'reducing the size and complexity of detailed chemical kinetic models.'
+        'Python-based chemical kinetic Model Automatic '
+        'Reduction Software (pyMARS)'
         ),
     long_description=long_description,
     url='https://github.com/Niemeyer-Research-Group/pyMARS',
