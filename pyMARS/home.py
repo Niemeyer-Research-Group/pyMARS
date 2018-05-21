@@ -5,11 +5,11 @@ from convert_chemkin_file import convert
 import soln2ck
 import soln2cti
 import numpy as np
-from run_drgep import run_drgep
-from run_drg import run_drg
-from run_pfa import run_pfa
-from autoignition_loop_control import autoignition_loop_control
-from sensativity_analysis import run_sa
+from drgep import run_drgep
+#from run_drg import run_drg
+#from run_pfa import run_pfa
+#from autoignition_loop_control import autoignition_loop_control
+#from sensativity_analysis import run_sa
 
 ct.suppress_thermo_warnings()
 
@@ -126,7 +126,7 @@ def readin(args='none', **argv):
                 os.system("rm autoignition_data_original_model.csv")
 
             print('running simulation\n')
-            sim_result = autoignition_loop_control(solution_object, args, True)
+            #sim_result = autoignition_loop_control(solution_object, args, True)
 	
         if args.run_drg is True:
             error = [10.0]
