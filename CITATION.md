@@ -2,14 +2,14 @@
 
 [![DOI](https://zenodo.org/badge/51664233.svg)](https://zenodo.org/badge/latestdoi/51664233)
 
-To cite PyKED in a scholarly article, please use
+To cite pyMARS in a scholarly article, please use
 
 > P. O. Mestas, P. Clayton, and K. E. Niemeyer. (2018) pyMARS v0.0.9 [software]. Zenodo. https://doi.org/10.5281/zenodo.1245157
 
 A BibTeX entry for LaTeX users is
 
 ```TeX
-@misc{PyKED,
+@misc{pyMARS,
     author = {Phillip O Mestas and Parker Clayton and Kyle E Niemeyer},
     year = 2018,
     title = {{pyMARS} v0.0.9},
