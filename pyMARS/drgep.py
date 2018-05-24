@@ -304,7 +304,7 @@ def get_rates(sim_array, solution_object):
                                     else:
                                         numerator[partial_name] = float(-reac_prod_rate*reactants[species])
 
-                    if reac_prod_rate < 0: #Same as above I think?  Consider deleting
+                    if reac_prod_rate < 0: #Same as above but for negative.
                         for species in products:
                             denom[species][0] += abs(float(reac_prod_rate*products[species]))
                             for species_b in all_species:
