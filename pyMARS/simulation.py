@@ -135,7 +135,6 @@ class Simulation(object):
             # Write ``table`` to disk
             table.flush()
 
-        print('Done with case ', self.idx)
         return self.ignition_delay
 
     def process_results(self):

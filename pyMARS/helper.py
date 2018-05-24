@@ -8,6 +8,7 @@
 ##############
 
 from simulation import Simulation
+import numpy as np
 
 def setup_simulations(conditions_array, model):
     sim_array = []
@@ -24,3 +25,25 @@ def setup_simulations(conditions_array, model):
         i = i + 1
 
     return sim_array
+
+
+############
+# This function takes a set up simulation array, simulates it, and processes the results.  It returns a numpy array of the ignition delays
+#
+# sim_array: An array of set up simulation objects.  Comes in unsimulated and comes out simulated with results processed.
+#
+# ignition_delay: np array of the ignition delays from the setup_simulations.
+#############
+
+
+def simulate(sim_array):
+        tau = [] #Ignition delays
+        sample_points = [] #Sample information
+        for case in sim_array: #Run simulations for original model and process results
+            tau.append(case.run_case())
+            sample_points.append(case.process_results())
+
+        ignition_delay = np.array(tau) #Turn tau array into a numpy array
+        return ignition_delay
+
+        
