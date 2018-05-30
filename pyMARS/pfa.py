@@ -55,7 +55,7 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
             graph.add_node(species.name)
         #timestep
         for tstep in total_edge_data[ic].keys(): #Set edge values for the graph
-            number = total_edge_data[ic][tstep][0]
+            number = total_edge_data[ic][tstep]
             #each species
             for edge in number:
                 try:
@@ -287,6 +287,6 @@ def get_rates_pfa(sim_array, solution_object):
                         add = rAB_p1[full_name] + rAB_c1[full_name] + rAB_p2[full_name] + rAB_c2[full_name]
                         DIC[full_name] = add
 
-            ic_edge_data[temp] = [DIC]
+            ic_edge_data[temp] = DIC
         total_edge_data[ic] = ic_edge_data
     return total_edge_data
