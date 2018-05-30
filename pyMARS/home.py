@@ -7,7 +7,7 @@ import soln2cti
 import numpy as np
 from drgep import run_drgep
 from drg import run_drg
-#from run_pfa import run_pfa
+from pfa import run_pfa
 #from autoignition_loop_control import autoignition_loop_control
 #from sensativity_analysis import run_sa
 
