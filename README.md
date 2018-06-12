@@ -5,13 +5,14 @@
 
 Python-based (chemical kinetic) Model Automatic Reduction Software (pyMARS) consists of multiple techniques for reducing the size and complexity of detailed chemical kinetic models.  pyMARS requires mechanisms to be stored in the Cantera format to be reduced.  However, running pyMARS with a CHEMKIN file will convert it into a Cantera file that can then be used.  The --convert option can then be used to turn the reduced model back into the CHEMKIN format.  
 
-pyMARS currently consists of three methods for model reduction:
+pyMARS currently consists of four methods for model reduction:
 
  1. Directed relation graph (DRG)
  2. Directed relation graph with error propagation (DRGEP)
  3. Sensativity analysis (SA) 
+ 4. Path flux analysis (PFA)
 
-All of these methods are documented in liturature.  Sensativity analysis must be performed after the completion of another method.  Additional reduction stages, including isomer lumping and CSP-based quasi-steady-state (QSS) species reduction, are currently under development and testing.
+All of these methods are documented in liturature.  Sensativity analysis must be performed after the completion of another method.  Additional reduction stages are currently under development and testing.
 
 See the following publications for more detail:
 
@@ -31,7 +32,7 @@ pyMARS is called from terminal via `pyMARS.py`
 which can be found in the pyMARS directory.
 
 example:
-    `python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input_file.txt --species N2,CO2,H2O --error 5 --target CH4,O2 --plot`
+    `python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input_file.txt --species CH4,O2,N2,CO2,H2O --error 5 --target CH4,O2 
 
 This will run pyMARS with the gri30.cti mechanism with the initial conditions listed in the example file.  pyMARS will record data from the autignition simulation for each inital condition.  Then, pyMARS will reduce the mechanism using the DRGEP method with the given target species until the error reaches 5 percent.  The species listed under species will not be removed from the model under any circumstance. 
 
@@ -49,8 +50,6 @@ Running pyMARS without any options will show a list of all possible options.  Th
   * --target: Comma seperated list of target species for model reduction.  
   * --run_drg: This option will run the DRG method for model reduction on the given model.  It requires a given error and target species through the --error and --target options.  
   * --run_drgep: This option will run the DRGEP method for model reduction on the given model.  It requires a given error and target species through the --error and --target options. 
-  * --plot: Plots the autoignition simulations for all of the initial conditions for the original mechanism.  
-  * --points: Prints the range of the sampling points on the screen. 
   * --run_sa: Run a sensativity analysis after completing another reduction method.                           
   * --ep_star: A float to be used as the ep star value for the sensativity analysis.  
 

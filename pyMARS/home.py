@@ -26,14 +26,6 @@ def readin(args='none', **argv):
         Thermo data file if Chemkin format (ex. thermo= 'thermo.dat')
     transport:
         Transport data file if Chemkin format
-    plot:
-        plot ignition curve (ex. plot='y')
-    points:
-        print ignition point and sample range (ex. points='y')
-    writecsv:
-        write data to csv (ex. writecsv='y')
-    writehdf5:
-        write data to hdf5 (ex. writehdf5='y')
     run_drg:
         Run DRG model reduction
     run_pfa:
@@ -66,10 +58,6 @@ def readin(args='none', **argv):
 
         #package from terminal use case
         if args is not 'none':
-            plot = args.plot
-            points = args.points
-            writecsv = True
-            writehdf5 = True
             data_file= args.file
             thermo_file = args.thermo
             transport_file = args.transport
@@ -103,30 +91,6 @@ def readin(args='none', **argv):
         print("\nThis is a Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
     
-        #runs simulation once with additional features on.  Always true since hdf5 and csv are always written now.  
-        if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True:
-            if os.path.exists('mass_fractions.hdf5'):
-                os.system('rm mass_fractions.hdf5')
-
-            if not (os.path.exists("./hdf5_files")): 
-                os.system("mkdir hdf5_files")
-            else:
-                os.system("rm -r -f hdf5_files")
-                os.system("mkdir hdf5_files")
-            
-            if args.plot is True:
-                if not (os.path.exists("./figures")): 
-                    os.system("mkdir figures")
-                else:
-                    os.system("rm -r -f figures")
-                    os.system("mkdir figures")
-                    
-            if os.path.exists("autoignition_data_original_model.csv"):
-                os.system("rm autoignition_data_original_model.csv")
-
-            print('running simulation\n')
-            #sim_result = autoignition_loop_control(solution_object, args, True)
-	
         if args.run_drg is True:
             error = [10.0]
             past = [0]

@@ -61,14 +61,6 @@ def m(args=None):
 		help='transport data file', \
 		type=str)
 
-	parser.add_argument('--plot', \
-		help='plots ignition curve', \
-		action="store_true")
-
-	parser.add_argument('--points', \
-		help='print sim sample points', \
-		action="store_true")
-    
 	parser.add_argument('--run_drg', \
 		help='run Direct Relation Graph method to reduce', \
 		action="store_true")
@@ -128,10 +120,6 @@ def m(args=None):
                 Transport data file if Chemkin format
             --species:
                 Specific species to not eliminate (ex. --species='H, OH')
-            --plot:
-                Plot a temperature profile of autoignition
-            --points:
-                Return sampling and ignition points
             --run_drgep :
                 Run Direct Relation Graphing with Error Propogation model reduction based on
                 a given allowed error.
@@ -143,7 +131,6 @@ def m(args=None):
 		Run a senativity analysis after completing a method.
 	    --ep_star:
 		The ep_star value for completing a sensativity analysis.  
-
 
         '''
 		print(string)
