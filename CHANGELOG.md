@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 -
 
 ### Fixed
--
+- bugs in setup.py script and path imports
 
 ## [0.0.1] - 2017-04-01
 ### Added

@@ -80,7 +80,7 @@ setup(
     tests_require=tests_require,
     python_requires='>=3',
     setup_requires=setup_requires,
-    zip_safe=False,
+    zip_safe=False)
 
 if __name__ == "__main__":
     setup()
