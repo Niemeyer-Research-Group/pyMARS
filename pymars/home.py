@@ -5,12 +5,16 @@ from convert_chemkin_file import convert
 import soln2ck
 import soln2cti
 import numpy as np
-from run_drgep import run_drgep
-from run_drg import run_drg
-from autoignition_loop_control import autoignition_loop_control
+from drgep import run_drgep
+from drg import run_drg
+from pfa import run_pfa
+from sensativity_analysis import run_sa
+
+ct.suppress_thermo_warnings()
 
 def readin(args='none', **argv):
-    """Main function for pyMARS
+    '''
+    Main function for pyMARS
 
     Parameters
     ----------
@@ -22,18 +26,10 @@ def readin(args='none', **argv):
         Thermo data file if Chemkin format (ex. thermo= 'thermo.dat')
     transport:
         Transport data file if Chemkin format
-    plot:
-        plot ignition curve (ex. plot='y')
-    points:
-        print ignition point and sample range (ex. points='y')
-    writecsv:
-        write data to csv (ex. writecsv='y')
-    writehdf5:
-        write data to hdf5 (ex. writehdf5='y')
-    write_ai_times:
-        write autoignition times for each inital condition
     run_drg:
         Run DRG model reduction
+    run_pfa:
+        Run PFA model reduction
     run_drgep:
 	Run drgep model.
     error:
@@ -42,7 +38,11 @@ def readin(args='none', **argv):
 	The string names of the species that should be kept in the model no matter what.
     targets: list of strings
 	The string names of the species that should be used as target species.
-
+    run_sa: Boolean
+        True if the user wants to run a sensativity analysis
+    ep_star: Int
+        An integer representing the ep star value for sensativity analysis.
+    
     Returns
     -------
         Converted mechanism file
@@ -52,26 +52,24 @@ def readin(args='none', **argv):
     Examples
     --------
     readin(file='gri30.cti', plot='y', species='OH, H')
-    """
+    '''
 
     class args():
 
         #package from terminal use case
         if args is not 'none':
-            plot = args.plot
-            points = args.points
-            writecsv = True
-            writehdf5 = True
             data_file= args.file
             thermo_file = args.thermo
             transport_file = args.transport
             run_drg = args.run_drg
+            run_pfa = args.run_pfa
             conditions_file = args.conditions
             convert = args.convert
             error = args.error
+            sa = args.run_sa
+            ep_star = args.ep_star
             run_drgep = args.run_drgep
-            write_ai_times = args.write_ai_times
-	    target = 0
+            target = 0
             if args.species is None:
                 keepers = []
             else:
@@ -92,25 +90,44 @@ def readin(args='none', **argv):
     if file_extension == ".cti" or file_extension == ".xml": #If the file is a Cantera file.
         print("\nThis is a Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
+    
+        if args.run_drg is True:
+            error = [10.0]
+            past = [0]
+            reduced = run_drg(args, solution_object,error,past)
+            if args.sa:
+                if args.ep_star:
+                    final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
+                    sa_file = soln2cti.write(final)
+                else:
+                    print("Please provide an --ep_star arguement to run SA.")
         
-        #runs simulation once with additional features on
-	if args.plot is True or args.writecsv is True or args.points is True or args.writehdf5 is True or args.write_ai_times is True:
-            if os.path.exists('mass_fractions.hdf5'):
-                os.system('rm mass_fractions.hdf5')
-            if args.write_ai_times is True:
-                if os.path.exists('autoignition_times.txt'):
-                    os.system('rm autoignition_times.txt')
-            print 'running simulation\n'
-            sim_result = autoignition_loop_control(solution_object, args, True)
-        
-	if args.run_drg is True:
-        	run_drg(args, solution_object)
+
+        if args.run_pfa is True:
+            error = [10.0]
+            past = [0]
+            reduced = run_pfa(args, solution_object,error,past)
+            if args.sa:
+                if args.ep_star:
+                    final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
+                    sa_file = soln2cti.write(final)
+                else:
+                    print("Please provide an --ep_star arguement to run SA.")
+				
 	
-	if args.convert is True:
+        if args.convert is True:
             soln2ck.write(solution_object)
 	
-	if args.run_drgep is True: #If the user wants to run drgep and specifies it as a command line argument.
-		run_drgep(args, solution_object)
+        if args.run_drgep is True: #If the user wants to run drgep and specifies it as a command line argument.
+            error = [10.0]
+            past = [0]
+            reduced = run_drgep(args, solution_object,error,past)
+            if args.sa:
+                if args.ep_star:
+                    final = run_sa(solution_object,reduced,args.ep_star,past[0],args)
+                    sa_file = soln2cti.write(final)
+                else:
+                    print("Please provide an --ep_star arguement to run SA.")
 
     elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
         print("\n\nThis is a Chemkin file")

@@ -3,23 +3,24 @@ import numpy as np
 import h5py
 from collections import Counter
 import time as tm
+from drg import graph_search
 import os, sys, argparse
 import cantera as ct
 import soln2ck
 import soln2cti
-import helper
-from simulation import Simulation
+import math
 from create_trimmed_model import trim
 from numpy import genfromtxt
-import math
 from readin_initial_conditions import readin_conditions
+import helper
 
 os.environ['Cantera_Data'] =os.getcwd()
+
 
 #################
 # This function determines what species should be excluded from the reduced model based on their DICs compared to the threshold value and a simple graph search.
 #
-# total_edge_data: information for calculating the DICs for the graph edge weights
+# total_edge_data: information containing the DICs for the graph edge weights
 # solution_object: The solution being reduced
 # threshold_value: User specified threshold value
 # keeper_list: Speicies that should always be kept
@@ -29,7 +30,7 @@ os.environ['Cantera_Data'] =os.getcwd()
 # Returns an array of species that should be excluded from the original model at this threshold level
 #################
 
-def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
+def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
 
     start_time = tm.time()
 
@@ -49,29 +50,27 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
             graph.add_node(species.name)
         #timestep
         for tstep in total_edge_data[ic].keys(): #Set edge values for the graph
-            numerator = total_edge_data[ic][tstep][1]
-            denominator = total_edge_data[ic][tstep][0]
+            number = total_edge_data[ic][tstep]
             #each species
-            for edge in numerator:
+            for edge in number:
                 try:
                     edge_name = edge.split('_', 1)
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
-                    #dge weight between two species
-                    if denominator[species_a_name] != 0:
-                        weight = abs(float(numerator[edge])/float(denominator[species_a_name]))
-                        if graph.has_edge(species_a_name, species_b_name):
-                            old_weight = graph[species_a_name][species_b_name]['weight']
-                            if weight > old_weight and weight <= 1 and weight > threshold_value: #Only include the weight if it is greater than the threshold value.
-                                graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-                            elif weight > 1:
-                                print("Error.  Edge weights should not be greater than one.")
-                                exit()
-                        elif weight <= 1 and weight > threshold_value:
+                    #pfa weight between two species
+                    weight = number[edge]
+                    if graph.has_edge(species_a_name, species_b_name):
+                        old_weight = graph[species_a_name][species_b_name]['weight']
+                        if weight > old_weight and weight > threshold_value: #Only include the weight if it is greater than the threshold value.
                             graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
-                        elif weight > 1:
-                                print("Error.  Edge weights should not be greater than one.")
-                                exit()
+                        #elif weight > 1:
+                        #    print("Error.  Edge weights should not be greater than one.")
+                        #    exit()
+                    elif weight > threshold_value:
+                        graph.add_weighted_edges_from([(species_a_name, species_b_name, weight)])
+                    #elif weight > 1:
+                    #        print("Error.  Edge weights should not be greater than one.")
+                    #        exit()
                 except IndexError:
                     print(edge)
                     continue
@@ -114,7 +113,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
     return exclusion_list
 
 ############
-# This is the MAIN top level function for running DRG
+# This is the MAIN top level function for running PFA
 #
 # args: a list of user specified command line arguements
 # solution_object: a Cantera object of the solution to be reduced
@@ -124,7 +123,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 # Writes reduced Cantera file and returns reduced Catnera solution object
 ############
 
-def run_drg(args, solution_object,error,past):
+def run_pfa(args, solution_object,error,past):
 
 	if len(args.target) == 0: #If the target species are not specified, puke and die.
 		print("Please specify a target species.")
@@ -145,15 +144,15 @@ def run_drg(args, solution_object,error,past):
 
 	sim_array = helper.setup_simulations(conditions_array,solution_object) #Turn conditions array into unran simulation objects for the original solution
 	ignition_delay_detailed = helper.simulate(sim_array) #Run simulations and process results
-	rate_edge_data = get_rates_drg(sim_array, solution_object) #Get edge weight calculation data.
+	rate_edge_data = get_rates_pfa(sim_array, solution_object) #Get edge weight calculation data.
 
 	print("Testing for starting threshold value")
-	drg_loop_control(solution_object, args, error, threshold, done, rate_edge_data,ignition_delay_detailed,conditions_array) #Trim the solution at that threshold and find the error.
+	pfa_loop_control(solution_object, args, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array) #Trim the solution at that threshold and find the error.
 	while error[0] != 0: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
 		threshold_i = threshold_i / 10
 		n = n + 1
-		drg_loop_control(solution_object, args, error, threshold, done, rate_edge_data,ignition_delay_detailed,conditions_array)
+		pfa_loop_control(solution_object, args, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 		if error[0] <= .02:
 			error[0] = 0
 
@@ -163,7 +162,7 @@ def run_drg(args, solution_object,error,past):
 	done[0] = False
 
 	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut.
-		sol_new = drg_loop_control( solution_object, args, error, threshold, done, rate_edge_data,ignition_delay_detailed,conditions_array) #Trim at this threshold value and calculate error.
+		sol_new = pfa_loop_control( solution_object, args, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array) #Trim at this threshold value and calculate error.
 		if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
 			max_t = threshold
 		#if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
@@ -175,7 +174,7 @@ def run_drg(args, solution_object,error,past):
 		threshold = round(threshold, n)
 
 	print("\nGreatest result: ")
-	sol_new = drg_loop_control( solution_object, args, error, max_t, done, rate_edge_data,ignition_delay_detailed,conditions_array)
+	sol_new = pfa_loop_control( solution_object, args, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
 
 	return sol_new[1]
@@ -188,24 +187,25 @@ def run_drg(args, solution_object,error,past):
 # stored_error: past error
 # threshold: current threshold value
 # done: are we done reducing yet? Boolean
-# rate_edge_data: information for calculating the DICs for reduction
+# rate_edge_data: the DICs for reduction
 # ignition_delay_detailed: ignition delay of detailed model
 # conditions_array: array holding information about initial conditions
 #
 # Returns the reduced solution object for this threshold and updates error value
 #############
 
-def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_edge_data,ignition_delay_detailed,conditions_array):
+def pfa_loop_control(solution_object, args, stored_error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array):
 
     target_species = args.target
 
+    #run detailed mechanism and retain initial conditions
     species_retained = []
     printout = ''
     print('Threshold     Species in Mech      Error')
 
     #run DRG and create new reduced solution
-    drgep = trim_drg(rate_edge_data, solution_object, threshold, args.keepers, done,target_species) #Find out what to cut from the model
-    exclusion_list = drgep
+    pfa = trim_pfa(rate_edge_data, solution_object, threshold, args.keepers, done,target_species) #Find out what to cut from the model
+    exclusion_list = pfa
     new_solution_objects = trim(solution_object, exclusion_list, args.data_file) #Cut the exclusion list from the model.
     species_retained.append(len(new_solution_objects[1].species()))
 
@@ -216,7 +216,6 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
     if (ignition_delay_detailed.all() == 0): #Ensure that ignition occured
         print("Original model did not ignite.  Check initial conditions.")
         exit()
-
 
     #Calculate error
     error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 #Calculate error
@@ -236,10 +235,10 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
 #
 # Returns:
 #   total_edge_data: a dictionary with keys of initial conditions and values of dictionarys that hold information for caculating DICs at each timestep.
-#       *the subdictionaries have the timestep as their keys and their values hold an array of numberator and denominator information for calculating DICs
+#       *the subdictionaries have the timestep as their keys and their values hold an array of DICs
 ############
 
-def get_rates_drg(sim_array, solution_object):
+def get_rates_pfa(sim_array, solution_object):
 
     old_solution = solution_object
     #iterate through all initial conditions
@@ -257,103 +256,173 @@ def get_rates_drg(sim_array, solution_object):
             new_reaction_production_rates = new_solution.net_rates_of_progress
             new_species_prod_rates=new_solution.net_production_rates
 
-            denom = {}
-            numerator = {}
-            for spc in new_solution.species():
-                for i, reac in enumerate(new_solution.reactions()):
-                    reac_prod_rate = float(new_reaction_production_rates[i])
-                    reactants = reac.reactants
-                    products = reac.products
-                    all_species = reac.reactants
-                    all_species.update(reac.products)
-                    if reac_prod_rate != 0:
-                        if reac_prod_rate > 0:
+            DIC = {}
 
-                            for species in products:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate*products[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate*products[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate*products[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate*products[species]))
+            single = get_PA(new_solution,new_reaction_production_rates) #Get PA and CA
+            PA = single[0]
+            CA = single[1]
 
-                            for species in reactants:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate*reactants[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate*reactants[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate*reactants[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate*reactants[species]))
+            double = get_PAB(new_solution,new_reaction_production_rates) #Get PAB and CAB
+            PAB = double[0]
+            CAB = double[1]
 
-                        if reac_prod_rate < 0:
+            r1 = get_rAB_1(new_solution,PA,CA,PAB,CAB)
+            rAB_p1 = r1[0]
+            rAB_c1 = r1[1]
 
-                            for species in products:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate*products[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate*products[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate*products[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate*products[species]))
+            r2 = get_rAB_2(new_solution,rAB_p1,rAB_c1)
+            rAB_p2 = r2[0]
+            rAB_c2 = r2[1]
 
-                            for species in reactants:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate*reactants[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate*reactants[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate*reactants[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate*reactants[species]))
+            s_names = new_solution.species_names
+            for species_a in s_names:
+                for species_b in s_names:
+                    if (species_a != species_b):
+                        full_name = species_a + "_" + species_b
+                        add = rAB_p1[full_name] + rAB_c1[full_name] + rAB_p2[full_name] + rAB_c2[full_name]
+                        DIC[full_name] = add
 
-            ic_edge_data[temp] = [denom, numerator]
+            ic_edge_data[temp] = DIC
         total_edge_data[ic] = ic_edge_data
     return total_edge_data
 
+######################
+# Function: get_PA
+# Description: Gets the PA (and CA) values of all species in a given solution.
+# Parameters: Must be a valid model stored in the cantera format with corresponding production rates.
+# Input: A solution class from the Cantera library and an array of production rates.
+# Output: Two dictionaries both keyed by species name.  One for PA, one for CA.
+# Returns: PA and CA dictionaries.
+#######################
 
-##########
-#    Search nodal graph and generate list of species to exclude
-#
-#    Parameters
-#    ----------
-#    nx_graph : obj
-#        networkx graph object of solution\
-#    target_species : list
-#        List of target species to search from
-#
-#    Returns
-#    -------
-#    essential_nodes : str
-#        String containing names of essential species
-##########
+def get_PA(new_solution, new_reaction_production_rates):
+	PA = {} #Dictionary that will hold the PA values for each species.
+	CA = {} #Dictionary that will hold the CA values for each species.
 
-def graph_search(nx_graph, target_species):
+	s_names = new_solution.species_names
+	for species in s_names: #For species in the solutuion
+		PA[species] = 0
+		CA[species] = 0
 
-    if len(target_species) > 1:
-        essential_nodes = list()
-        for target in target_species:
-            essential = list(nx.dfs_preorder_nodes(nx_graph, target))
-            for sp in essential:
-                if sp not in essential_nodes:
-                    essential_nodes.append(sp)
-    else:
-        essential_nodes = list(nx.dfs_preorder_nodes(nx_graph, target_species[0]))
+		for i, reac in enumerate(new_solution.reactions()): #For all reactions
+			reac_prod_rate = float(new_reaction_production_rates[i]) #Set up values
+			all_species = reac.reactants
+			all_species.update(reac.products)
 
-    return essential_nodes
+			if reac_prod_rate != 0:
+				if species in all_species: #If the species is in a productive reaction, sum up omega times v in the appropriate dictionary.
+					add = float(reac_prod_rate * all_species[species])
+					if add > 0:
+						PA[species] += abs(add)
+					else:
+						CA[species] += abs(add)
+
+	return PA,CA
+
+
+######################
+# Function: get_PAB
+# Description: Gets the PAB (and CAB) values of all species in a given solution.
+# Parameters: Must be a valid model stored in the cantera format with corresponding production rates.
+# Input: A solution class from the Cantera library and an array of production rates.
+# Output: Two dictionaries both keyed by species name.  One for PAB, one for CAB.
+# Returns: PAB and CAB dictionaries.
+#######################
+
+def get_PAB(new_solution, new_reaction_production_rates):
+	PAB = {} #Set up dictionaries
+	CAB = {}
+
+	s_names = new_solution.species_names
+	for species_a in s_names: #For every pair of species A and B in the solution
+		for species_b in s_names:
+			if species_a != species_b:
+				full_name = species_a + "_" + species_b
+				PAB[full_name] = 0
+				CAB[full_name] = 0
+
+				for i, reac in enumerate(new_solution.reactions()): #For all reactions
+					reac_prod_rate = float(new_reaction_production_rates[i]) #Set up values
+					all_species = reac.reactants
+					all_species.update(reac.products)
+
+					if reac_prod_rate != 0: #If both species exsist in the reaction, add the calculated value to the correct dictionary.
+						if species_a in all_species:
+							if species_b in all_species:
+								add = float(reac_prod_rate * all_species[species_a])
+								if add > 0:
+									PAB[full_name] += abs(add)
+								else:
+									CAB[full_name] += abs(add)
+
+	return PAB, CAB
+
+######################
+# Function: get_rAB_1
+# Description: Gets the rAB_p1 (and rAB_c1) values of all species in a given solution.
+# Parameters: Must be a valid model stored in the cantera format with corresponding production rates and 4 dictionaries.
+# Input: A solution class from the Cantera library and all of the PA,CA,PAB, and CAB values.
+# Output: Two dictionaries both keyed by species name.  One for rAB_p1, one for rAB_c1.
+# Returns: rAB_p1 and rAB_c1 dictionaries.
+#######################
+
+def get_rAB_1(new_solution,PA,CA,PAB,CAB):
+	rAB_p1 = {} #Set up dictionaries
+	rAB_c1 = {}
+
+	s_names = new_solution.species_names
+	for species_a in s_names: #For all pairs of species
+		for species_b in s_names:
+			if species_a != species_b:
+				full_name = species_a + "_" + species_b #Set up
+				rAB_p1[full_name] = 0
+				rAB_c1[full_name] = 0
+
+				top_p = PAB[full_name] #Get top
+				top_c = CAB[full_name]
+
+				if (PA[species_a] > CA[species_a]): #Get bot
+					bot = PA[species_a]
+				else:
+					bot = CA[species_a]
+
+				if (bot != 0): #Calculate
+					rAB_p1[full_name] = top_p/bot
+					rAB_c1[full_name] = top_c/bot
+
+	return rAB_p1, rAB_c1
+
+
+######################
+# Function: get_rAB_2
+# Description: Gets the rAB_p2 (and rAB_c2) values of all species in a given solution.
+# Parameters: Must be a valid model stored in the cantera format with corresponding production rates and 2 dictionaries.
+# Input: A solution class from the Cantera library and all of the rAB_p1 and rAB_c1 values.
+# Output: Two dictionaries both keyed by species name.  One for rAB_p2, one for rAB_c2.
+# Returns: rAB_p2 and rAB_c2 dictionaries.
+#######################
+
+def get_rAB_2(new_solution,rAB_p1,rAB_c1):
+	rAB_p2 = {} #Set up dictionaries
+	rAB_c2 = {}
+
+	s_names = new_solution.species_names
+	for species_a in s_names: #For all pairs of species
+		for species_b in s_names:
+			if species_a != species_b:
+				full_name = species_a + "_" + species_b #Set up
+				rAB_p2[full_name] = 0
+				rAB_c2[full_name] = 0
+
+				for species_m in s_names: #Look through all possible middle step species
+					if (species_m != species_a and species_m != species_b):
+						am_name = species_a + "_" + species_m
+						mb_name = species_m + "_" + species_b
+
+						add_p = rAB_p1[am_name] * rAB_p1[mb_name] #Get what to add for species_m
+						add_c = rAB_c1[am_name] * rAB_c1[mb_name]
+
+						rAB_p2[full_name] += add_p #Add that value
+						rAB_c2[full_name] += add_c
+
+	return rAB_p2,rAB_c2
