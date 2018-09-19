@@ -6,13 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
--
+- Added path flux analysis, so methods now include DRG, DRGEP, PFA, and sensitivity analysis
 
 ### Changed
--
+- Major code restructuring.
 
 ### Fixed
--
+- Fixed bugs in setup.py script and path imports
 
 ## [0.0.1] - 2017-04-01
 ### Added
