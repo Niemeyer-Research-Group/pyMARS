@@ -30,7 +30,8 @@ def trim(solution_object, exclusion_list, file_name):
     # Remove reactions that use trimmed species
     final_reaction_objects = []
     for i, reaction in enumerate(initial_reaction_list):
-        reaction_species = reaction.products.keys() + reaction.reactants.keys()
+        reaction_species = list(reaction.products.keys()) + list(reaction.reactants.keys())
+        reaction_species
         difference = set(reaction_species).intersection(exclusion_list)
         if len(difference) == 0:
             final_reaction_objects.append(reaction)
