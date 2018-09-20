@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from .home import readin
+from .pymars import pymars
 
 parser = ArgumentParser(description='pyMARS: Reduce chemical kinetic models.')
 
@@ -67,4 +67,4 @@ parser.add_argument('--ep_star',
 
 args = parser.parse_args()
 
-readin(args)
+pymars(args)

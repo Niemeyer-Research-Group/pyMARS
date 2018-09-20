@@ -1,18 +1,21 @@
 import os, sys, argparse
-import cantera as ct
-os.environ['Cantera_Data'] =os.getcwd()
-from convert_chemkin_file import convert
-import soln2ck
-import soln2cti
+
 import numpy as np
-from drgep import run_drgep
-from drg import run_drg
-from pfa import run_pfa
-from sensitivity_analysis import run_sa
+import cantera as ct
+
+os.environ['Cantera_Data'] =os.getcwd()
+
+from .convert_chemkin_file import convert
+from . import soln2ck
+from . import soln2cti
+from .drgep import run_drgep
+from .drg import run_drg
+from .pfa import run_pfa
+from .sensitivity_analysis import run_sa
 
 ct.suppress_thermo_warnings()
 
-def readin(args='none', **argv):
+def pymars(args='none', **argv):
     '''
     Main function for pyMARS
 
@@ -33,7 +36,7 @@ def readin(args='none', **argv):
     run_drgep:
 	Run drgep model.
     error:
-	Maximum ammount of error allowed. 
+	Maximum ammount of error allowed.
     keepers: list of strings
 	The string names of the species that should be kept in the model no matter what.
     targets: list of strings
@@ -42,7 +45,7 @@ def readin(args='none', **argv):
         True if the user wants to run a sensativity analysis
     ep_star: Int
         An integer representing the ep star value for sensativity analysis.
-    
+
     Returns
     -------
         Converted mechanism file
@@ -90,7 +93,7 @@ def readin(args='none', **argv):
     if file_extension == ".cti" or file_extension == ".xml": #If the file is a Cantera file.
         print("\nThis is a Cantera xml or cti file\n")
         solution_object = ct.Solution(args.data_file)
-    
+
         if args.run_drg is True:
             error = [10.0]
             past = [0]
@@ -101,7 +104,7 @@ def readin(args='none', **argv):
                     sa_file = soln2cti.write(final)
                 else:
                     print("Please provide an --ep_star arguement to run SA.")
-        
+
 
         if args.run_pfa is True:
             error = [10.0]
@@ -113,11 +116,11 @@ def readin(args='none', **argv):
                     sa_file = soln2cti.write(final)
                 else:
                     print("Please provide an --ep_star arguement to run SA.")
-				
-	
+
+
         if args.convert is True:
             soln2ck.write(solution_object)
-	
+
         if args.run_drgep is True: #If the user wants to run drgep and specifies it as a command line argument.
             error = [10.0]
             past = [0]
@@ -136,4 +139,3 @@ def readin(args='none', **argv):
 
     else:
         print("\n\nFile type not supported")
-
