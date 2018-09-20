@@ -26,7 +26,6 @@ with codecs.open(path.join(here, 'CITATION.md')) as citation_file:
 long_description = readme + '\n\n' + changelog + '\n\n' + citation
 
 install_requires = [
-    'argparse',
     'h5py',
     'numpy',
     'cantera>=2.3.0',
