@@ -30,7 +30,8 @@ install_requires = [
     'h5py',
     'numpy',
     'cantera>=2.3.0',
-    'networkx'
+    'networkx',
+    'pytables'
 ]
 
 tests_require = [
