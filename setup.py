@@ -10,17 +10,17 @@ import sys
 here = path.abspath(path.dirname(__file__))
 
 version = {}
-with codecs.open(path.join(here, 'pymars', '_version.py')) as version_file:
+with open(path.join(here, 'pymars', '_version.py')) as version_file:
     exec(version_file.read(), version)
 __version__ = version['__version__']
 
-with codecs.open(path.join(here, 'README.md')) as readme_file:
+with open(path.join(here, 'README.md')) as readme_file:
     readme = readme_file.read()
 
-with codecs.open(path.join(here, 'CHANGELOG.md')) as changelog_file:
+with open(path.join(here, 'CHANGELOG.md')) as changelog_file:
     changelog = changelog_file.read()
 
-with codecs.open(path.join(here, 'CITATION.md')) as citation_file:
+with open(path.join(here, 'CITATION.md')) as citation_file:
     citation = citation_file.read()
 
 long_description = readme + '\n\n' + changelog + '\n\n' + citation
@@ -29,7 +29,8 @@ install_requires = [
     'h5py',
     'numpy',
     'cantera>=2.3.0',
-    'networkx'
+    'networkx',
+    'pytables'
 ]
 
 tests_require = [
