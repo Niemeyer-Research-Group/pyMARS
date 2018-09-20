@@ -1,7 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from pyMARS import get_sample_range as gsr
-
 
 def log_data(midpoint):
     x = np.linspace(-2,8.0,10000)
@@ -16,8 +14,6 @@ def log_data(midpoint):
     sdata = np.zeros((len(x), len(x)))
     production_data = np.zeros((len(x), len(x)))
 
-    #plt.plot(x,y)
-    #plt.show()
     return [x,y, sdata, production_data, middle_index, x_0]
 
 #generate test data
