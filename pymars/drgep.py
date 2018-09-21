@@ -134,8 +134,7 @@ def trim_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
 # Writes reduced Cantera file and returns reduced Catnera solution object
 ############
 
-#Look into removing past and/or error? Might be important of SA but not sure, can't remember?  Look into it later
-def run_drgep(args, solution_object,error,past):
+def run_drgep(args, solution_object, error):
 
     #Set up variables
 	if len(args.target) == 0: #If the target species are not specified, puke and die.

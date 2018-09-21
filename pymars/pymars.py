@@ -1,50 +1,39 @@
-import os, sys, argparse
-
-import numpy as np
-import cantera as ct
-
-os.environ['Cantera_Data'] =os.getcwd()
-
-from .convert_chemkin_file import convert
-from . import soln2ck
+"""Contains main driver function for pyMARS program."""
+from cantera import Solution, suppress_thermo_warnings
+# local imports
 from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
 from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
+from .convert_chemkin_file import convert
 
-ct.suppress_thermo_warnings()
+# Avoid long warnings from Cantera about thermodynamic polynomials
+suppress_thermo_warnings()
 
-def pymars(args='none', **argv):
-    '''
-    Main function for pyMARS
+def pymars(model_file, conditions, error, method, target_species,
+           retained_species=None, run_sensitivity_analysis=False, epsilon_star=0.1
+           ):
+    """Driver function for pyMARS to reduce a model.
 
     Parameters
     ----------
-    file:
-        Input mechanism file (ex. file='gri30.cti')
-    species:
-        Species to eliminate (ex. species='H, OH')
-    thermo:
-        Thermo data file if Chemkin format (ex. thermo= 'thermo.dat')
-    transport:
-        Transport data file if Chemkin format
-    run_drg:
-        Run DRG model reduction
-    run_pfa:
-        Run PFA model reduction
-    run_drgep:
-	Run drgep model.
-    error:
-	Maximum ammount of error allowed.
-    keepers: list of strings
-	The string names of the species that should be kept in the model no matter what.
-    targets: list of strings
-	The string names of the species that should be used as target species.
-    run_sa: Boolean
-        True if the user wants to run a sensativity analysis
-    ep_star: Int
-        An integer representing the ep star value for sensativity analysis.
+    model_file : str
+        Cantera-format model to be reduced (e.g., 'mech.cti').
+    conditions : str
+        File with list of autoignition initial conditions.
+    error : float
+        Maximum error % for the reduced model.
+    method : {'DRG', 'DRGEP', 'PFA'}
+        Skeletal reduction method to use.
+    target_species: list of str
+        List of target species for reduction.
+    retained_species : list of str, optional
+        List of non-target species to always retain.
+    run_sensitivity_analysis : bool, optional
+        Flag to run sensitivity analysis after completing another method.
+    epsilon_star : float, optional
+        Epsilon^* value used to determine species for sensitivity analysis.
 
     Returns
     -------
@@ -54,88 +43,21 @@ def pymars(args='none', **argv):
 
     Examples
     --------
-    readin(file='gri30.cti', plot='y', species='OH, H')
-    '''
+    >>> pymars('gri30.cti', conditions_file, 10.0, 'DRGEP', ['CH4', 'O2'], retained_species=['N2'])
 
-    class args():
+    """
 
-        #package from terminal use case
-        if args is not 'none':
-            data_file= args.file
-            thermo_file = args.thermo
-            transport_file = args.transport
-            run_drg = args.run_drg
-            run_pfa = args.run_pfa
-            conditions_file = args.conditions
-            convert = args.convert
-            error = args.error
-            sa = args.run_sa
-            ep_star = args.ep_star
-            run_drgep = args.run_drgep
-            target = 0
-            if args.species is None:
-                keepers = []
-            else:
-                keepers = [str(item) for item in args.species.split(',')]
-                #strip spaces
-                for i, sp in enumerate(keepers):
-                    keepers[i]=sp.strip()
-            if args.target is None:
-                target = []
-            else:
-                target = [str(item) for item in args.target.split(',')]
-                #strip spaces
-                for i, sp in enumerate(target):
-                    target[i]=sp.strip()
+    solution_object = Solution(model_file)
 
-    file_extension= os.path.splitext(args.data_file)[1]
+    if method == 'DRG':
+        results = run_drg(solution_object, conditions, error, target_species, retained_species)
+    elif method == 'PFA':
+        results = run_pfa(solution_object, conditions, error, target_species, retained_species)
+    elif method == 'DRGEP':
+        results = run_drgep(solution_object, conditions, error, target_species, retained_species)
+    reduced_model, reduced_error = results
 
-    if file_extension == ".cti" or file_extension == ".xml": #If the file is a Cantera file.
-        print("\nThis is a Cantera xml or cti file\n")
-        solution_object = ct.Solution(args.data_file)
-
-        if args.run_drg is True:
-            error = [10.0]
-            past = [0]
-            reduced = run_drg(args, solution_object,error,past)
-            if args.sa:
-                if args.ep_star:
-                    final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
-                    sa_file = soln2cti.write(final)
-                else:
-                    print("Please provide an --ep_star arguement to run SA.")
-
-
-        if args.run_pfa is True:
-            error = [10.0]
-            past = [0]
-            reduced = run_pfa(args, solution_object,error,past)
-            if args.sa:
-                if args.ep_star:
-                    final = run_sa(solution_object,reduced,args.ep_star,past[0], args)
-                    sa_file = soln2cti.write(final)
-                else:
-                    print("Please provide an --ep_star arguement to run SA.")
-
-
-        if args.convert is True:
-            soln2ck.write(solution_object)
-
-        if args.run_drgep is True: #If the user wants to run drgep and specifies it as a command line argument.
-            error = [10.0]
-            past = [0]
-            reduced = run_drgep(args, solution_object,error,past)
-            if args.sa:
-                if args.ep_star:
-                    final = run_sa(solution_object,reduced,args.ep_star,past[0],args)
-                    sa_file = soln2cti.write(final)
-                else:
-                    print("Please provide an --ep_star arguement to run SA.")
-
-    elif file_extension == ".inp" or file_extension == ".dat" or file_extension == ".txt":
-        print("\n\nThis is a Chemkin file")
-        #convert file to cti
-        converted_file_name = convert(args.data_file, args.thermo_file, args.transport_file)
-
-    else:
-        print("\n\nFile type not supported")
+    if run_sensitivity_analysis:
+        results = run_sa(solution_object, reduced_model, epsilon_star, conditions, error, retained_species)
+        reduced_model, reduced_error = results
+        sa_file = soln2cti.write(reduced_model)
