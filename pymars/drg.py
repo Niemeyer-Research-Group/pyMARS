@@ -83,7 +83,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
                                 print(
                                     "Error.  Edge weights should not be greater than one.")
                                 exit()
-                        elif weight <= 1 and weight > threshold_value:
+                        elif threshold_value <= weight <= 1.0:
                             graph.add_weighted_edges_from(
                                 [(species_a_name, species_b_name, weight)])
                         elif weight > 1:
@@ -134,7 +134,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
     return exclusion_list
 
-def run_drg(solution_object, conditions, error, target_species, retained_species):
+def run_drg(solution_object, conditions, error_limit, target_species, retained_species):
     """Main function for running DRG reduction.
 
     Parameters
@@ -143,7 +143,7 @@ def run_drg(solution_object, conditions, error, target_species, retained_species
         a Cantera object of the solution to be reduced.
     conditions : str
         Name of file with list of autoignition initial conditions.
-    error : float
+    error_limit : float
         Maximum allowable error level for reduced model.
     target_species : list of str
         List of target species
@@ -177,7 +177,7 @@ def run_drg(solution_object, conditions, error, target_species, retained_species
     print("Testing for starting threshold value")
     # Trim the solution at that threshold and find the error.
     drg_loop_control(
-        solution_object, args, error, threshold, done, rate_edge_data,
+        solution_object, target_species, retained_species, threshold, done, rate_edge_data,
         ignition_delay_detailed, conditions_array
         )
     # While the error for trimming with that threshold value is greater than allowed.
@@ -187,7 +187,7 @@ def run_drg(solution_object, conditions, error, target_species, retained_species
         threshold_increment /= 10
         num_iterations += 1
         drg_loop_control(
-            solution_object, args, error, threshold, done, rate_edge_data,
+            solution_object, target_species, retained_species, threshold, done, rate_edge_data,
             ignition_delay_detailed, conditions_array
             )
         if error[0] <= 0.02:
@@ -200,23 +200,22 @@ def run_drg(solution_object, conditions, error, target_species, retained_species
     while not done[0] and error[0] < error:
         #Trim at this threshold value and calculate error.
         sol_new = drg_loop_control(
-            solution_object, args, error, threshold, done, rate_edge_data,
+            solution_object, target_species, retained_species, threshold, done, rate_edge_data,
             ignition_delay_detailed, conditions_array
             )
         # If a new max species cut without exceeding what is allowed is reached, save that threshold.
-        if args.error > error[0]:
+        if error_limit > error[0]:
             max_t = threshold
         # if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
         #	threshold = threshold + (threshold_increment * 4)
-            past[0] = error[0]
         # if (threshold >= .01):
         #        threshold_increment = .01
-        threshold += threshold_i
+        threshold += threshold_increment
         threshold = round(threshold, num_iterations)
 
     print("Greatest result: ")
     sol_new = drg_loop_control(
-        solution_object, args, error, max_t, done, rate_edge_data,
+        solution_object, target_species, retained_species, max_t, done, rate_edge_data,
         ignition_delay_detailed, conditions_array
         )
     # Write the solution object with the greatest error that isn't over the allowed ammount.
@@ -224,7 +223,7 @@ def run_drg(solution_object, conditions, error, target_species, retained_species
 
     return sol_new[1]
 
-def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_edge_data,
+def drg_loop_control(solution_object, target_species, retained_species, threshold, done, rate_edge_data,
                      ignition_delay_detailed, conditions_array
                      ):
     """Handles the reduction, simulation, and comparision for a single threshold value.
@@ -235,8 +234,6 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
         object being reduced
     args:
         arguments from the command line
-    stored_error : float
-        past error
     threshold : float
         current threshold value
     done : bool
@@ -254,25 +251,25 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
 
     """
 
-    target_species = args.target
-
     species_retained = []
     printout = ''
     print('Threshold     Species in Mech      Error')
 
     # run DRG and create new reduced solution
-    drgep = trim_drg(rate_edge_data, solution_object, threshold, args.keepers, done, target_species)  # Find out what to cut from the model
+    # Find out what to cut from the model
+    drgep = trim_drg(rate_edge_data, solution_object, threshold, retained_species, done, target_species)
     exclusion_list = drgep
     # Cut the exclusion list from the model.
-    new_solution_objects = trim(solution_object, exclusion_list, args.data_file)
+    new_solution_objects = trim(solution_object, exclusion_list)
     species_retained.append(len(new_solution_objects[1].species()))
 
     # simulated reduced solution
-    new_sim = helper.setup_simulations(conditions_array, new_solution_objects[1])  # Create simulation objects for reduced model for all conditions
+    # Create simulation objects for reduced model for all conditions
+    new_sim = helper.setup_simulations(conditions_array, new_solution_objects[1])
     ignition_delay_reduced = helper.simulate(
         new_sim)  # Run simulations and process results
 
-    if (ignition_delay_detailed.all() == 0):  # Ensure that ignition occured
+    if ignition_delay_detailed.all() == 0:  # Ensure that ignition occured
         print("Original model did not ignite.  Check initial conditions.")
         exit()
 
@@ -280,7 +277,6 @@ def drg_loop_control(solution_object, args, stored_error, threshold, done, rate_
     error = (abs(ignition_delay_reduced -ignition_delay_detailed) /ignition_delay_detailed) *100  # Calculate error
     printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              ' + str(round(np.max(error), 2)) + '%' + '\n'
     print(printout)
-    stored_error[0] = round(np.max(error), 2)
 
     # Return new model.
     new_solution_objects = new_solution_objects[1]
