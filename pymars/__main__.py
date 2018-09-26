@@ -3,8 +3,8 @@ from argparse import ArgumentParser
 from os.path import splitext
 from warnings import warn
 
-from .pymars import pymars
-from .convert_chemkin_file import convert
+from pymars import pymars
+from convert_chemkin_file import convert
 
 parser = ArgumentParser(description='pyMARS: Reduce chemical kinetic models.')
 
