@@ -1,12 +1,12 @@
 """Contains main driver function for pyMARS program."""
 from cantera import Solution, suppress_thermo_warnings
 # local imports
-from . import soln2cti
-from .drgep import run_drgep
-from .drg import run_drg
-from .pfa import run_pfa
-from .sensitivity_analysis import run_sa
-from .convert_chemkin_file import convert
+import soln2cti
+from drgep import run_drgep
+from drg import run_drg
+from pfa import run_pfa
+from sensitivity_analysis import run_sa
+from convert_chemkin_file import convert
 
 # Avoid long warnings from Cantera about thermodynamic polynomials
 suppress_thermo_warnings()
@@ -48,16 +48,17 @@ def pymars(model_file, conditions, error, method, target_species,
     """
 
     solution_object = Solution(model_file)
-
+    final_error = [0]
+    
     if method == 'DRG':
         results = run_drg(solution_object, conditions, error, target_species, retained_species)
     elif method == 'PFA':
-        results = run_pfa(solution_object, conditions, error, target_species, retained_species)
+        results = run_pfa(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
     elif method == 'DRGEP':
         results = run_drgep(solution_object, conditions, error, target_species, retained_species)
-    reduced_model, reduced_error = results
+    reduced_model = results
 
     if run_sensitivity_analysis:
-        results = run_sa(solution_object, reduced_model, epsilon_star, conditions, error, retained_species)
+        results = run_sa(solution_object, reduced_model, epsilon_star, conditions, final_error, retained_species)
         reduced_model, reduced_error = results
         sa_file = soln2cti.write(reduced_model)

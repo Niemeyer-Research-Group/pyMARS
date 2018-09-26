@@ -26,11 +26,12 @@ os.environ['Cantera_Data'] =os.getcwd()
 # keeper_list: Speicies that should always be kept
 # done: Determines wether or not the reduction is complete
 # target_species: The target species for the search in the array
+# model_file: File holding the model being reduced
 #
 # Returns an array of species that should be excluded from the original model at this threshold level
 #################
 
-def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
+def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species, model_file):
 
     start_time = tm.time()
 
@@ -115,17 +116,20 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
 ############
 # This is the MAIN top level function for running PFA
 #
-# args: a list of user specified command line arguements
 # solution_object: a Cantera object of the solution to be reduced
-# error: To hold the error level of the simulation
-# past: To hold error level of previous simulation
+# conditions_file: The file holding the initial conditions to simulate
+# error_limit: The highest allowed error percentage
+# target_species: The target species for reduction
+# retained_species: A list of species to be retained even if they should be cut by the algorithm
+# model_file: The path to the file where the solution object was generated from
+# final_error: To hold the error level of the simulation
 #
 # Writes reduced Cantera file and returns reduced Catnera solution object
 ############
 
-def run_pfa(args, solution_object,error,past):
+def run_pfa(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error):
 
-	if len(args.target) == 0: #If the target species are not specified, puke and die.
+	if len(target_species) == 0: #If the target species are not specified, puke and die.
 		print("Please specify a target species.")
 		exit()
 	done = [] #Singleton to hold wether or not any more species can be cut from the simulation.
@@ -136,9 +140,9 @@ def run_pfa(args, solution_object,error,past):
 	error = [10.0] #Singleton to hold the error value of the previously ran simulation.
 
 	#Check to make sure that conditions exist
-	if args.conditions_file:
-		conditions_array = readin_conditions(str(args.conditions_file))
-	elif not args.conditions_file:
+	if conditions_file:
+		conditions_array = readin_conditions(str(conditions_file))
+	elif not conditions_file:
 		print("Conditions file not found")
 		exit()
 
@@ -147,34 +151,34 @@ def run_pfa(args, solution_object,error,past):
 	rate_edge_data = get_rates_pfa(sim_array, solution_object) #Get edge weight calculation data.
 
 	print("Testing for starting threshold value")
-	pfa_loop_control(solution_object, args, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array) #Trim the solution at that threshold and find the error.
+	pfa_loop_control(solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array) #Trim the solution at that threshold and find the error.
 	while error[0] != 0: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
 		threshold_i = threshold_i / 10
 		n = n + 1
-		pfa_loop_control(solution_object, args, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
+		pfa_loop_control(solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 		if error[0] <= .02:
 			error[0] = 0
 
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
-	past[0] = 0 #An integer representing the error introduced in the past simulation.
+	final_error[0] = 0 #An integer representing the error introduced in the final simulation.
 	done[0] = False
 
-	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut.
-		sol_new = pfa_loop_control( solution_object, args, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array) #Trim at this threshold value and calculate error.
-		if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
+	while not done[0] and error[0] < error_limit: #Run the simulation until nothing else can be cut.
+		sol_new = pfa_loop_control( solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array) #Trim at this threshold value and calculate error.
+		if error_limit >= error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
 			max_t = threshold
-		#if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
+		#if (final_error == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
 		#	threshold = threshold + (threshold_i * 4)
-			past[0] = error[0]
+			final_error[0] = error[0]
 		#if (threshold >= .01):
                 #        threshold_i = .01
 		threshold = threshold + threshold_i
 		threshold = round(threshold, n)
 
 	print("\nGreatest result: ")
-	sol_new = pfa_loop_control( solution_object, args, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
+	sol_new = pfa_loop_control( solution_object, target_species, retained_species, model_file, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
 
 	return sol_new[1]
@@ -182,9 +186,11 @@ def run_pfa(args, solution_object,error,past):
 #############
 # This function handles the reduction, simulation, and comparision for a single threshold value
 #
-# solution_object: object being reduced
-# args: arguments from the command line
-# stored_error: past error
+# solution_object: object being reduced # target_species:
+# target_species: The target species for reduction
+# retained_species: A list of species to be retained even if they should be cut by the algorithm
+# model_file: The path to the file where the solution object was generated from
+# stored_error: Error from the previous reduction attempt
 # threshold: current threshold value
 # done: are we done reducing yet? Boolean
 # rate_edge_data: the DICs for reduction
@@ -194,9 +200,9 @@ def run_pfa(args, solution_object,error,past):
 # Returns the reduced solution object for this threshold and updates error value
 #############
 
-def pfa_loop_control(solution_object, args, stored_error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array):
+def pfa_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array):
 
-    target_species = args.target
+    target_species = target_species
 
     #run detailed mechanism and retain initial conditions
     species_retained = []
@@ -204,9 +210,9 @@ def pfa_loop_control(solution_object, args, stored_error, threshold, done, rate_
     print('Threshold     Species in Mech      Error')
 
     #run DRG and create new reduced solution
-    pfa = trim_pfa(rate_edge_data, solution_object, threshold, args.keepers, done,target_species) #Find out what to cut from the model
+    pfa = trim_pfa(rate_edge_data, solution_object, threshold, retained_species, done,target_species,model_file) #Find out what to cut from the model
     exclusion_list = pfa
-    new_solution_objects = trim(solution_object, exclusion_list, args.data_file) #Cut the exclusion list from the model.
+    new_solution_objects = trim(solution_object, exclusion_list, model_file) #Cut the exclusion list from the model.
     species_retained.append(len(new_solution_objects[1].species()))
 
     #simulated reduced solution
