@@ -55,7 +55,7 @@ def pymars(model_file, conditions, error, method, target_species,
     elif method == 'PFA':
         results = run_pfa(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
     elif method == 'DRGEP':
-        results = run_drgep(solution_object, conditions, error, target_species, retained_species)
+        results = run_drgep(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
     reduced_model = results
 
     if run_sensitivity_analysis:

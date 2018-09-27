@@ -13,8 +13,6 @@ from numpy import genfromtxt
 import math
 from dijkstra import ss_dijkstra_path_length_modified
 
-os.environ['Cantera_Data'] =os.getcwd()
-
 ############
 # Makes the dictionary of overall interaction coefficients for DRGEP by building a graph and searching it as explained in DRGEP
 #
@@ -90,11 +88,14 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
 # Returns an array of species that should be excluded from the original model at this threshold level
 #################
 
-def trim_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
+def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done):
     core_species = []
     species_objects = solution_object.species()
 
-    #Take all species that are over the threshold value and add them to essentail species.
+    for sp in retained_species:
+        core_species.append(sp)
+    
+    #Take all species that are over the threshold value and add them to essential species.
     essential_species = []
     for sp in species_objects:
         if sp.name in max_dic:
@@ -109,11 +110,6 @@ def trim_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
     for sp in essential_species:
         if sp not in core_species:
             core_species.append(sp.name)
-
-    retained_species = keeper_list #Specified by the user.  A list of species that also need to be kept.
-    for sp in retained_species:
-        if sp not in core_species:
-            core_species.append(sp)
 
     exclusion_list = []
 
@@ -134,10 +130,12 @@ def trim_drgep(max_dic, solution_object, threshold_value, keeper_list, done):
 # Writes reduced Cantera file and returns reduced Catnera solution object
 ############
 
-def run_drgep(args, solution_object, error):
+# TODO(mestasp): fix comments
+
+def run_drgep(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error):
 
     #Set up variables
-	if len(args.target) == 0: #If the target species are not specified, puke and die.
+	if len(target_species) == 0: #If the target species are not specified, puke and die.
 		print("Please specify a target species.")
 		exit()
 	done = [] #Singleton to hold wether or not any more species can be cut from the simulation.
@@ -148,9 +146,9 @@ def run_drgep(args, solution_object, error):
 	error = [10.0] #Singleton to hold the error value of the previously ran simulation.
 
 	#Check to make sure that conditions exist
-	if args.conditions_file:
-		conditions_array = readin_conditions(str(args.conditions_file))
-	elif not args.conditions_file:
+	if conditions_file:
+		conditions_array = readin_conditions(str(conditions_file))
+	elif not conditions_file:
 		print("Conditions file not found")
 		exit()
 
@@ -158,37 +156,37 @@ def run_drgep(args, solution_object, error):
 	ignition_delay_detailed = helper.simulate(sim_array) #Run simulations and process results
 
 	rate_edge_data = get_rates(sim_array,solution_object) #Get edge weight calculation data.
-	max_dic = make_dic_drgep(solution_object, rate_edge_data, args.target) #Make a dictionary of overall interaction coefficients.
+	max_dic = make_dic_drgep(solution_object, rate_edge_data, target_species) #Make a dictionary of overall interaction coefficients.
 
 	print("Testing for starting threshold value")
-	drgep_loop_control(solution_object, args, error, threshold, done, max_dic,ignition_delay_detailed,conditions_array) #Trim the solution at that threshold and find the error.
+	drgep_loop_control(solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array) #Trim the solution at that threshold and find the error.
 	while error[0] != 0: #While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 #Reduce the starting threshold value and try again.
 		threshold_i = threshold_i / 10
 		n = n + 1
-		drgep_loop_control(solution_object, args, error, threshold, done, max_dic,ignition_delay_detailed,conditions_array)
+		drgep_loop_control(solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array)
 		if error[0] <= .02:
 			error[0] = 0
 
 	print("Starting with a threshold value of " + str(threshold))
 	sol_new = solution_object
-	past[0] = 0 #An integer representing the error introduced in the past simulation.
+	final_error[0] = 0 #An integer representing the error introduced in the past simulation.
 	done[0] = False
 
-	while not done[0] and error[0] < args.error: #Run the simulation until nothing else can be cut.
-		sol_new = drgep_loop_control( solution_object, args, error, threshold, done, max_dic,ignition_delay_detailed,conditions_array) #Trim at this threshold value and calculate error.
-		if args.error > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
+	while not done[0] and error[0] < error_limit: #Run the simulation until nothing else can be cut.
+		sol_new = drgep_loop_control(solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array) #Trim at this threshold value and calculate error.
+		if error_limit > error[0]: #If a new max species cut without exceeding what is allowed is reached, save that threshold.
 			max_t = threshold
-            #if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
+            #if (final_error[0] == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
 		        #threshold = threshold + (threshold_i * 4)
-			past[0] = error[0]
+			final_error[0] = error[0]
 		    #if (threshold >= .01):
                 #threshold_i = .01
 			threshold = threshold + threshold_i
 			threshold = round(threshold, n)
 
 	print("\nGreatest result: ")
-	sol_new = drgep_loop_control( solution_object, args, error, max_t, done, max_dic,ignition_delay_detailed,conditions_array)
+	sol_new = drgep_loop_control(solution_object, target_species, retained_species, model_file, error, max_t, done, max_dic, ignition_delay_detailed, conditions_array)
 
 	drgep_trimmed_file = soln2cti.write(sol_new) #Write the solution object with the greatest error that isn't over the allowed ammount.
 	return sol_new[1]
@@ -208,9 +206,9 @@ def run_drgep(args, solution_object, error):
 # Returns the reduced solution object for this threshold and updates error value
 #############
 
-def drgep_loop_control(solution_object, args, stored_error, threshold, done, max_dic,ignition_delay_detailed,conditions_array):
+# TODO(mestasp): finish comments
 
-    target_species = args.target
+def drgep_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, max_dic, ignition_delay_detailed, conditions_array):
 
     #run detailed mechanism and retain initial conditions
     species_retained = []
@@ -218,8 +216,8 @@ def drgep_loop_control(solution_object, args, stored_error, threshold, done, max
     print('Threshold     Species in Mech      Error')
 
     #run DRGEP and create new reduced solution
-    exclusion_list = trim_drgep(max_dic, solution_object, threshold, args.keepers, done) #Find out what to cut from the model
-    new_solution_objects = trim(solution_object, exclusion_list, args.data_file) #Cut the exclusion list from the model.
+    exclusion_list = trim_drgep(max_dic, solution_object, threshold, retained_species, done) #Find out what to cut from the model
+    new_solution_objects = trim(solution_object, exclusion_list, model_file) #Cut the exclusion list from the model.
     species_retained.append(len(new_solution_objects[1].species()))
 
     #simulated reduced solution
