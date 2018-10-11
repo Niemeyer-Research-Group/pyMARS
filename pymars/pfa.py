@@ -354,24 +354,38 @@ def get_PA(new_solution, new_reaction_production_rates):
 	PA = {} # Dictionary that will hold the PA values for each species.
 	CA = {} # Dictionary that will hold the CA values for each species.
 
+	# Initalize all species
 	s_names = new_solution.species_names
-	for species in s_names: # For species in the solutuion
+	for species in s_names: 
 		PA[species] = 0
 		CA[species] = 0
 
-		for i, reac in enumerate(new_solution.reactions()): # For all reactions
-			reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
-			all_species = reac.reactants
-			all_species.update(reac.products)
+	for i, reac in enumerate(new_solution.reactions()): # For all reactions
+		reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
+				
+		if reac_prod_rate != 0:
+			if reac_prod_rate > 0: # For forward reactions
 
-			if reac_prod_rate != 0:
-				# If the species is in a productive reaction, sum up omega times v in the appropriate dictionary.
-				if species in all_species:
-					add = float(reac_prod_rate * all_species[species])
-					if add > 0:
-						PA[species] += abs(add)
-					else:
-						CA[species] += abs(add)
+				# Add all products to PA
+				for species in reac.products:
+					add = float(reac_prod_rate * reac.products[species])
+					PA[species] += abs(add)
+				# Add all reactants to CA
+				for species in reac.reactants:
+					add = float(reac_prod_rate * reac.reactants[species])
+					CA[species] += abs(add)
+					
+			if reac_prod_rate < 0: # For forward reactions
+			
+				# Add all products to CA	
+				for species in reac.products:
+					add = float(reac_prod_rate * reac.products[species])
+					CA[species] += abs(add)
+
+				# Add all reactants to PA
+				for species in reac.reactants:
+					add = float(reac_prod_rate * reac.reactants[species])
+					PA[species] += abs(add)
 
 	return PA,CA
 
@@ -407,19 +421,39 @@ def get_PAB(new_solution, new_reaction_production_rates):
 
 				for i, reac in enumerate(new_solution.reactions()): # For all reactions
 					reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
-					all_species = reac.reactants
-					all_species.update(reac.products)
+					all_species = reac.products
+					all_species.update(reac.reactants)
 
 					# If both species exsist in the reaction, add the calculated value to the correct dictionary.
 					if reac_prod_rate != 0:
 						if species_a in all_species:
 							if species_b in all_species:
-								add = float(reac_prod_rate * all_species[species_a])
-								if add > 0:
-									PAB[full_name] += abs(add)
-								else:
-									CAB[full_name] += abs(add)
+								
+								# For forward reactions
+								if reac_prod_rate > 0:
+						
+									# Add products to PAB
+									if species_a in reac.products:
+										add = float(reac_prod_rate * reac.products[species_a])
+										PAB[full_name] += abs(add)
 
+									# Add reactants to CAB
+									if species_a in reac.reactants:
+										add = float(reac_prod_rate * reac.reactants[species_a])
+										CAB[full_name] += abs(add)
+				
+								# For backward reactions	
+								if reac_prod_rate < 0:
+									
+									# Add products to CAB
+									if species_a in reac.products:
+										add = float(reac_prod_rate * reac.products[species_a])
+										CAB[full_name] += abs(add)
+									
+									# Add reactants to PAB
+									if species_a in reac.reactants:
+										add = float(reac_prod_rate * reac.reactants[species_a])
+										PAB[full_name] += abs(add)
 	return PAB, CAB
 
 
