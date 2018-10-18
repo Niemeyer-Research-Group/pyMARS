@@ -21,7 +21,7 @@ def setup_simulations(conditions_array, model):
         properties['fuel'] = conditions_array[i].fuel
         properties['oxidizer'] = conditions_array[i].oxid
 
-        sim_array.append(Simulation(i,properties,model,'./h5files')) #create simulation object and add it to the array
+        sim_array.append(Simulation(i,properties,model)) #create simulation object and add it to the array
         i = i + 1
 
     return sim_array
@@ -45,5 +45,3 @@ def simulate(sim_array):
 
         ignition_delay = np.array(tau) #Turn tau array into a numpy array
         return ignition_delay
-
-        

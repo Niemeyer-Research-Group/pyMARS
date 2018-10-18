@@ -34,7 +34,7 @@ pyMARS is called from terminal via `pyMARS.py` which can be found in the pyMARS 
 
 example:
 ```
-    python pyMARS.py --file ../example_files/gri30.cti --run_drgep --conditions ../example_files/example_input_file.txt --species CH4,O2,N2,CO2,H2O --error 5 --target CH4,O2
+    python __main__.py -m ../example_files/gri30.cti --conditions ../example_files/example_input_file.txt -e 5 --method DRGEP --targets CH4 O2 --retained_species CH4 O2 N2 CO2 H2O
 ```
 
 This will run pyMARS with the GRI Mech 3.0 model with the initial conditions listed in the example file. pyMARS will record data from the autoignition simulation for each initial condition. Then, pyMARS will reduce the model using the DRGEP method with the given target species until the error reaches 5%. The species listed under species will not be removed from the model under any circumstance.

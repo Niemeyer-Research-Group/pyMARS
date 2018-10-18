@@ -9,12 +9,12 @@ import numpy as np
 import h5py
 import cantera as ct
 
-from . import soln2ck
-from . import soln2cti
-from . import helper
-from .simulation import Simulation
-from .create_trimmed_model import trim
-from .readin_initial_conditions import readin_conditions
+import soln2ck
+import soln2cti
+import helper
+from simulation import Simulation
+from create_trimmed_model import trim
+from readin_initial_conditions import readin_conditions
 
 os.environ['Cantera_Data'] = os.getcwd()
 
