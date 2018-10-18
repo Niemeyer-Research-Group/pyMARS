@@ -11,13 +11,13 @@ import helper
 def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
 
 	"""
-	Creates a list of speices in limbo for use during a sensativity analysis.
+	Creates a list of speices in limbo for use during a sensitivity analysis.
 
 	Parameters
 	----------
 
 	reduced_model: The model reduced by the previous reduction
-	ep_star: Epsilon star value for the sensativity analysis
+	ep_star: Epsilon star value for the sensitivity analysis
 	drgep_coeffs: The dictionary of direct interaction coefficients
 	safe: species that are safe from being removed under any condition
 
@@ -43,7 +43,7 @@ def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
 def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
 
 	"""
-	Creates a dictionary of all of the species in limbo and their errors for sensativity analysis.
+	Creates a dictionary of all of the species in limbo and their errors for sensitivity analysis.
 
 	Parameters
 	----------
@@ -58,7 +58,7 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 	Returns
 	-------
 
-	A dictionary with species error to be used for sensativity anaylsis.
+	A dictionary with species error to be used for sensitivity anaylsis.
 
 	"""
 
@@ -132,14 +132,14 @@ def dic_lowest(dic):
 
 def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file, target, keepers, error_limit):
 	"""
-	Runs a sensativity analysis on a resulting reduced model.
+	Runs a sensitivity analysis on a resulting reduced model.
 	
 	Parameters
 	----------
 
 	original_model: The original version of the model being reduced
 	reduced_model: The model produced by the previous reduction
-	ep_star: The epsilon star value for the sensativity analysis
+	ep_star: The epsilon star value for the sensitivity analysis
 	final_error: Error percentage between the reduced and origanal models
 	conditions_file: The file holding the initial conditions for simulations
 	target: The target species for the reduction
@@ -149,7 +149,7 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 	Returns
 	-------
 
-	The model after the sensativity analysis has been preformed on it.
+	The model after the sensitivity analysis has been preformed on it.
 
 	"""
 
