@@ -51,7 +51,7 @@ def pymars(model_file, conditions, error, method, target_species,
     final_error = [0]
     
     if method == 'DRG':
-        results = run_drg(solution_object, conditions, error, target_species, retained_species)
+        results = run_drg(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
     elif method == 'PFA':
         results = run_pfa(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
     elif method == 'DRGEP':

@@ -16,15 +16,16 @@ from simulation import Simulation
 from create_trimmed_model import trim
 from readin_initial_conditions import readin_conditions
 
-os.environ['Cantera_Data'] = os.getcwd()
 
 def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
-    """Determines which species to remove based on their DICs compared to the threshold value and a simple graph search.
+    
+    """
+    Determines which species to remove based on their DICs compared to the threshold value and a simple graph search.
 
     Parameters
     ----------
     total_edge_data :
-        information for calculating the DICs for the graph edge weights
+        Information for calculating the DICs for the graph edge weights
     solution_object :
         The solution being reduced
     threshold_value :
@@ -44,37 +45,41 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
     start_time = time.time()
 
-    # initalize solution and components
+    # Initalize solution and components
     solution = solution_object
     species_objects = solution.species()
     reaction_objects = solution.reactions()
+    
     # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
     graph = networkx.DiGraph()
 
-    safe = []  # A list of species that are to be retained for this threshold value
+    # A list of species that are to be retained for this threshold value
+    safe = []
 
-    # calculate edge weights based on list received from get_rate_data
-    # initial condition
+    # Calculate edge weights based on list received from get_rate_data
+    # Initial condition
     for ic in total_edge_data.keys():  # For each initial condition
         for species in species_objects:  # Make graph
             graph.add_node(species.name)
-        # timestep
+        # Timestep
         # Set edge values for the graph
         for tstep in total_edge_data[ic].keys():
             numerator = total_edge_data[ic][tstep][1]
             denominator = total_edge_data[ic][tstep][0]
-            # each species
+            # Each species
             for edge in numerator:
                 try:
                     edge_name = edge.split('_', 1)
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
-                    # dge weight between two species
+                    
+                    # DRG weight between two species
                     if denominator[species_a_name] != 0:
                         weight = abs(
                             float(numerator[edge]) / float(denominator[species_a_name]))
                         if graph.has_edge(species_a_name, species_b_name):
                             old_weight = graph[species_a_name][species_b_name]['weight']
+                            
                             # Only include the weight if it is greater than the threshold value.
                             if weight > old_weight and weight <= 1 and weight > threshold_value:
                                 graph.add_weighted_edges_from(
@@ -96,7 +101,8 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
             # Search graph for max values to each species based on targets
             dic = graph_search(graph, target_species)
-            for sp in dic:  # Add to max dictionary if it is new or greater than the value already there.
+            # Add to max dictionary if it is new or greater than the value already there.
+            for sp in dic:
                 if sp not in safe:
                     safe.append(sp)
             graph.clear()  # Reset graph
@@ -134,14 +140,18 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
     return exclusion_list
 
-def run_drg(solution_object, conditions, error_limit, target_species, retained_species):
-    """Main function for running DRG reduction.
+
+def run_drg(solution_object, conditions_file, error_limit, target_species,
+            retained_species, model_file, final_error):
+    
+    """
+    Main function for running DRG reduction.
 
     Parameters
     ----------
     solution_object : ~cantera.Solution
-        a Cantera object of the solution to be reduced.
-    conditions : str
+        A Cantera object of the solution to be reduced.
+    conditions_file : str
         Name of file with list of autoignition initial conditions.
     error_limit : float
         Maximum allowable error level for reduced model.
@@ -149,6 +159,10 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
         List of target species
     retained_species : list of str
         List of species to always be retained
+    model_file : string 
+        The path to the file where the solution object was generated from
+    final_error: singleton float
+        To hold the error level of simulation
 
     Returns
     -------
@@ -156,6 +170,7 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
     Writes reduced Cantera file and returns reduced Cantera solution object
 
     """
+    
     assert target_species, 'Need to specify at least one target species.'
 
     # Singleton to hold whether any more species can be cut from the simulation.
@@ -164,8 +179,9 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
     threshold = 0.1  # Starting threshold value
     threshold_increment = 0.1
     num_iterations = 1
+    error = [10.0]
 
-    conditions_array = readin_conditions(conditions)
+    conditions_array = readin_conditions(conditions_file)
 
     # Turn conditions array into unrun simulation objects for the original solution
     sim_array = helper.setup_simulations(conditions_array, solution_object)
@@ -177,9 +193,9 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
     print("Testing for starting threshold value")
     # Trim the solution at that threshold and find the error.
     drg_loop_control(
-        solution_object, target_species, retained_species, threshold, done, rate_edge_data,
-        ignition_delay_detailed, conditions_array
-        )
+        solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data,
+        ignition_delay_detailed, conditions_array)
+
     # While the error for trimming with that threshold value is greater than allowed.
     while error[0] != 0:
         # Reduce the starting threshold value and try again.
@@ -187,7 +203,8 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
         threshold_increment /= 10
         num_iterations += 1
         drg_loop_control(
-            solution_object, target_species, retained_species, threshold, done, rate_edge_data,
+            solution_object, target_species, retained_species, model_file,
+            error, threshold, done, rate_edge_data,
             ignition_delay_detailed, conditions_array
             )
         if error[0] <= 0.02:
@@ -195,18 +212,22 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
 
     print("Starting with a threshold value of " + str(threshold))
     sol_new = solution_object
+    final_error[0] = 0
+    done[0] = False
 
     # Run the simulation until nothing else can be cut.
-    while not done[0] and error[0] < error:
-        #Trim at this threshold value and calculate error.
+    while not done[0] and error[0] < error_limit:
+        # Trim at this threshold value and calculate error.
         sol_new = drg_loop_control(
-            solution_object, target_species, retained_species, threshold, done, rate_edge_data,
+            solution_object, target_species, retained_species, model_file,
+            error, threshold, done, rate_edge_data,
             ignition_delay_detailed, conditions_array
             )
         # If a new max species cut without exceeding what is allowed is reached, save that threshold.
         if error_limit > error[0]:
             max_t = threshold
-        # if (past == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
+            final_error[0] = error[0]
+        # if (final_error[0] == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
         #	threshold = threshold + (threshold_increment * 4)
         # if (threshold >= .01):
         #        threshold_increment = .01
@@ -215,15 +236,15 @@ def run_drg(solution_object, conditions, error_limit, target_species, retained_s
 
     print("Greatest result: ")
     sol_new = drg_loop_control(
-        solution_object, target_species, retained_species, max_t, done, rate_edge_data,
+        solution_object, target_species, retained_species, model_file,
+        error, max_t, done, rate_edge_data,
         ignition_delay_detailed, conditions_array
         )
-    # Write the solution object with the greatest error that isn't over the allowed ammount.
-    drgep_trimmed_file = soln2cti.write(sol_new)
-
+    
     return sol_new[1]
 
-def drg_loop_control(solution_object, target_species, retained_species, threshold, done, rate_edge_data,
+
+def drg_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, rate_edge_data,
                      ignition_delay_detailed, conditions_array
                      ):
     """Handles the reduction, simulation, and comparision for a single threshold value.
@@ -232,8 +253,14 @@ def drg_loop_control(solution_object, target_species, retained_species, threshol
     ----------
     solution_object:
         object being reduced
-    args:
-        arguments from the command line
+    target_species : list of str
+        List of target species
+    retained_species : list of str
+        List of species to always be retained
+    model_file : string 
+        The path to the file where the solution object was generated from
+    stored_error: signleton float
+        Error of this reduced model simulation
     threshold : float
         current threshold value
     done : bool
@@ -255,15 +282,17 @@ def drg_loop_control(solution_object, target_species, retained_species, threshol
     printout = ''
     print('Threshold     Species in Mech      Error')
 
-    # run DRG and create new reduced solution
+    # Run DRG and create new reduced solution
     # Find out what to cut from the model
-    drgep = trim_drg(rate_edge_data, solution_object, threshold, retained_species, done, target_species)
-    exclusion_list = drgep
+    exclusion_list = trim_drg(
+                              rate_edge_data, solution_object, threshold,
+                              retained_species, done, target_species)
+    
     # Cut the exclusion list from the model.
-    new_solution_objects = trim(solution_object, exclusion_list)
+    new_solution_objects = trim(solution_object, exclusion_list, model_file)
     species_retained.append(len(new_solution_objects[1].species()))
 
-    # simulated reduced solution
+    # Simulated reduced solution
     # Create simulation objects for reduced model for all conditions
     new_sim = helper.setup_simulations(conditions_array, new_solution_objects[1])
     ignition_delay_reduced = helper.simulate(
@@ -277,10 +306,12 @@ def drg_loop_control(solution_object, target_species, retained_species, threshol
     error = (abs(ignition_delay_reduced -ignition_delay_detailed) /ignition_delay_detailed) *100  # Calculate error
     printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              ' + str(round(np.max(error), 2)) + '%' + '\n'
     print(printout)
+    stored_error[0] = round(np.max(error), 2)
 
     # Return new model.
     new_solution_objects = new_solution_objects[1]
     return new_solution_objects
+
 
 def get_rates_drg(sim_array, solution_object):
     """Calculates values to be used in the calculation of Direct Interaction Coefficients
@@ -302,11 +333,11 @@ def get_rates_drg(sim_array, solution_object):
     """
 
     old_solution = solution_object
-    # iterate through all initial conditions
+    # Iterate through all initial conditions
     total_edge_data = {}
     for ic in sim_array:
         ic_edge_data = {}
-        for tstep in ic.sample_points:  # iterate through all timesteps
+        for tstep in ic.sample_points:  # Iterate through all timesteps
             temp = tstep[0]  # Set up variables
             pressure = tstep[1]
             mass_fractions = np.array(tstep[2])
@@ -388,7 +419,9 @@ def get_rates_drg(sim_array, solution_object):
     return total_edge_data
 
 def graph_search(nx_graph, target_species):
-    """Search nodal graph and generate list of species to remove
+    
+    """
+    Search nodal graph and generate list of species to remove
 
     Parameters
     ----------
