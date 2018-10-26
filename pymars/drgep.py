@@ -227,8 +227,8 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 	print("\nGreatest result: ")
 	sol_new = drgep_loop_control(
 		solution_object, target_species, retained_species, model_file, error, max_t, done, max_dic, ignition_delay_detailed, conditions_array)
-
-	return sol_new[1]
+	
+	return sol_new
 
 
 def drgep_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, max_dic, ignition_delay_detailed, conditions_array):

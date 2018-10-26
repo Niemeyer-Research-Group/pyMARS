@@ -59,4 +59,5 @@ def pymars(model_file, conditions, error, method, target_species,
 
     if run_sensitivity_analysis:
         reduced_model = run_sa(solution_object, reduced_model, epsilon_star, final_error, conditions, target_species, retained_species, error)
+   
     output_file = soln2cti.write(reduced_model)
