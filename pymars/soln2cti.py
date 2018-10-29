@@ -287,6 +287,8 @@ def write(solution):
                           ',':'',
                           ' ': '  '
                           }
+        replace_list_2 = {':  ':':'
+                          }
         #build 7-coeff NASA polynomial array
         nasa_coeffs_1 = []
         for j, k in enumerate(nasa_coeffs):
@@ -309,6 +311,9 @@ def write(solution):
         composition = replace_multiple(
                                         str(species.composition),
                                             replace_list_1)
+        composition = replace_multiple(
+                                        str(composition),
+                                            replace_list_2)
         nasa_range_1 = str([species.thermo.min_temp, nasa_coeffs[0]])
         nasa_range_2 = str([nasa_coeffs[0], species.thermo.max_temp])
         #check if species has defined transport data
