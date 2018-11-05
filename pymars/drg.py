@@ -18,7 +18,6 @@ from readin_initial_conditions import readin_conditions
 
 
 def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
-    
     """
     Determines which species to remove based on their DICs compared to the threshold value and a simple graph search.
 
@@ -143,7 +142,6 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
 def run_drg(solution_object, conditions_file, error_limit, target_species,
             retained_species, model_file, final_error):
-    
     """
     Main function for running DRG reduction.
 
@@ -419,7 +417,6 @@ def get_rates_drg(sim_array, solution_object):
     return total_edge_data
 
 def graph_search(nx_graph, target_species):
-    
     """
     Search nodal graph and generate list of species to remove
 
