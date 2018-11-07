@@ -5,7 +5,6 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 import cantera as ct
-import pkg_resources
 
 import drgep
 import pfa
