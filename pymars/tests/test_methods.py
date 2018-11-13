@@ -8,6 +8,7 @@ import cantera as ct
 
 import drgep
 import pfa
+import drg
 import sensitivity_analysis
 
 ROOT_DIR =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -72,6 +73,31 @@ def testPFA():
 
 	# Expected answer	
 	path_to_answer = relative_location("pymars/tests/pfa_gri30.cti")
+	expected_model = ct.Solution(path_to_answer)
+
+	# Make sure models are the same
+	assert len(reduced_model.species()) == len(expected_model.species())
+	assert len(reduced_model.reactions()) == len(expected_model.reactions())
+
+def testDRG():
+
+	# Original model
+	path_to_original = relative_location("example_files/gri30.cti")
+	solution_object = ct.Solution(path_to_original)
+
+	# Conditions for reduction	
+	conditions =  relative_location("example_files/example_input_file.txt")
+	error = 5.0
+	target_species = ["CH4","O2"]
+	retained_species = ["CH4","O2","N2","H2O","CO2"]
+	final_error = [0]
+	epsilon_star = .5
+
+	# Run DRG
+	reduced_model = drg.run_drg(solution_object, conditions, error, target_species, retained_species, path_to_original, final_error)
+
+	# Expected answer	
+	path_to_answer = relative_location("pymars/tests/drg_gri30.cti")
 	expected_model = ct.Solution(path_to_answer)
 
 	# Make sure models are the same
