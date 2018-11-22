@@ -50,7 +50,7 @@ def testDRGEPSA():
 	expected_model = ct.Solution(path_to_answer)
 
 	# Make sure models are the same	
-	assert len(reduced_model.species()) == len(expected_model.species())
+	assert reduced_model.species_names == expected_model.species_names
 	assert len(reduced_model.reactions()) == len(expected_model.reactions())
 
 
@@ -76,7 +76,7 @@ def testPFA():
 	expected_model = ct.Solution(path_to_answer)
 
 	# Make sure models are the same
-	assert len(reduced_model.species()) == len(expected_model.species())
+	assert reduced_model.species_names == expected_model.species_names
 	assert len(reduced_model.reactions()) == len(expected_model.reactions())
 
 def testDRG():
@@ -101,5 +101,5 @@ def testDRG():
 	expected_model = ct.Solution(path_to_answer)
 
 	# Make sure models are the same
-	assert len(reduced_model.species()) == len(expected_model.species())
+	assert reduced_model.species_names == expected_model.species_names
 	assert len(reduced_model.reactions()) == len(expected_model.reactions())
