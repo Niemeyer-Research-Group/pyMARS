@@ -173,7 +173,7 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 	# Trim the solution at that threshold and find the error.
 	pfa_loop_control(
 		solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
-	while error[0] != 0: # While the error for trimming with that threshold value is greater than allowed.
+	while error[0] != 0 and threshold_i > .001: # While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 # Reduce the starting threshold value and try again.
 		threshold_i = threshold_i / 10
 		n = n + 1
