@@ -195,7 +195,7 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         ignition_delay_detailed, conditions_array)
 
     # While the error for trimming with that threshold value is greater than allowed.
-    while error[0] != 0:
+    while error[0] != 0 and threshold_increment > .001:
         # Reduce the starting threshold value and try again.
         threshold /= 10
         threshold_increment /= 10
