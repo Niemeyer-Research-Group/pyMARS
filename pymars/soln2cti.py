@@ -448,7 +448,7 @@ def write(solution):
                     Arr=arrhenius,
                     Efficiencies=efficiencies_string
                     ))
-        if equation_type == 'ElementaryReaction':
+        elif equation_type == 'ElementaryReaction':
             arrhenius = build_arrhenius(equation_object, equation_type)
             if equation_object.duplicate is True:
                 reaction_string = Template(
@@ -466,7 +466,7 @@ def write(solution):
                     equation_string=equation_string,
                     Arr=arrhenius
                     ))
-        if equation_type == 'FalloffReaction':
+        elif equation_type == 'FalloffReaction':
             #trimms efficiencies list
             efficiencies = equation_object.efficiencies
             trimmed_efficiencies = equation_object.efficiencies
@@ -507,7 +507,7 @@ def write(solution):
                 f.write(falloff_str)
             except IndexError:
                 f.write('\n           )\n\n')
-        if equation_type == 'PlogReaction':
+        elif equation_type == 'PlogReaction':
             reaction_string = Template('#  Reaction $m\n' + \
                             'pdep_arrhenius( \"$equation_string\",\n')
             reaction_string = reaction_string.substitute(
@@ -530,6 +530,9 @@ def write(solution):
                 reaction_string = reaction_string[:-1]
                 reaction_string = reaction_string + ')\n\n'
             f.write(reaction_string)
+        else:
+            print('Error: Unknown reaction type')
+            exit()
     f.close()
     return output_file_name
 
