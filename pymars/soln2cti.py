@@ -114,11 +114,17 @@ def write(solution):
         :param equation_type:
             string of equation type
         """
-        coeff_sum = sum(equation_object.reactants.values())
-        pre_exponential_factor = equation_object.rate.pre_exponential_factor
-        temperature_exponent = equation_object.rate.temperature_exponent
-        activation_energy = (equation_object.rate.activation_energy /
-                            calories_constant)
+        if equation_type == 'PlogReaction':
+            pre_exponential_factor = equation_object[1].pre_exponential_factor
+            temperature_exponent = equation_object[1].temperature_exponent
+            activation_energy = (equation_object[1].activation_energy /
+                                 calories_constant)
+        else:
+            coeff_sum = sum(equation_object.reactants.values())
+            pre_exponential_factor = equation_object.rate.pre_exponential_factor
+            temperature_exponent = equation_object.rate.temperature_exponent
+            activation_energy = (equation_object.rate.activation_energy /
+                                calories_constant)
 
         if equation_type == 'ElementaryReaction':
             if coeff_sum == 1:
@@ -501,6 +507,29 @@ def write(solution):
                 f.write(falloff_str)
             except IndexError:
                 f.write('\n           )\n\n')
+        if equation_type == 'PlogReaction':
+            reaction_string = Template('#  Reaction $m\n' + \
+                            'pdep_arrhenius( \"$equation_string\",\n')
+            reaction_string = reaction_string.substitute(
+                    m=m,
+                    equation_string=equation_string)
+            for rate_line in equation_object.rates:
+                pressure = str('{:f}'.format(rate_line[0]/ct.one_atm))
+                arrhenius = build_arrhenius(rate_line, equation_type)
+                arrhenius = arrhenius[1:-1]
+                reaction_string = Template(
+                        reaction_string + 
+                        "               [($pressure, 'atm'), $Arr],\n")
+                reaction_string = reaction_string.substitute(
+                        pressure=pressure,
+                        Arr = arrhenius)
+            if equation_object.duplicate is True:
+                reaction_string = reaction_string + \
+                                '               options=\'duplicate\')\n\n'
+            else:
+                reaction_string = reaction_string[:-1]
+                reaction_string = reaction_string + ')\n\n'
+            f.write(reaction_string)
     f.close()
     return output_file_name
 
