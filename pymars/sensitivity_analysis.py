@@ -11,7 +11,7 @@ import helper
 def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
 
 	"""
-	Creates a list of speices in limbo for use during a sensitivity analysis.
+	Creates a list of species in limbo for use during a sensitivity analysis.
 
 	Parameters
 	----------
@@ -38,7 +38,6 @@ def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
 		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
 			limbo.append(sp)
 	return limbo
-
 
 def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
 
