@@ -27,7 +27,7 @@ def testGRIwrite():
 
 	write(solution_object)
 
-	output_path = relative_location("pymars/tests/pym_gri30.cti")
+	output_path = "pym_gri30.cti"
 	new_solution_object = ct.Solution(output_path)
 
 	assert solution_object.species_names == new_solution_object.species_names
@@ -44,7 +44,7 @@ def testArtWrite():
 
 	write(solution_object)
 
-	output_path = relative_location("pymars/tests/pym_gas.cti")
+	output_path = "pym_gas.cti"
 	new_solution_object = ct.Solution(output_path)
 
 	assert solution_object.species_names == new_solution_object.species_names
@@ -65,7 +65,7 @@ def testGRIwriteRed():
 	
 	write(solution_object)
 
-	output_path = relative_location("pymars/tests/pym_trimmed_gri30.cti")
+	output_path = "pym_trimmed_gri30.cti"
 	new_solution_object = ct.Solution(output_path)
 
 	path_to_original = relative_location("pymars/tests/eout_gri30.cti")
@@ -88,7 +88,7 @@ def testArtWriteRed():
 	
 	write(solution_object)
 
-	output_path = relative_location("pymars/tests/pym_trimmed_gas.cti")
+	output_path = "pym_trimmed_gas.cti"
 	new_solution_object = ct.Solution(output_path)
 
 	path_to_original = relative_location("pymars/tests/eout_artificial-mechanism.cti")
