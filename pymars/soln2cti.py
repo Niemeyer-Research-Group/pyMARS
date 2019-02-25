@@ -158,13 +158,13 @@ def write(solution):
         :param t_range:
             simple string ('high' or 'low') to designate temperature range
         """
-
+        coeff_sum = sum(equation_object.products.values())
         if t_range == 'high':
             pre_exponential_factor = equation_object.high_rate.pre_exponential_factor
             temperature_exponent = equation_object.high_rate.temperature_exponent
             activation_energy = (equation_object.high_rate.activation_energy /
                                 calories_constant)
-            if len(equation_object.products) == 1:
+            if coeff_sum == 1:
                 pre_exponential_factor = str(
                                 '{:.5E}'.format(pre_exponential_factor*10**3))
             else:
@@ -182,7 +182,7 @@ def write(solution):
             activation_energy = (equation_object.low_rate.activation_energy /
                                 calories_constant)
 
-            if len(equation_object.products) == 1:
+            if coeff_sum == 1:
                 pre_exponential_factor = str(
                                 '{:.5E}'.format(pre_exponential_factor*10**6))
             else:
