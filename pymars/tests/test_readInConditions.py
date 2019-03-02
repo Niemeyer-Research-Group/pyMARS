@@ -47,7 +47,7 @@ def testGoodInput1():
 #@pytest.mark.xfail
 def testGoodInput2():
 	#test reading in example_input_artificial
-	conditions =  relative_location("example_files/example_input_artificial.txt")
+	conditions =  relative_location("pymars/tests/example_input_artificial.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
