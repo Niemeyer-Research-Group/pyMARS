@@ -1,0 +1,11 @@
+CONV
+PRES hello
+TEMP I
+TIME am
+DELT testing
+FUEL everthing 5.0
+OXID oxidizer 1.0
+OXID peanutbutter 3.7
+EQUI equal
+END
+
