@@ -4,6 +4,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
+import pytest
 import cantera as ct
 
 from sensitivity_analysis import dic_lowest
@@ -23,7 +24,11 @@ def relative_location(file):
                 but with boundary 0 to infinity
 """ 
 
-# TEST 1 :: nonsense dictionary values passed in =====================
+########
+# Input: dictionary values that vary in type
+# Output: program breaks 
+########
+@pytest.mark.xfail
 def test_bad_input():
     print("---dic_lowest <test 1> input :: dictionary w/ nonsense values") 
 
@@ -32,10 +37,11 @@ def test_bad_input():
 
     print("---dic_lowest <test 1> output :: " + output) 
 
-# not running test currently because it destroys execution
 
-
-# TEST 2 :: empty dictionary passed in  ==============================
+########
+# Input: empty dictionary 
+# Output: "error" -- input is caught 
+########
 def test_empty_input():
     print("---dic_lowest <test 2> input :: empty dictionary")
 
@@ -44,11 +50,12 @@ def test_empty_input():
 
     print("---dic_lowest <test 2> output :: " + output) 
 
-# run test 2
-test_empty_input()
+    assert output == "error"
 
-
-# TEST 3 :: Huge error value ========================================= 
+########
+# Input: large lowest value 
+# Output: "error" -- incorrect
+########
 def test_huge_error_value():
     print("---dic_lowest <test 3> input :: huge error value") 
 
@@ -58,11 +65,13 @@ def test_huge_error_value():
 
     print("---dic_lowest <test 3> output :: " + output) 
 
-# run test 3
-test_huge_error_value()
+    assert output == "CD" 
 
 
-# TEST 4 :: Good input 1 ============================================== 
+########
+# Input: good input where smallest value occurs at end of dictionary 
+# Output: lowest value, which is at the end of the dictionary 
+########
 def test_good_input_1():
     print("---dic_lowest <test 4> input :: good input 1. should be DE")
 
@@ -71,11 +80,12 @@ def test_good_input_1():
 
     print("---dic_lowest <test 4> output :: " + output) 
 
-# run test 4
-test_good_input_1()
+    assert output == "DE"
 
-
-# TEST 5 :: Good input 2 ============================================== 
+########
+# Input: good input where smallest value occurs in the middle of the dictionary
+# Output: lowest value, which is in the middle of the dictionary 
+########
 def test_good_input_2():
     print("---dic_lowest <test 5> input :: good input 2. should be H2O")
 
@@ -84,11 +94,12 @@ def test_good_input_2():
 
     print("---dic_lowest <test 5> output :: " + output) 
 
-# run test 5
-test_good_input_2()
+    assert output == "H2O"
 
-
-# TEST 6 :: Good input 3 ============================================== 
+########
+# Input: good input where smallest value occurs at beginning of dictionary 
+# Output: lowest value, which is at the beginning of the dictionary 
+########
 def test_good_input_3():
     print("---dic_lowest <test 6> input :: good input 3. should be Caius")
 
@@ -97,6 +108,4 @@ def test_good_input_3():
 
     print("---dic_lowest <test 6> output :: " + output) 
 
-# run test 6
-test_good_input_3()
-
+    assert output == "Caius"
