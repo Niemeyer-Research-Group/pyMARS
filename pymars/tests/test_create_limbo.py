@@ -261,7 +261,6 @@ def test_bad_input_1():
 #        array for the safe list (bad input)
 # Output: List of species (limbo) that could potentially be removed that is empty
 ########
-@pytest.mark.xfail
 def test_bad_input_2():
 
     # reduced model
@@ -282,9 +281,11 @@ def test_bad_input_2():
     print("---  ep_star: 0.5")
     ep_star = 0.5
     print("---  safe: bad input. dictionary instead of array") 
-    safe = ["H2", "O2", "H2O", "O", "OH", "C", "CH"]
+    safe = {"H2": "O2", "H2O": "O", "OH": "C"}
 
     output = create_limbo(solution_object, ep_star, dic, dic)
 
     print("---create_limbo <test 6> output :: ") 
     print(output)
+
+    assert len(output) == 0
