@@ -101,11 +101,11 @@ def test_good_input_2():
 # Output: lowest value, which is at the beginning of the dictionary 
 ########
 def test_good_input_3():
-    print("---dic_lowest <test 6> input :: good input 3. should be Caius")
+    print("---dic_lowest <test 6> input :: good input 3. should be Keyus")
 
-    dic = {"Caius": 1, "BC": 9, "CD": 8, "DE": 5} 
+    dic = {"Keyus": 1, "BC": 9, "CD": 8, "DE": 5} 
     output = dic_lowest(dic)
 
     print("---dic_lowest <test 6> output :: " + output) 
 
-    assert output == "Caius"
+    assert output == "Keyus"

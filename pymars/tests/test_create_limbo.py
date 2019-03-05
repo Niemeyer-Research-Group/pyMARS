@@ -82,6 +82,8 @@ def test_safe_mask_1():
     print("---create_limbo <test 1> output :: ") 
     print(output)
 
+    assert len(output) == 5
+
     assert "H" not in output
     assert "O" not in output
     assert "OH" not in output
@@ -125,6 +127,8 @@ def test_safe_mask_2():
     print("---create_limbo <test 2> output :: ") 
     print(output)
 
+    assert len(output) == 5
+
     assert "H2" not in output
     assert "O2" not in output
     assert "H2O" not in output
@@ -162,6 +166,8 @@ def test_epstar_1():
     safe = []
 
     output = create_limbo(solution_object, ep_star, dic, safe)
+
+    assert len(output) == 0
 
     assert "H2" not in output
     assert "O2" not in output
@@ -203,6 +209,8 @@ def test_epstar_2():
 
     print("---create_limbo <test 4> output :: ") 
     print(output)
+
+    assert len(output) == 8
 
     assert "H2" in output
     assert "O2" in output
