@@ -136,8 +136,6 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 
 	rate_edge_data = get_rates(sim_array, original_model) # Get edge weight calculation data.
 	
-	# Make a dictionary of overall interaction coefficients.
-	drgep_coeffs = make_dic_drgep(original_model, rate_edge_data, target)
 	if (id_detailed.all() == 0): # Ensure that ignition occured
 		print("Original model did not ignite.  Check initial conditions.")
 		exit()
