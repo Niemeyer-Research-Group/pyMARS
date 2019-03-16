@@ -144,7 +144,7 @@ def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done
     return exclusion_list
 
 
-def run_drgep(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error):
+def run_drgep(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error, ep_star):
     
 	""""
 	This is the MAIN top level function for running DRGEP
@@ -159,6 +159,7 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 	retained_species: An array of species that should not be removed from the model
 	model_file: The path to the file holding the original model
 	final_error: A singleton holding the final error percentage
+	ep_star: epsilon star value used for SA limbo calculations
 
 	Returns
 	-------
@@ -224,11 +225,17 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 			threshold = threshold + threshold_i
 			threshold = round(threshold, n)
 
+	limbo = []
+	for sp in sol_new.species_names:
+		if sp in max_dic and max_dic[sp] < ep_star and (not sp in limbo) and (not sp in retained_species):
+			limbo.append(sp)
+
 	print("\nGreatest result: ")
 	sol_new = drgep_loop_control(
 		solution_object, target_species, retained_species, model_file, error, max_t, done, max_dic, ignition_delay_detailed, conditions_array)
-	
-	return sol_new
+
+	result = [sol_new, limbo]	
+	return result
 
 
 def drgep_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, max_dic, ignition_delay_detailed, conditions_array):

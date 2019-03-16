@@ -8,38 +8,6 @@ import os
 import helper
 
 
-def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
-
-	"""
-	Creates a list of speices in limbo for use during a sensitivity analysis.
-
-	Parameters
-	----------
-
-	reduced_model: The model reduced by the previous reduction
-	ep_star: Epsilon star value for the sensitivity analysis
-	drgep_coeffs: The dictionary of direct interaction coefficients
-	safe: species that are safe from being removed under any condition
-
-	Returns
-	-------
-
-	A list of all species in limbo.
-	
-	"""
-	
-	limbo = []
-	reduc_species = []
-	species_objex = reduced_model.species()
-	for sp in species_objex:
-		reduc_species.append(sp.name)
-	for sp in reduc_species:
-		# All species that fit the condition of being in limbo are added to a list.
-		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
-			limbo.append(sp)
-	return limbo
-
-
 def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
 
 	"""
@@ -130,7 +98,7 @@ def dic_lowest(dic):
 	return s
 
 
-def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file, target, keepers, error_limit):
+def run_sa(original_model, reduced_model, final_error, conditions_file, target, keepers, error_limit, limbo):
 	"""
 	Runs a sensitivity analysis on a resulting reduced model.
 	
@@ -139,12 +107,12 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 
 	original_model: The original version of the model being reduced
 	reduced_model: The model produced by the previous reduction
-	ep_star: The epsilon star value for the sensitivity analysis
 	final_error: Error percentage between the reduced and origanal models
 	conditions_file: The file holding the initial conditions for simulations
 	target: The target species for the reduction
 	keepers: A list of species that should be retained no matter what
 	error_limit: The maximum allowed error between the reduced and original models
+	limbo: A list of species to be considered for reduction by the sensativity analysis
 	
 	Returns
 	-------
@@ -195,9 +163,6 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 			if not (sp.name in keep):
 				og_excl.append(sp.name)
 
-		# Find all the species in limbo.
-		limbo = create_limbo(old, ep_star, drgep_coeffs, keepers)
-
 		if len(limbo) == 0:
 			return old
 
@@ -208,6 +173,7 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 		dic = get_limbo_dic(original_model,old,limbo,final_error, id_detailed,conditions_array)
 		rm = dic_lowest(dic)  # Species that should be removed (Lowest error).
 		exclude = [rm]
+		limbo.remove(rm)
 
 		for sp in og_excl:  # Add to list of species that should be excluded from final model.
 			exclude.append(sp)
