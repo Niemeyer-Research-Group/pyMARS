@@ -141,7 +141,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
 
 def run_drg(solution_object, conditions_file, error_limit, target_species,
-            retained_species, model_file, final_error):
+            retained_species, model_file, final_error, epsilon_star=.1):
     """
     Main function for running DRG reduction.
 
@@ -232,6 +232,22 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         threshold += threshold_increment
         threshold = round(threshold, num_iterations)
 
+    limbo = []
+    if epsilon_star:
+        print("Calculating for DRGASA:")
+    
+        # Trim with ep star as threshold value and calculate error.
+        epstar_sol = drg_loop_control(
+            solution_object, target_species, retained_species, model_file,
+            error, epsilon_star, done, rate_edge_data,
+            ignition_delay_detailed, conditions_array
+            )
+    
+        for sp in sol_new.species_names:
+            if sp not in epstar_sol.species_names:
+                limbo.append(sp)
+
+
     print("Greatest result: ")
     sol_new = drg_loop_control(
         solution_object, target_species, retained_species, model_file,
@@ -239,7 +255,6 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         ignition_delay_detailed, conditions_array
         )
    
-    limbo = []
     result = [sol_new, limbo]
     return result
 

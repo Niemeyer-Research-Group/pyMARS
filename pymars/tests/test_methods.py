@@ -81,7 +81,7 @@ def testPFA():
 	assert reduced_model.species_names == expected_model.species_names
 	assert len(reduced_model.reactions()) == len(expected_model.reactions())
 
-def testDRG():
+def testDRGASA():
 
 	# Original model
 	path_to_original = relative_location("example_files/gri30.cti")
@@ -96,12 +96,25 @@ def testDRG():
 	epsilon_star = .5
 
 	# Run DRG
-	reduced_model = drg.run_drg(solution_object, conditions, error, target_species, retained_species, path_to_original, final_error)[0]
+	result = drg.run_drg(solution_object, conditions, error, target_species, retained_species, path_to_original, final_error, epsilon_star)
+	reduced_model = result[0]
+	limbo = result[1]
 
 	# Expected answer	
 	path_to_answer = relative_location("pymars/tests/drg_gri30.cti")
 	expected_model = ct.Solution(path_to_answer)
 
 	# Make sure models are the same
+	assert reduced_model.species_names == expected_model.species_names
+	assert len(reduced_model.reactions()) == len(expected_model.reactions())
+	
+	# Run SA	
+	reduced_model = sensitivity_analysis.run_sa(solution_object, reduced_model, final_error, conditions, target_species, retained_species, error, limbo)
+
+	# Get expected model	
+	path_to_answer = relative_location("pymars/tests/drgasa_gri30.cti")
+	expected_model = ct.Solution(path_to_answer)
+
+	# Make sure models are the same	
 	assert reduced_model.species_names == expected_model.species_names
 	assert len(reduced_model.reactions()) == len(expected_model.reactions())
