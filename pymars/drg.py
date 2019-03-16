@@ -161,11 +161,13 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         The path to the file where the solution object was generated from
     final_error: singleton float
         To hold the error level of simulation
+    epsilon_star: float
+        Epsilon star value for sensativity analysis
 
     Returns
     -------
 
-    Writes reduced Cantera file and returns reduced Cantera solution object
+    Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
 
     """
     
@@ -243,6 +245,7 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
             ignition_delay_detailed, conditions_array
             )
     
+        # Anything that was reduced at epstar threshold, add to limbo 
         for sp in sol_new.species_names:
             if sp not in epstar_sol.species_names:
                 limbo.append(sp)

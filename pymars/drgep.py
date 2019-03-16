@@ -164,7 +164,7 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 	Returns
 	-------
 
-	Writes reduced Cantera file and returns reduced Catnera solution object
+	Tuple of reduced Catnera solution object [0] and limbo species for SA [1]
     
 	"""
 
@@ -226,6 +226,7 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 			threshold = round(threshold, n)
 
 	limbo = []
+	# If a species meets the limbo criteria, add it to limbo
 	for sp in sol_new.species_names:
 		if sp in max_dic and max_dic[sp] < ep_star and (not sp in limbo) and (not sp in retained_species):
 			limbo.append(sp)

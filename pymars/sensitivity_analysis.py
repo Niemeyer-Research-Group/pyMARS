@@ -1,6 +1,5 @@
 from create_trimmed_model import trim
 from simulation import Simulation
-from drgep import make_dic_drgep
 from drgep import get_rates
 from readin_initial_conditions import readin_conditions
 import numpy as np
@@ -38,18 +37,22 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 	og_sn = []
 	new_sn = []
 
+	# Append species names
 	species_objex = reduced_model.species()
 	for sp in species_objex:
 		new_sn.append(sp.name)
 
+	# Append species names
 	species_objex = original_model.species()
 	for sp in species_objex:
 		og_sn.append(sp.name)
 
+	# If its in original model, and new model then keep
 	for sp in og_sn:
 		if sp in new_sn:
 			keep.append(sp)
-
+	
+	# If its not being kept, exclude (all that were removed in original reduction)
 	for sp in original_model.species():
 		if not (sp.name in keep):
 			og_excl.append(sp.name)
@@ -147,18 +150,22 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 		keep = []  # Species retained from removals
 		og_excl = []  # Species that will be excluded from the final model (Reduction will be preformed on original model)
 
+		# Append species names
 		species_objex = old.species()
 		for sp in species_objex:
 			new_sn.append(sp.name)
 
+		# Append species names
 		species_objex = original_model.species()
 		for sp in species_objex:
 			og_sn.append(sp.name)
 
+		# If its in original model, and new model
 		for sp in og_sn:
 			if sp in new_sn:
 				keep.append(sp)
 
+		# If its not being kept, exclude (all that were removed in original reduction)
 		for sp in original_model.species():
 			if not (sp.name in keep):
 				og_excl.append(sp.name)
@@ -173,7 +180,7 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 		dic = get_limbo_dic(original_model,old,limbo,final_error, id_detailed,conditions_array)
 		rm = dic_lowest(dic)  # Species that should be removed (Lowest error).
 		exclude = [rm]
-		limbo.remove(rm)
+		limbo.remove(rm) # Remove species from limbo
 
 		for sp in og_excl:  # Add to list of species that should be excluded from final model.
 			exclude.append(sp)

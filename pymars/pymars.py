@@ -57,6 +57,7 @@ def pymars(model_file, conditions, error, method, target_species,
     elif method == 'DRGEP':
         result = run_drgep(solution_object, conditions, error, target_species, retained_species, model_file, final_error, epsilon_star)
 
+    # Result object is split into the model [0] and limbo species if SA will be ran [1]
     reduced_model = result[0]
     limbo = result[1]
 
