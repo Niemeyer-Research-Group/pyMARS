@@ -1,3 +1,5 @@
+import cantera as ct
+
 from create_trimmed_model import trim
 from simulation import Simulation
 from drgep import get_rates
@@ -67,7 +69,13 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 
 		# Simulated reduced solution
 		new_sim = helper.setup_simulations(conditions_array,new_sol) # Create simulation objects for reduced model for all conditions
-		id_new = helper.simulate(new_sim) # Run simulations and process results
+	
+		try:	
+			id_new = helper.simulate(new_sim) # Run simulations and process results
+		except ct.CanteraError:
+			limbo.remove(sp)
+			id_new = 0
+	
 		error = (abs(id_new - id_detailed)/id_detailed)*100
 		error = round(np.max(error), 2)
 		print(sp + ": " + str(error))
