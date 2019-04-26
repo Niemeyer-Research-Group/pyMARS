@@ -115,9 +115,16 @@ def write(solution):
             string of equation type
         """
         if equation_type == 'PlogReaction':
-            pre_exponential_factor = equation_object[1].pre_exponential_factor
-            temperature_exponent = equation_object[1].temperature_exponent
-            activation_energy = (equation_object[1].activation_energy /
+            coeff_sum = equation_object[0]
+            equation_object = equation_object[1][1]
+            if coeff_sum == 1:
+                pre_exponential_factor = equation_object.pre_exponential_factor
+            if coeff_sum == 2:
+                pre_exponential_factor = equation_object.pre_exponential_factor*10**3
+            if coeff_sum == 3:
+                pre_exponential_factor = equation_object.pre_exponential_factor*10**6
+            temperature_exponent = equation_object.temperature_exponent
+            activation_energy = (equation_object.activation_energy /
                                  calories_constant)
         else:
             coeff_sum = sum(equation_object.reactants.values())
@@ -513,9 +520,10 @@ def write(solution):
             reaction_string = reaction_string.substitute(
                     m=m,
                     equation_string=equation_string)
+            sum_coeffs = sum(equation_object.reactants.values())
             for rate_line in equation_object.rates:
                 pressure = str('{:f}'.format(rate_line[0]/ct.one_atm))
-                arrhenius = build_arrhenius(rate_line, equation_type)
+                arrhenius = build_arrhenius((sum_coeffs,rate_line), equation_type)
                 arrhenius = arrhenius[1:-1]
                 reaction_string = Template(
                         reaction_string + 
