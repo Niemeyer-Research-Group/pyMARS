@@ -9,6 +9,37 @@ import os
 import helper
 
 
+def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
+
+	"""
+	Creates a list of species in limbo for use during a sensitivity analysis.
+
+	Parameters
+	----------
+
+	reduced_model: The model reduced by the previous reduction
+	ep_star: Epsilon star value for the sensitivity analysis
+	drgep_coeffs: The dictionary of direct interaction coefficients
+	safe: species that are safe from being removed under any condition
+
+	Returns
+	-------
+
+	A list of all species in limbo.
+	
+	"""
+	
+	limbo = []
+	reduc_species = []
+	species_objex = reduced_model.species()
+	for sp in species_objex:
+		reduc_species.append(sp.name)
+	for sp in reduc_species:
+		# All species that fit the condition of being in limbo are added to a list.
+		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
+			limbo.append(sp)
+	return limbo
+
 def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
 
 	"""
@@ -110,12 +141,10 @@ def dic_lowest(dic):
 
 
 def run_sa(original_model, reduced_model, final_error, conditions_file, target, keepers, error_limit, limbo):
-	"""
-	Runs a sensitivity analysis on a resulting reduced model.
+	"""Runs a sensitivity analysis on a resulting reduced model.
 	
 	Parameters
 	----------
-
 	original_model: The original version of the model being reduced
 	reduced_model: The model produced by the previous reduction
 	final_error: Error percentage between the reduced and origanal models
@@ -127,7 +156,6 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 	
 	Returns
 	-------
-
 	The model after the sensitivity analysis has been preformed on it.
 
 	"""
