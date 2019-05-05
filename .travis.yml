@@ -1,5 +1,5 @@
 sudo: false
-env:
+#env:
 
 language: generic
 
@@ -50,7 +50,7 @@ script:
   - set -e
   - if [[ -z "$TRAVIS_TAG" ]]; then
       pytest -vv --cov=./;
-      if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+      #if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
         #git checkout -- test-environment.yaml;
         #conda install -q sphinx doctr nbsphinx ipython;
         #python setup.py install;
@@ -58,7 +58,7 @@ script:
         #make html SPHINXOPTS="-W";
         #cd ..;
         #doctr deploy devel;
-      fi
+      #fi
     else
       if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
         conda build conda.recipe;
