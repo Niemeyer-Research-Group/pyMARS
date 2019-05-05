@@ -1,5 +1,4 @@
 sudo: false
-#env:
 
 language: generic
 
@@ -50,25 +49,9 @@ script:
   - set -e
   - if [[ -z "$TRAVIS_TAG" ]]; then
       pytest -vv --cov=./;
-      #if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
-        #git checkout -- test-environment.yaml;
-        #conda install -q sphinx doctr nbsphinx ipython;
-        #python setup.py install;
-        #cd docs;
-        #make html SPHINXOPTS="-W";
-        #cd ..;
-        #doctr deploy devel;
-      #fi
     else
       if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
         conda build conda.recipe;
-        #anaconda -t $ANACONDA_TOKEN upload $HOME/miniconda/conda-bld/*/pyteck*.tar.bz2;
-        #python setup.py install;
-        #cd docs;
-        #make html SPHINXOPTS="-W";
-        #cd ..;
-        #doctr deploy --build-tags .;
-        #doctr deploy --build-tags "tags/${TRAVIS_TAG}";
       fi
     fi
   - set +e
