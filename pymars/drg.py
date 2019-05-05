@@ -6,7 +6,6 @@ import sys
 
 import networkx
 import numpy as np
-import h5py
 import cantera as ct
 
 import soln2ck
@@ -48,7 +47,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
     solution = solution_object
     species_objects = solution.species()
     reaction_objects = solution.reactions()
-    
+
     # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
     graph = networkx.DiGraph()
 
@@ -71,14 +70,14 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
                     edge_name = edge.split('_', 1)
                     species_a_name = edge_name[0]
                     species_b_name = edge_name[1]
-                    
+
                     # DRG weight between two species
                     if denominator[species_a_name] != 0:
                         weight = abs(
                             float(numerator[edge]) / float(denominator[species_a_name]))
                         if graph.has_edge(species_a_name, species_b_name):
                             old_weight = graph[species_a_name][species_b_name]['weight']
-                            
+
                             # Only include the weight if it is greater than the threshold value.
                             if weight > old_weight and weight <= 1 and weight > threshold_value:
                                 graph.add_weighted_edges_from(
@@ -157,7 +156,7 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         List of target species
     retained_species : list of str
         List of species to always be retained
-    model_file : string 
+    model_file : string
         The path to the file where the solution object was generated from
     final_error: singleton float
         To hold the error level of simulation
@@ -170,7 +169,7 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
     Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
 
     """
-    
+
     assert target_species, 'Need to specify at least one target species.'
 
     # Singleton to hold whether any more species can be cut from the simulation.
@@ -237,15 +236,15 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
     limbo = []
     if epsilon_star:
         print("Calculating for DRGASA:")
-    
+
         # Trim with ep star as threshold value and calculate error.
         epstar_sol = drg_loop_control(
             solution_object, target_species, retained_species, model_file,
             error, epsilon_star, done, rate_edge_data,
             ignition_delay_detailed, conditions_array
             )
-    
-        # Anything that was reduced at epstar threshold, add to limbo 
+
+        # Anything that was reduced at epstar threshold, add to limbo
         for sp in sol_new.species_names:
             if sp not in epstar_sol.species_names:
                 limbo.append(sp)
@@ -257,7 +256,7 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         error, max_t, done, rate_edge_data,
         ignition_delay_detailed, conditions_array
         )
-   
+
     result = [sol_new, limbo]
     return result
 
@@ -275,7 +274,7 @@ def drg_loop_control(solution_object, target_species, retained_species, model_fi
         List of target species
     retained_species : list of str
         List of species to always be retained
-    model_file : string 
+    model_file : string
         The path to the file where the solution object was generated from
     stored_error: signleton float
         Error of this reduced model simulation
@@ -305,7 +304,7 @@ def drg_loop_control(solution_object, target_species, retained_species, model_fi
     exclusion_list = trim_drg(
                               rate_edge_data, solution_object, threshold,
                               retained_species, done, target_species)
-    
+
     # Cut the exclusion list from the model.
     new_solution_objects = trim(solution_object, exclusion_list, model_file)
     species_retained.append(len(new_solution_objects[1].species()))

@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-import h5py
 from collections import Counter
 import time as tm
 from drg import graph_search
@@ -30,12 +29,12 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
     target_species: The target species for the search in the array
     model_file: File holding the model being reduced
 
-    Returns 
+    Returns
     -------
 
     Returns an array of species that should be excluded from the original model at this threshold level
-   
-    """          
+
+    """
 
     start_time = tm.time()
 
@@ -43,7 +42,7 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
     solution = solution_object
     species_objects = solution.species()
     reaction_objects = solution.reactions()
-    
+
     # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
     graph = nx.DiGraph()
 
@@ -143,8 +142,8 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 	-------
 
 	Writes reduced Cantera file and returns reduced Catnera solution object
-	
-	"""    
+
+	"""
 
 	if len(target_species) == 0: # If the target species are not specified, puke and die.
 		print("Please specify a target species.")
@@ -169,7 +168,7 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 	rate_edge_data = get_rates_pfa(sim_array, solution_object) #Get edge weight calculation data.
 
 	print("Testing for starting threshold value")
-	
+
 	# Trim the solution at that threshold and find the error.
 	pfa_loop_control(
 		solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
@@ -183,7 +182,7 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 			error[0] = 0
 
 	print("Starting with a threshold value of " + str(threshold))
-	
+
 	sol_new = solution_object
 	final_error[0] = 0 # An integer representing the error introduced in the final simulation.
 	done[0] = False
@@ -207,7 +206,7 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 		solution_object, target_species, retained_species, model_file, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 
 	limbo = []
-	result = [sol_new, limbo]	
+	result = [sol_new, limbo]
 	return result
 
 
@@ -234,7 +233,7 @@ def pfa_loop_control(solution_object, target_species, retained_species, model_fi
     -------
 
     Returns the reduced solution object for this threshold and updates error value
-    
+
     """
 
     # Run detailed mechanism and retain initial conditions
@@ -269,7 +268,7 @@ def pfa_loop_control(solution_object, target_species, retained_species, model_fi
 
 def get_rates_pfa(sim_array, solution_object):
 
-    """     
+    """
     This function calculates values to be used in the calculation of Direct Interaction Coefficients
 
     Parameters
@@ -278,16 +277,16 @@ def get_rates_pfa(sim_array, solution_object):
     sim_array: Array of simulated simulation objects
     solution_object: Cantera object of the solution being reduced
 
-    Returns 
+    Returns
     -------
 
       total_edge_data: a dictionary with keys of initial conditions and values of dictionarys that hold information for caculating DICs at each timestep.
           *the subdictionaries have the timestep as their keys and their values hold an array of DICs
-    
+
     """
-    
+
     old_solution = solution_object
-    
+
     # Iterate through all initial conditions
     total_edge_data = {}
     for ic in sim_array:
@@ -338,7 +337,7 @@ def get_PA(new_solution, new_reaction_production_rates):
 
 	"""
 	Gets the PA (and CA) values of all species in a given solution.
-	
+
 	Parameters
 	----------
 
@@ -349,7 +348,7 @@ def get_PA(new_solution, new_reaction_production_rates):
 	-------
 
 	PA and CA dictionaries
-	
+
 	"""
 
 	PA = {} # Dictionary that will hold the PA values for each species.
@@ -357,13 +356,13 @@ def get_PA(new_solution, new_reaction_production_rates):
 
 	# Initalize all species
 	s_names = new_solution.species_names
-	for species in s_names: 
+	for species in s_names:
 		PA[species] = 0
 		CA[species] = 0
 
 	for i, reac in enumerate(new_solution.reactions()): # For all reactions
 		reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
-				
+
 		if reac_prod_rate != 0:
 			if reac_prod_rate > 0: # For forward reactions
 
@@ -375,10 +374,10 @@ def get_PA(new_solution, new_reaction_production_rates):
 				for species in reac.reactants:
 					add = float(reac_prod_rate * reac.reactants[species])
 					CA[species] += abs(add)
-					
+
 			if reac_prod_rate < 0: # For forward reactions
-			
-				# Add all products to CA	
+
+				# Add all products to CA
 				for species in reac.products:
 					add = float(reac_prod_rate * reac.products[species])
 					CA[species] += abs(add)
@@ -392,10 +391,10 @@ def get_PA(new_solution, new_reaction_production_rates):
 
 
 def get_PAB(new_solution, new_reaction_production_rates):
-	
+
 	"""
 	Gets the PAB (and CAB) values of all species in a given solution.
-	
+
 	Parameters
 	----------
 
@@ -404,11 +403,11 @@ def get_PAB(new_solution, new_reaction_production_rates):
 
 	Returns
 	-------
-	
+
 	PAB and CAB dictionaries.
-	
+
 	"""
-	
+
 	PAB = {} # Set up dictionaries
 	CAB = {}
 
@@ -431,10 +430,10 @@ def get_PAB(new_solution, new_reaction_production_rates):
 				for species_b in all_species:
 					if species_a != species_b:
 						full_name = species_a + "_" + species_b
-						
+
 						# For forward reactions
 						if reac_prod_rate > 0:
-				
+
 							# Add products to PAB
 							if species_a in reac.products:
 								add = float(reac_prod_rate * reac.products[species_a])
@@ -444,15 +443,15 @@ def get_PAB(new_solution, new_reaction_production_rates):
 							if species_a in reac.reactants:
 								add = float(reac_prod_rate * reac.reactants[species_a])
 								CAB[full_name] += abs(add)
-		
-						# For backward reactions	
+
+						# For backward reactions
 						if reac_prod_rate < 0:
-							
+
 							# Add products to CAB
 							if species_a in reac.products:
 								add = float(reac_prod_rate * reac.products[species_a])
 								CAB[full_name] += abs(add)
-							
+
 							# Add reactants to PAB
 							if species_a in reac.reactants:
 								add = float(reac_prod_rate * reac.reactants[species_a])
@@ -461,26 +460,26 @@ def get_PAB(new_solution, new_reaction_production_rates):
 
 
 def get_rAB_1(new_solution,PA,CA,PAB,CAB):
-	
+
 	"""
 	Gets the rAB_p1 (and rAB_c1) values of all species in a given solution.
-	
+
 	Parameters
 	----------
-	
+
 	new_solution: The object representing the cantera model
 	PA: A dictionary containing the PA values for the reduction
 	CA: A dictionary containing the CA values for the reduction
 	PAB: A dictionary containing the PAB values for the reduction
 	CAB: A dictionary containing the CAB values for the reduction
-	
+
 	Returns
 	-------
-	
+
 	rAB_p1 and rAB_c1 dictionaries.
 
 	"""
-	
+
 	rAB_p1 = {} # Set up dictionaries
 	rAB_c1 = {}
 
@@ -508,22 +507,22 @@ def get_rAB_1(new_solution,PA,CA,PAB,CAB):
 
 
 def get_rAB_2(new_solution,rAB_p1,rAB_c1):
-	
+
 	"""
 	Gets the rAB_p2 (and rAB_c2) values of all species in a given solution.
-	
+
 	Parameters
 	----------
-	
+
 	new_solution: The object representing the cantera model
 	rAB_p1: A dictionary containing the rAB_p1 values for the reduction
 	rAB_c1: A dictionary containing the rAB_c1 values for the reduction
-	
+
 	Returns
 	-------
 
 	rAB_p2 and rAB_c2 dictionaries.
-	
+
 	"""
 
 	rAB_p2 = {} # Set up dictionaries
