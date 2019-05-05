@@ -420,41 +420,43 @@ def get_PAB(new_solution, new_reaction_production_rates):
 				PAB[full_name] = 0
 				CAB[full_name] = 0
 
-				for i, reac in enumerate(new_solution.reactions()): # For all reactions
-					reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
-					all_species = reac.products
-					all_species.update(reac.reactants)
+	for i, reac in enumerate(new_solution.reactions()): # For all reactions
+		reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
+		all_species = reac.products
+		all_species.update(reac.reactants)
 
 					# If both species exsist in the reaction, add the calculated value to the correct dictionary.
-					if reac_prod_rate != 0:
-						if species_a in all_species:
-							if species_b in all_species:
-								
-								# For forward reactions
-								if reac_prod_rate > 0:
+		if reac_prod_rate != 0:
+			for species_a in all_species:
+				for species_b in all_species:
+					if species_a != species_b:
+						full_name = species_a + "_" + species_b
 						
-									# Add products to PAB
-									if species_a in reac.products:
-										add = float(reac_prod_rate * reac.products[species_a])
-										PAB[full_name] += abs(add)
-
-									# Add reactants to CAB
-									if species_a in reac.reactants:
-										add = float(reac_prod_rate * reac.reactants[species_a])
-										CAB[full_name] += abs(add)
+						# For forward reactions
+						if reac_prod_rate > 0:
 				
-								# For backward reactions	
-								if reac_prod_rate < 0:
-									
-									# Add products to CAB
-									if species_a in reac.products:
-										add = float(reac_prod_rate * reac.products[species_a])
-										CAB[full_name] += abs(add)
-									
-									# Add reactants to PAB
-									if species_a in reac.reactants:
-										add = float(reac_prod_rate * reac.reactants[species_a])
-										PAB[full_name] += abs(add)
+							# Add products to PAB
+							if species_a in reac.products:
+								add = float(reac_prod_rate * reac.products[species_a])
+								PAB[full_name] += abs(add)
+
+							# Add reactants to CAB
+							if species_a in reac.reactants:
+								add = float(reac_prod_rate * reac.reactants[species_a])
+								CAB[full_name] += abs(add)
+		
+						# For backward reactions	
+						if reac_prod_rate < 0:
+							
+							# Add products to CAB
+							if species_a in reac.products:
+								add = float(reac_prod_rate * reac.products[species_a])
+								CAB[full_name] += abs(add)
+							
+							# Add reactants to PAB
+							if species_a in reac.reactants:
+								add = float(reac_prod_rate * reac.reactants[species_a])
+								PAB[full_name] += abs(add)
 	return PAB, CAB
 
 
