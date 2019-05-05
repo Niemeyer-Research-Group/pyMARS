@@ -1,0 +1,48 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: pymars
+  version: {{ data['version'] }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+  noarch: python
+
+requirements:
+  build:
+    - python >=3.5
+    - setuptools
+    - pip
+
+  run:
+    - python
+    - numpy >=1.13.1
+    - pytables
+    - cantera >=2.3.0
+    - networkx
+
+test:
+  imports:
+    - pymars
+
+  requires:
+    - pytest >=3.0.1
+    - pytest-cov >=2.3.1
+
+  commands:
+    - pytest -vv --pyargs pymars
+
+about:
+  home: data['url']
+  license: MIT
+  license_file: LICENSE
+  license_family: MIT
+
+  summary: data['description']
+  description: data['long_description']
+  doc_url: https://github.com/Niemeyer-Research-Group/pyMARS
+  dev_url: data['url']

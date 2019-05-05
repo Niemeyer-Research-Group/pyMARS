@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-import h5py
 import os, sys, argparse
 import cantera as ct
 import soln2ck
@@ -16,7 +15,7 @@ from dijkstra import ss_dijkstra_path_length_modified
 
 def make_dic_drgep(solution_object, total_edge_data, target_species):
 
-    """     
+    """
     Makes the dictionary of overall interaction coefficients for DRGEP by building a graph and searching it as explained in DRGEP
 
     Parameters
@@ -31,14 +30,14 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
     -------
 
     A dictionary with keys of species and values of that species OIC
-    
+
     """
 
     # Initalize solution and components
     solution = solution_object
     species_objects = solution.species()
     reaction_objects = solution.reactions()
-    
+
     # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
     graph = nx.DiGraph()
 
@@ -94,7 +93,7 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
 
 
 def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done):
-    
+
     """
     Determines what species should be excluded from the reduced model based on their OICs compared to the threshold value.
 
@@ -109,15 +108,15 @@ def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done
     Returns
     -------
     An array of species that should be excluded from the original model at this threshold level
-    
+
     """
-    
+
     core_species = []
     species_objects = solution_object.species()
 
     for sp in retained_species:
         core_species.append(sp)
-    
+
     # Take all species that are over the threshold value and add them to essential species.
     essential_species = []
     for sp in species_objects:
@@ -138,14 +137,14 @@ def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done
 
     for species in solution_object.species():
         # If its not one of our species we must keep, add it to the list of species to be trimmed.
-        if species.name not in core_species: 
+        if species.name not in core_species:
             exclusion_list.append(species.name)
 
     return exclusion_list
 
 
 def run_drgep(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error, ep_star):
-    
+
 	""""
 	This is the MAIN top level function for running DRGEP
 
@@ -165,7 +164,7 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 	-------
 
 	Tuple of reduced Catnera solution object [0] and limbo species for SA [1]
-    
+
 	"""
 
 	# Set up variables
@@ -196,7 +195,7 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 	print("Testing for starting threshold value")
 	drgep_loop_control(
 		solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array)
-	
+
 	while error[0] != 0 and threshold_i > .001: # While the error for trimming with that threshold value is greater than allowed.
 		threshold = threshold / 10 # Reduce the starting threshold value and try again.
 		threshold_i = threshold_i / 10
@@ -230,19 +229,19 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 		solution_object, target_species, retained_species, model_file, error, max_t, done, max_dic, ignition_delay_detailed, conditions_array)
 
 	limbo = []
-	if ep_star:	
+	if ep_star:
 		# If a species meets the limbo criteria, add it to limbo
 		for sp in sol_new.species_names:
 			if sp in max_dic and max_dic[sp] < ep_star and (not sp in limbo) and (not sp in retained_species):
 				limbo.append(sp)
 
-	result = [sol_new, limbo]	
+	result = [sol_new, limbo]
 	return result
 
 
 def drgep_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, max_dic, ignition_delay_detailed, conditions_array):
 
-    """      
+    """
     This function handles the reduction, simulation, and comparision for a single threshold value.
 
     Parameters
@@ -263,8 +262,8 @@ def drgep_loop_control(solution_object, target_species, retained_species, model_
     -------
 
     Returns the reduced solution object for this threshold and updates error value
-   
-    """      
+
+    """
 
     # Run detailed mechanism and retain initial conditions
     species_retained = []
@@ -297,12 +296,12 @@ def drgep_loop_control(solution_object, target_species, retained_species, model_
 
 def get_rates(sim_array, solution_object):
 
-    """     
+    """
     This function calculates values to be used in the calculation of Direct Interaction Coefficients
 
     Parameters
     ----------
-    
+
     sim_array: Array of simulated simulation objects
     solution_object: Cantera object of the solution being reduced
 
@@ -406,7 +405,7 @@ def graph_search_drgep(nx_graph, target_species):
 
     """
     This function searches the graph to generate a dictionary of the greatest paths to all species from one of the targets.
-   
+
     Parameters
     ----------
     nx_graph : obj
@@ -418,7 +417,7 @@ def graph_search_drgep(nx_graph, target_species):
     -------
     max_dic : dictionary
         Values of the greatest possible path to each species from one of the targets on this graph keyed by species name.
-    
+
     """
 
     max_dic = {} # A dictionary holding the maximum path to each species.
