@@ -19,8 +19,8 @@ These methods are documented in the literature. Sensitivity analysis must be per
 
 See the following publications for more detail:
 
- * KE Niemeyer, CJ Sung, and MP Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. *Combust. Flame*, 157(9):1760--1770, 2010. doi:[10.1016/j.combustflflame.2009.12.022](https://doi.org/10.1016/j.combustflflame.2009.12.022)
- * KE Niemeyer and CJ Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. *Combust. Flame*, 158(8):1439--1443, 2011. doi:[10.1016/j.combustflflame.2010.12.010](https://doi.org/10.1016/j.combustflflame.2010.12.010).
+ * KE Niemeyer, CJ Sung, and MP Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. *Combust. Flame*, 157(9):1760--1770, 2010. doi:[10.1016/j.combustflame.2009.12.022](https://doi.org/10.1016/j.combustflame.2009.12.022)
+ * KE Niemeyer and CJ Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. *Combust. Flame*, 158(8):1439--1443, 2011. doi:[10.1016/j.combustflame.2010.12.010](https://doi.org/10.1016/j.combustflame.2010.12.010).
  * KE Niemeyer and CJ Sung. Mechanism reduction for multicomponent surrogates: A case study using toluene reference fuels. *Combust. Flame*, in press, 2014. doi:[10.1016/j.combustflame.2014.05.001](https://doi.org/10.1016/j.combustflame.2014.05.001)
  * TF Lu and CK Law. *Combustion and Flame*, 154:153--163, 2008. doi:[10.1016/j.combustflame.2007.11.013](https://doi.org/10.1016/j.combustflame.2007.11.013)
 
