@@ -1,0 +1,14 @@
+name: py${PYTHON}
+channels:
+- defaults
+- conda-forge
+- cantera
+dependencies:
+  - python=${PYTHON}
+  - numpy>=1.13.1
+  - cantera>=2.3.0
+  - networkx
+  - pytables
+  - pytest>=3.2.0
+  - pytest-cov>=2.3.1
+  - codecov

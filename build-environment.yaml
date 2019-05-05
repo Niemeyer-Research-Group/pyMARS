@@ -1,0 +1,17 @@
+name: build-env
+channels:
+- defaults
+- conda-forge
+- cantera
+dependencies:
+  - python=${PYTHON}
+  - numpy>=1.13.1
+  - cantera>=2.3.0
+  - networkx
+  - pytables
+  - sphinx
+  - nbsphinx
+  - ipython
+  - conda-build
+  - anaconda-client
+  - doctr
