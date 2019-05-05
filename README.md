@@ -2,6 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/51664233.svg)](https://zenodo.org/badge/latestdoi/51664233)
 [![Build Status](https://travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master)](https://travis-ci.org/Niemeyer-Research-Group/pyMARS)
+[![codecov](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS/branch/master/graph/badge.svg)](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
 
