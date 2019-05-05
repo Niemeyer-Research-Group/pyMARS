@@ -51,13 +51,17 @@ def pymars(model_file, conditions, error, method, target_species,
     final_error = [0]
     
     if method == 'DRG':
-        reduced_model = run_drg(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
+        result = run_drg(solution_object, conditions, error, target_species, retained_species, model_file, final_error, epsilon_star)
     elif method == 'PFA':
-        reduced_model = run_pfa(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
+        result = run_pfa(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
     elif method == 'DRGEP':
-        reduced_model = run_drgep(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
+        result = run_drgep(solution_object, conditions, error, target_species, retained_species, model_file, final_error, epsilon_star)
+
+    # Result object is split into the model [0] and limbo species if SA will be ran [1]
+    reduced_model = result[0]
+    limbo = result[1]
 
     if run_sensitivity_analysis:
-        reduced_model = run_sa(solution_object, reduced_model, epsilon_star, final_error, conditions, target_species, retained_species, error)
+        reduced_model = run_sa(solution_object, reduced_model, final_error, conditions, target_species, retained_species, error, limbo)
    
     output_file = soln2cti.write(reduced_model)

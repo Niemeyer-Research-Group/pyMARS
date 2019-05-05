@@ -141,7 +141,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
 
 def run_drg(solution_object, conditions_file, error_limit, target_species,
-            retained_species, model_file, final_error):
+            retained_species, model_file, final_error, epsilon_star=.1):
     """
     Main function for running DRG reduction.
 
@@ -161,11 +161,13 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         The path to the file where the solution object was generated from
     final_error: singleton float
         To hold the error level of simulation
+    epsilon_star: float
+        Epsilon star value for sensativity analysis
 
     Returns
     -------
 
-    Writes reduced Cantera file and returns reduced Cantera solution object
+    Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
 
     """
     
@@ -232,14 +234,32 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
         threshold += threshold_increment
         threshold = round(threshold, num_iterations)
 
+    limbo = []
+    if epsilon_star:
+        print("Calculating for DRGASA:")
+    
+        # Trim with ep star as threshold value and calculate error.
+        epstar_sol = drg_loop_control(
+            solution_object, target_species, retained_species, model_file,
+            error, epsilon_star, done, rate_edge_data,
+            ignition_delay_detailed, conditions_array
+            )
+    
+        # Anything that was reduced at epstar threshold, add to limbo 
+        for sp in sol_new.species_names:
+            if sp not in epstar_sol.species_names:
+                limbo.append(sp)
+
+
     print("Greatest result: ")
     sol_new = drg_loop_control(
         solution_object, target_species, retained_species, model_file,
         error, max_t, done, rate_edge_data,
         ignition_delay_detailed, conditions_array
         )
-    
-    return sol_new
+   
+    result = [sol_new, limbo]
+    return result
 
 
 def drg_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, rate_edge_data,

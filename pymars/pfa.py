@@ -205,8 +205,10 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 	print("\nGreatest result: ")
 	sol_new = pfa_loop_control(
 		solution_object, target_species, retained_species, model_file, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
-	
-	return sol_new
+
+	limbo = []
+	result = [sol_new, limbo]	
+	return result
 
 
 def pfa_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array):

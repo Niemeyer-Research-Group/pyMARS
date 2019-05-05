@@ -1,43 +1,12 @@
+import cantera as ct
+
 from create_trimmed_model import trim
 from simulation import Simulation
-from drgep import make_dic_drgep
 from drgep import get_rates
 from readin_initial_conditions import readin_conditions
 import numpy as np
 import os
 import helper
-
-
-def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
-
-	"""
-	Creates a list of speices in limbo for use during a sensitivity analysis.
-
-	Parameters
-	----------
-
-	reduced_model: The model reduced by the previous reduction
-	ep_star: Epsilon star value for the sensitivity analysis
-	drgep_coeffs: The dictionary of direct interaction coefficients
-	safe: species that are safe from being removed under any condition
-
-	Returns
-	-------
-
-	A list of all species in limbo.
-	
-	"""
-	
-	limbo = []
-	reduc_species = []
-	species_objex = reduced_model.species()
-	for sp in species_objex:
-		reduc_species.append(sp.name)
-	for sp in reduc_species:
-		# All species that fit the condition of being in limbo are added to a list.
-		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
-			limbo.append(sp)
-	return limbo
 
 
 def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
@@ -70,18 +39,22 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 	og_sn = []
 	new_sn = []
 
+	# Append species names
 	species_objex = reduced_model.species()
 	for sp in species_objex:
 		new_sn.append(sp.name)
 
+	# Append species names
 	species_objex = original_model.species()
 	for sp in species_objex:
 		og_sn.append(sp.name)
 
+	# If its in original model, and new model then keep
 	for sp in og_sn:
 		if sp in new_sn:
 			keep.append(sp)
-
+	
+	# If its not being kept, exclude (all that were removed in original reduction)
 	for sp in original_model.species():
 		if not (sp.name in keep):
 			og_excl.append(sp.name)
@@ -96,7 +69,13 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 
 		# Simulated reduced solution
 		new_sim = helper.setup_simulations(conditions_array,new_sol) # Create simulation objects for reduced model for all conditions
-		id_new = helper.simulate(new_sim) # Run simulations and process results
+	
+		try:	
+			id_new = helper.simulate(new_sim) # Run simulations and process results
+		except ct.CanteraError:
+			limbo.remove(sp)
+			id_new = 0
+	
 		error = (abs(id_new - id_detailed)/id_detailed)*100
 		error = round(np.max(error), 2)
 		print(sp + ": " + str(error))
@@ -130,7 +109,7 @@ def dic_lowest(dic):
 	return s
 
 
-def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file, target, keepers, error_limit):
+def run_sa(original_model, reduced_model, final_error, conditions_file, target, keepers, error_limit, limbo):
 	"""
 	Runs a sensitivity analysis on a resulting reduced model.
 	
@@ -139,12 +118,12 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 
 	original_model: The original version of the model being reduced
 	reduced_model: The model produced by the previous reduction
-	ep_star: The epsilon star value for the sensitivity analysis
 	final_error: Error percentage between the reduced and origanal models
 	conditions_file: The file holding the initial conditions for simulations
 	target: The target species for the reduction
 	keepers: A list of species that should be retained no matter what
 	error_limit: The maximum allowed error between the reduced and original models
+	limbo: A list of species to be considered for reduction by the sensativity analysis
 	
 	Returns
 	-------
@@ -165,8 +144,6 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 
 	rate_edge_data = get_rates(sim_array, original_model) # Get edge weight calculation data.
 	
-	# Make a dictionary of overall interaction coefficients.
-	drgep_coeffs = make_dic_drgep(original_model, rate_edge_data, target)
 	if (id_detailed.all() == 0): # Ensure that ignition occured
 		print("Original model did not ignite.  Check initial conditions.")
 		exit()
@@ -179,24 +156,25 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 		keep = []  # Species retained from removals
 		og_excl = []  # Species that will be excluded from the final model (Reduction will be preformed on original model)
 
+		# Append species names
 		species_objex = old.species()
 		for sp in species_objex:
 			new_sn.append(sp.name)
 
+		# Append species names
 		species_objex = original_model.species()
 		for sp in species_objex:
 			og_sn.append(sp.name)
 
+		# If its in original model, and new model
 		for sp in og_sn:
 			if sp in new_sn:
 				keep.append(sp)
 
+		# If its not being kept, exclude (all that were removed in original reduction)
 		for sp in original_model.species():
 			if not (sp.name in keep):
 				og_excl.append(sp.name)
-
-		# Find all the species in limbo.
-		limbo = create_limbo(old, ep_star, drgep_coeffs, keepers)
 
 		if len(limbo) == 0:
 			return old
@@ -208,6 +186,7 @@ def run_sa(original_model, reduced_model, ep_star, final_error, conditions_file,
 		dic = get_limbo_dic(original_model,old,limbo,final_error, id_detailed,conditions_array)
 		rm = dic_lowest(dic)  # Species that should be removed (Lowest error).
 		exclude = [rm]
+		limbo.remove(rm) # Remove species from limbo
 
 		for sp in og_excl:  # Add to list of species that should be excluded from final model.
 			exclude.append(sp)
