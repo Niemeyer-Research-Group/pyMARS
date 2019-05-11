@@ -45,10 +45,10 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
 
     # Calculate edge weights based on list received from get_rate_data and use them to create a graph
     for ic in total_edge_data.keys(): # For each initial condition
-        for species in species_objects: # Make graph
-            graph.add_node(species.name)
         # Timestep
         for tstep in total_edge_data[ic].keys(): # Make a graph at each timestep
+            for species in species_objects: # Make graph
+                graph.add_node(species.name)
             # DRGEP calculations of direct interaction coeffients are done in the total_edge_data function.
             numerator = total_edge_data[ic][tstep][1]
             denominator = total_edge_data[ic][tstep][0]
