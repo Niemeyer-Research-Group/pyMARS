@@ -52,10 +52,10 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
     # Calculate edge weights based on list received from get_rate_data
     # Initial condition
     for ic in total_edge_data.keys(): # For each initial condition
-        for species in species_objects: # Make graph
-            graph.add_node(species.name)
         # Timestep
         for tstep in total_edge_data[ic].keys(): # Set edge values for the graph
+            for species in species_objects: # Make graph
+                graph.add_node(species.name)
             number = total_edge_data[ic][tstep]
             # Each species
             for edge in number:
@@ -84,7 +84,7 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
                     continue
 
             dic = graph_search(graph, target_species) # Search graph for max values to each species based on targets
-            for sp in dic: # Add to max dictionary if it is new or greater than the value already there.
+            for sp in dic: # Add to safe list if it is not already there.
                 if sp not in safe:
                     safe.append(sp)
             graph.clear() # Reset graph

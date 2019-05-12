@@ -1,6 +1,6 @@
 """writes a solution object to a cantera cti file.
 
-currently only works for Elementary, Falloff and ThreeBody Reactions
+currently only works for Elementary, Falloff, Plog and ThreeBody Reactions
 Cantera development version 2.3.0a2 required
 """
 from __future__ import print_function
@@ -114,11 +114,24 @@ def write(solution):
         :param equation_type:
             string of equation type
         """
-        coeff_sum = sum(equation_object.reactants.values())
-        pre_exponential_factor = equation_object.rate.pre_exponential_factor
-        temperature_exponent = equation_object.rate.temperature_exponent
-        activation_energy = (equation_object.rate.activation_energy /
-                            calories_constant)
+        if equation_type == 'PlogReaction':
+            coeff_sum = equation_object[0]
+            equation_object = equation_object[1][1]
+            if coeff_sum == 1:
+                pre_exponential_factor = equation_object.pre_exponential_factor
+            if coeff_sum == 2:
+                pre_exponential_factor = equation_object.pre_exponential_factor*10**3
+            if coeff_sum == 3:
+                pre_exponential_factor = equation_object.pre_exponential_factor*10**6
+            temperature_exponent = equation_object.temperature_exponent
+            activation_energy = (equation_object.activation_energy /
+                                 calories_constant)
+        else:
+            coeff_sum = sum(equation_object.reactants.values())
+            pre_exponential_factor = equation_object.rate.pre_exponential_factor
+            temperature_exponent = equation_object.rate.temperature_exponent
+            activation_energy = (equation_object.rate.activation_energy /
+                                calories_constant)
 
         if equation_type == 'ElementaryReaction':
             if coeff_sum == 1:
@@ -442,7 +455,7 @@ def write(solution):
                     Arr=arrhenius,
                     Efficiencies=efficiencies_string
                     ))
-        if equation_type == 'ElementaryReaction':
+        elif equation_type == 'ElementaryReaction':
             arrhenius = build_arrhenius(equation_object, equation_type)
             if equation_object.duplicate is True:
                 reaction_string = Template(
@@ -460,7 +473,7 @@ def write(solution):
                     equation_string=equation_string,
                     Arr=arrhenius
                     ))
-        if equation_type == 'FalloffReaction':
+        elif equation_type == 'FalloffReaction':
             #trimms efficiencies list
             efficiencies = equation_object.efficiencies
             trimmed_efficiencies = equation_object.efficiencies
@@ -501,6 +514,33 @@ def write(solution):
                 f.write(falloff_str)
             except IndexError:
                 f.write('\n           )\n\n')
+        elif equation_type == 'PlogReaction':
+            reaction_string = Template('#  Reaction $m\n' + \
+                            'pdep_arrhenius( \"$equation_string\",\n')
+            reaction_string = reaction_string.substitute(
+                    m=m,
+                    equation_string=equation_string)
+            sum_coeffs = sum(equation_object.reactants.values())
+            for rate_line in equation_object.rates:
+                pressure = str('{:f}'.format(rate_line[0]/ct.one_atm))
+                arrhenius = build_arrhenius((sum_coeffs,rate_line), equation_type)
+                arrhenius = arrhenius[1:-1]
+                reaction_string = Template(
+                        reaction_string + 
+                        "               [($pressure, 'atm'), $Arr],\n")
+                reaction_string = reaction_string.substitute(
+                        pressure=pressure,
+                        Arr = arrhenius)
+            if equation_object.duplicate is True:
+                reaction_string = reaction_string + \
+                                '               options=\'duplicate\')\n\n'
+            else:
+                reaction_string = reaction_string[:-1]
+                reaction_string = reaction_string + ')\n\n'
+            f.write(reaction_string)
+        else:
+            print('Error: Unknown reaction type')
+            exit()
     f.close()
     return output_file_name
 
