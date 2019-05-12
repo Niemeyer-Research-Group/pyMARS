@@ -70,7 +70,6 @@ def testPFA():
 	target_species = ["CH4","O2"]
 	retained_species = ["CH4","O2","N2","H2O","CO2"]
 	final_error = [0]
-	epsilon_star = .5
 
 	# Run PFA
 	reduced_model = pfa.run_pfa(solution_object, conditions, error, target_species, 
