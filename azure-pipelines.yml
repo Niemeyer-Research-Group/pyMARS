@@ -26,7 +26,7 @@ jobs:
     displayName: Set appropriate Python version in environment file
 
   - script: |
-      conda env create --quiet --file test-environment.yml
+      conda env create --quiet --file test-environment.yaml
       conda info -a
     displayName: Create Anaconda environment
   
