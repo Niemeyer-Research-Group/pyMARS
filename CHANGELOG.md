@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - Added path flux analysis, so methods now include DRG, DRGEP, PFA, and sensitivity analysis
+- Added testing on Windows systems via Azure Pipelines
 
 ### Changed
 - Major code restructuring.
