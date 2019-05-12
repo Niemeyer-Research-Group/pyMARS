@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - Added path flux analysis, so methods now include DRG, DRGEP, PFA, and sensitivity analysis
+- Adds test suite for all current methods
 
 ### Changed
 - Major code restructuring.
 
 ### Fixed
-- Fixed bugs in setup.py script and path imports
+- Fixed bugs in setup.py script and path imports 
+- Fixed model printing of Plog reactions
 
 ## [0.0.1] - 2017-04-01
 ### Added
