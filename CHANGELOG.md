@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added path flux analysis, so methods now include DRG, DRGEP, PFA, and sensitivity analysis
 - Adds test suite for all current methods
 - Adds Travis CI and AppVeyor continuous integration
+- Added testing on Windows systems via Azure Pipelines
 - Adds Travis-based package deploy to PyPI and Anaconda
 
 ### Changed
