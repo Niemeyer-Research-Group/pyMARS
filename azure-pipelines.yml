@@ -14,11 +14,29 @@ jobs:
   steps:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
+  
+  - script: |
+      conda config --set always_yes yes --set changeps1 no
+      conda config --append channels conda-forge
+      conda update conda
+      conda update -q --all
+    displayName: Install Anaconda Packages
+  
+  - powershell: (get-content test-environment.yaml) | %{$_ -replace "\$\{PYTHON\}","$(python.version)"} | set-content test-environment.yaml
+    displayName: Set appropriate Python version in environment file
 
-  - script: conda env create --quiet --file test-environment.yml
+  - script: |
+      conda env create --quiet --file test-environment.yml
+      conda info -a
     displayName: Create Anaconda environment
+  
+  - powershell: Write-Host "Packages in py3.x Environment:"
+    displayName: List packages
+    
+  - script: conda list -n py$(python.version)
+    displayName: List package in environment
 
-  - bash: |
+  - script: |
       call activate env-from-yaml
       pip install pytest pytest-azurepipelines
       pytest
