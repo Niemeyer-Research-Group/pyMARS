@@ -57,11 +57,11 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
     # Calculate edge weights based on list received from get_rate_data
     # Initial condition
     for ic in total_edge_data.keys():  # For each initial condition
-        for species in species_objects:  # Make graph
-            graph.add_node(species.name)
         # Timestep
         # Set edge values for the graph
         for tstep in total_edge_data[ic].keys():
+            for species in species_objects:  # Make graph
+                graph.add_node(species.name)
             numerator = total_edge_data[ic][tstep][1]
             denominator = total_edge_data[ic][tstep][0]
             # Each species
@@ -99,7 +99,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
             # Search graph for max values to each species based on targets
             dic = graph_search(graph, target_species)
-            # Add to max dictionary if it is new or greater than the value already there.
+            # Add to the safe list if it is not already there.
             for sp in dic:
                 if sp not in safe:
                     safe.append(sp)
