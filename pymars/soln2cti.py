@@ -3,16 +3,15 @@
 currently only works for Elementary, Falloff, Plog and ThreeBody Reactions
 Cantera development version 2.3.0a2 required
 """
-from __future__ import print_function
-from __future__ import division
 
 import os
 import textwrap
 from string import Template
-from name_trim import name_trim
 
 import cantera as ct
-#from test_mechanism_from_solution import test
+
+from .name_trim import name_trim
+
 
 def write(solution):
     """Function to write cantera solution object to cti file.

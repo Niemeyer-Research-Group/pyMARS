@@ -2,17 +2,15 @@
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+import pkg_resources
 
 import cantera as ct
 
-from drgep import trim_drgep
-
-ROOT_DIR =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from ..drgep import trim_drgep
 
 def relative_location(file):
-	file_path = os.path.join(ROOT_DIR, file)
-	return file_path
+	file_path = os.path.join(file)
+	return pkg_resources.resource_filename(__name__, file_path)
 
 ##################
 # Input: The GRI model with a dictionary threshold combo to save 2.  
@@ -21,8 +19,7 @@ def relative_location(file):
 def testGRItrim51():
 
 	# Original model
-	path_to_original = relative_location("example_files/gri30.cti")
-	solution_object = ct.Solution(path_to_original)
+	solution_object = ct.Solution("gri30.cti")
 
 	# Dictionary, retained species, and threshold value to input
 	max_dict = {"CH4": 1.0, "N2": .25, "O2": .75}
@@ -53,7 +50,7 @@ def testGRItrim51():
 def testArtTrim1():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -84,7 +81,7 @@ def testArtTrim1():
 def testArtTrim2():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -117,7 +114,7 @@ def testArtTrim2():
 def testArtRetain():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -148,7 +145,7 @@ def testArtRetain():
 def testArtRemoveAll():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -182,7 +179,7 @@ def testArtRemoveAll():
 def testArtRemoveEqual():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -213,7 +210,7 @@ def testArtRemoveEqual():
 def testEmptyDict():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -247,7 +244,7 @@ def testEmptyDict():
 def testInvalidDict():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input
@@ -279,7 +276,7 @@ def testInvalidDict():
 def testThresholdGreaterThan1():
 
 	# Original model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Dictionary, retained species, and threshold value to input

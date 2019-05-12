@@ -1,12 +1,13 @@
 """Contains main driver function for pyMARS program."""
 from cantera import Solution, suppress_thermo_warnings
+
 # local imports
-import soln2cti
-from drgep import run_drgep
-from drg import run_drg
-from pfa import run_pfa
-from sensitivity_analysis import run_sa
-from convert_chemkin_file import convert
+from . import soln2cti
+from .drgep import run_drgep
+from .drg import run_drg
+from .pfa import run_pfa
+from .sensitivity_analysis import run_sa
+from .convert_chemkin_file import convert
 
 # Avoid long warnings from Cantera about thermodynamic polynomials
 suppress_thermo_warnings()

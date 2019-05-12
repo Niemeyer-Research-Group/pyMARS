@@ -2,11 +2,11 @@
 import sys
 import os
 import pytest
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 import networkx as nx
 import cantera as ct
-from drg import graph_search
+
+from ..drg import graph_search
 
 xfail = pytest.mark.xfail
 

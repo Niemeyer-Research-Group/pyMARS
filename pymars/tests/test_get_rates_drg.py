@@ -2,32 +2,28 @@
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+import math 
 
 import cantera as ct
-import math
 import pytest
 
-import drg
-import helper
-
-from readin_initial_conditions import readin_conditions
-
-ROOT_DIR =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from .. import drg
+from .. import helper
+from ..readin_initial_conditions import readin_conditions
 
 def relative_location(file):
-	file_path = os.path.join(ROOT_DIR, file)
-	return file_path
+	file_path = os.path.join(file)
+	return pkg_resources.resource_filename(__name__, file_path)
 
 @pytest.mark.xfail
 def testArtificial():
 	
 	# Load model
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	# Set up simulation data from givin initial coniditions
-	conditions = relative_location("pymars/tests/example_input_artificial.txt") # Locate conditions file
+	conditions = relative_location("example_input_artificial.txt") # Locate conditions file
 	conditions_array = readin_conditions(conditions) # Load conditions
 	sim_array = helper.setup_simulations(conditions_array, solution_object) # Set up simulation
 	helper.simulate(sim_array) # Run autoignition simulation

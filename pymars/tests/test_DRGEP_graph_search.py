@@ -2,11 +2,11 @@
 import sys
 import os
 import pytest
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 import networkx as nx
 import cantera as ct
-from drgep import graph_search_drgep
+
+from ..drgep import graph_search_drgep
 
 xfail = pytest.mark.xfail
 
@@ -14,10 +14,13 @@ xfail = pytest.mark.xfail
 #starting from A, nodes A,E,C,F,D,I,H,O should be the only nodes found
 def test_DRGEP_GraphSearchSimple():
 	graph = nx.DiGraph()
-	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'])
+	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 
+						  'L', 'M', 'N', 'O'
+						  ])
 
-	graph.add_weighted_edges_from([('A','B', 1), ('B','C',1), ('C','D',1),('D','E',1),
-       	                     ('E','F',1)])
+	graph.add_weighted_edges_from([('A','B', 1), ('B','C',1), ('C','D',1),
+								   ('D','E',1), ('E','F',1)
+								   ])
 
 	subgraph = nx.DiGraph([(u,v,d) for u,v,d in graph.edges(data=True) if d['weight'] > 0])
 
@@ -38,10 +41,13 @@ def test_DRGEP_GraphSearchSimple():
 #starting from A, nodes A,-F should be found doubling each time
 def test_DRGEP_GraphSearchDouble():
 	graph = nx.DiGraph()
-	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'])
+	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 
+						  'L', 'M', 'N', 'O'
+						  ])
 
-	graph.add_weighted_edges_from([('A','B', 2), ('B','C',2), ('C','D',2),('D','E',2),
-       	                     ('E','F',2)])
+	graph.add_weighted_edges_from([('A','B', 2), ('B','C',2), ('C','D',2),
+								   ('D','E',2), ('E','F',2)
+								   ])
 
 	subgraph = nx.DiGraph([(u,v,d) for u,v,d in graph.edges(data=True) if d['weight'] > 0])
 
@@ -62,10 +68,13 @@ def test_DRGEP_GraphSearchDouble():
 #starting from A, nodes A,-F should be found decreasing by half each time
 def test_DRGEP_GraphSearchHalve():
 	graph = nx.DiGraph()
-	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'])
+	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 
+						  'L', 'M', 'N', 'O'
+						  ])
 
-	graph.add_weighted_edges_from([('A','B', .5), ('B','C',.5), ('C','D',.5),('D','E',.5),
-       	                     ('E','F',.5)])
+	graph.add_weighted_edges_from([('A','B', .5), ('B','C',.5), ('C','D',.5), 
+								   ('D','E',.5), ('E','F',.5)
+								   ])
 
 
 	subgraph = nx.DiGraph([(u,v,d) for u,v,d in graph.edges(data=True) if d['weight'] > 0])
@@ -87,13 +96,16 @@ def test_DRGEP_GraphSearchHalve():
 #starting from G, nodes G and L should be the only nodes found
 def test_DRGEP_GraphSearchFromG():
 	graph = nx.DiGraph()
-	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'])
+	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 
+						  'L', 'M', 'N', 'O'
+						  ])
 
 	graph.add_weighted_edges_from([('A','F', 0), ('C','F',1.0), ('A','C',1.0),
-       	                     ('A','N',0), ('N','C',1.0), ('C','D',1.0),
-       	                     ('D','I',1.0), ('I','O',1.0), ('A','E',1.0),
-       	                     ('E','G',0), ('G','I',0), ('G','M',0),
-       	                     ('G','L',1.0), ('E','H',1.0), ('H','J',0)])
+       	                     	   ('A','N',0), ('N','C',1.0), ('C','D',1.0),
+       	                     	   ('D','I',1.0), ('I','O',1.0), ('A','E',1.0),
+       	                     	   ('E','G',0), ('G','I',0), ('G','M',0),
+       	                     	   ('G','L',1.0), ('E','H',1.0), ('H','J',0)
+								   ])
 
 	subgraph = nx.DiGraph([(u,v,d) for u,v,d in graph.edges(data=True) if d['weight'] > 0])
 
@@ -111,7 +123,10 @@ def test_DRGEP_GraphSearchFromG():
 def test_DRGEP_GraphSearchComplicated():
 	graph = nx.DiGraph()
 	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G'])
-	graph.add_weighted_edges_from([('A','B', .1), ('C','D',.2), ('B','C',.3), ('D','E',.6), ('E','F',.5), ('F','A',.4), ('A','E',.7), ('C','G',.01), ('G','A',.01), ('E','B',.05)])
+	graph.add_weighted_edges_from([('A','B', .1), ('C','D',.2), ('B','C',.3), ('D','E',.6), 
+								   ('E','F',.5), ('F','A',.4), ('A','E',.7), ('C','G',.01), 
+								   ('G','A',.01), ('E','B',.05)
+								   ])
 
 
 	subgraph = nx.DiGraph([(u,v,d) for u,v,d in graph.edges(data=True) if d['weight'] > 0])
@@ -132,13 +147,16 @@ def test_DRGEP_GraphSearchComplicated():
 
 def test_DRGEP_GraphSearch3Inputs():
 	graph = nx.DiGraph()
-	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'])
+	graph.add_nodes_from(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 
+						  'L', 'M', 'N', 'O'
+						  ])
 
 	graph.add_weighted_edges_from([('A','F', 0), ('C','F',1.0), ('A','C',1.0),
-       	                     ('A','N',0), ('N','C',1.0), ('C','D',1.0),
-       	                     ('D','I',1.0), ('I','O',1.0), ('A','E',1.0),
-       	                     ('E','G',0), ('G','I',0), ('G','M',0),
-       	                     ('G','L',1.0), ('E','H',1.0), ('H','J',0)])
+       	                     	   ('A','N',0), ('N','C',1.0), ('C','D',1.0),
+       	                     	   ('D','I',1.0), ('I','O',1.0), ('A','E',1.0),
+       	                     	   ('E','G',0), ('G','I',0), ('G','M',0),
+       	                     	   ('G','L',1.0), ('E','H',1.0), ('H','J',0)
+								   ])
 
 
 	target_species= ['A','C','D']
@@ -148,7 +166,7 @@ def test_DRGEP_GraphSearch3Inputs():
 	assert 'A' in max_dic
 	assert 'C' in max_dic
 	assert 'D' in max_dic
-	assert [n in max_dic for n in ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K','L','M','N','O',]]
+	assert [n in max_dic for n in ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K', 'L','M','N','O',]]
 	assert [n not in max_dic for n in ['B']]
 
 def test_DRGEP_GraphSearchComplicated2Inputs():

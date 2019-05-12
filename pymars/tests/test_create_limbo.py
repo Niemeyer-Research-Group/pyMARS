@@ -2,18 +2,10 @@
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
-
 import pytest
 import cantera as ct
 
-from sensitivity_analysis import create_limbo 
-
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-def relative_location(file):
-    file_path = os.path.join(ROOT_DIR, file)
-    return file_path
+from ..sensitivity_analysis import create_limbo 
 
 """
  NORMAL INPUT:
@@ -58,8 +50,7 @@ LIMBO DEFINTION:
 def test_safe_mask_1():
 
     # reduced model
-    path_to_reduced = relative_location("example_files/gri30.cti")
-    solution_object = ct.Solution(path_to_reduced)
+    solution_object = ct.Solution("gri30.cti")
 
     # drgep dictionary
     dic = {"H2": 0.1, "H": 0.15, "O": 0.2, "O2": 0.25, "OH": 0.3, "H2O": 0.35, "C": 0.4, "CH": 0.45}
@@ -102,9 +93,7 @@ def test_safe_mask_1():
 ########
 def test_safe_mask_2():
 
-    # reduced model
-    path_to_reduced = relative_location("example_files/gri30.cti")
-    solution_object = ct.Solution(path_to_reduced)
+    solution_object = ct.Solution("gri30.cti")
 
     # drgep dictionary
     dic = {"H2": 0.1, "H": 0.15, "O": 0.2, "O2": 0.25, "OH": 0.3, "H2O": 0.35, "C": 0.4, "CH": 0.45}
@@ -145,9 +134,7 @@ def test_safe_mask_2():
 ########
 def test_epstar_1():
 
-    # reduced model
-    path_to_reduced = relative_location("example_files/gri30.cti")
-    solution_object = ct.Solution(path_to_reduced)
+    solution_object = ct.Solution("gri30.cti")
 
     # drgep dictionary
     dic = {"H2": 0.1, "H": 0.15, "O": 0.2, "O2": 0.25, "OH": 0.3, "H2O": 0.35, "C": 0.4, "CH": 0.45}
@@ -185,9 +172,7 @@ def test_epstar_1():
 ########
 def test_epstar_2():
 
-    # reduced model
-    path_to_reduced = relative_location("example_files/gri30.cti")
-    solution_object = ct.Solution(path_to_reduced)
+    solution_object = ct.Solution("gri30.cti")
 
     # drgep dictionary
     dic = {"H2": 0.1, "H": 0.15, "O": 0.2, "O2": 0.25, "OH": 0.3, "H2O": 0.35, "C": 0.4, "CH": 0.45}
@@ -228,9 +213,7 @@ def test_epstar_2():
 @pytest.mark.xfail
 def test_bad_input_1():
 
-    # reduced model
-    path_to_reduced = relative_location("example_files/gri30.cti")
-    solution_object = ct.Solution(path_to_reduced)
+    solution_object = ct.Solution("gri30.cti")
 
     # drgep dictionary
     dic = {"H2": 0.1, "H": 0.15, "O": 0.2, "O2": 0.25, "OH": 0.3, "H2O": 0.35, "C": 0.4, "CH": 0.45}
@@ -263,9 +246,7 @@ def test_bad_input_1():
 ########
 def test_bad_input_2():
 
-    # reduced model
-    path_to_reduced = relative_location("example_files/gri30.cti")
-    solution_object = ct.Solution(path_to_reduced)
+    solution_object = ct.Solution("gri30.cti")
 
     # drgep dictionary
     dic = {"H2": 0.1, "H": 0.15, "O": 0.2, "O2": 0.25, "OH": 0.3, "H2O": 0.35, "C": 0.4, "CH": 0.45}

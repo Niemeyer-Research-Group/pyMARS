@@ -1,12 +1,11 @@
+import numpy as np
 import cantera as ct
 
-from create_trimmed_model import trim
-from simulation import Simulation
-from drgep import get_rates
-from readin_initial_conditions import readin_conditions
-import numpy as np
-import os
-import helper
+from . import helper
+from .create_trimmed_model import trim
+from .simulation import Simulation
+from .drgep import get_rates
+from .readin_initial_conditions import readin_conditions
 
 
 def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
@@ -95,11 +94,10 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 		for p in og_excl:
 			excluded.append(p) # Add that species to the list of exclusion.
 		# Remove species from the model.
-		new_sol_obs = trim(original_model,excluded,"sa_trim.cti")
-		new_sol = new_sol_obs[1]
+		new_sol = trim(original_model, excluded, "sa_trim.cti")
 
 		# Simulated reduced solution
-		new_sim = helper.setup_simulations(conditions_array,new_sol) # Create simulation objects for reduced model for all conditions
+		new_sim = helper.setup_simulations(conditions_array, new_sol) # Create simulation objects for reduced model for all conditions
 	
 		try:	
 			id_new = helper.simulate(new_sim) # Run simulations and process results
@@ -107,7 +105,7 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 			limbo.remove(sp)
 			id_new = 0
 	
-		error = (abs(id_new - id_detailed)/id_detailed)*100
+		error = 100 * abs(id_new - id_detailed) / id_detailed
 		error = round(np.max(error), 2)
 		print(sp + ": " + str(error))
 		error = abs(error - final_error)
@@ -223,14 +221,15 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 		print("attempting to remove " + rm)
 		
 		# Remove exclusion list from original model
-		new_sol_obs = trim(original_model,exclude,"sa_trim.cti")
-		new_sol = new_sol_obs[1]
+		new_sol = trim(original_model, exclude, "sa_trim.cti")
 
 		# Simulated reduced solution
-		new_sim = helper.setup_simulations(conditions_array,new_sol)  # Create simulation objects for reduced model for all conditions
-		id_new = helper.simulate(new_sim)  # Run simulations and process results
+		# Create simulation objects for reduced model for all conditions
+		new_sim = helper.setup_simulations(conditions_array, new_sol)
+		# Run simulations and process results
+		id_new = helper.simulate(new_sim)
 
-		error = (abs(id_new - id_detailed)/id_detailed)*100
+		error = 100 * abs(id_new - id_detailed) / id_detailed
 		error = round(np.max(error), 2)
 		print("Error of: " + str(error))
 		print()

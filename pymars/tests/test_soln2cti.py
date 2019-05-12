@@ -2,19 +2,17 @@
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+import pkg_resources
 
 import pytest
 import cantera as ct
 
-from create_trimmed_model import trim
-from soln2cti import write
-
-ROOT_DIR =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from ..create_trimmed_model import trim
+from ..soln2cti import write
 
 def relative_location(file):
-	file_path = os.path.join(ROOT_DIR, file)
-	return file_path
+	file_path = os.path.join(file)
+	return pkg_resources.resource_filename(__name__, file_path)
 
 ########
 # Input: Solution representing the GRI 3.0 Mech
@@ -22,8 +20,7 @@ def relative_location(file):
 ########
 def testGRIwrite():
 	
-	path_to_original = relative_location("example_files/gri30.cti")
-	solution_object = ct.Solution(path_to_original)
+	solution_object = ct.Solution("gri30.cti")
 
 	write(solution_object)
 
@@ -39,7 +36,7 @@ def testGRIwrite():
 ########
 def testArtWrite():
 	
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	write(solution_object)
@@ -57,18 +54,17 @@ def testArtWrite():
 ########
 def testGRIwriteRed():
 	
-	path_to_original = relative_location("example_files/gri30.cti")
-	solution_object = ct.Solution(path_to_original)
+	solution_object = ct.Solution("gri30.cti")
 
 	exclusion_list = ["CH4", "O2", "N2"]
-	solution_object = trim(solution_object, exclusion_list, "gri30.cti")[1]
+	solution_object = trim(solution_object, exclusion_list, "gri30.cti")
 	
 	write(solution_object)
 
 	output_path = "pym_trimmed_gri30.cti"
 	new_solution_object = ct.Solution(output_path)
 
-	path_to_original = relative_location("pymars/tests/eout_gri30.cti")
+	path_to_original = relative_location("eout_gri30.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	assert solution_object.species_names == new_solution_object.species_names
@@ -80,18 +76,18 @@ def testGRIwriteRed():
 ########
 def testArtWriteRed():
 	
-	path_to_original = relative_location("pymars/tests/artificial-mechanism.cti")
+	path_to_original = relative_location("artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	exclusion_list = ["H", "O2"]
-	solution_object = trim(solution_object, exclusion_list, "gas.cti")[1]
+	solution_object = trim(solution_object, exclusion_list, "gas.cti")
 	
 	write(solution_object)
 
 	output_path = "pym_trimmed_gas.cti"
 	new_solution_object = ct.Solution(output_path)
 
-	path_to_original = relative_location("pymars/tests/eout_artificial-mechanism.cti")
+	path_to_original = relative_location("eout_artificial-mechanism.cti")
 	solution_object = ct.Solution(path_to_original)
 
 	assert solution_object.species_names == new_solution_object.species_names

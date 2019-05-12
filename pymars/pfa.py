@@ -1,17 +1,17 @@
-import networkx as nx
-import numpy as np
 from collections import Counter
 import time as tm
-from drg import graph_search
-import os, sys, argparse
+
+import networkx as nx
+import numpy as np
 import cantera as ct
-import soln2ck
-import soln2cti
-import math
-from create_trimmed_model import trim
-from numpy import genfromtxt
-from readin_initial_conditions import readin_conditions
-import helper
+
+from . import soln2ck
+from . import soln2cti
+from . import helper
+from .simulation import Simulation
+from .create_trimmed_model import trim
+from .readin_initial_conditions import readin_conditions
+from .drg import graph_search
 
 def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species, model_file):
 
@@ -244,11 +244,11 @@ def pfa_loop_control(solution_object, target_species, retained_species, model_fi
     # Run DRG and create new reduced solution
     exclusion_list = trim_pfa(
         rate_edge_data, solution_object, threshold, retained_species, done,target_species,model_file) # Find out what to cut from the model
-    new_solution_objects = trim(solution_object, exclusion_list, model_file) # Cut the exclusion list from the model.
-    species_retained.append(len(new_solution_objects[1].species()))
+    new_solution = trim(solution_object, exclusion_list, model_file) # Cut the exclusion list from the model.
+    species_retained.append(len(new_solution.species()))
 
     # Simulated reduced solution
-    new_sim = helper.setup_simulations(conditions_array,new_solution_objects[1]) # Create simulation objects for reduced model for all conditions
+    new_sim = helper.setup_simulations(conditions_array, new_solution) # Create simulation objects for reduced model for all conditions
     ignition_delay_reduced = helper.simulate(new_sim) # Run simulations and process results
 
     if (ignition_delay_detailed.all() == 0): # Ensure that ignition occured
@@ -256,14 +256,15 @@ def pfa_loop_control(solution_object, target_species, retained_species, model_fi
         exit()
 
     # Calculate error
-    error = (abs(ignition_delay_reduced-ignition_delay_detailed)/ignition_delay_detailed)*100 # Calculate error
-    printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+    error = 100 * abs(ignition_delay_reduced - ignition_delay_detailed) / ignition_delay_detailed
+    printout += (str(threshold) + '                 ' + str(len(new_solution.species())) + 
+				 '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+				 )
     print(printout)
     stored_error[0] = round(np.max(error), 2)
 
     # Return new model
-    new_solution_objects = new_solution_objects[1]
-    return new_solution_objects
+    return new_solution
 
 
 def get_rates_pfa(sim_array, solution_object):

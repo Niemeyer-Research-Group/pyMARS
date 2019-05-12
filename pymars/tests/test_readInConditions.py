@@ -2,23 +2,21 @@
 
 import sys
 import os
+import pkg_resources
 import pytest
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 import cantera as ct
-import readin_initial_conditions
+from .. import readin_initial_conditions
 
-ROOT_DIR =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-def relative_location( file):
-	file_path = os.path.join(ROOT_DIR, file)
-	return file_path
+def relative_location(file):
+	file_path = os.path.join(file)
+	return pkg_resources.resource_filename(__name__, file_path)
 
 
 #@pytest.mark.xfail
 def testGoodInput1():
 	#test reading in example_input_file
-	conditions =  relative_location("example_files/example_input_file.txt")
+	conditions =  relative_location("example_input_file.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -47,7 +45,7 @@ def testGoodInput1():
 #@pytest.mark.xfail
 def testGoodInput2():
 	#test reading in example_input_artificial
-	conditions =  relative_location("pymars/tests/example_input_artificial.txt")
+	conditions =  relative_location("example_input_artificial.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -64,7 +62,7 @@ def testGoodInput2():
 #@pytest.mark.xfail
 def testRearrangedInput():
 	#test reading in re-arranged example_input_file
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_new_order.txt")
+	conditions =  relative_location("inputfiles/example_input_file_new_order.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -93,7 +91,7 @@ def testRearrangedInput():
 #@pytest.mark.xfail
 def testIllogicalSpeciesNames():
 	#test reading file in correct order and format, but illogical values
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_illogical.txt")
+	conditions =  relative_location("inputfiles/example_input_file_illogical.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -111,7 +109,7 @@ def testIllogicalSpeciesNames():
 @pytest.mark.xfail
 def testStringForFloats():
 	#test string values when expecting float
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_bad_float.txt")
+	conditions =  relative_location("inputfiles/example_input_file_bad_float.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -127,7 +125,7 @@ def testStringForFloats():
 	
 @pytest.mark.xfail
 def testNoValuesAfterSpecies():
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_no_species_value.txt")
+	conditions =  relative_location("inputfiles/example_input_file_no_species_value.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -143,7 +141,7 @@ def testNoValuesAfterSpecies():
 
 def testNegativeSpeciesValues():
 	#test reading in negative species values
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_negative_species_values.txt")
+	conditions =  relative_location("inputfiles/example_input_file_negative_species_values.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -161,7 +159,7 @@ def testNegativeSpeciesValues():
 def testNoOpeningKeyword():
 	#test file with no "CONV"
 	#should not read anything.
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_no_open_keyword.txt")
+	conditions =  relative_location("inputfiles/example_input_file_no_open_keyword.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)
@@ -179,7 +177,7 @@ def testNoOpeningKeyword():
 def testNoClosingKeyword():
 	#test file with no "END"
 	#Will read, but will never close.
-	conditions =  relative_location("pymars/tests/inputfiles/example_input_file_no_close_keyword.txt")
+	conditions =  relative_location("inputfiles/example_input_file_no_close_keyword.txt")
 	condObject = readin_initial_conditions.readin_conditions(conditions)
 	print("condObject[0].pressure: " + condObject[0].pressure)
 	print("condObject[0].temperature: " + condObject[0].temperature)

@@ -2,52 +2,44 @@
 import cantera as ct
 import os
 
-def trim(solution_object, exclusion_list, file_name):
+def trim(initial_solution, exclusion_list, file_name):
     """ Function to reduce list of species and corresponding reactions.
 
     Parameters
     ----------
-    solution_object : obj
-        Cantera solution object
+    initial_solution : obj
+        Cantera solution object of initial model
     exclusion_list : list
         List of species that will be trimmed
+    file_name : str 
+        Name of original model file to be reduced
 
     Returns
     -------
-        Original Cantera Solution Object
-        Trimmed Cantera Solution Object
+        Trimmed Cantera solution object
+
     """
 
-    # define initial solution/species/reaction objects
-    initial_solution = solution_object
-
-    initial_species_objects = initial_solution.species
-    initial_species_names = initial_solution.species_names
-
-    initial_reaction_list = initial_solution.reactions()
-    initial_reaction_objects = initial_solution.reactions
-
     # Remove reactions that use trimmed species
-    final_reaction_objects = []
-    for i, reaction in enumerate(initial_reaction_list):
+    final_reactions = []
+    for reaction in initial_solution.reactions():
         reaction_species = list(reaction.products.keys()) + list(reaction.reactants.keys())
-        reaction_species
-        difference = set(reaction_species).intersection(exclusion_list)
-        if len(difference) == 0:
-            final_reaction_objects.append(reaction)
+        if all([sp not in reaction_species for sp in exclusion_list]):
+            final_reactions.append(reaction)
+        
 
-    # Remove Species
-    final_species_names = initial_species_names
-    for n in exclusion_list:
-        if n in initial_species_names:
-            final_species_names.remove(n)
-    final_species_objects = [initial_solution.species(name) \
-                                for name in final_species_names]
+    # Remove species if in list to be removed
+    final_species = [initial_solution.species(sp) 
+                     for sp in initial_solution.species_names if sp not in exclusion_list
+                     ]
+                             
     # New solution definition
-    new_solution= ct.Solution(  species=final_species_objects,
-                                reactions=final_reaction_objects,
-                                thermo='IdealGas',
-                                kinetics='GasKinetics')
+    new_solution= ct.Solution(species=final_species,
+                              reactions=final_reactions,
+                              thermo='IdealGas',
+                              kinetics='GasKinetics'
+                              )
     new_solution.TP = initial_solution.TP
-    new_solution.name = ('trimmed_' + os.path.splitext(file_name)[0])
-    return (initial_solution, new_solution)
+    new_solution.name = 'trimmed_' + os.path.splitext(file_name)[0]
+
+    return new_solution

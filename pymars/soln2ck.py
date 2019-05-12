@@ -3,14 +3,11 @@
 currently only works for Elementary, Falloff and ThreeBody Reactions
 Cantera development version 2.3.0a2 required
 """
-from __future__ import print_function
-from __future__ import division
 
 import os
 from string import Template
 
 import cantera as ct
-#from test.test_mechanism_from_solution import test
 from cantera import ck2cti
 
 

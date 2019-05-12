@@ -1,19 +1,10 @@
 """ Tests the dictionary lowest model unit used by pyMARS """
 
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
-
 import pytest
+
 import cantera as ct
 
-from sensitivity_analysis import dic_lowest
-
-ROOT_DIR =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-def relative_location(file):
-    file_path = os.path.join(ROOT_DIR, file)
-    return file_path
+from ..sensitivity_analysis import dic_lowest
 
 """
  NORMAL INPUT DICTIONARY CONTENTS:

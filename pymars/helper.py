@@ -7,8 +7,9 @@
 # simulation array: an array of unran simulation objects from simulation.py
 ##############
 
-from simulation import Simulation
 import numpy as np
+
+from .simulation import Simulation
 
 def setup_simulations(conditions_array, model):
     sim_array = []
