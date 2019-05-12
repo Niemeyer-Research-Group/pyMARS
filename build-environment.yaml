@@ -4,7 +4,6 @@ channels:
 - conda-forge
 - cantera
 dependencies:
-  - python=${PYTHON}
   - numpy>=1.13.1
   - cantera>=2.3.0
   - networkx
