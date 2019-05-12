@@ -1,6 +1,17 @@
-## Takes in a string that represents the path to a file and changes it to just the files name.  
 
 def name_trim(string):
+	"""Changes string with file path and returns file alone.
+
+	Parameters
+	----------
+	string : str
+		Full path to a file
+	
+	Returns
+	-------
+	string : str
+		Filename extracted from full path
+	"""
 	first_index = 0
 	for i in range (0,len(string)):
 		if (string[i] == '/'):

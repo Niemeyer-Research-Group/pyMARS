@@ -9,22 +9,24 @@ from .readin_initial_conditions import readin_conditions
 
 
 def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
-
-	"""
-	Creates a list of species in limbo for use during a sensitivity analysis.
+	"""Creates a list of species in limbo for use during sensitivity analysis.
 
 	Parameters
 	----------
 
-	reduced_model: The model reduced by the previous reduction
-	ep_star: Epsilon star value for the sensitivity analysis
-	drgep_coeffs: The dictionary of direct interaction coefficients
-	safe: species that are safe from being removed under any condition
+	reduced_model : Cantera.Solution
+		The model reduced by the previous reduction
+	ep_star	: float
+		Epsilon star (upper threshold) value for sensitivity analysis
+	drgep_coeffs : dict
+		The dictionary of direct interaction coefficients
+	safe : list of Cantera.Species
+		Species that are protected from removal under any condition
 
 	Returns
 	-------
-
-	A list of all species in limbo.
+	limbo : list of Cantera.Species
+		List of all species in limbo
 	
 	"""
 	
@@ -35,29 +37,36 @@ def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
 		reduc_species.append(sp.name)
 	for sp in reduc_species:
 		# All species that fit the condition of being in limbo are added to a list.
-		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
+		if (sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and 
+			(not sp in limbo) and (not sp in safe)
+			):
 			limbo.append(sp)
 	return limbo
 
-def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
 
-	"""
-	Creates a dictionary of all of the species in limbo and their errors for sensitivity analysis.
+def get_limbo_dic(original_model, reduced_model, limbo, final_error, 
+				  id_detailed, conditions_array
+				  ):
+	"""Creates dictionary of all species in limbo and their errors for sensitivity analysis.
 
 	Parameters
 	----------
-
-	original_model: The original version of the model being reduced
-	reduced_model: The model produced by the previous reduction
-	limbo: A list of the species in limbo
-	final_error: Error percentage between the reduced and origanal models
-	id_detailed: The ignition delays for each simulation of the original model
-	conditions_array: An array holding the initial conditions for simulations
+	original_model : cantera.Solution
+		Original model being reduced
+	reduced_model : cantera.Solution
+		Model produced by the previous reduction stage
+	limbo : list of Cantera.Species
+		List of species in limbo
+	final_error : float
+		Error percentage between the reduced and origanal models
+	id_detailed : numpy.array
+		The ignition delays for each simulation of the original model
+	conditions_array : list of Condition
+		Array holding the initial conditions for simulations
 	
 	Returns
 	-------
-
-	A dictionary with species error to be used for sensitivity anaylsis.
+	Dictionary with species error to be used for sensitivity anaylsis.
 
 	"""
 
@@ -112,20 +121,18 @@ def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed
 		dic[sp] = error # Add adjusted error to dictionary.
 	return dic
 
-def dic_lowest(dic):
 
-	"""
-	Gets the key with the lowest value in the dictionary.
+def dic_lowest(dic):
+	"""Gets the key with the lowest value in the dictionary.
 
 	Parameters
 	----------
-
-	dic: The dictionary to get the lowest value out of
+	dic : dict
+		Dictionary to get the lowest value out of
 
 	Returns
 	-------
-
-	The key with the lowest value in the dictionary.
+	The key with the lowest value in the dictionary
 
 	"""
 
@@ -138,23 +145,33 @@ def dic_lowest(dic):
 	return s
 
 
-def run_sa(original_model, reduced_model, final_error, conditions_file, target, keepers, error_limit, limbo):
+def run_sa(original_model, reduced_model, final_error, conditions_file, 
+		   target, keepers, error_limit, limbo
+		   ):
 	"""Runs a sensitivity analysis on a resulting reduced model.
 	
 	Parameters
 	----------
-	original_model: The original version of the model being reduced
-	reduced_model: The model produced by the previous reduction
-	final_error: Error percentage between the reduced and origanal models
-	conditions_file: The file holding the initial conditions for simulations
-	target: The target species for the reduction
-	keepers: A list of species that should be retained no matter what
-	error_limit: The maximum allowed error between the reduced and original models
-	limbo: A list of species to be considered for reduction by the sensativity analysis
+	original_model : Cantera.Solution
+		The original version of the model being reduced
+	reduced_model : Cantera.Solution
+		The model produced by the previous reduction
+	final_error : float
+		Error percentage between the reduced and origanal models
+	conditions_file : str
+		Filename of file holding the initial conditions for simulations
+	target : 
+		The target species for the reduction
+	keepers : 
+		A list of species that should be retained no matter what
+	error_limit : float
+		The maximum allowed error between the reduced and original models
+	limbo : list of Cantera.Species
+		List of species to be considered for reduction by the sensitivity analysis
 	
 	Returns
 	-------
-	The model after the sensitivity analysis has been preformed on it.
+	The model after the sensitivity analysis has been performed on it
 
 	"""
 
@@ -175,6 +192,7 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 		exit()
 	old = reduced_model
 
+	# TODO: replace this potentially infinite while loop
 	while True:
 
 		og_sn = []  # Original species names

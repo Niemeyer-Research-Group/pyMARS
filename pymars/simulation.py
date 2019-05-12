@@ -31,12 +31,17 @@ class Simulation(object):
     def __init__(self, idx, properties, model, path=''):
         """Initialize simulation case.
 
-        :param idx: identifier number for this case
-        :type idx: int
-        :param properties: set of properties for this case
-        :type properties: dict
-        :param str model_file: Filename for Cantera-format model
-        :param str path: Path for data file
+        Parameters
+        ----------
+        idx : int
+            identifier number for this case
+        properties : dict
+            set of properties for this case
+        model_file : str 
+            Filename for Cantera-format model
+        path : str
+            Path for data file
+
         """
         self.idx = idx
         self.properties = properties
@@ -74,8 +79,13 @@ class Simulation(object):
     def run_case(self, stop_at_ignition=False, restart=False):
         """Run simulation case set up ``setup_case``.
 
-        :param bool stop_at_ignition: If ``True``, stop integration at ignition point.
-        :param bool restart: If ``True``, skip if results file exists.
+        Parameters
+        ----------
+        stop_at_ignition : bool
+            If ``True``, stop integration at ignition point.
+        restart : bool
+            If ``True``, skip if results file exists.
+
         """
 
         if restart and os.path.isfile(self.meta['save-file']):
@@ -140,7 +150,9 @@ class Simulation(object):
     def process_results(self):
         """Process integration results to sample data
 
-        Returns arrays of sampled data.
+        Returns
+        -------
+        Array of sampled data.
         """
 
         number_sampled_points = 20

@@ -1,7 +1,7 @@
 from collections import Counter
 import time as tm
 
-import networkx as nx
+import networkx
 import numpy as np
 import cantera as ct
 
@@ -13,38 +13,38 @@ from .create_trimmed_model import trim
 from .readin_initial_conditions import readin_conditions
 from .drg import graph_search
 
-def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species, model_file):
-
-    """
-    This function determines what species should be excluded from the reduced model based on their DICs compared to the threshold value and a simple graph search.
+def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list,
+			 done, target_species, model_file
+			 ):
+    """Determines what species to remove based on direct interaction coefficients.
 
     Parameters
     ----------
-
-    total_edge_data: information containing the DICs for the graph edge weights
-    solution_object: The solution being reduced
-    threshold_value: User specified threshold value
-    keeper_list: Speicies that should always be kept
-    done: Determines wether or not the reduction is complete
-    target_species: The target species for the search in the array
-    model_file: File holding the model being reduced
+    total_edge_data : dict
+        Information for calculating the DICs for the graph edge weights
+    solution_object : cantera.Solution
+        The solution being reduced
+    threshold_value : float
+        User specified threshold value
+    keeper_list : list of str
+        Species that should always be kept
+    done : bool
+        Determines whether or not the reduction is complete
+    target_species : list of str
+        The target species for the search in the array
 
     Returns
     -------
-
-    Returns an array of species that should be excluded from the original model at this threshold level
+    Array of species that should be reduced at this threshold level
 
     """
-
-    start_time = tm.time()
 
     # Initalize solution and components
     solution = solution_object
     species_objects = solution.species()
-    reaction_objects = solution.reactions()
 
     # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
-    graph = nx.DiGraph()
+    graph = networkx.DiGraph()
 
 
     safe = [] # A list of species that are to be retained for this threshold value
@@ -124,24 +124,28 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list, don
 
 def run_pfa(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error):
 
-	""""
-	This is the MAIN top level function for running PFA
+	"""Top level function for running PFA, writes reduced file
 
 	Parameters
 	----------
-
-	solution_object: a Cantera object of the solution to be reduced
-	conditions_file: The file holding the initial conditions to simulate
-	error_limit: The highest allowed error percentage
-	target_species: The target species for reduction
-	retained_species: A list of species to be retained even if they should be cut by the algorithm
-	model_file: The path to the file where the solution object was generated from
-	final_error: To hold the error level of the simulation
+    solution_object : ~cantera.Solution
+        A Cantera object of the solution to be reduced.
+    conditions_file : str
+        Name of file with list of autoignition initial conditions.
+    error_limit : float
+        Maximum allowable error level for reduced model.
+    target_species : list of str
+        List of target species
+    retained_species : list of str
+        List of species to always be retained
+    model_file : string
+        The path to the file where the solution object was generated from
+    final_error: singleton float
+        To hold the error level of simulation
 
 	Returns
 	-------
-
-	Writes reduced Cantera file and returns reduced Catnera solution object
+	Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
 
 	"""
 
@@ -210,29 +214,38 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 	return result
 
 
-def pfa_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array):
-
-    """
-    This function handles the reduction, simulation, and comparision for a single threshold value
+def pfa_loop_control(solution_object, target_species, retained_species, model_file, 
+					 stored_error, threshold, done, rate_edge_data, 
+					 ignition_delay_detailed, conditions_array
+					 ):
+    """Handles the reduction, simulation, and comparison for a single threshold value
 
     Parameters
     ----------
-
-    solution_object: object being reduced # target_species:
-    target_species: The target species for reduction
-    retained_species: A list of species to be retained even if they should be cut by the algorithm
-    model_file: The path to the file where the solution object was generated from
-    stored_error: Error from the previous reduction attempt
-    threshold: current threshold value
-    done: are we done reducing yet? Boolean
-    rate_edge_data: the DICs for reduction
-    ignition_delay_detailed: ignition delay of detailed model
-    conditions_array: array holding information about initial conditions
+    solution_object : cantera.Solution
+        object being reduced
+    target_species : list of str
+        List of target species
+    retained_species : list of str
+        List of species to always be retained
+    model_file : string
+        The path to the file where the solution object was generated from
+    stored_error: signleton float
+        Error of this reduced model simulation
+    threshold : float
+        current threshold value
+    done : bool
+        are we done reducing yet?
+    rate_edge_data : dict
+        information for calculating the DICs for reduction
+    ignition_delay_detailed : numpy.array
+        ignition delay of detailed model
+    conditions_array : list of Condition
+        list holding information about initial conditions
 
     Returns
     -------
-
-    Returns the reduced solution object for this threshold and updates error value
+    Reduced solution object for this threshold and updates error value
 
     """
 
@@ -268,21 +281,21 @@ def pfa_loop_control(solution_object, target_species, retained_species, model_fi
 
 
 def get_rates_pfa(sim_array, solution_object):
-
-    """
-    This function calculates values to be used in the calculation of Direct Interaction Coefficients
+    """Calculates values for calculation of Direct Interaction Coefficients
 
     Parameters
     ----------
-
-    sim_array: Array of simulated simulation objects
-    solution_object: Cantera object of the solution being reduced
+    sim_array : 
+        Array of simulated simulation objects
+    solution_object : cantera.Solution
+        Cantera object of the solution being reduced
 
     Returns
     -------
-
-      total_edge_data: a dictionary with keys of initial conditions and values of dictionarys that hold information for caculating DICs at each timestep.
-          *the subdictionaries have the timestep as their keys and their values hold an array of DICs
+    dict
+        Initial conditions and information for calculating DICs at each timestep. 
+        The subdictionaries have the timestep as their keys and their values hold an 
+        array of numberator and denominator information for calculating DICs.
 
     """
 
@@ -335,20 +348,19 @@ def get_rates_pfa(sim_array, solution_object):
 
 
 def get_PA(new_solution, new_reaction_production_rates):
-
-	"""
-	Gets the PA (and CA) values of all species in a given solution.
+	"""Gets the PA (and CA) values of all species in a given solution.
 
 	Parameters
 	----------
-
-	new_solution: The object representing the cantera model
-	new_reaction_production_rates: the production rates associated with the model
+	new_solution : cantera.Solution
+		The object representing the cantera model
+	new_reaction_production_rates : 
+		the production rates associated with the model
 
 	Returns
 	-------
-
-	PA and CA dictionaries
+	dict
+		PA and CA dictionaries
 
 	"""
 
@@ -392,20 +404,19 @@ def get_PA(new_solution, new_reaction_production_rates):
 
 
 def get_PAB(new_solution, new_reaction_production_rates):
-
-	"""
-	Gets the PAB (and CAB) values of all species in a given solution.
+	"""Gets the PAB (and CAB) values of all species in a given solution.
 
 	Parameters
 	----------
-
-	new_solution: The object representing the cantera model
-	new_reaction_production_rates: the production rates associated with the model
+	new_solution : cantera.Solution
+		The object representing the cantera model
+	new_reaction_production_rates : 
+		the production rates associated with the model
 
 	Returns
 	-------
-
-	PAB and CAB dictionaries.
+	dict
+		PAB and CAB dictionaries.
 
 	"""
 
@@ -461,23 +472,27 @@ def get_PAB(new_solution, new_reaction_production_rates):
 
 
 def get_rAB_1(new_solution,PA,CA,PAB,CAB):
-
-	"""
-	Gets the rAB_p1 (and rAB_c1) values of all species in a given solution.
+	"""Gets the rAB_p1 (and rAB_c1) values of all species in a given solution.
 
 	Parameters
 	----------
-
-	new_solution: The object representing the cantera model
-	PA: A dictionary containing the PA values for the reduction
-	CA: A dictionary containing the CA values for the reduction
-	PAB: A dictionary containing the PAB values for the reduction
-	CAB: A dictionary containing the CAB values for the reduction
+	new_solution : cantera.Solution
+		The object representing the cantera model
+	PA : dict
+		A dictionary containing the PA values for the reduction
+	CA : dict
+		A dictionary containing the CA values for the reduction
+	PAB : dict
+		A dictionary containing the PAB values for the reduction
+	CAB : dict
+		A dictionary containing the CAB values for the reduction
 
 	Returns
 	-------
-
-	rAB_p1 and rAB_c1 dictionaries.
+	rAB_p1 : dict
+		rAB_p1 dictionary
+	rAB_c1 : dict
+		rAB_c1 dictionaries.
 
 	"""
 
@@ -508,20 +523,19 @@ def get_rAB_1(new_solution,PA,CA,PAB,CAB):
 
 
 def get_rAB_2(new_solution,rAB_p1,rAB_c1):
-
-	"""
-	Gets the rAB_p2 (and rAB_c2) values of all species in a given solution.
+	"""Gets the rAB_p2 (and rAB_c2) values of all species in a given solution.
 
 	Parameters
 	----------
-
-	new_solution: The object representing the cantera model
-	rAB_p1: A dictionary containing the rAB_p1 values for the reduction
-	rAB_c1: A dictionary containing the rAB_c1 values for the reduction
+	new_solution : cantera.Solution
+		The object representing the cantera model
+	rAB_p1 : dict
+		A dictionary containing the rAB_p1 values for the reduction
+	rAB_c1 : dict
+		A dictionary containing the rAB_c1 values for the reduction
 
 	Returns
 	-------
-
 	rAB_p2 and rAB_c2 dictionaries.
 
 	"""

@@ -17,22 +17,24 @@ from .readin_initial_conditions import readin_conditions
 
 
 def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
-    """
-    Determines which species to remove based on their DICs compared to the threshold value and a simple graph search.
+    """Determines which species to remove based on direct interaction coefficients
+
+    Compares direct interaction coefficients (DICs) to a threshold value,
+    and performs a simple graph search to find species reachable from targets.
 
     Parameters
     ----------
-    total_edge_data :
+    total_edge_data : dict
         Information for calculating the DICs for the graph edge weights
-    solution_object :
+    solution_object : cantera.Solution
         The solution being reduced
-    threshold_value :
+    threshold_value : float
         User specified threshold value
-    keeper_list :
+    keeper_list : list of str
         Species that should always be kept
-    done :
-        Determines wether or not the reduction is complete
-    target_species :
+    done : bool
+        Determines whether or not the reduction is complete
+    target_species : list of str
         The target species for the search in the array
 
     Returns
@@ -41,12 +43,9 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
     """
 
-    start_time = time.time()
-
     # Initalize solution and components
     solution = solution_object
     species_objects = solution.species()
-    reaction_objects = solution.reactions()
 
     # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
     graph = networkx.DiGraph()
@@ -141,8 +140,7 @@ def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, don
 
 def run_drg(solution_object, conditions_file, error_limit, target_species,
             retained_species, model_file, final_error, epsilon_star=.1):
-    """
-    Main function for running DRG reduction.
+    """Main function for running DRG reduction.
 
     Parameters
     ----------
@@ -165,7 +163,6 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
 
     Returns
     -------
-
     Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
 
     """
@@ -192,8 +189,9 @@ def run_drg(solution_object, conditions_file, error_limit, target_species,
     print("Testing for starting threshold value")
     # Trim the solution at that threshold and find the error.
     drg_loop_control(
-        solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data,
-        ignition_delay_detailed, conditions_array)
+        solution_object, target_species, retained_species, model_file, error, threshold, 
+        done, rate_edge_data, ignition_delay_detailed, conditions_array
+        )
 
     # While the error for trimming with that threshold value is greater than allowed.
     while error[0] != 0 and threshold_increment > .001:
@@ -269,7 +267,7 @@ def drg_loop_control(solution_object, target_species, retained_species, model_fi
 
     Parameters
     ----------
-    solution_object:
+    solution_object : cantera.Solution
         object being reduced
     target_species : list of str
         List of target species
@@ -283,12 +281,12 @@ def drg_loop_control(solution_object, target_species, retained_species, model_fi
         current threshold value
     done : bool
         are we done reducing yet?
-    rate_edge_data :
+    rate_edge_data : dict
         information for calculating the DICs for reduction
-    ignition_delay_detailed :
+    ignition_delay_detailed : numpy.array
         ignition delay of detailed model
-    conditions_array :
-        array holding information about initial conditions
+    conditions_array : list of Condition
+        list holding information about initial conditions
 
     Returns
     -------
@@ -302,9 +300,9 @@ def drg_loop_control(solution_object, target_species, retained_species, model_fi
 
     # Run DRG and create new reduced solution
     # Find out what to cut from the model
-    exclusion_list = trim_drg(
-                              rate_edge_data, solution_object, threshold,
-                              retained_species, done, target_species)
+    exclusion_list = trim_drg(rate_edge_data, solution_object, threshold,
+                              retained_species, done, target_species
+                              )
 
     # Cut the exclusion list from the model.
     new_solution = trim(solution_object, exclusion_list, model_file)
@@ -337,17 +335,17 @@ def get_rates_drg(sim_array, solution_object):
 
     Parameters
     ----------
-    sim_array :
+    sim_array : 
         Array of simulated simulation objects
-    solution_object :
+    solution_object : cantera.Solution
         Cantera object of the solution being reduced
 
     Returns
     -------
     dict
-        Initial conditions and information for calculating DICs at each timestep. The subdictionaries have the
-        timestep as their keys and their values hold an array of numberator and denominator information for
-        calculating DICs
+        Initial conditions and information for calculating DICs at each timestep. 
+        The subdictionaries have the timestep as their keys and their values hold an 
+        array of numberator and denominator information for calculating DICs.
 
     """
 
@@ -438,14 +436,13 @@ def get_rates_drg(sim_array, solution_object):
     return total_edge_data
 
 def graph_search(nx_graph, target_species):
-    """
-    Search nodal graph and generate list of species to remove
+    """Search nodal graph and generate list of species to remove.
 
     Parameters
     ----------
-    nx_graph : obj
-        networkx graph object of solution
-    target_species : list
+    nx_graph : networkx.Graph
+        Object of solution graph
+    target_species : list of str
         List of target species to search from
 
     Returns

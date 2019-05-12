@@ -28,7 +28,8 @@ def write(solution):
 
     Examples
     --------
-        soln2cti.write(gas)
+    >>> soln2cti.write(gas)
+    
     """
 
     trimmed_solution = solution

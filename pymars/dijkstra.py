@@ -1,27 +1,23 @@
 from collections import deque
 from heapq import heappush, heappop
 from itertools import count
-import networkx as nx
-from networkx.utils import generate_unique_node
+import networkx
 
 #The following functions were taken from the networkx source code and modified for this project. 
  
-def ss_dijkstra_path_length_modified(G, source, cutoff=None,
-                                       weight='weight'):
+def ss_dijkstra_path_length_modified(G, source, cutoff=None, weight='weight'):
     """Compute the greatest path length via multiplication between source and all other
     reachable nodes for a weighted graph with all weights <= 1.
 
     Parameters
     ----------
-    G : NetworkX graph
-
+    G : networkx.Graph
+        Graph to be considered
     source : node label
        Starting node for path
-
-    weight: string, optional (default='weight')
+    weight: str, optional (default='weight')
        Edge data key corresponding to the edge weight.
-
-    cutoff : integer or float, optional
+    cutoff : int or float, optional
        Depth to stop the search. Only paths of length <= cutoff are returned.
 
     Returns
@@ -31,8 +27,8 @@ def ss_dijkstra_path_length_modified(G, source, cutoff=None,
 
     Examples
     --------
-    >>> G=nx.path_graph(5)
-    >>> length=nx.ss_dijkstra_path_length_modified(G,0)
+    >>> G=networkx.path_graph(5)
+    >>> length=networkx.ss_dijkstra_path_length_modified(G,0)
     >>> length[4]
     1
     >>> print(length)
@@ -58,46 +54,40 @@ def ss_dijkstra_path_length_modified(G, source, cutoff=None,
     return mod_dijkstra(G, source, get_weight, cutoff=cutoff)
 
 
-
-def mod_dijkstra(G, source, get_weight, pred=None, paths=None, cutoff=None,
-              target=None):
+def mod_dijkstra(G, source, get_weight, pred=None, paths=None, 
+                 cutoff=None, target=None
+                 ):
     """Modified implementation of Dijkstra's algorithm. Multiples values instead of adds and returns a dictionary with nodes as keys and values containing the greatest path to that node.  Each edge weight must be <= 1 so that the further they are from the source, the less important they are.
 
     Parameters
     ----------
-    G : NetworkX graph
-
+    G : networkx.Graph
+        Graph to be considered
     source : node label
        Starting node for path
-
     get_weight: function
         Function for getting edge weight
-
     pred: list, optional(default=None)
         List of predecessors of a node
-
     paths: dict, optional (default=None)
         Path from the source to a target node.
-
     target : node label, optional
        Ending node for path
-
     cutoff : integer or float, optional
        Depth to stop the search. Only paths of length <= cutoff are returned.
 
     Returns
     -------
-    distance,path : dictionaries
+    distance, path : dict
        Returns a tuple of two dictionaries keyed by node.
        The first dictionary stores distance from the source.
        The second stores the path from the source to that node.
-
-    pred,distance : dictionaries
+    pred,distance : dict
        Returns two dictionaries representing a list of predecessors
        of a node and the distance to each node.
-
-    distance : dictionary
+    distance : dict
        Dictionary of greatest lengths keyed by target.
+
     """
     G_succ = G.succ if G.is_directed() else G.adj #Adjaceny list
     push = heappush
@@ -145,4 +135,3 @@ def mod_dijkstra(G, source, get_weight, pred=None, paths=None, cutoff=None,
     if pred is not None:
         return (pred, dist)
     return dist
-

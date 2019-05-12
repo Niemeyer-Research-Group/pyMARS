@@ -3,7 +3,7 @@ import cantera as ct
 import os
 
 def trim(initial_solution, exclusion_list, file_name):
-    """ Function to reduce list of species and corresponding reactions.
+    """Reduces model using list of species to be removed.
 
     Parameters
     ----------

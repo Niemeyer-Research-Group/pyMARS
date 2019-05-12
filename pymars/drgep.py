@@ -16,21 +16,26 @@ from .dijkstra import ss_dijkstra_path_length_modified
 
 def make_dic_drgep(solution_object, total_edge_data, target_species):
 
-    """
-    Makes the dictionary of overall interaction coefficients for DRGEP by building a graph and searching it as explained in DRGEP
+    """ Makes the dictionary of overall interaction coefficients for DRGEP
+
+    Builds a graph and searches it as explained in DRGEP method.
 
     Parameters
     ----------
-
-    solution_object: the Cantera soluton object that is being reduced
-    target_species: an array of target species for the reduction as specified by the user
-    total_edge_data: a dictionary with keys of initial conditions and values of dictionarys that hold information for caculating DICs at each timestep.
-      *the subdictionaries have the timestep as their keys and their values hold an array of numberator and denominator information for calculating DICs.
+    solution_object : cantera.Solution
+        Model  being reduced
+    target_species : list of str
+        target species for the reduction as specified by the user
+    total_edge_data : dict
+        Initial conditions and values of dicts that hold information for calculating 
+        DICs at each timestep. The subdictionaries have the timestep as their keys and 
+        their values hold an array of numberator and denominator information for 
+        calculating DICs.
 
     Returns
     -------
-
-    A dictionary with keys of species and values of that species OIC
+    dict
+        Keys of species and values of that species' overall interaction coefficent
 
     """
 
@@ -95,20 +100,24 @@ def make_dic_drgep(solution_object, total_edge_data, target_species):
 
 def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done):
 
-    """
-    Determines what species should be excluded from the reduced model based on their OICs compared to the threshold value.
+    """Determines species to remove based on OICs and threshold value.
 
     Parameters
     ----------
-    max_dic: Dictionary of OICs for all species
-    solution_object: The solution being reduced
-    threshold_value: User specified threshold value
-    keeper_list: Speicies that should always be kept
-    done: Determines wether or not the reduction is complete
+    max_dic : dict
+        Dictionary of overall interaction coefficients for all species
+    solution_object : cantera.Solution
+        The solution being reduced
+    threshold_value : float
+        User-specified threshold value
+    retained_species : list of cantera.Species
+        Species that should always be kept
+    done : bool
+        Determines wether or not the reduction is complete
 
     Returns
     -------
-    An array of species that should be excluded from the original model at this threshold level
+    List of species that should be excluded from the original model at this threshold level
 
     """
 
@@ -144,26 +153,33 @@ def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done
     return exclusion_list
 
 
-def run_drgep(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error, ep_star):
+def run_drgep(solution_object, conditions_file, error_limit, target_species, 
+              retained_species, model_file, final_error, ep_star
+              ):
 
-	""""
-	This is the MAIN top level function for running DRGEP
+	"""This is the MAIN top level function for running DRGEP
 
 	Parameters
 	----------
-
-	solution_object: A Cantera object of the solution to be reduced
-	conditions_file: A file holding the initial conditions for the simulation
-	error_limit: The maximum error allowed for the reduced model
-	target_species: An array of the target species for reduction
-	retained_species: An array of species that should not be removed from the model
-	model_file: The path to the file holding the original model
-	final_error: A singleton holding the final error percentage
-	ep_star: epsilon star value used for SA limbo calculations
+	solution_object : cantera.Solution
+        Model to be reduced
+	conditions_file : str
+        A file holding the initial conditions for the simulation
+	error_limit : float
+        Maximum error allowed for the reduced model
+	target_species : list of str
+        List of the target species for reduction
+	retained_species : list of str
+        An array of species that should not be removed from the model
+	model_file : str
+        The path to the file holding the original model
+	final_error : list of float
+        A singleton holding the final error percentage
+	ep_star : float
+        Upper threshold used for identifying limbo species for sensitivity analysis
 
 	Returns
 	-------
-
 	Tuple of reduced Catnera solution object [0] and limbo species for SA [1]
 
 	"""
@@ -240,29 +256,40 @@ def run_drgep(solution_object, conditions_file, error_limit, target_species, ret
 	return result
 
 
-def drgep_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, max_dic, ignition_delay_detailed, conditions_array):
+def drgep_loop_control(solution_object, target_species, retained_species, model_file, 
+                       stored_error, threshold, done, max_dic, ignition_delay_detailed, 
+                       conditions_array
+                       ):
+    """Handles the reduction, simulation, and comparison for a single threshold value.
 
-    """
-    This function handles the reduction, simulation, and comparision for a single threshold value.
+    Also updates error value (input)
 
     Parameters
     ----------
-
-    solution_object: object being reduced
-    target_species: An array of the target species for reduction
-    retained_species: An array of species that should not be removed from the model
-    model_file: The path to the file holding the original model
-    stored_error: past error
-    threshold: current threshold value
-    done: are we done reducing yet? Boolean
-    max_dic: OIC dictionary for DRGEP
-    ignition_delay_detailed: ignition delay of detailed model
-    conditions_array: array holding information about initial conditions
+    solution_object : cantera.Solution
+        object being reduced
+    target_species : list of str
+        List of the target species for reduction
+    retained_species : list of str
+        List of species that should not be removed from the model
+    model_file : str
+        File holding the original model
+    stored_error : list of float
+        past error
+    threshold : float
+        current threshold value
+    done : bool
+        are we done reducing yet?
+    max_dic : dict
+        OIC dictionary for DRGEP
+    ignition_delay_detailed : numpy.array 
+        ignition delays of detailed model
+    conditions_array : list of Condition
+        array holding information about initial conditions
 
     Returns
     -------
-
-    Returns the reduced solution object for this threshold and updates error value
+    Reduced solution object for this threshold
 
     """
 
@@ -299,20 +326,19 @@ def drgep_loop_control(solution_object, target_species, retained_species, model_
 
 
 def get_rates(sim_array, solution_object):
-
-    """
-    This function calculates values to be used in the calculation of Direct Interaction Coefficients
+    """Calculates values to be used in the calculation of Direct Interaction Coefficients
 
     Parameters
     ----------
-
-    sim_array: Array of simulated simulation objects
-    solution_object: Cantera object of the solution being reduced
+    sim_array : list of Simulation
+        list of simulation objects
+    solution_object : cantera.Solution
+        Cantera object of the solution being reduced
 
     Returns
     -------
-
-    Returns a dictionary for calculating interaction coefficients as described in the make_dic_drgep function comments
+    dict for calculating interaction coefficients as described in the ``make_dic_drgep``
+    function comments.
 
     """
 
@@ -406,21 +432,20 @@ def get_rates(sim_array, solution_object):
 
 
 def graph_search_drgep(nx_graph, target_species):
-
-    """
-    This function searches the graph to generate a dictionary of the greatest paths to all species from one of the targets.
+    """Searches graph to generate a dictionary of the greatest paths to all species from one of the targets.
 
     Parameters
     ----------
-    nx_graph : obj
+    nx_graph : networkx.Graph
         networkx graph object of solution
-    target_species : list
+    target_species : list of str
         List of target species to search from
 
     Returns
     -------
-    max_dic : dictionary
-        Values of the greatest possible path to each species from one of the targets on this graph keyed by species name.
+    max_dic : dict
+        Values of the greatest possible path to each species from one of the targets on this graph 
+        keyed by species name.
 
     """
 

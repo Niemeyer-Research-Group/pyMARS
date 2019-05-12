@@ -19,12 +19,15 @@ def write(solution):
     solution : obj
         Cantera solution object
 
-    Returns : str
-        Name of trimmed Mechanism file (.inp)
-
-    Example
+    Returns
     -------
-        soln2ck.write(gas)
+    str
+        Name of trimmed model file (.inp)
+
+    Examples
+    --------
+    >>> soln2ck.write(gas)
+
     """
     trimmed_solution = solution
     input_file_name_stripped = trimmed_solution.name

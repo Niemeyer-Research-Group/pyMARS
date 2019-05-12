@@ -39,7 +39,7 @@ def pymars(model_file, conditions, error, method, target_species,
     Returns
     -------
         Converted mechanism file
-        Trimmed Solution Object
+        Trimmed Solution object
         Trimmed Mechanism file
 
     Examples
