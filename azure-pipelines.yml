@@ -37,7 +37,7 @@ jobs:
     displayName: List package in environment
 
   - script: |
-      call activate env-from-yaml
-      pip install pytest pytest-azurepipelines
-      pytest
+      call activate py$(python.version)
+      conda install pytest-azurepipelines
+      pytest -vv --cov=./ --cov-append
     displayName: pytest
