@@ -353,106 +353,61 @@ def write(solution):
         section_break(the_file, 'Reaction Data')
 
         # write data for each reaction
-        for reaction in solution.reactions():
-            
-            m = str(eq_index+1)
+        for idx, reaction in enumerate(solution.reactions()):
 
-            if type(reaction) == ct.ThreeBodyReaction:
-                # trims efficiencies list
-                efficiencies = reaction.efficiencies
-                trimmed_efficiencies = reaction.efficiencies
-                for s in efficiencies:
-                    if s not in solution.species_names:
-                        del trimmed_efficiencies[s]
+            reaction_string = f'#  Reaction {idx + 1}\n'
 
+            if type(reaction) == ct.ElementaryReaction:
                 arrhenius = build_arrhenius(reaction)
-                replace_list_2 = {"{":  "\"",
-                                "\'": "",
-                                ": ": ":",
-                                ",":  " ",
-                                "}":  "\""
-                                }
-                efficiencies_string = replace_multiple(str(trimmed_efficiencies), replace_list_2)
-                reaction_string = Template(
-                            '#  Reaction $m\n'
-                            'three_body_reaction( \"$equation_string\",  $Arr,\n'
-                            '       efficiencies = $Efficiencies) \n\n'
-                            )
-                the_file.write(reaction_string.substitute(
-                               m=m,
-                               equation_string=equation_string,
-                               Arr=arrhenius,
-                               Efficiencies=efficiencies_string
-                               ))
-            elif equation_type == 'ElementaryReaction':
-                arrhenius = build_arrhenius(equation_object, equation_type)
-                if equation_object.duplicate is True:
-                    reaction_string = Template(
-                            '#  Reaction $m\n'
-                            'reaction( \"$equation_string\", $Arr,\n'
-                            '        options = \'duplicate\')\n\n'
-                            )
-                else:
-                    reaction_string = Template(
-                            '#  Reaction $m\n'
-                            'reaction( \"$equation_string\", $Arr)\n\n'
-                            )
-                the_file.write(reaction_string.substitute(
-                        m=m,
-                        equation_string=equation_string,
-                        Arr=arrhenius
-                        ))
-            elif equation_type == 'FalloffReaction':
-                #trimms efficiencies list
-                efficiencies = equation_object.efficiencies
-                trimmed_efficiencies = equation_object.efficiencies
-                for s in efficiencies:
-                    if s not in trimmed_solution.species_names:
-                        del trimmed_efficiencies[s]
+                reaction_string += f'reaction( "{reaction.equation}",  {arrhenius}'
 
-                kf = build_modified_arrhenius(equation_object, 'high')
-                kf0 = build_modified_arrhenius(equation_object, 'low')
-                replace_list_2 = {
-                                "{":"\"",
-                                "\'":"",
-                                ": ":":",
-                                ",":" ",
-                                "}":"\""
-                                }
-                efficiencies_string = replace_multiple(str(trimmed_efficiencies), replace_list_2)
-                reaction_string = Template(
-                            '#  Reaction $m\n' +
-                            'falloff_reaction( \"$equation_string\",\n' +
-                            '        kf = $kf,\n' +
-                            '        kf0   = $kf0,\n' +
-                            '        efficiencies = $Efficiencies'
-                            )
-                the_file.write(reaction_string.substitute(
-                        m=m,
-                        equation_string=equation_string,
-                        kf=kf,
-                        kf0=kf0,
-                        Efficiencies=efficiencies_string
-                        ))
-                j = equation_object.falloff.parameters
-                #If optional Arrhenius data included:
-                try:
-                    falloff_str = build_falloff(j)
-                    the_file.write(falloff_str)
-                except IndexError:
-                    the_file.write('\n           )\n\n')
-            elif equation_type == 'PlogReaction':
-                reaction_string = Template('#  Reaction $m\n' +
-                                           'pdep_arrhenius( \"$equation_string\",\n'
-                                           )
-                reaction_string = reaction_string.substitute(
-                        m=m,
-                        equation_string=equation_string
-                        )
+            elif type(reaction) == ct.ThreeBodyReaction:
+                arrhenius = build_arrhenius(reaction)
+                reaction_string += f'three_body_reaction( "{reaction.equation}",  {arrhenius}'
+
+                # trims efficiencies list
+                reduced_efficiencies = {s:reaction.efficiencies[s] 
+                                        for s in reaction.efficiencies 
+                                        if s in solution.species_names
+                                        }
+                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                if efficiencies_str:
+                    reaction_string += f',\n         efficiencies = " {efficiencies_str} "'
+                                    
+            elif type(reaction) == ct.FalloffReaction:
+                arrhenius_high = build_modified_arrhenius(reaction, 'high')
+                arrhenius_low = build_modified_arrhenius(reaction, 'low')
+
+                reaction_string += (f'falloff_reaction( "{reaction.equation}",\n' +
+                                    f'         kf = {arrhenius_high},\n' +
+                                    f'         kf0 = {arrhenius_low}'
+                                    )
+                
+                # need to print additional falloff parameters if present
+                if reaction.falloff.parameters.size > 0:
+                    falloff_str = build_falloff(reaction.falloff.parameters)
+                    reaction_string += (',\n' + 
+                                        '         falloff = ' + falloff_str
+                                        )
+                
+                # trims efficiencies list
+                reduced_efficiencies = {s:reaction.efficiencies[s] 
+                                        for s in reaction.efficiencies 
+                                        if s in solution.species_names
+                                        }
+                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                if efficiencies_str:
+                    reaction_string += f',\n         efficiencies = " {efficiencies_str} "'
+
+            elif type(reaction) == ct.PlogReaction:
+                reaction_string += f'pdep_arrhenius( "{reaction.equation}",\n'
+
+                
                 sum_coeffs = sum(equation_object.reactants.values())
-                for rate_line in equation_object.rates:
+
+                for rate in reaction.rates:
                     pressure = str('{:f}'.format(rate_line[0]/ct.one_atm))
-                    arrhenius = build_arrhenius((sum_coeffs,rate_line), equation_type)
+                    arrhenius = build_arrhenius((sum_coeffs,rate_line))
                     arrhenius = arrhenius[1:-1]
                     reaction_string = Template(
                             reaction_string + 
@@ -471,7 +426,12 @@ def write(solution):
                     reaction_string = reaction_string + ')\n\n'
                 the_file.write(reaction_string)
             else:
-                print('Error: Unknown reaction type')
-                exit()
+                raise NotImplementedError(f'Unsupported reaction type: {type(reaction)}')
+            
+            if reaction.duplicate:
+                reaction_string += ',\n        options = "duplicate"'
+                                
+            reaction_string += ')\n\n'
+            the_file.write(reaction_string)
     
     return output_file_name
