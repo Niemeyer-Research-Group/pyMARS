@@ -98,15 +98,15 @@ def build_falloff_arrhenius(rate, reaction_order, reaction_type, pressure_limit)
 
     # Each needs more complicated handling due if high- or low-pressure limit
     if reaction_type == ct.FalloffReaction:
-        if pres_range == 'low':
+        if pressure_limit == 'low':
             pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order)
-        elif pres_range == 'high':
+        elif pressure_limit == 'high':
             pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 1)
 
     elif reaction_type == ct.ChemicallyActivatedReaction:
-        if pres_range == 'low':
+        if pressure_limit == 'low':
             pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 1)
-        elif pres_range == 'high':
+        elif pressure_limit == 'high':
             pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 2)
     else:
         raise ValueError('Reaction type not supported: ', reaction_type)
