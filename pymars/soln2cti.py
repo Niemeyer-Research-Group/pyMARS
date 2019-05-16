@@ -278,11 +278,11 @@ def write(solution):
                                     
             elif type(reaction) == ct.FalloffReaction:
                 arrhenius_high = build_falloff_arrhenius(
-                    reaction.rate, sum(reaction.reactants.values()), 
+                    reaction.high_rate, sum(reaction.reactants.values()), 
                     ct.FalloffReaction, 'high'
                     )
                 arrhenius_low = build_falloff_arrhenius(
-                    reaction.rate, sum(reaction.reactants.values()), 
+                    reaction.low_rate, sum(reaction.reactants.values()), 
                     ct.FalloffReaction, 'low'
                     )
 
@@ -307,11 +307,11 @@ def write(solution):
             
             elif type(reaction) == ct.ChemicallyActivatedReaction:
                 arrhenius_high = build_falloff_arrhenius(
-                    reaction.rate, sum(reaction.reactants.values()), 
+                    reaction.high_rate, sum(reaction.reactants.values()), 
                     ct.ChemicallyActivatedReaction, 'high'
                     )
                 arrhenius_low = build_falloff_arrhenius(
-                    reaction.rate, sum(reaction.reactants.values()), 
+                    reaction.low_rate, sum(reaction.reactants.values()), 
                     ct.ChemicallyActivatedReaction, 'low'
                     )
 

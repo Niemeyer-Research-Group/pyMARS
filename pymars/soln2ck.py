@@ -63,7 +63,7 @@ def build_arrhenius(rate, reaction_order, reaction_type):
     
     arrhenius = [f'{pre_exponential_factor:.4e}', 
                  f'{rate.temperature_exponent:.3f}', 
-                 f'{(rate.activation_energy / CALORIES_CONSTANT):.:.3e}'
+                 f'{(rate.activation_energy / CALORIES_CONSTANT):.2f}'
                  ]
     return '  '.join(arrhenius)
 
@@ -144,8 +144,8 @@ def build_falloff(parameters, falloff_function):
     return falloff_string
 
 
-def build_nasa(nasa_coeffs, row):
-    """Creates string of NASA polynomial coefficients
+def build_thermo_data(nasa_coeffs, row):
+    """Creates string of NASA polynomial coefficients for thermodynamic data.
 
     Parameters
     ----------
@@ -177,96 +177,104 @@ def write(solution):
     Parameters
     ----------
     solution : cantera.Solution
-        Model to be printed
+        Model to be written
 
     Returns
     -------
-    str
-        Name of trimmed model file (.inp)
+    output_file_name : str
+        Name of output model file (.inp)
 
     Examples
     --------
+    >>> gas = cantera.Solution('gri30.cti')
     >>> soln2ck.write(gas)
+    reduced_gri30.inp
 
     """
-    trimmed_solution = solution
-    input_file_name_stripped = trimmed_solution.name
-    cwd = os.getcwd()
-    output_file_name = os.path.join(cwd, 'pym_' + input_file_name_stripped + '.inp')
+    # Remove extension from filename
+    input_file_name = os.path.splitext(os.path.basename(solution.name))[0]
+    output_file_name = f'reduced_{input_file_name}.inp'
     
-    with open(output_file_name, 'w+') as the_file:
+    with open(output_file_name, 'w') as the_file:
 
-        #Write title block to file
-        section_break(the_file, 'Chemkin File converted from Solution Object by pyMARS')
+        # Write title block to file
+        the_file.write(section_break('Chemkin file converted from solution object'))
 
-        #Write phase definition to file
-        element_names = eliminate(str(trimmed_solution.element_names),
-                                  ['[', ']', '\'', ',']
-                                  )
-        element_string = Template('ELEMENTS\n' + '$element_names\n' + 'END\n')
-        the_file.write(element_string.substitute(element_names=element_names))
-        species_names = build_species_string(trimmed_solution)
-        species_string = Template('SPECIES\n' + '$species_names\n' + 'END\n')
-        the_file.write(species_string.substitute(species_names=species_names))
+        # write species and element lists to file
+        element_names = '  '.join(solution.element_names)
+        the_file.write(
+            'ELEMENTS\n' + 
+            f'{element_names}\n' +
+            'END\n\n'
+            )
+        species_names = fill('  '.join(solution.species_names), width=60)
+        the_file.write(
+            'SPECIES\n' + 
+            f'{species_names}\n'
+            'END\n\n'
+            )
 
-        #Write species to file
-        section_break(the_file, 'Species data')
-        the_file.write('THERMO ALL' + '\n' + '   300.000  1000.000  5000.000' +'\n')
-        phase_unknown_list = []
-
-        # write data for each species in the Solution object
-        for species in trimmed_solution.species():
-            t_low = '{0:.3f}'.format(species.thermo.min_temp)
-            t_max = '{0:.3f}'.format(species.thermo.max_temp)
-            t_mid = '{0:.3f}'.format(species.thermo.coeffs[0])
-            temp_range = str(t_low) + '  ' + str(t_max) + '  ' + t_mid
-            species_comp = ''
-            for atom in species.composition:
-                species_comp += '{:<4}'.format(atom)
-                species_comp += str(int(species.composition[atom]))
-            if type(species.transport).__name__ == 'GasTransportData':
-                species_phase = 'G'
-            else:
-                phase_unknown_list.append(species.name)
-                species_phase = 'G'
-            line_1 = (
-                    '{:<18}'.format(species.name) +
-                    '{:<6}'.format('    ') +
-                    '{:<20}'.format(species_comp) +
-                    '{:<4}'.format(species_phase) +
-                    '{:<31}'.format(temp_range) +
-                    '{:<1}'.format('1') +
-                    '\n')
-            the_file.write(line_1)
-            line_2_coeffs = build_nasa(species.thermo.coeffs, 2)
-            line_2 = line_2_coeffs  + '    2\n'
-            the_file.write(line_2)
-            line_3_coeffs = build_nasa(species.thermo.coeffs, 3)
-            line_3 = line_3_coeffs + '    3\n'
-            the_file.write(line_3)
-            line_4_coeffs = build_nasa(species.thermo.coeffs, 4)
-            line_4 = line_4_coeffs + '                   4\n'
-            the_file.write(line_4)
-
-        the_file.write('END\n')
-
-        #Write reactions to file
-        section_break(the_file, 'Reaction Data')
+        # Write reactions to file
         the_file.write('REACTIONS\n')
 
         #write data for each reaction in the Solution Object
-        for reac in trimmed_solution.reactions():
-            equation_string = eliminate(reac.equation, ' ', 'single')
+        for reaction in solution.reactions():
+
+            reaction_string = f'{reaction.equation:<51}'
+
+            # The Arrhenius parameters that follow the equation string on the main line 
+            # depend on the type of reaction.
+            if type(reaction) in [ct.ElementaryReaction, ct.ThreeBodyReaction]:
+                arrhenius = build_arrhenius(
+                    reaction.rate, 
+                    sum(reaction.reactants.values()), 
+                    type(reaction)
+                    )
+
+            elif type(reaction) == ct.FalloffReaction:
+                # high-pressure limit is included on the main reaction line
+                arrhenius = build_falloff_arrhenius(
+                    reaction.high_rate, 
+                    sum(reaction.reactants.values()), 
+                    ct.FalloffReaction,
+                    'high'
+                    )
+
+            elif type(reaction) == ct.ChemicallyActivatedReaction:
+                # low-pressure limit is included on the main reaction line
+                arrhenius = build_falloff_arrhenius(
+                    reaction.low_rate, 
+                    sum(reaction.reactants.values()), 
+                    ct.ChemicallyActivatedReaction,
+                    'low'
+                    )
+
+            elif type(reaction) == ct.ChebyshevReaction:
+                arrhenius = '1.0e0  0.0  0.0'
+
+            elif type(reaction) == ct.PlogReaction:
+                arrhenius = build_arrhenius(
+                    reaction.rates[0][1],
+                    sum(reaction.reactants.values()), 
+                    ct.PlogReaction
+                    )
+            reaction_string += arrhenius + '\n'
             
-            if type(reac) == ct.ThreeBodyReaction:
-                arrhenius = build_arrhenius(reac)
-                main_line = (
-                            '{:<51}'.format(equation_string) +
-                            '{:>9}'.format(arrhenius[0]) +
-                            '{:>9}'.format(arrhenius[1]) +
-                            '{:>11}'.format(arrhenius[2]) +
-                            '\n'
-                            )
+            # need to trim and print third-body efficiencies, if present
+            if type(reaction) in [ct.ThreeBodyReaction, ct.FalloffReaction, 
+                                  ct.ChemicallyActivatedReaction
+                                  ]:
+                # trims efficiencies list
+                reduced_efficiencies = {s:reaction.efficiencies[s] 
+                                        for s in reaction.efficiencies
+                                        if s in solution.species_names
+                                        }
+                efficiencies_str = '  '.join([f'{s}/{v}/' for s, v in reduced_efficiencies.items()])
+                if efficiencies_str:
+                    reaction_string += efficiencies_str + '\n'
+            
+            # 
+
                 the_file.write(main_line)
                 #trimms efficiencies list
                 efficiencies = reac.efficiencies
@@ -347,5 +355,48 @@ def write(solution):
                 the_file.write(duplicate_line)
 
         the_file.write('END')
+
+    # TODO
+    # write thermo data
+    
+        section_break(the_file, 'Species data')
+        the_file.write('THERMO ALL' + '\n' + '   300.000  1000.000  5000.000' +'\n')
+        phase_unknown_list = []
+
+        # write data for each species in the Solution object
+        for species in trimmed_solution.species():
+            t_low = '{0:.3f}'.format(species.thermo.min_temp)
+            t_max = '{0:.3f}'.format(species.thermo.max_temp)
+            t_mid = '{0:.3f}'.format(species.thermo.coeffs[0])
+            temp_range = str(t_low) + '  ' + str(t_max) + '  ' + t_mid
+            species_comp = ''
+            for atom in species.composition:
+                species_comp += '{:<4}'.format(atom)
+                species_comp += str(int(species.composition[atom]))
+            if type(species.transport).__name__ == 'GasTransportData':
+                species_phase = 'G'
+            else:
+                phase_unknown_list.append(species.name)
+                species_phase = 'G'
+            line_1 = (
+                    '{:<18}'.format(species.name) +
+                    '{:<6}'.format('    ') +
+                    '{:<20}'.format(species_comp) +
+                    '{:<4}'.format(species_phase) +
+                    '{:<31}'.format(temp_range) +
+                    '{:<1}'.format('1') +
+                    '\n')
+            the_file.write(line_1)
+            line_2_coeffs = build_nasa(species.thermo.coeffs, 2)
+            line_2 = line_2_coeffs  + '    2\n'
+            the_file.write(line_2)
+            line_3_coeffs = build_nasa(species.thermo.coeffs, 3)
+            line_3 = line_3_coeffs + '    3\n'
+            the_file.write(line_3)
+            line_4_coeffs = build_nasa(species.thermo.coeffs, 4)
+            line_4 = line_4_coeffs + '                   4\n'
+            the_file.write(line_4)
+
+        the_file.write('END\n')
 
     return output_file_name
