@@ -13,7 +13,7 @@ def relative_location(file):
 	return pkg_resources.resource_filename(__name__, file_path)
 
 
-def testGRIMinus3():
+def test_GRI_minus_three():
 	"""Tests removal of three species from GRI Mech 3.0.
 	"""
 
@@ -34,13 +34,6 @@ def testGRIMinus3():
 	expected_species_num = 50
 	expected_reactions_num = 237
 
-	# Print stuff
-	print("-- Trim 3 from GRI3.0 --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
-
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num
 	assert reduced_model_num_reactions == expected_reactions_num
@@ -51,7 +44,7 @@ def testGRIMinus3():
 	assert "O2" not in reduced_model.species_names
 	assert "N2" not in reduced_model.species_names
 
-def testGRIMinus0():
+def test_GRI_minus_zero():
 	"""Tests removal of zero species from GRI Mech 3.0.
 	"""
 
@@ -72,13 +65,6 @@ def testGRIMinus0():
 	expected_species_num = 53
 	expected_reactions_num = 325
 
-	# Print stuff
-	print("-- Trim 0 from GRI3.0 --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
-
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num
 	assert reduced_model_num_reactions == expected_reactions_num
@@ -87,11 +73,10 @@ def testGRIMinus0():
 	# Make sure target is not removed 
 	assert "CH4" in reduced_model.species_names
 
-########
-# Input: Artificial mechanism (4 species), removal list of one species
-# Output: Reduced mechanism with 3 species and not the species in the removal list
-########
-def testArtMinus1():
+
+def test_artificial_minus_one():
+	"""Test removing one species from artificial model.
+	"""
 
 	# Original model to remove things from
 	path_to_original = relative_location("artificial-mechanism.cti")
@@ -111,13 +96,6 @@ def testArtMinus1():
 	expected_species_num = 3
 	expected_reactions_num = 1
 
-	# Print stuff
-	print("-- Trim 1 from Artificial Model --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
-
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num
 	assert reduced_model_num_reactions == expected_reactions_num
@@ -126,13 +104,13 @@ def testArtMinus1():
 	# Make sure removed species are not included
 	assert "H" not in reduced_model.species_names
 
-########
-# Input: Artificial mechanism (4 species), removal list of all 4 valid speices
-# Output: Reduced mechanism with 0 species
-#   *This test fails because Cantera will not produce an empty solution object
-########
+
 @pytest.mark.xfail
 def testArtRemoveAll():
+	"""Test removing all four species in an artificial model.
+
+	Fails because Cantera will not produce a Solution with no species/reactions.
+	"""
 
 	# Original model to remove things from
 	path_to_original = relative_location("artificial-mechanism.cti")
@@ -152,13 +130,6 @@ def testArtRemoveAll():
 	expected_species_num = 0
 	expected_reactions_num = 0
 
-	# Print stuff
-	print("-- Trim all from Artificial Model --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
-
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num
 	assert reduced_model_num_reactions == expected_reactions_num
@@ -167,11 +138,9 @@ def testArtRemoveAll():
 	# Make sure removed species are not included
 	assert "H" not in reduced_model.species_names
 
-########
-# Input: Artificial mechanism (4 species), removal list of one species that is not in the model
-# Output: Reduced mechanism with 4 species
-########
 def testArtRemoveInvalid():
+	"""Test removing species not present in model.
+	"""
 
 	# Original model to remove things from
 	path_to_original = relative_location("artificial-mechanism.cti")
@@ -191,23 +160,14 @@ def testArtRemoveInvalid():
 	expected_species_num = 4
 	expected_reactions_num = 2
 
-	# Print stuff
-	print("-- Trim 1 invalid from Artificial Model --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
-
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num
 	assert reduced_model_num_reactions == expected_reactions_num
 	assert reduced_model_num_species == len(solution_object.species())
 
-########
-# Input: Artificial mechanism (4 species), removal list of H and CH4 
-# Output: Reduced mechanism with 3 species and not the species in the removal list
-########
 def testArtRemoveInvalidAnd1():
+	"""Test removing mixture of species both in and not in artificial model.
+	"""
 
 	# Original model to remove things from
 	path_to_original = relative_location("artificial-mechanism.cti")
@@ -227,13 +187,6 @@ def testArtRemoveInvalidAnd1():
 	expected_species_num = 3
 	expected_reactions_num = 1
 
-	# Print stuff
-	print("-- Trim 1 from Artificial Model with invalid --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
-
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num
 	assert reduced_model_num_reactions == expected_reactions_num
@@ -242,22 +195,9 @@ def testArtRemoveInvalidAnd1():
 	# Make sure removed species are not included
 	assert "H" not in reduced_model.species_names
 
-########
-# Input: Random inputs 
-# Output: Catch bad input error
-# *No error is thrown, so this test fails
-########
-@pytest.mark.xfail
-def testBadInput():
-
-	# Run trim unit
-	reduced_model = trim("solution_object", "exclusion_list", "a-m.cti")
-
-########
-# Input: GRI Mech 3.0 (53 species), removal list of 10 species
-# Output: Reduced mechanism with 43 species and none of the species in the removal list
-########
-def testGRIMinus10():
+def test_GRI_minus_10():
+	"""Test removing 10 species from GRI Mech 3.0
+	"""
 
 	# Original model to remove things from
 	solution_object = ct.Solution("gri30.cti")
@@ -275,13 +215,6 @@ def testGRIMinus10():
 	# Expected answer	
 	expected_species_num = 43
 	expected_reactions_num = 14
-
-	# Print stuff
-	print("-- Trim 10 from GRI3.0 --")
-	print("Trimmed num species: " + str(reduced_model_num_species))
-	print("Trimmed num reactions: " + str(reduced_model_num_reactions))
-	print("Trimmed model species: ")
-	print(reduced_model.species_names)
 
 	# Make sure number matches what is expected
 	assert reduced_model_num_species == expected_species_num

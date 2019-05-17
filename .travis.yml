@@ -5,16 +5,16 @@ language: generic
 matrix:
   include:
     - os: linux
-      env: PYTHON="3.5"
+      env: PYTHON="3.6"
 
     - os: linux
-      env: PYTHON="3.6"
-
-    - os: osx
-      env: PYTHON="3.5"
+      env: PYTHON="3.7"
 
     - os: osx
       env: PYTHON="3.6"
+
+    - os: osx
+      env: PYTHON="3.7"
 
 # Install packages
 install:

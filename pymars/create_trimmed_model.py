@@ -1,5 +1,3 @@
-# Local Imports
-import cantera as ct
 import os
 
 def trim(initial_solution, exclusion_list, file_name):
@@ -7,39 +5,43 @@ def trim(initial_solution, exclusion_list, file_name):
 
     Parameters
     ----------
-    initial_solution : obj
+    initial_solution : cantera.Solution
         Cantera solution object of initial model
-    exclusion_list : list
-        List of species that will be trimmed
-    file_name : str 
+    exclusion_list : list of str
+        List of species names that will be removed
+    file_name : str
         Name of original model file to be reduced
 
     Returns
     -------
-        Trimmed Cantera solution object
+    cantera.Solution
+        Cantera solution object with reduced model
 
     """
+    # Remove species if in list to be removed
+    final_species = [sp for sp in initial_solution.species() if sp.name not in exclusion_list]
 
-    # Remove reactions that use trimmed species
+    # Remove reactions that use eliminated species
     final_reactions = []
     for reaction in initial_solution.reactions():
         reaction_species = list(reaction.products.keys()) + list(reaction.reactants.keys())
-        if all([sp not in reaction_species for sp in exclusion_list]):
-            final_reactions.append(reaction)
-        
+        if all([sp in final_species for sp in reaction_species]):
+            # remove any eliminated species from third-body efficiencies
+            if hasattr(reaction, 'efficiencies'):
+                reaction.efficiencies = {
+                    sp:val for sp, val in reaction.efficiencies.items() 
+                    if sp in final_species
+                    }
 
-    # Remove species if in list to be removed
-    final_species = [initial_solution.species(sp) 
-                     for sp in initial_solution.species_names if sp not in exclusion_list
-                     ]
-                             
-    # New solution definition
+            final_reactions.append(reaction)
+
+    # Create new solution based on remaining species and reactions
     new_solution= ct.Solution(species=final_species,
                               reactions=final_reactions,
                               thermo='IdealGas',
                               kinetics='GasKinetics'
                               )
     new_solution.TP = initial_solution.TP
-    new_solution.name = 'trimmed_' + os.path.splitext(file_name)[0]
+    new_solution.name = 'reduced_' + os.path.splitext(file_name)[0]
 
     return new_solution

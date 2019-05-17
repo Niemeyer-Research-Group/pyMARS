@@ -9,12 +9,10 @@ from textwrap import fill
 
 import cantera as ct
 
-from .name_trim import name_trim
-
 # number of calories in 1000 Joules
 CALORIES_CONSTANT = 4184.0
 
-#1 debye = d coulomb-meters
+# Conversion from 1 debye to coulomb-meters
 DEBEYE_CONVERSION = 3.33564e-30
 
 
@@ -207,11 +205,11 @@ def write(solution):
         for species in solution.species():
             # build strings with low- and high-temperature 7 NASA coefficients
             nasa_range_low = f'[{species.thermo.min_temp}, {species.thermo.coeffs[0]}]'
-            nasa_coeffs_low = ["{:.9e}".format(c) for c in species.thermo.coeffs[8:15]]
+            nasa_coeffs_low = [f'{c:.9e}' for c in species.thermo.coeffs[8:15]]
             nasa_coeffs_low = fill('[' + ', '.join(nasa_coeffs_low) + ']', width=50, subsequent_indent=16*' ')
             
             nasa_range_high = f'[{species.thermo.coeffs[0]}, {species.thermo.max_temp}]'
-            nasa_coeffs_high = ["{:.9e}".format(c) for c in species.thermo.coeffs[1:8]]
+            nasa_coeffs_high = [f'{c:.9e}' for c in species.thermo.coeffs[1:8]]
             nasa_coeffs_high = fill('[' + ', '.join(nasa_coeffs_high) + ']', width=50, subsequent_indent=16*' ')
 
             composition = ', '.join([f'{s}:{int(v)}' for s, v in species.composition.items()])

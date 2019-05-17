@@ -69,6 +69,6 @@ setup(
     install_requires=install_requires,
     tests_require=tests_require,
     setup_requires=setup_requires,
-    python_requires='~=3.5',
+    python_requires='~=3.6',
     zip_safe=False,
     )
