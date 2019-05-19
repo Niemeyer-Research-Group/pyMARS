@@ -363,73 +363,22 @@ def get_rates_drg(sim_array, solution_object):
             new_solution = old_solution
             new_solution.TPY = temp, pressure, mass_fractions
             new_reaction_production_rates = new_solution.net_rates_of_progress
-            new_species_prod_rates = new_solution.net_production_rates
 
-            denom = {}
-            numerator = {}
-            for spc in new_solution.species():
-                for i, reac in enumerate(new_solution.reactions()):
-                    reac_prod_rate = float(new_reaction_production_rates[i])
-                    reactants = reac.reactants
-                    products = reac.products
-                    all_species = reac.reactants
-                    all_species.update(reac.products)
-                    if reac_prod_rate != 0:
-                        if reac_prod_rate > 0:
-
-                            for species in products:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * products[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * products[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * products[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * products[species]))
-
-                            for species in reactants:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * reactants[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * reactants[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * reactants[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * reactants[species]))
-
-                        if reac_prod_rate < 0:
-
-                            for species in products:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * products[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * products[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * products[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * products[species]))
-
-                            for species in reactants:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * reactants[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * reactants[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * reactants[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * reactants[species]))
+            denom = np.zeros(new_solution.n_species)
+            numerator = np.zeros((new_solution.n_species, new_solution.n_species))
+            reac_prod_rate = new_reaction_production_rates
+            reactants = new_solution.reactant_stoich_coeffs()
+            products = new_solution.product_stoich_coeffs()
+            net_stoich = products - reactants
+            abs_stoich = np.abs(products) + np.abs(reactants)
+            valid = np.where(reac_prod_rate != 0)[0]
+            if valid.size:
+                base_rates = np.abs(
+                    net_stoich[:, valid] * new_reaction_production_rates[valid])
+                denom = np.sum(base_rates, axis=1)
+                for sp_b in range(new_solution.n_species):
+                    numerator[:, sp_b] += np.sum(
+                        base_rates[:, np.where(abs_stoich[sp_b, valid])[0]], axis=1)
 
             ic_edge_data[temp] = [denom, numerator]
         total_edge_data[ic] = ic_edge_data
