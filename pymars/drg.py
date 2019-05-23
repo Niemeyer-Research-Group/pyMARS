@@ -7,7 +7,7 @@ import cantera as ct
 
 from . import soln2cti
 from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
-from .create_trimmed_model import trim, ReducedModel
+from .reduce_model import trim, ReducedModel
 
 
 def create_drg_matrix(state, solution):
@@ -196,6 +196,7 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         matrices.append(create_drg_matrix((state[0], state[1], state[2:]), solution))
 
     # begin reduction iterations
+    logging.info('Beginning DRG reduction loop')
     logging.info('Threshold | Number of species | Max error (%)')
 
     iterations = 0
@@ -220,6 +221,7 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
                 raise SystemExit(
                     'Threshold value dropped below 1e-5 without producing viable reduced model'
                     )
+            logging.info('Threshold value too high, reducing by factor of 10')
             continue
         
         logging.info(f'{threshold:^9} | {num_species:^17} | {error_current:^.2f}')

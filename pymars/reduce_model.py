@@ -1,3 +1,4 @@
+"""Module for general model reduction class and function."""
 import os
 from typing import NamedTuple
 
@@ -13,7 +14,7 @@ class ReducedModel(NamedTuple):
     
 
 def trim(solution, exclusion_list, file_name):
-    """ Function to reduce list of species and corresponding reactions.
+    """Function to eliminate species and corresponding reactions from model
 
     Parameters
     ----------

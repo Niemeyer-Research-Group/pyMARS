@@ -1,460 +1,266 @@
-import os
-import sys 
+"""Module containing Directed Relation Graph with Error Propagation (DRGEP) reduction method.
+"""
 
 import numpy as np
-import networkx as nx
+import networkx
 import cantera as ct
 
-from . import soln2ck
 from . import soln2cti
-from . import helper
-from .simulation import Simulation
-from .create_trimmed_model import trim
-from .readin_initial_conditions import readin_conditions
+from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
+from .reduce_model import trim
 from .dijkstra import ss_dijkstra_path_length_modified
 
 
-def make_dic_drgep(solution_object, total_edge_data, target_species):
-
-    """ Makes the dictionary of overall interaction coefficients for DRGEP
-
-    Builds a graph and searches it as explained in DRGEP method.
+def create_drgep_matrix(state, solution):
+    """Creates DRGEP graph adjacency matrix
 
     Parameters
     ----------
-    solution_object : cantera.Solution
-        Model  being reduced
-    target_species : list of str
-        target species for the reduction as specified by the user
-    total_edge_data : dict
-        Initial conditions and values of dicts that hold information for calculating 
-        DICs at each timestep. The subdictionaries have the timestep as their keys and 
-        their values hold an array of numberator and denominator information for 
-        calculating DICs.
+    state : tuple
+        Tuple of state with temperature, pressure, and species mass fractions
+    solution : cantera.Solution
+        Cantera object of the solution being analyzed
 
     Returns
     -------
-    dict
-        Keys of species and values of that species' overall interaction coefficent
+    adjacency_matrix : numpy.ndarray
+        Adjacency matrix based on calculated direct interaction coefficients
 
     """
-
-    # Initalize solution and components
-    solution = solution_object
-    species_objects = solution.species()
-    reaction_objects = solution.reactions()
-
-    # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
-    graph = nx.DiGraph()
-
-    max_dic = {} # Dictionary holding the maximum values for the iteration
-
-    # Calculate edge weights based on list received from get_rate_data and use them to create a graph
-    for ic in total_edge_data.keys(): # For each initial condition
-        # Timestep
-        for tstep in total_edge_data[ic].keys(): # Make a graph at each timestep
-            for species in species_objects: # Make graph
-                graph.add_node(species.name)
-            # DRGEP calculations of direct interaction coeffients are done in the total_edge_data function.
-            numerator = total_edge_data[ic][tstep][1]
-            denominator = total_edge_data[ic][tstep][0]
-            for edge in numerator: # For each edge, determine its weight amnd add it to the graph
-                try:
-                    edge_name = edge.split('_', 1)
-                    species_a_name = edge_name[0]
-                    species_b_name = edge_name[1]
-                    # DRGEP weight between two species
-                    if denominator[species_a_name] != 0:
-                        weight = abs(
-                            float(numerator[edge])/float(denominator[species_a_name]))
-                        if graph.has_edge(species_a_name, species_b_name):
-                            old_weight = graph[species_a_name][species_b_name]['weight']
-                            if weight > old_weight and weight <= 1:
-                                graph.add_weighted_edges_from(
-                                    [(species_a_name, species_b_name, weight)])
-                            elif weight > 1:
-                                print(
-                                    "Error.  Edge weights should not be greater than one.")
-                                exit()
-                        elif weight <= 1:
-                            graph.add_weighted_edges_from(
-                                [(species_a_name, species_b_name, weight)])
-                        elif weight > 1:
-                            print(
-                                "Error.  Edge weights should not be greater than one.")
-                            exit()
-                except IndexError:
-                    print(edge)
-                    continue
-
-            # Search the graph for overall interaction coefficents and add them to max_dic if they belong
-            dic = graph_search_drgep(graph, target_species) # Search graph for max values to each species based on targets
-            for sp in dic: # Add to max dictionary if it is new or greater than the value already there.
-                if sp not in max_dic:
-                    max_dic[sp] = dic[sp]
-                elif dic[sp] > max_dic[sp]:
-                    max_dic[sp] = dic[sp]
-            graph.clear() # Reset graph
-    return max_dic
-
-
-def trim_drgep(max_dic, solution_object, threshold_value, retained_species, done):
-
-    """Determines species to remove based on OICs and threshold value.
-
-    Parameters
-    ----------
-    max_dic : dict
-        Dictionary of overall interaction coefficients for all species
-    solution_object : cantera.Solution
-        The solution being reduced
-    threshold_value : float
-        User-specified threshold value
-    retained_species : list of cantera.Species
-        Species that should always be kept
-    done : bool
-        Determines wether or not the reduction is complete
-
-    Returns
-    -------
-    List of species that should be excluded from the original model at this threshold level
-
-    """
-
-    core_species = []
-    species_objects = solution_object.species()
-
-    for sp in retained_species:
-        core_species.append(sp)
-
-    # Take all species that are over the threshold value and add them to essential species.
-    essential_species = []
-    for sp in species_objects:
-        if sp.name in max_dic:
-            if max_dic[sp.name] > threshold_value and sp not in essential_species:
-                essential_species.append(sp)
-    done[0] = True
-    for sp in species_objects: # If any more can be taken out, we are not done yet.
-        if sp.name in max_dic:
-            if max_dic[sp.name] > threshold_value:
-                done[0] = False
-
-    for sp in essential_species:
-        if sp not in core_species:
-            core_species.append(sp.name)
-
-    exclusion_list = []
-
-    for species in solution_object.species():
-        # If its not one of our species we must keep, add it to the list of species to be trimmed.
-        if species.name not in core_species:
-            exclusion_list.append(species.name)
-
-    return exclusion_list
-
-
-def run_drgep(solution_object, conditions_file, error_limit, target_species, 
-              retained_species, model_file, final_error, ep_star
-              ):
-
-	"""This is the MAIN top level function for running DRGEP
-
-	Parameters
-	----------
-	solution_object : cantera.Solution
-        Model to be reduced
-	conditions_file : str
-        A file holding the initial conditions for the simulation
-	error_limit : float
-        Maximum error allowed for the reduced model
-	target_species : list of str
-        List of the target species for reduction
-	retained_species : list of str
-        An array of species that should not be removed from the model
-	model_file : str
-        The path to the file holding the original model
-	final_error : list of float
-        A singleton holding the final error percentage
-	ep_star : float
-        Upper threshold used for identifying limbo species for sensitivity analysis
-
-	Returns
-	-------
-	Tuple of reduced Catnera solution object [0] and limbo species for SA [1]
-
-	"""
-
-	# Set up variables
-	if len(target_species) == 0: # If the target species are not specified, puke and die.
-		print("Please specify a target species.")
-		exit()
-	done = [] # Singleton to hold wether or not any more species can be cut from the simulation.
-	done.append(False)
-	threshold = .1 # Starting threshold value
-	threshold_i = .1
-	n = 1
-	error = [10.0] # Singleton to hold the error value of the previously ran simulation.
-
-	# Check to make sure that conditions exist
-	if conditions_file:
-		conditions_array = readin_conditions(str(conditions_file))
-	elif not conditions_file:
-		print("Conditions file not found")
-		exit()
-
-	sim_array = helper.setup_simulations(conditions_array,solution_object) # Turn conditions array into unran simulation objects for the original solution
-	ignition_delay_detailed = helper.simulate(sim_array) # Run simulations and process results
-
-	rate_edge_data = get_rates(sim_array,solution_object) # Get edge weight calculation data.
-	max_dic = make_dic_drgep(solution_object, rate_edge_data, target_species) # Make a dictionary of overall interaction coefficients.
-
-	# Trim the solution at that treshold and find the error.
-	print("Testing for starting threshold value")
-	drgep_loop_control(
-		solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array)
-
-	while error[0] != 0 and threshold_i > .001: # While the error for trimming with that threshold value is greater than allowed.
-		threshold = threshold / 10 # Reduce the starting threshold value and try again.
-		threshold_i = threshold_i / 10
-		n = n + 1
-		drgep_loop_control(
-			solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array)
-		if error[0] <= .02:
-			error[0] = 0
-
-	print("Starting with a threshold value of " + str(threshold))
-	sol_new = solution_object
-	final_error[0] = 0 # An integer representing the error introduced in the past simulation.
-	done[0] = False
-
-	while not done[0] and error[0] < error_limit: # Run the simulation until nothing else can be cut.
-		# Trim at this threshold value and calculate error.
-		sol_new = drgep_loop_control(
-			solution_object, target_species, retained_species, model_file, error, threshold, done, max_dic, ignition_delay_detailed, conditions_array)
-		if error_limit > error[0]: # If a new max species cut without exceeding what is allowed is reached, save that threshold.
-			max_t = threshold
-            #if (final_error[0] == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
-		        #threshold = threshold + (threshold_i * 4)
-			final_error[0] = error[0]
-		    #if (threshold >= .01):
-                #threshold_i = .01
-			threshold = threshold + threshold_i
-			threshold = round(threshold, n)
-
-	print("\nGreatest result: ")
-	sol_new = drgep_loop_control(
-		solution_object, target_species, retained_species, model_file, error, max_t, done, max_dic, ignition_delay_detailed, conditions_array)
-
-	limbo = []
-	if ep_star:
-		# If a species meets the limbo criteria, add it to limbo
-		for sp in sol_new.species_names:
-			if sp in max_dic and max_dic[sp] < ep_star and (not sp in limbo) and (not sp in retained_species):
-				limbo.append(sp)
-
-	result = [sol_new, limbo]
-	return result
-
-
-def drgep_loop_control(solution_object, target_species, retained_species, model_file, 
-                       stored_error, threshold, done, max_dic, ignition_delay_detailed, 
-                       conditions_array
-                       ):
-    """Handles the reduction, simulation, and comparison for a single threshold value.
-
-    Also updates error value (input)
-
-    Parameters
-    ----------
-    solution_object : cantera.Solution
-        object being reduced
-    target_species : list of str
-        List of the target species for reduction
-    retained_species : list of str
-        List of species that should not be removed from the model
-    model_file : str
-        File holding the original model
-    stored_error : list of float
-        past error
-    threshold : float
-        current threshold value
-    done : bool
-        are we done reducing yet?
-    max_dic : dict
-        OIC dictionary for DRGEP
-    ignition_delay_detailed : numpy.array 
-        ignition delays of detailed model
-    conditions_array : list of Condition
-        array holding information about initial conditions
-
-    Returns
-    -------
-    Reduced solution object for this threshold
-
-    """
-
-    # Run detailed mechanism and retain initial conditions
-    species_retained = []
-    printout = ''
-    print('Threshold     Species in Mech      Error')
-
-    # Run DRGEP and create new reduced solution
-    exclusion_list = trim_drgep(max_dic, solution_object, threshold, retained_species, done) # Find out what to cut from the model
-    new_solution = trim(solution_object, exclusion_list, model_file) # Cut the exclusion list from the model.
-    species_retained.append(len(new_solution.species()))
-
-    # Simulated reduced solution
-    # Create simulation objects for reduced model for all conditions
-    new_sim = helper.setup_simulations(conditions_array,new_solution)
-    # Run simulations and process results
-    ignition_delay_reduced = helper.simulate(new_sim)
-
-    if ignition_delay_detailed.all() == 0: # Ensure that ignition occured
-        print("Original model did not ignite.  Check initial conditions.")
-        exit()
-
-    # Calculate and print error.
-    error = 100 * abs(ignition_delay_reduced - ignition_delay_detailed) / ignition_delay_detailed
-    printout += (str(threshold) + '                 ' + str(len(new_solution.species())) + 
-                 '              '+  str(round(np.max(error), 2)) +'%' + '\n'
-                 )
-    print(printout)
-    stored_error[0] = round(np.max(error), 2)
-
-    # Return new model
-    return new_solution
-
-
-def get_rates(sim_array, solution_object):
-    """Calculates values to be used in the calculation of Direct Interaction Coefficients
-
-    Parameters
-    ----------
-    sim_array : list of Simulation
-        list of simulation objects
-    solution_object : cantera.Solution
-        Cantera object of the solution being reduced
-
-    Returns
-    -------
-    dict for calculating interaction coefficients as described in the ``make_dic_drgep``
-    function comments.
-
-    """
-
-    # Initialize solution
-    old_solution = solution_object
-    # Iterate through all initial conditions
-    total_edge_data = {}
-    for ic in sim_array:
-        ic_edge_data = {}
-        for tstep in ic.sample_points: # Iterate through all timesteps
-            temp = tstep[0] # Set up variables
-            pressure = tstep[1]
-            mass_fractions = np.array(tstep[2])
-
-            # Set up solution at current timestep
-            new_solution = old_solution
-            new_solution.TPY = temp, pressure, mass_fractions
-            new_reaction_production_rates = new_solution.net_rates_of_progress
-            new_species_prod_rates = new_solution.net_production_rates
-
-            denom = {}
-            numerator = {}
-            for spc in new_solution.species():
-                denom[spc.name] = []
-                denom[spc.name].append(0)
-                denom[spc.name].append(0)
-
-            # Calculate direct interaction coefficients as specified by the DRGEP method
-            for i, reac in enumerate(new_solution.reactions()): # For all reactions
-                reac_prod_rate = float(new_reaction_production_rates[i])
-                reactants = reac.reactants
-                products = reac.products
-                all_species = reac.reactants
-                all_species.update(reac.products)
-
-                if reac_prod_rate != 0:
-                    if reac_prod_rate > 0:
-                        for species in products: # Add to denominator for all of the species in products
-                            denom[species][1] += abs(float(reac_prod_rate * products[species]))
-                            for species_b in all_species:
-                                if species_b != species:
-                                    partial_name = species + '_' + species_b
-                                    if partial_name in numerator: # Add to numerator for all species pairs
-                                        numerator[partial_name] += float(reac_prod_rate * products[species])
-                                    else:
-                                        numerator[partial_name] = float(reac_prod_rate * products[species])
-
-                        for species in reactants: # For all reactants subtract instead of add
-                            denom[species][0] += abs(float(reac_prod_rate * reactants[species]))
-                            for species_b in all_species:
-                                if species_b != species:
-                                    partial_name = species + '_' + species_b
-                                    if partial_name in numerator:
-                                        numerator[partial_name] += float(-reac_prod_rate * reactants[species])
-                                    else:
-                                        numerator[partial_name] = float(-reac_prod_rate * reactants[species])
-
-                    if reac_prod_rate < 0: # Same as above but for negative.
-                        for species in products:
-                            denom[species][0] += abs(float(reac_prod_rate * products[species]))
-                            for species_b in all_species:
-                                if species_b != species:
-                                    partial_name = species + '_' + species_b
-                                    if partial_name in numerator:
-                                         numerator[partial_name] += float(reac_prod_rate * products[species])
-                                    else:
-                                         numerator[partial_name] = float(reac_prod_rate * products[species])
-
-                        for species in reactants:
-                            denom[species][1] += abs(float(reac_prod_rate * reactants[species]))
-                            for species_b in all_species:
-                                if species_b != species:
-                                    partial_name = species + '_' + species_b
-                                    if partial_name in numerator:
-                                         numerator[partial_name] += float(-reac_prod_rate * reactants[species])
-                                    else:
-                                         numerator[partial_name] = float(-reac_prod_rate * reactants[species])
-
-            for species in new_solution.species(): # Use greater value as denominator
-                if abs(denom[species.name][0]) > abs(denom[species.name][1]):
-                    denom[species.name] = abs(denom[species.name][0])
-                else:
-                    denom[species.name] = abs(denom[species.name][1])
-
-            for name in numerator: # Use absolute value of numerator
-                numerator[name] = abs(numerator[name])
-            ic_edge_data[temp] = [denom, numerator] # Add to ic data
-        total_edge_data[ic] = ic_edge_data # Add to information to be used to make the graph
-
-    return total_edge_data
-
-
-def graph_search_drgep(nx_graph, target_species):
+    temp, pressure, mass_fractions = state
+    solution.TPY = temp, pressure, mass_fractions
+
+    net_stoich = solution.product_stoich_coeffs() - solution.reactant_stoich_coeffs()
+    flags = np.where(((solution.product_stoich_coeffs() != 0) |
+                        (solution.reactant_stoich_coeffs() !=0 )
+                        ), 1, 0)
+
+    # only consider contributions from reactions with nonzero net rates of progress
+    valid_reactions = np.where(solution.net_rates_of_progress != 0)[0]
+    if valid_reactions.size:
+        base_rates = (
+            net_stoich[:, valid_reactions] *
+            solution.net_rates_of_progress[valid_reactions]
+            )
+        
+        denominator_dest = np.sum(np.maximum(0.0, -base_rates), axis=1)
+        denominator_prod = np.sum(np.maximum(0.0, base_rates), axis=1)
+        denominator = np.maximum(denominator_prod, denominator_dest)[:, np.newaxis]
+
+        numerator = np.zeros((solution.n_species, solution.n_species))
+        for sp_b in range(solution.n_species):
+            numerator[:, sp_b] += np.sum(
+                base_rates[:, np.where(flags[sp_b, valid_reactions])[0]], axis=1
+                )
+        numerator = np.abs(numerator)
+
+        # May get divide by zero if an inert species is present, and denominator
+        # entry is zero.
+        with np.errstate(divide='ignore', invalid='ignore'):
+            adjacency_matrix = np.where(denominator != 0, numerator / denominator, 0)
+
+    else:
+        adjacency_matrix = np.zeros((solution.n_species, solution.n_species))
+
+    # set diagonals to zero, to avoid self-directing graph edges
+    np.fill_diagonal(adjacency_matrix, 0.0)
+
+    return adjacency_matrix
+
+
+def graph_search_drgep(graph, target_species):
     """Searches graph to generate a dictionary of the greatest paths to all species from one of the targets.
 
     Parameters
     ----------
-    nx_graph : networkx.Graph
-        networkx graph object of solution
+    graph : networkx.DiGraph
+        Graph representing model
     target_species : list of str
         List of target species to search from
 
     Returns
     -------
-    max_dic : dict
-        Values of the greatest possible path to each species from one of the targets on this graph 
-        keyed by species name.
+    overall_coefficients : dict
+        Overall interaction coefficients; maximum over all paths from all targets to each species
 
     """
-
-    max_dic = {} # A dictionary holding the maximum path to each species.
+    overall_coefficients = {}
     for target in target_species:
-        dic = ss_dijkstra_path_length_modified(nx_graph, target) # Get dictionary of each values maximum path
-        for sp in dic: # If the species are not in the max dictionary or the new value for that species is greater than the one in the max dictionary, add it to the max dictionary.
-            if sp not in max_dic:
-                max_dic[sp] = dic[sp]
-            elif max_dic[sp] < dic[sp]:
-                max_dic[sp] = dic[sp]
-    return max_dic
+        coefficients = ss_dijkstra_path_length_modified(graph, target)        
+        overall_coefficients = {
+            sp:max(overall_coefficients.get(sp, 0.0), coefficients[sp]) for sp in coefficients
+            }
+    
+    return overall_coefficients
+
+
+def get_importance_coeffs(species_names, target_species, matrices):
+    """Calculate importance coefficients for all species
+
+    Parameters
+    ----------
+    species_names : list of str
+        Species names
+    target_species : list of str
+        List of target species
+    matrices : list of numpy.ndarray
+        List of adjacency matrices
+
+    Returns
+    -------
+    importance_coefficients : dict
+        Maximum coefficients over all sampled states
+
+    """
+    importance_coefficients = {}
+    name_mapping = {i: sp for i, sp in enumerate(species_names)}
+    for matrix in matrices:
+        graph = networkx.DiGraph(matrix)
+        networkx.relabel_nodes(graph, name_mapping, copy=False)
+        coefficients = graph_search_drgep(graph, target_species)
+
+        importance_coefficients = {
+            sp:max(importance_coefficients.get(sp, 0.0), coefficients[sp]) for sp in coefficients
+            }
+    
+    return importance_coefficients
+
+
+def reduce_drgep(solution, model_file, species_safe, threshold,
+                 importance_coeffs, sample_inputs, sampled_metrics
+               ):
+    """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
+
+    Parameters
+    ----------
+    solution : cantera.Solution
+        Model being reduced
+    model_file : str
+        Filename for model being reduced
+    species_safe : list of str
+        List of species to always be retained
+    threshold : float
+        DRG threshold for trimming graph
+    importance_coeffs : dict
+        Dictionary with species and their overall interaction coefficients.
+    sample_inputs : SamplingInputs
+        Filename information for sampling (e.g., autoignition inputs/outputs)
+    sampled_metrics: numpy.ndarray
+        Global metrics from original model used to evaluate error
+
+    Returns
+    -------
+    ReducedModel
+        Return reduced model and associated metadata
+
+    """
+    species_removed = [sp for sp in solution.species_names
+                       if importance_coeffs[sp] < threshold 
+                       and sp not in species_safe
+                       ]
+
+    # Cut the exclusion list from the model.
+    new_solution = trim(solution, species_removed, model_file)
+    new_model_file = soln2cti.write(new_solution)
+
+    reduced_model_metrics = sample_metrics(sample_inputs, new_model_file)
+    error = calculate_error(sampled_metrics, reduced_model_metrics)
+
+    return ReducedModel(
+        model=new_solution, error=error, filename=new_model_file
+        )
+
+
+def run_drgep(model_file, sample_inputs, error_limit, species_targets,
+              species_safe, threshold_upper=None
+              ):
+	"""Main function for running DRGEP reduction.
+
+	Parameters
+	----------
+    model_file : str
+        Original model file
+    sample_inputs : SamplingInputs
+        Contains filenames for sampling
+    error_limit : float
+        Maximum allowable error level for reduced model
+    species_targets : list of str
+        List of target species names
+    species_safe : list of str
+        List of species names to always be retained
+    threshold_upper: float, optional
+        Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
+
+    Returns
+    -------
+    ReducedModel
+        Return reduced model and associated metadata
+
+	"""
+    solution = ct.Solution(model_file)
+    assert species_targets, 'Need to specify at least one target species.'
+
+    # first, sample thermochemical data and generate metrics for measuring error
+    # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
+    # will be used to produce graphs for any threshold value.
+    sampled_data, sampled_metrics = sample(sample_inputs, model_file)
+	
+	matrices = []
+    for state in sampled_data:
+        matrices.append(create_drgep_matrix((state[0], state[1], state[2:]), solution))
+
+    # For DRGEP, find the overall interaction coefficients for all species 
+    # using the maximum over all the sampled states
+    importance_coeffs = get_importance_coeffs(
+        solution.species_names, target_species, matrices
+        )
+
+    # begin reduction iterations
+    logging.info('Beginning DRGEP reduction loop')
+    logging.info('Threshold | Number of species | Max error (%)')
+
+    iterations = 0
+    error_current = 0.0
+    threshold = 0.01
+    threshold_increment = 0.01
+    while error_current <= error_limit:
+        reduced_model = reduce_drgep(
+            solution, model_file, species_safe, threshold, importance_coeffs, 
+            sample_inputs, sampled_metrics
+            )
+        error_current = reduced_model.error
+        num_species = reduced_model.model.n_species
+
+        # reduce threshold if past error limit on first iteration
+        if not iterations and error_current > error_limit:
+            error_current = 0.0
+            threshold /= 10
+            threshold_increment /= 10
+            if threshold <= 1e-6:
+                raise SystemExit(
+                    'Threshold value dropped below 1e-6 without producing viable reduced model'
+                    )
+            logging.info('Threshold value too high, reducing by factor of 10')
+            continue
+        
+        logging.info(f'{threshold:^9} | {num_species:^17} | {error_current:^.2f}')
+
+        threshold += threshold_increment
+        model_previous = reduced_model
+    
+    if error_current > error_limit:
+        reduced_model = model_previous
+        error_current = reduced_model.error
+        num_species = reduced_model.model.n_species
+
+    if threshold_upper:
+		for sp in reduced_model.species_names:
+            if importance_coeffs[sp] < threshold_upper and (sp not in species_safe):
+				reduced_model.limbo_species.append(sp)
+    
+    logging.info('DRGEP reduction complete.')
+    logging.info(f'Skeletal model: {num_species} species and '
+                 f'{reduced_model.model.n_species} reactions.'
+                 )
+    logging.info(f'Maximum error: {error_current:.2f}%')
+    return reduced_model
