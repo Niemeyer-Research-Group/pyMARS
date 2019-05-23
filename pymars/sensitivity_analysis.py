@@ -140,7 +140,7 @@ def dic_lowest(dic):
 	return s
 
 
-def run_sa(original_model, reduced_model, final_error, conditions_file, target, keepers, error_limit, limbo):
+def run_sa(model_file, final_error, conditions_file, target, keepers, error_limit, limbo):
 	"""Runs a sensitivity analysis on a resulting reduced model.
 	
 	Parameters
@@ -169,8 +169,6 @@ def run_sa(original_model, reduced_model, final_error, conditions_file, target, 
 	# Turn conditions array into unran simulation objects for the original solution
 	sim_array = helper.setup_simulations(conditions_array, original_model)
 	id_detailed = helper.simulate(sim_array)  # Run simulations and process results
-
-	rate_edge_data = get_rates(sim_array, original_model) # Get edge weight calculation data.
 	
 	if (id_detailed.all() == 0): # Ensure that ignition occured
 		print("Original model did not ignite.  Check initial conditions.")

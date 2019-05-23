@@ -2,6 +2,15 @@
 import cantera as ct
 import os
 
+class ReducedModel(NamedTuple):
+    """Represents reduced model and associated metadata
+    """
+    model: ct.Solution
+    filename: str = ''
+    error: float = 0.0
+    limbo_species: list = []
+    
+
 def trim(solution_object, exclusion_list, file_name):
     """ Function to reduce list of species and corresponding reactions.
 

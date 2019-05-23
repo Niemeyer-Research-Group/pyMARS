@@ -21,53 +21,50 @@ except ImportError:
     print('PyTables must be installed')
     raise
 
-# Local imports
-#from .utils import units
-
-
 class Simulation(object):
-    """Class for ignition delay simulations."""
+    """Class for ignition delay simulations
 
+    Parameters
+    ----------
+    idx : int
+        Identifer index for case
+    properties : dict
+        Dictionary with all properties needed
+    """
     def __init__(self, idx, properties, model, path=''):
-        """Initialize simulation case.
-
-        :param idx: identifier number for this case
-        :type idx: int
-        :param properties: set of properties for this case
-        :type properties: dict
-        :param str model_file: Filename for Cantera-format model
-        :param str path: Path for data file
-        """
         self.idx = idx
         self.properties = properties
+        self.model = model
+        self.path = path
 
-        self.gas = model
+    def setup_case(self):
+        """Initialize simulation case.
+        """
+        self.gas = ct.Solution(self.model)
 
+        self.time_end = 10.0
+        if 'end-time' in self.properties:
+            self.time_end = self.properties['end-time']
 
-        self.time_end = 10 #This is just a filler idk how end time should actually be determined yet
-
-        self.gas.TP = (self.properties['temperature'], self.properties['pressure']*float(ct.one_atm))
-        self.gas.set_equivalence_ratio(self.properties['equivalence_ratio'],
+        self.gas.TP = (
+            self.properties['temperature'], self.properties['pressure'] * ct.one_atm
+            )
+        self.gas.set_equivalence_ratio(self.properties['equivalence-ratio'],
                                        self.properties['fuel'],
                                        self.properties['oxidizer']
                                       )
 
-        # Create non-interacting ``Reservoir`` on other side of ``Wall``
-        env = ct.Reservoir(ct.Solution('air.xml'))
-
-        # All reactors are ``IdealGasReactor`` objects
-        self.reac = ct.IdealGasReactor(self.gas)
-        self.wall = ct.Wall(self.reac, env, A=1.0, velocity=0)
+        if self.properties['kind'] == 'constant pressure':
+            self.reac = ct.IdealGasConstPressureReactor(self.gas)
+        else:
+            self.reac = ct.IdealGasReactor(self.gas)
 
         # Create ``ReactorNet`` newtork
         self.reac_net = ct.ReactorNet([self.reac])
 
         # Set file for later data file
-        file_path = os.path.join(path, str(self.idx) + '.h5')
-        self.save_file = file_path
+        self.save_file = os.path.join(self.path, str(self.idx) + '.h5')
         self.sample_points = []
-
-
 
         self.ignition_delay = 0.0
 
@@ -78,8 +75,8 @@ class Simulation(object):
         :param bool restart: If ``True``, skip if results file exists.
         """
 
-        if restart and os.path.isfile(self.meta['save-file']):
-            print('Skipped existing case ', self.meta['id'])
+        if restart and os.path.isfile(self.save_file):
+            print('Skipped existing case ', self.idx)
             return
 
         # Save simulation results in hdf5 table format.
@@ -137,46 +134,61 @@ class Simulation(object):
 
         return self.ignition_delay
 
-    def process_results(self):
+    def process_results(self, skip_data=False):
         """Process integration results to sample data
 
-        Returns arrays of sampled data.
-        """
+        Parameters
+        ----------
+        skip_data : bool
+            Flag to skip sampling thermochemical data
 
-        number_sampled_points = 20
+        Returns
+        -------
+        tuple of float, numpy.ndarray or float
+            Ignition delay, or ignition delay and sampled data
+
+        """
+        delta = 0.05
+        deltas = np.arange(delta, 1 + delta, delta)
 
         # Load saved integration results
+        self.save_file = os.path.join(self.path, str(self.idx) + '.h5')
         with tables.open_file(self.save_file, 'r') as h5file:
             # Load Table with Group name simulation
             table = h5file.root.simulation
 
+            times = table.col('time')
             temperatures = table.col('temperature')
             pressures = table.col('pressure')
             mass_fractions = table.col('mass_fractions')
 
         temperature_initial = temperatures[0]
         temperature_max = temperatures[len(temperatures)-1]
-        delta = temperature_max - temperature_initial 
+        temperature_diff = temperature_max - temperature_initial 
 
-        multiplier = .05
-
-        sampled_data = []
+        sampled_data = np.zeros((len(deltas), 2 + mass_fractions.shape[1]))
 
         # need to add processing to get the 20 data points here
-        for temperature, pressure, mass_fraction in zip(temperatures, pressures, mass_fractions):
-            # get temperature, pressure, mass fractions
+        self.ignition_delay = 0.0
+        ignition_flag = False
+        idx = 0
+        for time, temp, pres, mass in zip(
+            times, temperatures, pressures, mass_fractions
+            ):
+            if temp > temperature_initial + 400.0 and not ignition_flag:
+                    self.ignition_delay = time
+                    ignition_flag = True
+                    if skip_data:
+                        return self.ignition_delay
+            
+            if temp >= temperature_initial + (deltas[idx] * temperature_diff):
+                sampled_data[idx, 0:2] = [temp, pres]
+                sampled_data[idx, 2:] = mass
 
-            if temperature >= temperature_initial + (multiplier * delta):
-                point_data = []
-                point_data.append(temperature) 
-                point_data.append(pressure) 
-                point_data.append(mass_fraction)
-                sampled_data.append(point_data)
-
-                multiplier += .05
-                if multiplier >= 1:
-                    self.sample_points = sampled_data
-                    return sampled_data
+                idx += 1
+                if idx == 20:
+                    self.sampled_data = sampled_data
+                    return self.ignition_delay, sampled_data
 
     def clean(self):
         """Delete HDF5 file with full integration data.
