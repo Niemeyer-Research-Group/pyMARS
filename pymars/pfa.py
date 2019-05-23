@@ -3,9 +3,10 @@ import numpy as np
 import cantera as ct
 import networkx
 
-from .create_trimmed_model import trim, ReducedModel
-from .drg import graph_search
 from . import soln2cti
+from .reduce_model import trim, ReducedModel
+from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
+from .drg import graph_search
 
 def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list,
 			 done, target_species, model_file

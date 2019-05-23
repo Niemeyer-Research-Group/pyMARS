@@ -145,27 +145,26 @@ def dic_lowest(dic):
 	return s
 
 
-def run_sa(model_file, final_error, conditions_file, target, keepers, error_limit, limbo):
-	"""Runs a sensitivity analysis on a resulting reduced model.
+def run_sa(model_file, starting_error, sample_inputs, error_limit, 
+		   species_safe, threshold_upper, species_limbo=[]):
+	"""Runs a sensitivity analysis to remove species on a given model.
 	
 	Parameters
 	----------
-	original_model : Cantera.Solution
-		The original version of the model being reduced
-	reduced_model : Cantera.Solution
-		The model produced by the previous reduction
-	final_error : float
+	model_file : str
+		Model being analyzed
+	starting_error : float
 		Error percentage between the reduced and origanal models
-	conditions_file : str
-		Filename of file holding the initial conditions for simulations
-	target : 
-		The target species for the reduction
-	keepers : 
-		A list of species that should be retained no matter what
-	error_limit : float
-		The maximum allowed error between the reduced and original models
-	limbo : list of Cantera.Species
-		List of species to be considered for reduction by the sensitivity analysis
+	sample_inputs : SamplingInputs
+        Contains filenames for sampling
+    error_limit : float
+        Maximum allowable error level for reduced model
+    species_safe : list of str
+        List of species names to always be retained
+    threshold_upper: float
+        Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
+	species_limbo:
+		List of species to consider; if empty, consider all not in ``species_safe``
 	
 	Returns
 	-------
@@ -174,23 +173,8 @@ def run_sa(model_file, final_error, conditions_file, target, keepers, error_limi
 	"""
 	original_model = ct.Solution(model_file)
 
-	if conditions_file:
-		conditions_array = readin_conditions(str(conditions_file))
-	elif not conditions_file:
-		print("Conditions file not found")
-		exit()
-
-	# Turn conditions array into unran simulation objects for the original solution
-	sim_array = helper.setup_simulations(conditions_array, original_model)
-	id_detailed = helper.simulate(sim_array)  # Run simulations and process results
-	
-	if (id_detailed.all() == 0): # Ensure that ignition occured
-		print("Original model did not ignite.  Check initial conditions.")
-		exit()
-	old = reduced_model
-
-	# TODO: replace this potentially infinite while loop
-	while True:
+	error_current = 0.0
+	while error_current <= error_limit:
 
 		og_sn = []  # Original species names
 		new_sn = []  # Species names in current reduced model

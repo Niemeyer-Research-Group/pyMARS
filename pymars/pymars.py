@@ -11,7 +11,7 @@ from .sensitivity_analysis import run_sa
 from .convert_chemkin_file import convert
 
 def pymars(model_file, conditions, error_limit, method, 
-           target_species, safe_species=[], 
+           target_species=[], safe_species=[], 
            run_sensitivity_analysis=False, upper_threshold=None
            ):
     """Driver function for reducing a chemical kinetic model.
@@ -26,8 +26,8 @@ def pymars(model_file, conditions, error_limit, method,
         Maximum error % for the reduced model.
     method : {'DRG', 'DRGEP', 'PFA'}
         Skeletal reduction method to use.
-    target_species: list of str
-        List of target species for reduction.
+    target_species: list of str, optional
+        List of target species for graph-based reduction.
     safe_species : list of str, optional
         List of non-target species to always retain.
     run_sensitivity_analysis : bool, optional
@@ -43,6 +43,9 @@ def pymars(model_file, conditions, error_limit, method,
 
     # TODO: allow specification of other sampling filenames
     sampling_inputs = SamplingInputs(input_ignition=conditions)
+
+    if method in ['DRG', 'DRGEP', 'PFA']:
+        assert target_species, 'Need to specify target species for graph-based reduction methods'
 
     if run_sensitivity_analysis:
         assert (upper_threshold, 
@@ -67,8 +70,8 @@ def pymars(model_file, conditions, error_limit, method,
 
     if run_sensitivity_analysis and reduced_model.limbo_species:
         reduced_model = run_sa(
-            model_file, reduced_model.error, conditions, target_species, 
-            safe_species, error_limit, reduced_model.limbo_species
+            model_file, reduced_model.error, conditions, error_limit, 
+            target_species + safe_species, upper_threshold, reduced_model.limbo_species
             )
    
     return soln2cti.write(reduced_model.model)
