@@ -1,7 +1,8 @@
 """Contains main driver function for pyMARS program."""
-from cantera import Solution, suppress_thermo_warnings
+import logging
 
 # local imports
+from .sampling import SamplingInputs
 from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
@@ -9,13 +10,11 @@ from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
 from .convert_chemkin_file import convert
 
-# Avoid long warnings from Cantera about thermodynamic polynomials
-suppress_thermo_warnings()
-
-def pymars(model_file, conditions, error, method, target_species,
-           retained_species=None, run_sensitivity_analysis=False, epsilon_star=0.1
+def pymars(model_file, conditions, error_limit, method, 
+           target_species, safe_species=[], 
+           run_sensitivity_analysis=False, upper_threshold=None
            ):
-    """Driver function for pyMARS to reduce a model.
+    """Driver function for reducing a chemical kinetic model.
 
     Parameters
     ----------
@@ -23,24 +22,18 @@ def pymars(model_file, conditions, error, method, target_species,
         Cantera-format model to be reduced (e.g., 'mech.cti').
     conditions : str
         File with list of autoignition initial conditions.
-    error : float
+    error_limit : float
         Maximum error % for the reduced model.
     method : {'DRG', 'DRGEP', 'PFA'}
         Skeletal reduction method to use.
     target_species: list of str
         List of target species for reduction.
-    retained_species : list of str, optional
+    safe_species : list of str, optional
         List of non-target species to always retain.
     run_sensitivity_analysis : bool, optional
         Flag to run sensitivity analysis after completing another method.
-    epsilon_star : float, optional
-        Epsilon^* value used to determine species for sensitivity analysis.
-
-    Returns
-    -------
-        Converted mechanism file
-        Trimmed Solution object
-        Trimmed Mechanism file
+    upper_threshold : float, optional
+        Upper threshold (epsilon^*) used to determine species for sensitivity analysis
 
     Examples
     --------
@@ -48,21 +41,34 @@ def pymars(model_file, conditions, error, method, target_species,
 
     """
 
-    solution_object = Solution(model_file)
-    final_error = [0]
-    
-    if method == 'DRG':
-        result = run_drg(solution_object, conditions, error, target_species, retained_species, model_file, final_error, epsilon_star)
-    elif method == 'PFA':
-        result = run_pfa(solution_object, conditions, error, target_species, retained_species, model_file, final_error)
-    elif method == 'DRGEP':
-        result = run_drgep(solution_object, conditions, error, target_species, retained_species, model_file, final_error, epsilon_star)
-
-    # Result object is split into the model [0] and limbo species if SA will be ran [1]
-    reduced_model = result[0]
-    limbo = result[1]
+    # TODO: allow specification of other sampling filenames
+    sampling_inputs = SamplingInputs(input_ignition=conditions)
 
     if run_sensitivity_analysis:
-        reduced_model = run_sa(solution_object, reduced_model, final_error, conditions, target_species, retained_species, error, limbo)
+        assert (upper_threshold, 
+            'Need to specify upper threshold (epsilon^*) for sensitivity analysis'
+            )
+    
+    if method == 'DRG':
+        reduced_model = run_drg(
+            model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
+            )
+    elif method == 'PFA':
+        reduced_model = run_pfa(
+            model_file, sampling_inputs, error_limit, target_species, safe_species
+            )
+    elif method == 'DRGEP':
+        reduced_model = run_drgep(
+            model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
+            )
+    
+    if method in ['DRG', 'DRGEP', 'PFA']:
+        model_file = reduced_model.filename
+
+    if run_sensitivity_analysis and reduced_model.limbo_species:
+        reduced_model = run_sa(
+            model_file, reduced_model.error, conditions, target_species, 
+            safe_species, error_limit, reduced_model.limbo_species
+            )
    
-    output_file = soln2cti.write(reduced_model)
+    return soln2cti.write(reduced_model.model)

@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from os.path import splitext
 from warnings import warn
 
-from pymars import pymars
+from .pymars import pymars
 from convert_chemkin_file import convert
 
 parser = ArgumentParser(description='pyMARS: Reduce chemical kinetic models.')
@@ -16,7 +16,7 @@ parser.add_argument('-m', '--model',
 parser.add_argument('--conditions',
                     help='File with list of autoignition initial conditions.',
                     type=str,
-                    required=True
+                    default='ignition_input.yml'
                     )
 parser.add_argument('-e', '--error',
                     help='Maximum error % for the reduced model.',
@@ -74,7 +74,7 @@ if args.convert:
     convert(args.model, args.thermo, args.transport)
 else:
     # Check for Chemkin format and convert if needed
-    if splitext(args.model)[1] in ['.inp', '.dat', '.txt']:
+    if splitext(args.model)[1] != '.cti':
         warn('Chemkin file detected; converting before reduction.')
         args.model = convert(args.model, args.thermo_file, args.transport_file)
 

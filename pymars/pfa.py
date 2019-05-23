@@ -1,17 +1,11 @@
-from collections import Counter
-import time as tm
 
-import networkx
 import numpy as np
 import cantera as ct
+import networkx
 
-from . import soln2ck
-from . import soln2cti
-from . import helper
-from .simulation import Simulation
-from .create_trimmed_model import trim
-from .readin_initial_conditions import readin_conditions
+from .create_trimmed_model import trim, ReducedModel
 from .drg import graph_search
+from . import soln2cti
 
 def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list,
 			 done, target_species, model_file
@@ -144,8 +138,9 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
         To hold the error level of simulation
 
 	Returns
-	-------
-	Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
+    -------
+    ReducedModel
+        Return reduced model and associated metadata
 
 	"""
 
@@ -187,13 +182,12 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 
 	print("Starting with a threshold value of " + str(threshold))
 
-	sol_new = solution_object
 	final_error[0] = 0 # An integer representing the error introduced in the final simulation.
 	done[0] = False
 
 	while not done[0] and error[0] < error_limit: # Run the simulation until nothing else can be cut.
 		# Trim at this threshold value and calculate error.
-		sol_new = pfa_loop_control(
+		reduced_model = pfa_loop_control(
 			solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 		if error_limit >= error[0]: # If a new max species cut without exceeding what is allowed is reached, save that threshold.
 			max_t = threshold
@@ -206,12 +200,10 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
 		threshold = round(threshold, n)
 
 	print("\nGreatest result: ")
-	sol_new = pfa_loop_control(
+	reduced_model = pfa_loop_control(
 		solution_object, target_species, retained_species, model_file, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 
-	limbo = []
-	result = [sol_new, limbo]
-	return result
+	return reduced_model
 
 
 def pfa_loop_control(solution_object, target_species, retained_species, model_file, 

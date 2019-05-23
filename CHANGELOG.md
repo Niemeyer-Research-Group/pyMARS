@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - Added path flux analysis, so methods now include DRG, DRGEP, PFA, and sensitivity analysis
+- Adds test suite for all current methods
+- Adds Travis CI and AppVeyor continuous integration
 - Added testing on Windows systems via Azure Pipelines
 - Added printing support for chemically activated and Chebyshev reactions, and non-Troe falloff
+- Adds Travis-based package deploy to PyPI and Anaconda
 
 ### Changed
 - Major code restructuring.
 - Now supports Python 3.6+
 
 ### Fixed
-- Fixed bugs in setup.py script and path imports
+- Fixed bugs in setup.py script and path imports 
+- Fixed model printing of Plog reactions
 
 ## [0.0.1] - 2017-04-01
 ### Added
