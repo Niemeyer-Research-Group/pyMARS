@@ -217,6 +217,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
 
     # begin reduction iterations
     logging.info('Beginning DRGEP reduction loop')
+    logging.info(45 * '-')
     logging.info('Threshold | Number of species | Max error (%)')
 
     iterations = 0
@@ -258,9 +259,10 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
             if importance_coeffs[sp] < threshold_upper and (sp not in species_safe):
 				reduced_model.limbo_species.append(sp)
     
+    logging.info(45 * '-')
     logging.info('DRGEP reduction complete.')
     logging.info(f'Skeletal model: {num_species} species and '
-                 f'{reduced_model.model.n_species} reactions.'
+                 f'{reduced_model.model.n_reactions} reactions.'
                  )
     logging.info(f'Maximum error: {error_current:.2f}%')
     return reduced_model

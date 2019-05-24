@@ -76,7 +76,38 @@ def calculate_error(metrics_original, metrics_test):
     return error
 
 
-def sample_metrics(inputs, model, num_threads=None):
+def read_metrics(inputs):
+    """Reads in stored already-sampled metrics.
+
+    Parameters
+    ----------
+    inputs : SamplingInputs
+        Inputs necessary for sampling
+
+    Returns
+    -------
+    ignition_delays : numpy.ndarray
+        Calculated metrics for model, used for evaluating error
+
+    """
+    if inputs.input_ignition:
+        exists_output = os.path.isfile(inputs.output_ignition)
+        if exists_output:
+            ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
+        else:
+            raise SystemError('Error, no ignition output file present.')
+
+    elif inputs.input_psr:
+        raise NotImplementedError('PSR calculations not currently supported.')
+    elif inputs.input_laminar_flame:
+        raise NotImplementedError('Laminar flame calculations not currently supported.')
+    else:
+        raise KeyError('No input files specified for sampling.')
+
+    return ignition_delays
+
+
+def sample_metrics(inputs, model, save_output=False, num_threads=None):
     """Evaluates metrics used for determining error of reduced model
 
     Initially, supports autoignition delay only.
@@ -87,7 +118,9 @@ def sample_metrics(inputs, model, num_threads=None):
         Inputs necessary for sampling
     model : cantera.Solution
         Filename for Cantera model for performing simulations
-    num_threads : int
+    save_output : bool, optional
+        Flag to save resulting output
+    num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
         cores minus one is used.
@@ -123,6 +156,9 @@ def sample_metrics(inputs, model, num_threads=None):
         for idx, sim in enumerate(results):
             ignition_delays[idx] = sim.process_results(skip_data=True)
             sim.clean()
+        
+        if save_output:
+            np.savetxt(inputs.output_ignition, ignition_delays, delimiter=',')
 
     elif inputs.input_psr:
         raise NotImplementedError('PSR calculations not currently supported.')

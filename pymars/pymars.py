@@ -1,14 +1,16 @@
 """Contains main driver function for pyMARS program."""
 import logging
+import os
 
 # local imports
-from .sampling import SamplingInputs
+from .sampling import SamplingInputs, sample_metrics
 from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
 from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
 from .convert_chemkin_file import convert
+
 
 def pymars(model_file, conditions, error_limit, method, 
            target_species=[], safe_species=[], 
@@ -33,7 +35,8 @@ def pymars(model_file, conditions, error_limit, method,
     run_sensitivity_analysis : bool, optional
         Flag to run sensitivity analysis after completing another method.
     upper_threshold : float, optional
-        Upper threshold (epsilon^*) used to determine species for sensitivity analysis
+        Upper threshold (epsilon^*) used to determine species for sensitivity analysis 
+        in combination with DRG or DRGEP method
 
     Examples
     --------
@@ -65,13 +68,20 @@ def pymars(model_file, conditions, error_limit, method,
             model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
             )
     
+    error = 0.0
+    limbo_species = []
     if method in ['DRG', 'DRGEP', 'PFA']:
         model_file = reduced_model.filename
+        error = reduced_model.error
+        limbo_species = reduced_model.limbo_species
+    else:
+        # The metrics for the starting model need to be determined
+	    sample_metrics(sampling_inputs, model_file, save_output=True)
 
-    if run_sensitivity_analysis and reduced_model.limbo_species:
+    if run_sensitivity_analysis:
         reduced_model = run_sa(
-            model_file, reduced_model.error, conditions, error_limit, 
-            target_species + safe_species, upper_threshold, reduced_model.limbo_species
+            model_file, error, sampling_inputs, error_limit, 
+            target_species + safe_species, limbo_species
             )
    
     return soln2cti.write(reduced_model.model)

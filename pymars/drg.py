@@ -197,6 +197,7 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
 
     # begin reduction iterations
     logging.info('Beginning DRG reduction loop')
+    logging.info(45 * '-')
     logging.info('Threshold | Number of species | Max error (%)')
 
     iterations = 0
@@ -234,9 +235,10 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
     
+    logging.info(45 * '-')
     logging.info('DRG reduction complete.')
     logging.info(f'Skeletal model: {num_species} species and '
-                 f'{reduced_model.model.n_species} reactions.'
+                 f'{reduced_model.model.n_reactions} reactions.'
                  )
     logging.info(f'Maximum error: {error_current:.2f}%')
     return reduced_model
