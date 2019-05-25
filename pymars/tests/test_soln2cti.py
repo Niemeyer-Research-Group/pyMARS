@@ -1,13 +1,12 @@
 """ Tests the create output file unit used by pyMARS """
 
-import sys
 import os
 import pkg_resources
 
 import pytest
 import cantera as ct
 
-from ..create_trimmed_model import trim
+from ..reduce_model import trim
 from ..soln2cti import write
 
 def relative_location(file):
