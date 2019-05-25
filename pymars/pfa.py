@@ -9,8 +9,8 @@ from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
 from .drg import graph_search
 
 def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list,
-			 done, target_species, model_file
-			 ):
+             done, target_species, model_file
+             ):
     """Determines what species to remove based on direct interaction coefficients.
 
     Parameters
@@ -119,10 +119,10 @@ def trim_pfa(total_edge_data, solution_object, threshold_value, keeper_list,
 
 def run_pfa(solution_object, conditions_file, error_limit, target_species, retained_species, model_file, final_error):
 
-	"""Top level function for running PFA, writes reduced file
+    """Top level function for running PFA, writes reduced file
 
-	Parameters
-	----------
+    Parameters
+    ----------
     solution_object : ~cantera.Solution
         A Cantera object of the solution to be reduced.
     conditions_file : str
@@ -138,79 +138,79 @@ def run_pfa(solution_object, conditions_file, error_limit, target_species, retai
     final_error: singleton float
         To hold the error level of simulation
 
-	Returns
+    Returns
     -------
     ReducedModel
         Return reduced model and associated metadata
 
-	"""
+    """
 
-	if len(target_species) == 0: # If the target species are not specified, puke and die.
-		print("Please specify a target species.")
-		exit()
-	done = [] # Singleton to hold wether or not any more species can be cut from the simulation.
-	done.append(False)
-	threshold = .1 # Starting threshold value
-	threshold_i = .1
-	n = 1
-	error = [10.0] # Singleton to hold the error value of the previously ran simulation.
+    if len(target_species) == 0: # If the target species are not specified, puke and die.
+        print("Please specify a target species.")
+        exit()
+    done = [] # Singleton to hold wether or not any more species can be cut from the simulation.
+    done.append(False)
+    threshold = .1 # Starting threshold value
+    threshold_i = .1
+    n = 1
+    error = [10.0] # Singleton to hold the error value of the previously ran simulation.
 
-	# Check to make sure that conditions exist
-	if conditions_file:
-		conditions_array = readin_conditions(str(conditions_file))
-	elif not conditions_file:
-		print("Conditions file not found")
-		exit()
+    # Check to make sure that conditions exist
+    if conditions_file:
+        conditions_array = readin_conditions(str(conditions_file))
+    elif not conditions_file:
+        print("Conditions file not found")
+        exit()
 
-	# Turn conditions array into unran simulation objects for the original solution
-	sim_array = helper.setup_simulations(conditions_array,solution_object)
-	ignition_delay_detailed = helper.simulate(sim_array) #Run simulations and process results
-	rate_edge_data = get_rates_pfa(sim_array, solution_object) #Get edge weight calculation data.
+    # Turn conditions array into unran simulation objects for the original solution
+    sim_array = helper.setup_simulations(conditions_array,solution_object)
+    ignition_delay_detailed = helper.simulate(sim_array) #Run simulations and process results
+    rate_edge_data = get_rates_pfa(sim_array, solution_object) #Get edge weight calculation data.
 
-	print("Testing for starting threshold value")
+    print("Testing for starting threshold value")
 
-	# Trim the solution at that threshold and find the error.
-	pfa_loop_control(
-		solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
-	while error[0] != 0 and threshold_i > .001: # While the error for trimming with that threshold value is greater than allowed.
-		threshold = threshold / 10 # Reduce the starting threshold value and try again.
-		threshold_i = threshold_i / 10
-		n = n + 1
-		pfa_loop_control(
-			solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
-		if error[0] <= .02:
-			error[0] = 0
+    # Trim the solution at that threshold and find the error.
+    pfa_loop_control(
+        solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
+    while error[0] != 0 and threshold_i > .001: # While the error for trimming with that threshold value is greater than allowed.
+        threshold = threshold / 10 # Reduce the starting threshold value and try again.
+        threshold_i = threshold_i / 10
+        n = n + 1
+        pfa_loop_control(
+            solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
+        if error[0] <= .02:
+            error[0] = 0
 
-	print("Starting with a threshold value of " + str(threshold))
+    print("Starting with a threshold value of " + str(threshold))
 
-	final_error[0] = 0 # An integer representing the error introduced in the final simulation.
-	done[0] = False
+    final_error[0] = 0 # An integer representing the error introduced in the final simulation.
+    done[0] = False
 
-	while not done[0] and error[0] < error_limit: # Run the simulation until nothing else can be cut.
-		# Trim at this threshold value and calculate error.
-		reduced_model = pfa_loop_control(
-			solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
-		if error_limit >= error[0]: # If a new max species cut without exceeding what is allowed is reached, save that threshold.
-			max_t = threshold
-		#if (final_error == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
-		#	threshold = threshold + (threshold_i * 4)
-			final_error[0] = error[0]
-		#if (threshold >= .01):
+    while not done[0] and error[0] < error_limit: # Run the simulation until nothing else can be cut.
+        # Trim at this threshold value and calculate error.
+        reduced_model = pfa_loop_control(
+            solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data, ignition_delay_detailed, conditions_array)
+        if error_limit >= error[0]: # If a new max species cut without exceeding what is allowed is reached, save that threshold.
+            max_t = threshold
+        #if (final_error == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
+        #	threshold = threshold + (threshold_i * 4)
+            final_error[0] = error[0]
+        #if (threshold >= .01):
                 #        threshold_i = .01
-		threshold = threshold + threshold_i
-		threshold = round(threshold, n)
+        threshold = threshold + threshold_i
+        threshold = round(threshold, n)
 
-	print("\nGreatest result: ")
-	reduced_model = pfa_loop_control(
-		solution_object, target_species, retained_species, model_file, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
+    print("\nGreatest result: ")
+    reduced_model = pfa_loop_control(
+        solution_object, target_species, retained_species, model_file, error, max_t, done, rate_edge_data, ignition_delay_detailed, conditions_array)
 
-	return reduced_model
+    return reduced_model
 
 
 def pfa_loop_control(solution_object, target_species, retained_species, model_file, 
-					 stored_error, threshold, done, rate_edge_data, 
-					 ignition_delay_detailed, conditions_array
-					 ):
+                     stored_error, threshold, done, rate_edge_data, 
+                     ignition_delay_detailed, conditions_array
+                     ):
     """Handles the reduction, simulation, and comparison for a single threshold value
 
     Parameters
@@ -264,8 +264,8 @@ def pfa_loop_control(solution_object, target_species, retained_species, model_fi
     # Calculate error
     error = 100 * abs(ignition_delay_reduced - ignition_delay_detailed) / ignition_delay_detailed
     printout += (str(threshold) + '                 ' + str(len(new_solution.species())) + 
-				 '              '+  str(round(np.max(error), 2)) +'%' + '\n'
-				 )
+                 '              '+  str(round(np.max(error), 2)) +'%' + '\n'
+                 )
     print(printout)
     stored_error[0] = round(np.max(error), 2)
 
@@ -341,221 +341,221 @@ def get_rates_pfa(sim_array, solution_object):
 
 
 def get_PA(new_solution, new_reaction_production_rates):
-	"""Gets the PA (and CA) values of all species in a given solution.
+    """Gets the PA (and CA) values of all species in a given solution.
 
-	Parameters
-	----------
-	new_solution : cantera.Solution
-		The object representing the cantera model
-	new_reaction_production_rates : 
-		the production rates associated with the model
+    Parameters
+    ----------
+    new_solution : cantera.Solution
+        The object representing the cantera model
+    new_reaction_production_rates : 
+        the production rates associated with the model
 
-	Returns
-	-------
-	dict
-		PA and CA dictionaries
+    Returns
+    -------
+    dict
+        PA and CA dictionaries
 
-	"""
+    """
 
-	PA = {} # Dictionary that will hold the PA values for each species.
-	CA = {} # Dictionary that will hold the CA values for each species.
+    PA = {} # Dictionary that will hold the PA values for each species.
+    CA = {} # Dictionary that will hold the CA values for each species.
 
-	# Initalize all species
-	s_names = new_solution.species_names
-	for species in s_names:
-		PA[species] = 0
-		CA[species] = 0
+    # Initalize all species
+    s_names = new_solution.species_names
+    for species in s_names:
+        PA[species] = 0
+        CA[species] = 0
 
-	for i, reac in enumerate(new_solution.reactions()): # For all reactions
-		reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
+    for i, reac in enumerate(new_solution.reactions()): # For all reactions
+        reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
 
-		if reac_prod_rate != 0:
-			if reac_prod_rate > 0: # For forward reactions
+        if reac_prod_rate != 0:
+            if reac_prod_rate > 0: # For forward reactions
 
-				# Add all products to PA
-				for species in reac.products:
-					add = float(reac_prod_rate * reac.products[species])
-					PA[species] += abs(add)
-				# Add all reactants to CA
-				for species in reac.reactants:
-					add = float(reac_prod_rate * reac.reactants[species])
-					CA[species] += abs(add)
+                # Add all products to PA
+                for species in reac.products:
+                    add = float(reac_prod_rate * reac.products[species])
+                    PA[species] += abs(add)
+                # Add all reactants to CA
+                for species in reac.reactants:
+                    add = float(reac_prod_rate * reac.reactants[species])
+                    CA[species] += abs(add)
 
-			if reac_prod_rate < 0: # For forward reactions
+            if reac_prod_rate < 0: # For forward reactions
 
-				# Add all products to CA
-				for species in reac.products:
-					add = float(reac_prod_rate * reac.products[species])
-					CA[species] += abs(add)
+                # Add all products to CA
+                for species in reac.products:
+                    add = float(reac_prod_rate * reac.products[species])
+                    CA[species] += abs(add)
 
-				# Add all reactants to PA
-				for species in reac.reactants:
-					add = float(reac_prod_rate * reac.reactants[species])
-					PA[species] += abs(add)
+                # Add all reactants to PA
+                for species in reac.reactants:
+                    add = float(reac_prod_rate * reac.reactants[species])
+                    PA[species] += abs(add)
 
-	return PA,CA
+    return PA,CA
 
 
 def get_PAB(new_solution, new_reaction_production_rates):
-	"""Gets the PAB (and CAB) values of all species in a given solution.
+    """Gets the PAB (and CAB) values of all species in a given solution.
 
-	Parameters
-	----------
-	new_solution : cantera.Solution
-		The object representing the cantera model
-	new_reaction_production_rates : 
-		the production rates associated with the model
+    Parameters
+    ----------
+    new_solution : cantera.Solution
+        The object representing the cantera model
+    new_reaction_production_rates : 
+        the production rates associated with the model
 
-	Returns
-	-------
-	dict
-		PAB and CAB dictionaries.
+    Returns
+    -------
+    dict
+        PAB and CAB dictionaries.
 
-	"""
+    """
 
-	PAB = {} # Set up dictionaries
-	CAB = {}
+    PAB = {} # Set up dictionaries
+    CAB = {}
 
-	s_names = new_solution.species_names
-	for species_a in s_names: # For every pair of species A and B in the solution
-		for species_b in s_names:
-			if species_a != species_b:
-				full_name = species_a + "_" + species_b
-				PAB[full_name] = 0
-				CAB[full_name] = 0
+    s_names = new_solution.species_names
+    for species_a in s_names: # For every pair of species A and B in the solution
+        for species_b in s_names:
+            if species_a != species_b:
+                full_name = species_a + "_" + species_b
+                PAB[full_name] = 0
+                CAB[full_name] = 0
 
-	for i, reac in enumerate(new_solution.reactions()): # For all reactions
-		reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
-		all_species = reac.products
-		all_species.update(reac.reactants)
+    for i, reac in enumerate(new_solution.reactions()): # For all reactions
+        reac_prod_rate = float(new_reaction_production_rates[i]) # Set up values
+        all_species = reac.products
+        all_species.update(reac.reactants)
 
-					# If both species exsist in the reaction, add the calculated value to the correct dictionary.
-		if reac_prod_rate != 0:
-			for species_a in all_species:
-				for species_b in all_species:
-					if species_a != species_b:
-						full_name = species_a + "_" + species_b
+                    # If both species exsist in the reaction, add the calculated value to the correct dictionary.
+        if reac_prod_rate != 0:
+            for species_a in all_species:
+                for species_b in all_species:
+                    if species_a != species_b:
+                        full_name = species_a + "_" + species_b
 
-						# For forward reactions
-						if reac_prod_rate > 0:
+                        # For forward reactions
+                        if reac_prod_rate > 0:
 
-							# Add products to PAB
-							if species_a in reac.products:
-								add = float(reac_prod_rate * reac.products[species_a])
-								PAB[full_name] += abs(add)
+                            # Add products to PAB
+                            if species_a in reac.products:
+                                add = float(reac_prod_rate * reac.products[species_a])
+                                PAB[full_name] += abs(add)
 
-							# Add reactants to CAB
-							if species_a in reac.reactants:
-								add = float(reac_prod_rate * reac.reactants[species_a])
-								CAB[full_name] += abs(add)
+                            # Add reactants to CAB
+                            if species_a in reac.reactants:
+                                add = float(reac_prod_rate * reac.reactants[species_a])
+                                CAB[full_name] += abs(add)
 
-						# For backward reactions
-						if reac_prod_rate < 0:
+                        # For backward reactions
+                        if reac_prod_rate < 0:
 
-							# Add products to CAB
-							if species_a in reac.products:
-								add = float(reac_prod_rate * reac.products[species_a])
-								CAB[full_name] += abs(add)
+                            # Add products to CAB
+                            if species_a in reac.products:
+                                add = float(reac_prod_rate * reac.products[species_a])
+                                CAB[full_name] += abs(add)
 
-							# Add reactants to PAB
-							if species_a in reac.reactants:
-								add = float(reac_prod_rate * reac.reactants[species_a])
-								PAB[full_name] += abs(add)
-	return PAB, CAB
+                            # Add reactants to PAB
+                            if species_a in reac.reactants:
+                                add = float(reac_prod_rate * reac.reactants[species_a])
+                                PAB[full_name] += abs(add)
+    return PAB, CAB
 
 
 def get_rAB_1(new_solution,PA,CA,PAB,CAB):
-	"""Gets the rAB_p1 (and rAB_c1) values of all species in a given solution.
+    """Gets the rAB_p1 (and rAB_c1) values of all species in a given solution.
 
-	Parameters
-	----------
-	new_solution : cantera.Solution
-		The object representing the cantera model
-	PA : dict
-		A dictionary containing the PA values for the reduction
-	CA : dict
-		A dictionary containing the CA values for the reduction
-	PAB : dict
-		A dictionary containing the PAB values for the reduction
-	CAB : dict
-		A dictionary containing the CAB values for the reduction
+    Parameters
+    ----------
+    new_solution : cantera.Solution
+        The object representing the cantera model
+    PA : dict
+        A dictionary containing the PA values for the reduction
+    CA : dict
+        A dictionary containing the CA values for the reduction
+    PAB : dict
+        A dictionary containing the PAB values for the reduction
+    CAB : dict
+        A dictionary containing the CAB values for the reduction
 
-	Returns
-	-------
-	rAB_p1 : dict
-		rAB_p1 dictionary
-	rAB_c1 : dict
-		rAB_c1 dictionaries.
+    Returns
+    -------
+    rAB_p1 : dict
+        rAB_p1 dictionary
+    rAB_c1 : dict
+        rAB_c1 dictionaries.
 
-	"""
+    """
 
-	rAB_p1 = {} # Set up dictionaries
-	rAB_c1 = {}
+    rAB_p1 = {} # Set up dictionaries
+    rAB_c1 = {}
 
-	s_names = new_solution.species_names
-	for species_a in s_names: # For all pairs of species
-		for species_b in s_names:
-			if species_a != species_b:
-				full_name = species_a + "_" + species_b # Set up
-				rAB_p1[full_name] = 0
-				rAB_c1[full_name] = 0
+    s_names = new_solution.species_names
+    for species_a in s_names: # For all pairs of species
+        for species_b in s_names:
+            if species_a != species_b:
+                full_name = species_a + "_" + species_b # Set up
+                rAB_p1[full_name] = 0
+                rAB_c1[full_name] = 0
 
-				top_p = PAB[full_name] # Get numerator
-				top_c = CAB[full_name]
+                top_p = PAB[full_name] # Get numerator
+                top_c = CAB[full_name]
 
-				if (PA[species_a] > CA[species_a]): # Get denomonator
-					bot = PA[species_a]
-				else:
-					bot = CA[species_a]
+                if (PA[species_a] > CA[species_a]): # Get denomonator
+                    bot = PA[species_a]
+                else:
+                    bot = CA[species_a]
 
-				if (bot != 0): # Calculate
-					rAB_p1[full_name] = top_p/bot
-					rAB_c1[full_name] = top_c/bot
+                if (bot != 0): # Calculate
+                    rAB_p1[full_name] = top_p/bot
+                    rAB_c1[full_name] = top_c/bot
 
-	return rAB_p1, rAB_c1
+    return rAB_p1, rAB_c1
 
 
 def get_rAB_2(new_solution,rAB_p1,rAB_c1):
-	"""Gets the rAB_p2 (and rAB_c2) values of all species in a given solution.
+    """Gets the rAB_p2 (and rAB_c2) values of all species in a given solution.
 
-	Parameters
-	----------
-	new_solution : cantera.Solution
-		The object representing the cantera model
-	rAB_p1 : dict
-		A dictionary containing the rAB_p1 values for the reduction
-	rAB_c1 : dict
-		A dictionary containing the rAB_c1 values for the reduction
+    Parameters
+    ----------
+    new_solution : cantera.Solution
+        The object representing the cantera model
+    rAB_p1 : dict
+        A dictionary containing the rAB_p1 values for the reduction
+    rAB_c1 : dict
+        A dictionary containing the rAB_c1 values for the reduction
 
-	Returns
-	-------
-	rAB_p2 and rAB_c2 dictionaries.
+    Returns
+    -------
+    rAB_p2 and rAB_c2 dictionaries.
 
-	"""
+    """
 
-	rAB_p2 = {} # Set up dictionaries
-	rAB_c2 = {}
+    rAB_p2 = {} # Set up dictionaries
+    rAB_c2 = {}
 
-	s_names = new_solution.species_names
-	for species_a in s_names: # For all pairs of species
-		for species_b in s_names:
-			if species_a != species_b:
-				full_name = species_a + "_" + species_b # Set up
-				rAB_p2[full_name] = 0
-				rAB_c2[full_name] = 0
+    s_names = new_solution.species_names
+    for species_a in s_names: # For all pairs of species
+        for species_b in s_names:
+            if species_a != species_b:
+                full_name = species_a + "_" + species_b # Set up
+                rAB_p2[full_name] = 0
+                rAB_c2[full_name] = 0
 
-				# Look through all possible middle step species
-				for species_m in s_names:
-					if (species_m != species_a and species_m != species_b):
-						am_name = species_a + "_" + species_m
-						mb_name = species_m + "_" + species_b
+                # Look through all possible middle step species
+                for species_m in s_names:
+                    if (species_m != species_a and species_m != species_b):
+                        am_name = species_a + "_" + species_m
+                        mb_name = species_m + "_" + species_b
 
-						# Get what to add for species_m
-						add_p = rAB_p1[am_name] * rAB_p1[mb_name]
-						add_c = rAB_c1[am_name] * rAB_c1[mb_name]
+                        # Get what to add for species_m
+                        add_p = rAB_p1[am_name] * rAB_p1[mb_name]
+                        add_c = rAB_c1[am_name] * rAB_c1[mb_name]
 
-						# Add that value
-						rAB_p2[full_name] += add_p
-						rAB_c2[full_name] += add_c
+                        # Add that value
+                        rAB_p2[full_name] += add_p
+                        rAB_c2[full_name] += add_c
 
-	return rAB_p2,rAB_c2
+    return rAB_p2,rAB_c2

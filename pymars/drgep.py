@@ -7,7 +7,7 @@ import cantera as ct
 
 from . import soln2cti
 from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
-from .reduce_model import trim
+from .reduce_model import trim, ReducedModel
 from .dijkstra import ss_dijkstra_path_length_modified
 
 
@@ -174,10 +174,10 @@ def reduce_drgep(solution, model_file, species_safe, threshold,
 def run_drgep(model_file, sample_inputs, error_limit, species_targets,
               species_safe, threshold_upper=None
               ):
-	"""Main function for running DRGEP reduction.
-
-	Parameters
-	----------
+    """Main function for running DRGEP reduction.
+    
+    Parameters
+    ----------
     model_file : str
         Original model file
     sample_inputs : SamplingInputs
@@ -188,15 +188,15 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
         List of target species names
     species_safe : list of str
         List of species names to always be retained
-    threshold_upper: float, optional
+    threshold_upper : float, optional
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
 
     Returns
     -------
     ReducedModel
         Return reduced model and associated metadata
-
-	"""
+    
+    """
     solution = ct.Solution(model_file)
     assert species_targets, 'Need to specify at least one target species.'
 
@@ -204,8 +204,8 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_data, sampled_metrics = sample(sample_inputs, model_file)
-	
-	matrices = []
+    
+    matrices = []
     for state in sampled_data:
         matrices.append(create_drgep_matrix((state[0], state[1], state[2:]), solution))
 
@@ -255,9 +255,9 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
         num_species = reduced_model.model.n_species
 
     if threshold_upper:
-		for sp in reduced_model.species_names:
+        for sp in reduced_model.species_names:
             if importance_coeffs[sp] < threshold_upper and (sp not in species_safe):
-				reduced_model.limbo_species.append(sp)
+                reduced_model.limbo_species.append(sp)
     
     logging.info(45 * '-')
     logging.info('DRGEP reduction complete.')

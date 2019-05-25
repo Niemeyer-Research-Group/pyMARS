@@ -14,7 +14,8 @@ from .convert_chemkin_file import convert
 
 def pymars(model_file, conditions, error_limit, method, 
            target_species=[], safe_species=[], 
-           run_sensitivity_analysis=False, upper_threshold=None
+           run_sensitivity_analysis=False, upper_threshold=None,
+           path=''
            ):
     """Driver function for reducing a chemical kinetic model.
 
@@ -37,6 +38,8 @@ def pymars(model_file, conditions, error_limit, method,
     upper_threshold : float, optional
         Upper threshold (epsilon^*) used to determine species for sensitivity analysis 
         in combination with DRG or DRGEP method
+    path : str
+        Path to directory for writing files
 
     Examples
     --------
@@ -76,7 +79,7 @@ def pymars(model_file, conditions, error_limit, method,
         limbo_species = reduced_model.limbo_species
     else:
         # The metrics for the starting model need to be determined
-	    sample_metrics(sampling_inputs, model_file, save_output=True)
+        sample_metrics(sampling_inputs, model_file, save_output=True)
 
     if run_sensitivity_analysis:
         reduced_model = run_sa(
