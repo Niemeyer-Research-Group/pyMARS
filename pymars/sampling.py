@@ -45,7 +45,7 @@ def simulation_worker(sim_tuple):
     sim.setup_case()
     sim.run_case(stop_at_ignition)
 
-    sim = Simulation(sim.idx, sim.properties, sim.model)
+    sim = Simulation(sim.idx, sim.properties, sim.model, path=sim.path)
     return sim
 
 
@@ -127,7 +127,7 @@ def read_metrics(inputs):
     return ignition_delays
 
 
-def sample_metrics(inputs, model, save_output=False, num_threads=None):
+def sample_metrics(inputs, model, save_output=False, num_threads=None, path=''):
     """Evaluates metrics used for determining error of reduced model
 
     Initially, supports autoignition delay only.
@@ -144,6 +144,8 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None):
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
         cores minus one is used. If 1, then do not use multiprocessing module.
+    path : str, optional
+        Optional path for writing files
     
     Returns
     -------
@@ -162,7 +164,7 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None):
         
         simulations = []
         for idx, properties in enumerate(inputs):
-            simulations.append([Simulation(idx, properties, model), idx])
+            simulations.append([Simulation(idx, properties, model, path), idx])
 
         jobs = tuple(simulations)
         if num_threads == 1:
@@ -190,7 +192,7 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None):
     return ignition_delays
 
 
-def sample(inputs, model, num_threads=None):
+def sample(inputs, model, num_threads=None, path=''):
     """Samples thermochemical data and generates metrics for various phenomena.
 
     Initially, supports autoignition delay only.
@@ -205,6 +207,8 @@ def sample(inputs, model, num_threads=None):
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
         cores minus one is used. If 1, then do not use multiprocessing module.
+    path : str, optional
+        Optional path for writing files
     
     Returns
     -------
@@ -240,7 +244,7 @@ def sample(inputs, model, num_threads=None):
             stop_at_ignition = False
             simulations = []
             for idx, properties in enumerate(conditions):
-                simulations.append([Simulation(idx, properties, model), stop_at_ignition])
+                simulations.append([Simulation(idx, properties, model, path), stop_at_ignition])
 
             jobs = tuple(simulations)
             if num_threads == 1:

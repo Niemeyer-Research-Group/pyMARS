@@ -153,7 +153,7 @@ def build_falloff(parameters, falloff_function):
     return falloff_string
 
 
-def write(solution, output_filename=''):
+def write(solution, output_filename='', path=''):
     """Function to write cantera solution object to cti file.
 
     Parameters
@@ -162,6 +162,8 @@ def write(solution, output_filename=''):
         Model to be written
     output_filename : str, optional
         Name of file to be written; if not provided, use ``solution.name``
+    path : str, optional
+        Path for writing file.
 
     Returns
     -------
@@ -176,7 +178,7 @@ def write(solution, output_filename=''):
 
     """
     if not output_filename:
-        output_filename = f'{solution.name}.cti'
+        output_filename = os.path.join(path, f'{solution.name}.cti')
 
     with open(output_filename, 'w') as the_file: 
 

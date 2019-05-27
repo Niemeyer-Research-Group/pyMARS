@@ -524,12 +524,13 @@ class TestReduceDRG:
         matrices = []
         for state in data:
             matrices.append(create_drg_matrix((state[0], state[1], state[2:]), model))
-
-        reduced_model = reduce_drg(
-            model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
-            inputs, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
-            previous_model=None, threshold_upper=None, num_threads=1
-            )
+        
+        with TemporaryDirectory() as temp_dir:
+            reduced_model = reduce_drg(
+                model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
+                inputs, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
+                previous_model=None, threshold_upper=None, num_threads=1, path=temp_dir
+                )
         
         expected_species = [
             'H2', 'H', 'O', 'O2', 'OH', 'H2O', 'HO2', 'H2O2', 'C', 'CH', 'CH2', 'CH2(S)', 
@@ -549,12 +550,17 @@ class TestRunDRG:
 
         # Conditions for reduction
         conditions = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml'))
+            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml')),
+            output_ignition=relative_location('example_ignition_output.txt'),
+            data_ignition=relative_location('example_ignition_data.dat')
             )
         error = 5.0
 
         # Run DRG
-        reduced_model = run_drg(model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1)
+        with TemporaryDirectory() as temp_dir:
+            reduced_model = run_drg(
+                model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1, path=temp_dir
+                )
 
         # Expected answer
         expected_model = ct.Solution(relative_location("drg_gri30.cti"))

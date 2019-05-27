@@ -118,7 +118,8 @@ def trim_drg(matrix, species_names, species_targets, threshold):
 
 def reduce_drg(model_file, species_targets, species_safe, threshold, 
                matrices, sample_inputs, sampled_metrics, 
-               previous_model=None, threshold_upper=None, num_threads=None
+               previous_model=None, threshold_upper=None, num_threads=None,
+               path=''
                ):
     """Given a threshold and DRG matrix, reduce the model and determine the error.
 
@@ -147,6 +148,8 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
         cores minus one is used. If 1, then do not use multiprocessing module.
+    path : str, optional
+        Optional path for writing files
 
     Returns
     -------
@@ -172,10 +175,10 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
 
     # Cut the exclusion list from the model.
     reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
-    reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}')
+    reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}', path=path)
 
     reduced_model_metrics = sample_metrics(
-        sample_inputs, reduced_model_filename, num_threads=num_threads
+        sample_inputs, reduced_model_filename, num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
     
@@ -197,7 +200,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
 
 
 def run_drg(model_file, sample_inputs, error_limit, species_targets,
-            species_safe, threshold_upper=None, num_threads=None
+            species_safe, threshold_upper=None, num_threads=None, path=''
             ):
     """Main function for running DRG reduction.
 
@@ -219,6 +222,8 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
         cores minus one is used. If 1, then do not use multiprocessing module.
+    path : str, optional
+        Optional path for writing files
 
     Returns
     -------
@@ -233,7 +238,9 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
-    sampled_metrics, sampled_data = sample(sample_inputs, model_file, num_threads=num_threads)
+    sampled_metrics, sampled_data = sample(
+        sample_inputs, model_file, num_threads=num_threads, path=path
+        )
 
     matrices = []
     for state in sampled_data:
@@ -255,7 +262,7 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         reduced_model = reduce_drg(
             model_file, species_targets, species_safe, threshold, matrices, 
             sample_inputs, sampled_metrics, previous_model=previous_model, 
-            threshold_upper=threshold_upper, num_threads=num_threads
+            threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
@@ -283,7 +290,7 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         reduced_model = reduce_drg(
             model_file, species_targets, species_safe, threshold, matrices, 
             sample_inputs, sampled_metrics, 
-            threshold_upper=threshold_upper, num_threads=num_threads
+            threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     
     logging.info(45 * '-')

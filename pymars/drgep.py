@@ -132,8 +132,8 @@ def get_importance_coeffs(species_names, target_species, matrices):
     return importance_coefficients
 
 
-def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, 
-                 sample_inputs, sampled_metrics, num_threads=None
+def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
+                 sampled_metrics, previous_model=None, num_threads=None
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -151,6 +151,8 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs,
         Filename information for sampling (e.g., autoignition inputs/outputs)
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    previous_model : ReducedModel, optional
+        Model produced at previous threshold level; used to avoid repeated work.
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
@@ -167,6 +169,11 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs,
                        if importance_coeffs[sp] < threshold 
                        and sp not in species_safe
                        ]
+
+    if (previous_model and 
+        len(species_removed) == solution.n_species - previous_model.model.n_species
+        ):
+        return previous_model
 
     # Cut the exclusion list from the model.
     reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
@@ -233,14 +240,17 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     logging.info(45 * '-')
     logging.info('Threshold | Number of species | Max error (%)')
 
+    # start with detailed (starting) model
+    previous_model = ReducedModel(model=solution, filename=model_file, error=0.0)
+
     first = True
     error_current = 0.0
     threshold = 0.01
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, 
-            sample_inputs, sampled_metrics, num_threads=num_threads
+            model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
+            sampled_metrics, previous_model=previous_model, num_threads=num_threads
             )
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
@@ -261,12 +271,13 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
 
         threshold += threshold_increment
         first = False
+        previous_model = reduced_model
     
     if error_current > error_limit:
         threshold -= 2 * threshold_increment
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, 
-            sample_inputs, sampled_metrics, num_threads=num_threads
+            model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
+            sampled_metrics, previous_model=previous_model, num_threads=num_threads
             )
 
     if threshold_upper:
