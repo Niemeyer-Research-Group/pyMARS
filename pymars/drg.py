@@ -136,10 +136,10 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         List of DRG adjacency matrices determined from thermochemical state data
     sample_inputs : SamplingInputs
         Filename information for sampling (e.g., autoignition inputs/outputs)
-    previous_model : ReducedModel, optional
-        Model produced at previous threshold level; used to avoid repeated work.
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    previous_model : ReducedModel, optional
+        Model produced at previous threshold level; used to avoid repeated work.
     threshold_upper : float, optional
         Optional upper threshold (epsilon^star) used to identify species for
         further sensitivity analysis
