@@ -48,6 +48,16 @@ parser.add_argument('--epsilon_star',
                     help='Epsilon^* value used to determine species for sensitivity analysis.',
                     type=float
                     )
+parser.add_argument('--path',
+                    help='Path to directory for writing files.',
+                    type=str,
+                    default=''
+                    )
+parser.add_argument('--num_threads',
+                    help='Number of CPU cores to use for running simulations in parallel.',
+                    default=None,
+                    type=int
+                    )
 
 # Specifying conversion requires its own set of options
 parser.add_argument('--convert',
@@ -79,5 +89,6 @@ else:
         args.model = convert(args.model, args.thermo_file, args.transport_file)
 
     pymars(args.model, args.conditions, args.error, args.method, args.targets,
-           args.retained_species, args.run_sa, args.epsilon_star
+           args.retained_species, args.run_sa, args.epsilon_star, args.path,
+           args.num_threads
            )

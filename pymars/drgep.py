@@ -133,7 +133,7 @@ def get_importance_coeffs(species_names, target_species, matrices):
 
 
 def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, 
-                 sample_inputs, sampled_metrics
+                 sample_inputs, sampled_metrics, num_threads=None
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -151,6 +151,10 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs,
         Filename information for sampling (e.g., autoignition inputs/outputs)
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
 
     Returns
     -------
@@ -168,7 +172,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs,
     reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
     reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}')
 
-    reduced_model_metrics = sample_metrics(sample_inputs, reduced_model_filename)
+    reduced_model_metrics = sample_metrics(sample_inputs, reduced_model_filename, num_threads)
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
     return ReducedModel(
@@ -177,7 +181,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs,
 
 
 def run_drgep(model_file, sample_inputs, error_limit, species_targets,
-              species_safe, threshold_upper=None
+              species_safe, threshold_upper=None, num_threads=None
               ):
     """Main function for running DRGEP reduction.
     
@@ -195,6 +199,10 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
         List of species names to always be retained
     threshold_upper : float, optional
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
 
     Returns
     -------
@@ -208,7 +216,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
-    sampled_metrics, sampled_data = sample(sample_inputs, model_file)
+    sampled_metrics, sampled_data = sample(sample_inputs, model_file, num_threads)
     
     matrices = []
     for state in sampled_data:
@@ -232,7 +240,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, 
-            sample_inputs, sampled_metrics
+            sample_inputs, sampled_metrics, num_threads=num_threads
             )
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
@@ -258,7 +266,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
         threshold -= 2 * threshold_increment
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, 
-            sample_inputs, sampled_metrics
+            sample_inputs, sampled_metrics, num_threads=num_threads
             )
 
     if threshold_upper:

@@ -143,7 +143,7 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None):
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
-        cores minus one is used.
+        cores minus one is used. If 1, then do not use multiprocessing module.
     
     Returns
     -------
@@ -165,11 +165,15 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None):
             simulations.append([Simulation(idx, properties, model), idx])
 
         jobs = tuple(simulations)
-        pool = multiprocessing.Pool(processes=num_threads)
-        
-        results = pool.map(ignition_worker, jobs)
-        pool.close()
-        pool.join()
+        if num_threads == 1:
+            results = []
+            for job in jobs:
+                results.append(ignition_worker(job))
+        else:
+            pool = multiprocessing.Pool(processes=num_threads)
+            results = pool.map(ignition_worker, jobs)
+            pool.close()
+            pool.join()
 
         results = {key:val for k in results for key, val in k.items()}
         ignition_delays = np.zeros(len(results))
@@ -200,7 +204,7 @@ def sample(inputs, model, num_threads=None):
     num_threads : int
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
-        cores minus one is used.
+        cores minus one is used. If 1, then do not use multiprocessing module.
     
     Returns
     -------
@@ -239,15 +243,18 @@ def sample(inputs, model, num_threads=None):
                 simulations.append([Simulation(idx, properties, model), stop_at_ignition])
 
             jobs = tuple(simulations)
-            pool = multiprocessing.Pool(processes=num_threads)
-            
-            results = pool.map(simulation_worker, jobs)
-            pool.close()
-            pool.join()
+            if num_threads == 1:
+                results = []
+                for job in jobs:
+                    results.append(simulation_worker(job))
+            else:
+                pool = multiprocessing.Pool(processes=num_threads)
+                results = pool.map(simulation_worker, jobs)
+                pool.close()
+                pool.join()
 
             ignition_delays = np.zeros(len(conditions))
-            ignition_data = []
-            
+            ignition_data = []     
             for idx, sim in enumerate(results):
                 ignition_delays[idx], data = sim.process_results()
                 ignition_data += list(data)

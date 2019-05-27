@@ -9,7 +9,9 @@ from .sampling import sample_metrics, calculate_error, read_metrics, SamplingInp
 from .reduce_model import trim, ReducedModel
 
 
-def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limbo):
+def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limbo, 
+                            num_threads=None
+                            ):
     """Calculate error induced by removal of each limbo species
 
     Parameters
@@ -20,8 +22,12 @@ def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limb
         Contains filenames for sampling
     metrics : numpy.ndarray
         Calculated metrics for starting model, used for evaluating error
-    species_limbo:
+    species_limbo : list of str
         List of species to consider removal
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
     
     Returns
     -------
@@ -33,14 +39,15 @@ def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limb
     for idx, species in enumerate(species_limbo):
         test_model = trim(starting_model.model, [species], starting_model.filename)
         test_model_file = soln2cti.write(test_model)
-        reduced_model_metrics = sample_metrics(sample_inputs, test_model_file)
+        reduced_model_metrics = sample_metrics(sample_inputs, test_model_file, num_threads)
         species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
     
     return species_errors
 
 
 def run_sa(model_file, starting_error, sample_inputs, error_limit, 
-           species_safe, algorithm_type='initial', species_limbo=[]):
+           species_safe, algorithm_type='initial', species_limbo=[], num_threads=None
+           ):
     """Runs a sensitivity analysis to remove species on a given model.
     
     Parameters
@@ -58,8 +65,12 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
     algorithm_type : {'initial', 'greedy'}
         Type of sensitivity analysis: initial (order based on initial error), or 
         greedy (all species error re-evaluated after each removal)
-    species_limbo:
+    species_limbo : list of str, optional
         List of species to consider; if empty, consider all not in ``species_safe``
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
     
     Returns
     -------
@@ -84,7 +95,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
     # Need to first evaluate all induced errors of species; for the ``initial`` method,
     # this will be the only evaluation.
     species_errors = evaluate_species_errors(
-        current_model, sample_inputs, initial_metrics, species_limbo
+        current_model, sample_inputs, initial_metrics, species_limbo, num_threads
         )
 
     while species_limbo:
@@ -96,7 +107,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
         test_model = trim(current_model.model, [species_remove], current_model.filename)
         test_model_file = soln2cti.write(test_model)
 
-        reduced_model_metrics = sample_metrics(sample_inputs, test_model_file)
+        reduced_model_metrics = sample_metrics(sample_inputs, test_model_file, num_threads)
         error = calculate_error(initial_metrics, reduced_model_metrics)
 
         logging.info(f'{test_model.n_species:^17} | {species_remove:^17} | {error:^.2f}')
@@ -112,7 +123,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
         # If using the greedy algorithm, now need to reevaluate all species errors
         if algorithm_type == 'greedy':
             species_errors = evaluate_species_errors(
-                current_model.model, sample_inputs, initial_metrics, species_limbo
+                current_model.model, sample_inputs, initial_metrics, species_limbo, num_threads
                 )
             if min(species_errors) > error_limit:
                 break

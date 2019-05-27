@@ -15,7 +15,7 @@ from .convert_chemkin_file import convert
 def pymars(model_file, conditions, error_limit, method, 
            target_species=[], safe_species=[], 
            run_sensitivity_analysis=False, upper_threshold=None,
-           path=''
+           path='', num_threads=None
            ):
     """Driver function for reducing a chemical kinetic model.
 
@@ -40,6 +40,10 @@ def pymars(model_file, conditions, error_limit, method,
         in combination with DRG or DRGEP method
     path : str
         Path to directory for writing files
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
 
     Examples
     --------
@@ -58,15 +62,18 @@ def pymars(model_file, conditions, error_limit, method,
     
     if method == 'DRG':
         reduced_model = run_drg(
-            model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
+            model_file, sampling_inputs, error_limit, target_species, safe_species, 
+            threshold_upper=upper_threshold, num_threads=num_threads
             )
     elif method == 'PFA':
         reduced_model = run_pfa(
-            model_file, sampling_inputs, error_limit, target_species, safe_species
+            model_file, sampling_inputs, error_limit, target_species, safe_species,
+            num_threads=num_threads
             )
     elif method == 'DRGEP':
         reduced_model = run_drgep(
-            model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
+            model_file, sampling_inputs, error_limit, target_species, safe_species, 
+            threshold_upper=upper_threshold, num_threads=num_threads
             )
     
     error = 0.0
@@ -82,7 +89,7 @@ def pymars(model_file, conditions, error_limit, method,
     if run_sensitivity_analysis:
         reduced_model = run_sa(
             model_file, error, sampling_inputs, error_limit, 
-            target_species + safe_species, limbo_species
+            target_species + safe_species, limbo_species, num_threads=num_threads
             )
    
     return soln2cti.write(reduced_model.model)
