@@ -36,8 +36,8 @@ def simulation_worker(sim_tuple):
 
     Returns
     -------
-    tuple of float, numpy.ndarray
-        Calculated ignition delay and sampled data
+    sim : Simulation
+        Object with simulation metadata
 
     """
     sim, stop_at_ignition = sim_tuple
@@ -47,6 +47,26 @@ def simulation_worker(sim_tuple):
 
     sim = Simulation(sim.idx, sim.properties, sim.model)
     return sim
+
+
+def ignition_worker(sim_tuple):
+    """Worker for multiprocessing of ignition delay only cases.
+
+    Parameters
+    ----------
+    sim_tuple : tuple
+        Tuple of Simulation object to be run and identifier
+
+    Returns
+    -------
+    dict
+        Case identifier and calculated ignition delay
+
+    """
+    sim, idx = sim_tuple
+    sim.setup_case()
+    ignition_delay = sim.calculate_ignition()
+    return {idx: ignition_delay}
 
 
 def calculate_error(metrics_original, metrics_test):
@@ -140,26 +160,22 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None):
         with open(inputs.input_ignition, 'r') as the_file:
             inputs = yaml.safe_load(the_file)
         
-        stop_at_ignition = True
         simulations = []
         for idx, properties in enumerate(inputs):
-            simulations.append([Simulation(idx, properties, model), stop_at_ignition])
+            simulations.append([Simulation(idx, properties, model), idx])
 
         jobs = tuple(simulations)
         pool = multiprocessing.Pool(processes=num_threads)
         
-        results = pool.map(simulation_worker, jobs)
+        results = pool.map(ignition_worker, jobs)
         pool.close()
         pool.join()
 
+        results = {key:val for k in results for key, val in k.items()}
         ignition_delays = np.zeros(len(results))
-        for idx, sim in enumerate(results):
-            ignition_delays[idx] = sim.process_results(skip_data=True)
-            sim.clean()
+        for idx, ignition_delay in results.items():
+            ignition_delays[idx] = ignition_delay
         
-        if save_output:
-            np.savetxt(inputs.output_ignition, ignition_delays, delimiter=',')
-
     elif inputs.input_psr:
         raise NotImplementedError('PSR calculations not currently supported.')
     elif inputs.input_laminar_flame:
@@ -177,7 +193,7 @@ def sample(inputs, model, num_threads=None):
 
     Parameters
     ----------
-    SamplingInputs : dict
+    inputs : SamplingInputs
         Inputs necessary for sampling
     model : str
         Filename for Cantera model for performing simulations
@@ -199,20 +215,27 @@ def sample(inputs, model, num_threads=None):
 
     if inputs.input_ignition:
         with open(inputs.input_ignition, 'r') as the_file:
-            inputs = yaml.safe_load(the_file)
+            conditions = yaml.safe_load(the_file)
         # TODO: validate input file for correctness.
+
+        ignition_delays = np.zeros(len(conditions))
+        ignition_data = []
         
         # check for presence of data and output files; if present, reuse.
         exists_data = os.path.isfile(inputs.data_ignition)
         exists_output = os.path.isfile(inputs.output_ignition)
         if exists_data and exists_output:
-            logging.info('Reusing existing autoignition samples for the starting model.')
             ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
             ignition_data = np.genfromtxt(inputs.data_ignition, delimiter=',')
+            # need to check that saved data at least matches the number of 
+        
+        if len(ignition_delays) == len(conditions) and len(ignition_data)/20 == len(conditions):
+            logging.info('Reusing existing autoignition samples for the starting model.')
         else:
+            logging.info('Running autoignition simulations for starting model.')
             stop_at_ignition = False
             simulations = []
-            for idx, properties in enumerate(inputs):
+            for idx, properties in enumerate(conditions):
                 simulations.append([Simulation(idx, properties, model), stop_at_ignition])
 
             jobs = tuple(simulations)
@@ -222,8 +245,9 @@ def sample(inputs, model, num_threads=None):
             pool.close()
             pool.join()
 
-            ignition_delays = np.zeros(len(results))
+            ignition_delays = np.zeros(len(conditions))
             ignition_data = []
+            
             for idx, sim in enumerate(results):
                 ignition_delays[idx], data = sim.process_results()
                 ignition_data += list(data)

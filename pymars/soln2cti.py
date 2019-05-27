@@ -132,14 +132,14 @@ def build_falloff(parameters, falloff_function):
         String of falloff parameters
 
     """
-    if falloff_function == ct.TroeFalloff:
+    if falloff_function == 'Troe':
         falloff_string = ('Troe(' +
                           f'A = {parameters[0]}' +
                           f', T3 = {parameters[1]}' +
                           f', T1 = {parameters[2]}' +
                           f', T2 = {parameters[3]})'
                           )
-    elif falloff_function == ct.SriFalloff:
+    elif falloff_function == 'SRI':
         falloff_string = ('SRI(' + 
                           f'A = {parameters[0]}' +
                           f', B = {parameters[1]}' +
@@ -153,31 +153,32 @@ def build_falloff(parameters, falloff_function):
     return falloff_string
 
 
-def write(solution):
+def write(solution, output_filename=''):
     """Function to write cantera solution object to cti file.
 
     Parameters
     ----------
     solution : cantera.Solution
         Model to be written
+    output_filename : str, optional
+        Name of file to be written; if not provided, use ``solution.name``
 
     Returns
     -------
-    output_file_name : str
+    output_filename : str
         Name of output model file (.cti)
 
     Examples
     --------
-    >>> gas = cantera.Solution('gri30.cti')
+    >>> gas = cantera.Solution('gri30.cti', 'copy_gri30.cti')
     >>> soln2cti.write(gas)
-    reduced_gri30.cti
+    copy_gri30.cti
 
     """
-    # Remove extension from filename
-    input_file_name = os.path.splitext(os.path.basename(solution.name))[0]
-    output_file_name = f'reduced_{input_file_name}.cti'
+    if not output_filename:
+        output_filename = f'{solution.name}.cti'
 
-    with open(output_file_name, 'w') as the_file: 
+    with open(output_filename, 'w') as the_file: 
 
         # Write title block to file
         the_file.write(section_break('CTI file converted from solution object'))
@@ -191,7 +192,7 @@ def write(solution):
         species_names = fill(' '.join(solution.species_names), width=55, subsequent_indent=19*' ')
 
         the_file.write(
-            f'ideal_gas(name = "reduced_{input_file_name}", \n' +
+            f'ideal_gas(name = "{os.path.splitext(os.path.basename(output_filename))[0]}", \n' +
             f'     elements = "{element_names}", \n' +
             f'     species = """ {species_names} """, \n' +
             f'     reactions = "all", \n' +
@@ -217,7 +218,7 @@ def write(solution):
             # start writing composition and thermo data
             species_string = (
                 f'species(name = "{species.name}",\n' +
-                f'    atoms = {composition}, \n' +
+                f'    atoms = "{composition}", \n' +
                 f'    thermo = (\n' +
                 f'       NASA(   {nasa_range_low}, {nasa_coeffs_low}  ),\n' +
                 f'       NASA(   {nasa_range_high}, {nasa_coeffs_high}  )\n' +
@@ -370,4 +371,4 @@ def write(solution):
             reaction_string += ')\n\n'
             the_file.write(reaction_string)
     
-    return output_file_name
+    return output_filename

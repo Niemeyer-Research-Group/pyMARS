@@ -1,5 +1,6 @@
 """Module containing Directed Relation Graph with Error Propagation (DRGEP) reduction method.
 """
+import logging 
 
 import numpy as np
 import networkx
@@ -123,18 +124,21 @@ def get_importance_coeffs(species_names, target_species, matrices):
             sp:max(importance_coefficients.get(sp, 0.0), coefficients[sp]) for sp in coefficients
             }
     
+    # Make sure all species are present in the dict; inerts/non-participating species won't be
+    for sp in species_names:
+        if sp not in importance_coefficients:
+            importance_coefficients[sp] = 0.0
+    
     return importance_coefficients
 
 
-def reduce_drgep(solution, model_file, species_safe, threshold,
-                 importance_coeffs, sample_inputs, sampled_metrics
-               ):
+def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, 
+                 sample_inputs, sampled_metrics
+                 ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
     Parameters
     ----------
-    solution : cantera.Solution
-        Model being reduced
     model_file : str
         Filename for model being reduced
     species_safe : list of str
@@ -154,20 +158,21 @@ def reduce_drgep(solution, model_file, species_safe, threshold,
         Return reduced model and associated metadata
 
     """
+    solution = ct.Solution(model_file)
     species_removed = [sp for sp in solution.species_names
                        if importance_coeffs[sp] < threshold 
                        and sp not in species_safe
                        ]
 
     # Cut the exclusion list from the model.
-    new_solution = trim(solution, species_removed, model_file)
-    new_model_file = soln2cti.write(new_solution)
+    reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
+    reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}')
 
-    reduced_model_metrics = sample_metrics(sample_inputs, new_model_file)
+    reduced_model_metrics = sample_metrics(sample_inputs, reduced_model_filename)
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
     return ReducedModel(
-        model=new_solution, error=error, filename=new_model_file
+        model=reduced_model, filename=reduced_model_filename, error=error
         )
 
 
@@ -203,7 +208,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
-    sampled_data, sampled_metrics = sample(sample_inputs, model_file)
+    sampled_metrics, sampled_data = sample(sample_inputs, model_file)
     
     matrices = []
     for state in sampled_data:
@@ -212,7 +217,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     # For DRGEP, find the overall interaction coefficients for all species 
     # using the maximum over all the sampled states
     importance_coeffs = get_importance_coeffs(
-        solution.species_names, target_species, matrices
+        solution.species_names, species_targets, matrices
         )
 
     # begin reduction iterations
@@ -220,20 +225,20 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     logging.info(45 * '-')
     logging.info('Threshold | Number of species | Max error (%)')
 
-    iterations = 0
+    first = True
     error_current = 0.0
     threshold = 0.01
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
-            solution, model_file, species_safe, threshold, importance_coeffs, 
+            model_file, species_safe, threshold, importance_coeffs, 
             sample_inputs, sampled_metrics
             )
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
 
         # reduce threshold if past error limit on first iteration
-        if not iterations and error_current > error_limit:
+        if first and error_current > error_limit:
             error_current = 0.0
             threshold /= 10
             threshold_increment /= 10
@@ -244,15 +249,17 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
             logging.info('Threshold value too high, reducing by factor of 10')
             continue
         
-        logging.info(f'{threshold:^9} | {num_species:^17} | {error_current:^.2f}')
+        logging.info(f'{threshold:^9.2e} | {num_species:^17} | {error_current:^.2f}')
 
         threshold += threshold_increment
-        model_previous = reduced_model
+        first = False
     
     if error_current > error_limit:
-        reduced_model = model_previous
-        error_current = reduced_model.error
-        num_species = reduced_model.model.n_species
+        threshold -= 2 * threshold_increment
+        reduced_model = reduce_drgep(
+            model_file, species_safe, threshold, importance_coeffs, 
+            sample_inputs, sampled_metrics
+            )
 
     if threshold_upper:
         for sp in reduced_model.species_names:
@@ -261,8 +268,8 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     
     logging.info(45 * '-')
     logging.info('DRGEP reduction complete.')
-    logging.info(f'Skeletal model: {num_species} species and '
+    logging.info(f'Skeletal model: {reduced_model.model.n_species} species and '
                  f'{reduced_model.model.n_reactions} reactions.'
                  )
-    logging.info(f'Maximum error: {error_current:.2f}%')
+    logging.info(f'Maximum error: {reduced_model.error:.2f}%')
     return reduced_model

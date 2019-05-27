@@ -43,7 +43,7 @@ def pymars(model_file, conditions, error_limit, method,
 
     Examples
     --------
-    >>> pymars('gri30.cti', conditions_file, 10.0, 'DRGEP', ['CH4', 'O2'], retained_species=['N2'])
+    >>> pymars('gri30.cti', conditions_file, 10.0, 'DRGEP', ['CH4', 'O2'], safe_species=['N2'])
 
     """
 
@@ -54,9 +54,7 @@ def pymars(model_file, conditions, error_limit, method,
         assert target_species, 'Need to specify target species for graph-based reduction methods'
 
     if run_sensitivity_analysis:
-        assert (upper_threshold, 
-            'Need to specify upper threshold (epsilon^*) for sensitivity analysis'
-            )
+        assert upper_threshold, 'Need to specify upper threshold (epsilon^*) for sensitivity analysis'
     
     if method == 'DRG':
         reduced_model = run_drg(
