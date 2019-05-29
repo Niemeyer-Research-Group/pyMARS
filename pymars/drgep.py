@@ -289,7 +289,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
             )
 
     if threshold_upper:
-        for sp in reduced_model.species_names:
+        for sp in reduced_model.model.species_names:
             if importance_coeffs[sp] < threshold_upper and (sp not in species_safe):
                 reduced_model.limbo_species.append(sp)
     

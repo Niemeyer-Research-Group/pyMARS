@@ -82,9 +82,6 @@ def pymars(model_file, conditions, error_limit, method,
         model_file = reduced_model.filename
         error = reduced_model.error
         limbo_species = reduced_model.limbo_species
-    else:
-        # The metrics for the starting model need to be determined
-        sample_metrics(sampling_inputs, model_file, save_output=True)
 
     if run_sensitivity_analysis:
         reduced_model = run_sa(

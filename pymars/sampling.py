@@ -127,7 +127,7 @@ def read_metrics(inputs):
     return ignition_delays
 
 
-def sample_metrics(inputs, model, save_output=False, num_threads=None, path=''):
+def sample_metrics(inputs, model, reuse_saved=False, num_threads=None, path=''):
     """Evaluates metrics used for determining error of reduced model
 
     Initially, supports autoignition delay only.
@@ -136,10 +136,10 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None, path=''):
     ----------
     inputs : SamplingInputs
         Inputs necessary for sampling
-    model : cantera.Solution
+    model : str
         Filename for Cantera model for performing simulations
-    save_output : bool, optional
-        Flag to save resulting output
+    reuse_saved : bool, optional
+        Flag to reuse saved output
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
@@ -160,27 +160,36 @@ def sample_metrics(inputs, model, save_output=False, num_threads=None, path=''):
 
     if inputs.input_ignition:
         with open(inputs.input_ignition, 'r') as the_file:
-            inputs = yaml.safe_load(the_file)
+            conditions = yaml.safe_load(the_file)
+
+        ignition_delays = np.zeros(len(conditions))
         
-        simulations = []
-        for idx, properties in enumerate(inputs):
-            simulations.append([Simulation(idx, properties, model, path), idx])
-
-        jobs = tuple(simulations)
-        if num_threads == 1:
-            results = []
-            for job in jobs:
-                results.append(ignition_worker(job))
+        exists_output = os.path.isfile(inputs.output_ignition)
+        if reuse_saved and exists_output:
+            ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
+        
+        if reuse_saved and len(ignition_delays) == len(conditions):
+            logging.info('Reusing existing autoignition samples for the starting model.')
         else:
-            pool = multiprocessing.Pool(processes=num_threads)
-            results = pool.map(ignition_worker, jobs)
-            pool.close()
-            pool.join()
+            simulations = []
+            for idx, properties in enumerate(conditions):
+                simulations.append([Simulation(idx, properties, model, path), idx])
 
-        results = {key:val for k in results for key, val in k.items()}
-        ignition_delays = np.zeros(len(results))
-        for idx, ignition_delay in results.items():
-            ignition_delays[idx] = ignition_delay
+            jobs = tuple(simulations)
+            if num_threads == 1:
+                results = []
+                for job in jobs:
+                    results.append(ignition_worker(job))
+            else:
+                pool = multiprocessing.Pool(processes=num_threads)
+                results = pool.map(ignition_worker, jobs)
+                pool.close()
+                pool.join()
+
+            results = {key:val for k in results for key, val in k.items()}
+            ignition_delays = np.zeros(len(results))
+            for idx, ignition_delay in results.items():
+                ignition_delays[idx] = ignition_delay
         
     elif inputs.input_psr:
         raise NotImplementedError('PSR calculations not currently supported.')
