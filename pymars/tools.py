@@ -3,6 +3,7 @@
 import os
 from operator import attrgetter
 
+import numpy as np
 from cantera import ck2cti
 
 def compare_models(model1, model2):

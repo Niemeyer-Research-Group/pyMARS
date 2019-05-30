@@ -92,35 +92,35 @@ class TestWrite:
         """
         old_solution = ct.Solution('gri30.cti')
 
-        R1 = ct.ChemicallyActivatedReaction.fromCti('''
-        units(length='cm', quantity='mol')
-        chemically_activated_reaction('CH3 + OH (+ M) <=> CH2O + H2 (+ M)',
+        R1 = ct.ChemicallyActivatedReaction.fromCti(
+        "units(length='cm', quantity='mol')\n" + 
+        '''chemically_activated_reaction('CH3 + OH (+ M) <=> CH2O + H2 (+ M)',
             kLow=[2.823201e+02, 1.46878, (-3270.56495, 'cal/mol')],
             kHigh=[5.880000e-14, 6.721, (-3022.227, 'cal/mol')],
             falloff=Troe(A=1.671, T3=434.782, T1=2934.21, T2=3919.0))'''
         )
 
-        R2 = ct.ChemicallyActivatedReaction.fromCti('''
-        units(length='cm', quantity='mol')
-        chemically_activated_reaction('CH3 (+ M) <=> CH2 + H (+ M)',
+        R2 = ct.ChemicallyActivatedReaction.fromCti(
+        "units(length='cm', quantity='mol')\n" +
+        '''chemically_activated_reaction('CH3 (+ M) <=> CH2 + H (+ M)',
             kLow=[2.823201e+02, 1.46878, (-3270.56495, 'cal/mol')],
             kHigh=[5.880000e-14, 6.721, (-3022.227, 'cal/mol')],
             falloff=Troe(A=1.671, T3=434.782, T1=2934.21, T2=3919.0))'''
         )
         
-        R3 = ct.PlogReaction.fromCti('''
-        units(length='cm', quantity='mol')
-        pdep_arrhenius('CH3 + 2 OH <=> CH2O + H2 + OH',
-            [(0.001315789, 'atm'), 2.440000e+10, 1.04, 3980.0],
-            [(0.039473684, 'atm'), 3.890000e+10, 0.989, 4114.0],
-            [(1.0, 'atm'), 3.460000e+12, 0.442, 5463.0],
-            [(10.0, 'atm'), 1.720000e+14, -0.01, 7134.0],
-            [(100.0, 'atm'), 1.900000e+15, -0.29, 8306.0])'''
+        R3 = ct.PlogReaction.fromCti(
+        "units(length='cm', quantity='mol')\n" +
+        '''pdep_arrhenius('CH3 + 2 OH <=> CH2O + H2 + OH',
+            [(0.001315789, 'atm'), 2.440000e+10, 1.04, (3980.0, 'cal/mol')],
+            [(0.039473684, 'atm'), 3.890000e+10, 0.989, (4114.0, 'cal/mol')],
+            [(1.0, 'atm'), 3.460000e+12, 0.442, (5463.0, 'cal/mol')],
+            [(10.0, 'atm'), 1.720000e+14, -0.01, (7134.0, 'cal/mol')],
+            [(100.0, 'atm'), 1.900000e+15, -0.29, (8306.0, 'cal/mol')])'''
         )
 
-        R4 = ct.ChebyshevReaction.fromCti('''
-        units(length='cm', quantity='mol')
-        chebyshev_reaction('CH3 + CH3 <=> 2 CH2 + H2',
+        R4 = ct.ChebyshevReaction.fromCti(
+        "units(length='cm', quantity='mol')\n" +
+        '''chebyshev_reaction('CH3 + CH3 <=> 2 CH2 + H2',
             Tmin=290.0, Tmax=3000.0,
             Pmin=(0.001, 'atm'), Pmax=(100.0, 'atm'),
             coeffs=[[-1.44280e+01,  2.59970e-01, -2.24320e-02, -2.78700e-03],
