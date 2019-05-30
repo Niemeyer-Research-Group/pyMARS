@@ -9,7 +9,7 @@ from .drgep import run_drgep
 from .drg import run_drg
 from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
-from .convert_chemkin_file import convert
+from .tools import convert
 
 
 def pymars(model_file, conditions, error_limit, method, 
