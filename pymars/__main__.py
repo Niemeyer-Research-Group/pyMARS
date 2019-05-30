@@ -4,7 +4,7 @@ from os.path import splitext
 from warnings import warn
 
 from .pymars import pymars
-from .convert_chemkin_file import convert
+from .tools import convert
 
 parser = ArgumentParser(description='pyMARS: Reduce chemical kinetic models.')
 
@@ -66,12 +66,14 @@ parser.add_argument('--convert',
                     default=False,
                     )
 parser.add_argument('--thermo',
-                    help='thermodynamic data filename (only necessary for CHEMKIN files).',
-                    type=str
+                    help='thermodynamic data filename (only necessary for Chemkin files).',
+                    type=str,
+                    default=''
                     )
 parser.add_argument('--transport',
-                    help='transport data filename (only necessary for CHEMKIN files).',
-                    type=str
+                    help='transport data filename (only necessary for Chemkin files).',
+                    type=str,
+                    default=''
                     )
 
 args = parser.parse_args()
@@ -81,12 +83,12 @@ if args.run_sa and args.epsilon_star is None:
 
 if args.convert:
     # Convert model and exit
-    convert(args.model, args.thermo, args.transport)
+    convert(args.model, args.thermo, args.transport, args.path)
 else:
     # Check for Chemkin format and convert if needed
     if splitext(args.model)[1] != '.cti':
         warn('Chemkin file detected; converting before reduction.')
-        args.model = convert(args.model, args.thermo_file, args.transport_file)
+        args.model = convert(args.model, args.thermo, args.transport, args.path)
 
     pymars(args.model, args.conditions, args.error, args.method, args.targets,
            args.retained_species, args.run_sa, args.epsilon_star, args.path,
