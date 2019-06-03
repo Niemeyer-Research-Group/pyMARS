@@ -9,7 +9,7 @@ import networkx as nx
 import cantera as ct
 
 from ..sampling import SamplingInputs
-from ..pfa import run_pfa, get_rAB_1, get_rAB_2
+from ..pfa import run_pfa
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
 try:
@@ -40,8 +40,8 @@ def relative_location(file):
     return pkg_resources.resource_filename(__name__, file_path)
 
 
-class TestGetRAB1:
-    def testGoodInput(self):
+class TestCreatePFAMatrix:
+    def test_artificial_mech(self):
         PA = {'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
         CA = {'H':2, 'H2':3, 'H2O':5, 'O2':4}
         PAB = {
@@ -85,29 +85,6 @@ class TestGetRAB1:
         assert var[0]['H_H2O'] == 2.5
         assert var[0]['H_O2'] == 0.5
 
-    #@pytest.mark.xfail	
-    def testBothNegative(self):
-        PA = {'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
-        CA = {'H':2, 'H2':3, 'H2O':5, 'O2':4}
-        PAB = {
-            'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-            }
-        CAB = {
-            'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-            'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-            }
-
-        PA['H'] = -2
-        CA['H'] = -1.5
-        path_to_original = relative_location('artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_1(solution_object,PA,CA,PAB,CAB)
-        print(var[0])
-        assert var[0]['H_H2'] == -2.6666666666666665
-        assert var[0]['H_H2O'] == -3.3333333333333335
-        assert var[0]['H_O2'] == -0.6666666666666666
-
     def testDivideByZero(self):
         PA = {'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
         CA = {'H':2, 'H2':3, 'H2O':5, 'O2':4}
@@ -129,68 +106,16 @@ class TestGetRAB1:
         assert var[0]['H_H2'] == 0
         assert var[0]['H_H2O'] == 0
         assert var[0]['H_O2'] == 0
-        
-    @pytest.mark.xfail	
-    def testPAisChar(self):
-        """PA 'H' value will be a char"""
-        PA = {'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
-        CA = {'H':2, 'H2':3, 'H2O':5, 'O2':4}
-        PAB = {
-            'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-            }
-        CAB = {
-            'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-            'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-            }
-        PA['H'] = 'f'
-        CA['H'] = 2
-        path_to_original = relative_location('artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_1(solution_object,PA,CA,PAB,CAB)
-        print(var[0])
-
-    @pytest.mark.xfail	
-    def testPAMissing(self):
-        """PA will not have the speceis 'H' defined."""
-        PA = {'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
-        CA = {'H':2, 'H2':3, 'H2O':5, 'O2':4}
-        PAB = {
-            'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-            }
-        CAB = {
-            'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-            'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-            }
-        PA = {'H2':2, 'H2O':3, 'O2':1}
-        path_to_original = relative_location('artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_1(solution_object,PA,CA,PAB,CAB)
-        print(var[0])
-
-    @pytest.mark.xfail	
-    def testEmptyDictionary(self):
-        PA = {}
-        CA = {}
-        PAB = {}
-        CAB = {}
-        path_to_original = relative_location('artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_1(solution_object,PA,CA,PAB,CAB)
-        print(var[0])
-
-
-class TestGetRAB2:    
+    
     def testGoodInput(self):
         rAB_p1 = {
             'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-		    'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-		    }
+            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
+            }
         rAB_c1 = {
             'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-		    'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-		    }
+            'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
+            }
         # Original model
         path_to_original = relative_location('artificial-mechanism.cti')
         solution_object = ct.Solution(path_to_original)
@@ -205,12 +130,12 @@ class TestGetRAB2:
     def testGoodInputZero(self):
         rAB_p1 = {
             'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-		    'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-		    }
+            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
+            }
         rAB_c1 = {
             'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-		    'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-		    }
+            'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
+            }
         rAB_p1['H_O2'] = 0;
         path_to_original = relative_location('artificial-mechanism.cti')
         solution_object = ct.Solution(path_to_original)
@@ -225,12 +150,12 @@ class TestGetRAB2:
     def testGoodInputNegative(self):
         rAB_p1 = {
             'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-		    'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-		    }
+            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
+            }
         rAB_c1 = {
             'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-		    'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-		    }
+            'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
+            }
         rAB_p1['H_O2'] = -3;
         path_to_original = relative_location('artificial-mechanism.cti')
         solution_object = ct.Solution(path_to_original)
@@ -241,43 +166,6 @@ class TestGetRAB2:
         assert var[0]['H_H2'] == -5
         assert var[0]['H_H2O'] == 1
         assert var[0]['H_O2'] == 32
-
-    @pytest.mark.xfail	
-    def testrAB_hasChar(self):
-        rAB_p1 = {
-            'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-		    'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-		    }
-        rAB_c1 = {
-            'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-		    'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-		    }
-        rAB_p1['H_O2'] = 'f';
-        path_to_original = relative_location('pymars/test/artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_2(solution_object,rAB_p1,rAB_c1)
-
-    @pytest.mark.xfail	
-    def testIncompleteDictionary(self):	
-        rAB_c1 = {
-            'H_H2':1, 'H_H2O':2, 'H_O2':3, 'H2_H2O':4, 'H2_H':5, 'H2_O2':1, 'H2O_H2':5, 
-		    'H2O_H':4, 'H2O_O2':3, 'O2_H2':2, 'O2_H2O':1,'O2_H':2
-		    }
-        rAB_p1 = {
-            'H_H2':4, 'H_H2O':5, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
-            'H2O_H':3, 'H2O_O2':4, 'O2_H2':5, 'O2_H2O':1,'O2_H':2
-            }
-        path_to_original = relative_location('artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_2(solution_object,rAB_p1,rAB_c1)
-
-    @pytest.mark.xfail	
-    def testEmptyDictionary(self):
-        rAB_p1 = {}
-        rAB_c1 = {}
-        path_to_original = relative_location('artificial-mechanism.cti')
-        solution_object = ct.Solution(path_to_original)
-        var = get_rAB_2(solution_object,rAB_p1,rAB_c1)
 
 
 class TestRunPFA:
@@ -303,5 +191,5 @@ class TestRunPFA:
         expected_model = ct.Solution(path_to_answer)
 
         # Make sure models are the same
-        assert check_equal(reduced_model.species_names, expected_model.species_names)
-        assert reduced_model.n_reactions == expected_model.n_reactions
+        assert check_equal(reduced_model.model.species_names, expected_model.species_names)
+        assert reduced_model.model.n_reactions == expected_model.n_reactions

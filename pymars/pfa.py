@@ -53,7 +53,6 @@ def create_pfa_matrix(state, solution):
             CAB[:, sp_b] += np.sum(
                 np.maximum(-base_rates[:, np.where(flags[sp_b, valid_reactions])[0]], 0), axis=1
                 )
-        #numerator = np.einsum('ij,kj->ik', base_rates, flags)
 
         # May get divide by zero if an inert species is present, and denominator
         # entry is zero.
