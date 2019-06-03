@@ -41,33 +41,39 @@ def create_pfa_matrix(state, solution):
             net_stoich[:, valid_reactions] *
             solution.net_rates_of_progress[valid_reactions]
             )
-        PA = np.sum(np.maximum(base_rates,0), axis=1)[:, np.newaxis]
-        CA = np.sum(np.maximum(-base_rates,0), axis=1)[:, np.newaxis]
+        production_A = np.sum(np.maximum(base_rates, 0), axis=1)
+        consumption_A = np.sum(np.maximum(-base_rates, 0), axis=1)
 
-        PAB = np.zeros((solution.n_species, solution.n_species))
-        CAB = np.zeros((solution.n_species, solution.n_species))
+        production_AB = np.zeros((solution.n_species, solution.n_species))
+        consumption_AB = np.zeros((solution.n_species, solution.n_species))
         for sp_b in range(solution.n_species):
-            PAB[:, sp_b] += np.sum(
+            production_AB[:, sp_b] += np.sum(
                 np.maximum(base_rates[:, np.where(flags[sp_b, valid_reactions])[0]], 0), axis=1
                 )
-            CAB[:, sp_b] += np.sum(
+            consumption_AB[:, sp_b] += np.sum(
                 np.maximum(-base_rates[:, np.where(flags[sp_b, valid_reactions])[0]], 0), axis=1
                 )
 
         # May get divide by zero if an inert species is present, and denominator
         # entry is zero.
+        denominator = np.maximum(production_A, consumption_A)[:, np.newaxis]
         with np.errstate(divide='ignore', invalid='ignore'):
-            rproAB1 = np.where(PA != 0 or CA != 0, PAB / max(PA, CA), 0)
+            r_pro_AB1 = np.where(
+                denominator != 0, production_AB / denominator, 0
+                )
         with np.errstate(divide='ignore', invalid='ignore'):
-            rconAB1 = np.where(PA != 0 or CA != 0, CAB / max(PA, CA), 0)
+            r_con_AB1 = np.where(
+                denominator != 0, consumption_AB / denominator, 0
+                )
 
-        rproAB2 = np.zeros((solution.n_species, solution.n_species))
-        rconAB2 = np.zeros((solution.n_species, solution.n_species))
+        # TODO: might be possible to replace this with an np.einsum() operation.
+        r_pro_AB2 = np.zeros((solution.n_species, solution.n_species))
+        r_con_AB2 = np.zeros((solution.n_species, solution.n_species))
         for sp_m in range(solution.n_species):
-            rproAB2 += rproAB1[:, sp_m] * rproAB1[sp_m, :]
-            rconAB2 += rconAB1[:, sp_m] * rconAB1[sp_m, :]
+            r_pro_AB2 += np.outer(r_pro_AB1[:, sp_m], r_pro_AB1[sp_m, :])
+            r_con_AB2 += np.outer(r_con_AB1[:, sp_m], r_con_AB1[sp_m, :])
 
-        adjacency_matrix = rproAB1 + rconAB1 + rproAB2 + rconAB2   
+        adjacency_matrix = r_pro_AB1 + r_con_AB1 + r_pro_AB2 + r_con_AB2
  
     else:
         adjacency_matrix = np.zeros((solution.n_species, solution.n_species))

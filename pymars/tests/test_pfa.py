@@ -42,7 +42,8 @@ def relative_location(file):
 
 class TestCreatePFAMatrix:
     def test_artificial_mech(self):
-        PA = {'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
+        # species: H, H2, H2O, O2
+        PA = np.array({'H':1.5, 'H2':2, 'H2O':3, 'O2':1}
         CA = {'H':2, 'H2':3, 'H2O':5, 'O2':4}
         PAB = {
             'H_H2':4, 'H_H2O':5, 'H_O2':1, 'H2_H2O':1, 'H2_H':2, 'H2_O2':3, 'H2O_H2':2, 
@@ -57,9 +58,7 @@ class TestCreatePFAMatrix:
         path_to_original = relative_location('artificial-mechanism.cti')
         solution_object = ct.Solution(path_to_original)
         var = get_rAB_1(solution_object,PA,CA,PAB,CAB)
-        print(var[0]['H_H2'])
-        print(var[0]['H_H2O'])
-        print(var[0]['H_O2'])
+
         assert var[0]['H_H2'] == 2.0
         assert var[0]['H_H2O'] == 2.5
         assert var[0]['H_O2'] == 0.5
