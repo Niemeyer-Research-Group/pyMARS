@@ -374,10 +374,11 @@ def write(solution, output_filename='', path=''):
                 reaction_string += f'chebyshev_reaction( "{reaction.equation}",\n'
                 
                 # need to modify first coefficient
-                reaction.coeffs[0][0] += math.log10(1e-3 ** (sum(reaction.reactants.values()) - 1))
+                coeffs = reaction.coeffs[:]
+                coeffs[0][0] -= math.log10(1e-3 ** (sum(reaction.reactants.values()) - 1))
 
                 coeffs_strings = []
-                for coeff_row in reaction.coeffs:
+                for coeff_row in coeffs:
                     coeffs_strings.append('[' + ', '.join([f'{c:.6e}' for c in coeff_row]) + ']')
                 coeffs_string = f',\n{indent[15] + indent[9]}'.join(coeffs_strings)
                 
