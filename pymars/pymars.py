@@ -9,13 +9,13 @@ from .drgep import run_drgep
 from .drg import run_drg
 from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
-from .convert_chemkin_file import convert
+from .tools import convert
 
 
 def pymars(model_file, conditions, error_limit, method, 
            target_species=[], safe_species=[], 
            run_sensitivity_analysis=False, upper_threshold=None,
-           path=''
+           path='', num_threads=None
            ):
     """Driver function for reducing a chemical kinetic model.
 
@@ -40,10 +40,14 @@ def pymars(model_file, conditions, error_limit, method,
         in combination with DRG or DRGEP method
     path : str
         Path to directory for writing files
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
 
     Examples
     --------
-    >>> pymars('gri30.cti', conditions_file, 10.0, 'DRGEP', ['CH4', 'O2'], retained_species=['N2'])
+    >>> pymars('gri30.cti', conditions_file, 10.0, 'DRGEP', ['CH4', 'O2'], safe_species=['N2'])
 
     """
 
@@ -54,21 +58,22 @@ def pymars(model_file, conditions, error_limit, method,
         assert target_species, 'Need to specify target species for graph-based reduction methods'
 
     if run_sensitivity_analysis:
-        assert (upper_threshold, 
-            'Need to specify upper threshold (epsilon^*) for sensitivity analysis'
-            )
+        assert upper_threshold, 'Need to specify upper threshold (epsilon^*) for sensitivity analysis'
     
     if method == 'DRG':
         reduced_model = run_drg(
-            model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
+            model_file, sampling_inputs, error_limit, target_species, safe_species, 
+            threshold_upper=upper_threshold, num_threads=num_threads
             )
     elif method == 'PFA':
         reduced_model = run_pfa(
-            model_file, sampling_inputs, error_limit, target_species, safe_species
+            model_file, sampling_inputs, error_limit, target_species, safe_species,
+            num_threads=num_threads
             )
     elif method == 'DRGEP':
         reduced_model = run_drgep(
-            model_file, sampling_inputs, error_limit, target_species, safe_species, upper_threshold
+            model_file, sampling_inputs, error_limit, target_species, safe_species, 
+            threshold_upper=upper_threshold, num_threads=num_threads
             )
     
     error = 0.0
@@ -77,14 +82,11 @@ def pymars(model_file, conditions, error_limit, method,
         model_file = reduced_model.filename
         error = reduced_model.error
         limbo_species = reduced_model.limbo_species
-    else:
-        # The metrics for the starting model need to be determined
-        sample_metrics(sampling_inputs, model_file, save_output=True)
 
     if run_sensitivity_analysis:
         reduced_model = run_sa(
             model_file, error, sampling_inputs, error_limit, 
-            target_species + safe_species, limbo_species
+            target_species + safe_species, limbo_species, num_threads=num_threads
             )
    
     return soln2cti.write(reduced_model.model)

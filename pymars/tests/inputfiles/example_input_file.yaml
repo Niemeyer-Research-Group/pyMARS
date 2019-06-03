@@ -14,7 +14,7 @@
   temperature: 1200
   end-time: 10.0
   fuel: 
-    H2: 1.0
+    CH4: 1.0
   oxidizer:
     O2: 1.0
     N2: 3.76

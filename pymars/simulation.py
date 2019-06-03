@@ -79,7 +79,7 @@ class Simulation(object):
         Parameters
         ----------
         stop_at_ignition : bool
-            If ``True``, stop integration at ignition point.
+            If ``True``, stop integration at ignition point, don't save data.
         restart : bool
             If ``True``, skip if results file exists.
 
@@ -134,13 +134,27 @@ class Simulation(object):
                     ignition_flag = True
 
                     if stop_at_ignition:
-                        continue
+                        break
 
                 # Add ``timestep`` to table
                 timestep.append()
 
             # Write ``table`` to disk
             table.flush()
+
+        return self.ignition_delay
+
+    def calculate_ignition(self):
+        """Run simulation case set up ``setup_case``, just for ignition delay.
+        """
+        # Main time integration loop; continue integration while time of
+        # the ``ReactorNet`` is less than specified end time.
+        while self.reac_net.time < self.time_end:
+            self.reac_net.step()
+
+            if self.reac.T > self.properties['temperature'] + 400.0:
+                self.ignition_delay = self.reac_net.time
+                break
 
         return self.ignition_delay
 

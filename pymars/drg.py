@@ -88,15 +88,43 @@ def graph_search(graph, target_species):
     return reached_species
 
 
-def reduce_drg(solution, model_file, species_targets, species_safe, threshold,
-               matrices, sample_inputs, sampled_metrics, threshold_upper=None
+def trim_drg(matrix, species_names, species_targets, threshold):
+    """
+
+    Parameters
+    ----------
+    matrix : np.ndarray
+        Adjacency matrix representing graph
+    species_names : list of str
+        List of all species names
+    species_targets : list of str
+        List of target species names
+    threshold : float
+        DRG threshold for trimming graph
+    
+    Returns
+    ------
+    species_reached : list of str
+        Names of species reached in graph search
+
+    """
+    name_mapping = {i: sp for i, sp in enumerate(species_names)}
+    graph = networkx.DiGraph(np.where(matrix >= threshold, matrix, 0.0))
+    networkx.relabel_nodes(graph, name_mapping, copy=False)
+    species_reached = graph_search(graph, species_targets)
+
+    return species_reached
+
+
+def reduce_drg(model_file, species_targets, species_safe, threshold, 
+               matrices, sample_inputs, sampled_metrics, 
+               previous_model=None, threshold_upper=None, num_threads=None,
+               path=''
                ):
     """Given a threshold and DRG matrix, reduce the model and determine the error.
 
     Parameters
     ----------
-    solution : cantera.Solution
-        Model being reduced
     model_file : str
         Filename for model being reduced
     species_targets : list of str
@@ -111,9 +139,17 @@ def reduce_drg(solution, model_file, species_targets, species_safe, threshold,
         Filename information for sampling (e.g., autoignition inputs/outputs)
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    previous_model : ReducedModel, optional
+        Model produced at previous threshold level; used to avoid repeated work.
     threshold_upper : float, optional
         Optional upper threshold (epsilon^star) used to identify species for
         further sensitivity analysis
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
+    path : str, optional
+        Optional path for writing files
 
     Returns
     -------
@@ -121,43 +157,50 @@ def reduce_drg(solution, model_file, species_targets, species_safe, threshold,
         Return reduced model and associated metadata
 
     """
-    name_mapping = {i: sp for i, sp in enumerate(solution.species_names)}
+    solution = ct.Solution(model_file)
+
     species_retained = []
     for matrix in matrices:
-        graph = networkx.DiGraph(np.where(matrix >= threshold, matrix, 0.0))
-        networkx.relabel_nodes(graph, name_mapping, copy=False)
-        species_retained += graph_search(graph, species_targets)
+        species_retained += trim_drg(matrix, solution.species_names, species_targets, threshold)
+    
     # want to ensure retained species are the set of those reachable for each state
     species_retained = list(set(species_retained))
+
+    if previous_model and len(species_retained) == previous_model.model.n_species:
+        return previous_model
 
     species_removed = [sp for sp in solution.species_names
                        if sp not in (species_retained + species_safe)
                        ]
 
     # Cut the exclusion list from the model.
-    new_solution = trim(solution, species_removed, model_file)
-    new_model_file = soln2cti.write(new_solution)
+    reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
+    reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}', path=path)
 
-    reduced_model_metrics = sample_metrics(sample_inputs, new_model_file)
+    reduced_model_metrics = sample_metrics(
+        sample_inputs, reduced_model_filename, num_threads=num_threads, path=path
+        )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
     
     # If desired, now identify limbo species for future sensitivity analysis
-    species_limbo = []
+    limbo_species = []
     if threshold_upper:
-        graph = networkx.DiGraph(np.where(matrix >= threshold_upper, matrix, 0.0))
-        networkx.relabel_nodes(graph, name_mapping, copy=False)
-        species_retained += graph_search(graph, species_targets)
-        species_limbo = [sp for sp in solution.species_names
-                         if sp not in (species_retained + species_safe + species_removed)
-                         ]
+        species_retained += trim_drg(
+            matrix, solution.species_names, species_targets, threshold_upper
+            )
+        limbo_species = [
+            sp for sp in solution.species_names
+            if sp not in (species_retained + species_safe + species_removed)
+            ]
 
     return ReducedModel(
-        model=new_solution, error=error, filename=new_model_file, limbo_species=species_limbo
+        model=reduced_model, filename=reduced_model_filename, 
+        error=error, limbo_species=limbo_species
         )
 
 
 def run_drg(model_file, sample_inputs, error_limit, species_targets,
-            species_safe, threshold_upper=None
+            species_safe, threshold_upper=None, num_threads=None, path=''
             ):
     """Main function for running DRG reduction.
 
@@ -175,6 +218,12 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         List of species names to always be retained
     threshold_upper: float, optional
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = ``None``, in which case the available number of
+        cores minus one is used. If 1, then do not use multiprocessing module.
+    path : str, optional
+        Optional path for writing files
 
     Returns
     -------
@@ -189,7 +238,9 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
-    sampled_data, sampled_metrics = sample(sample_inputs, model_file)
+    sampled_metrics, sampled_data = sample(
+        sample_inputs, model_file, num_threads=num_threads, path=path
+        )
 
     matrices = []
     for state in sampled_data:
@@ -200,21 +251,24 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
     logging.info(45 * '-')
     logging.info('Threshold | Number of species | Max error (%)')
 
-    iterations = 0
+    # start with detailed (starting) model
+    previous_model = ReducedModel(model=solution, filename=model_file, error=0.0)
+
+    first = True
     error_current = 0.0
     threshold = 0.01
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drg(
-            solution, model_file, species_targets, species_safe, 
-            threshold, matrices, sample_inputs, sampled_metrics,
-            threshold_upper
+            model_file, species_targets, species_safe, threshold, matrices, 
+            sample_inputs, sampled_metrics, previous_model=previous_model, 
+            threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
 
         # reduce threshold if past error limit on first iteration
-        if not iterations and error_current > error_limit:
+        if first and error_current > error_limit:
             error_current = 0.0
             threshold /= 10
             threshold_increment /= 10
@@ -225,20 +279,24 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
             logging.info('Threshold value too high, reducing by factor of 10')
             continue
         
-        logging.info(f'{threshold:^9} | {num_species:^17} | {error_current:^.2f}')
+        logging.info(f'{threshold:^9.2e} | {num_species:^17} | {error_current:^.2f}')
 
         threshold += threshold_increment
-        model_previous = reduced_model
+        first = False
+        previous_model = reduced_model
     
     if error_current > error_limit:
-        reduced_model = model_previous
-        error_current = reduced_model.error
-        num_species = reduced_model.model.n_species
+        threshold -= (2 * threshold_increment)
+        reduced_model = reduce_drg(
+            model_file, species_targets, species_safe, threshold, matrices, 
+            sample_inputs, sampled_metrics, 
+            threshold_upper=threshold_upper, num_threads=num_threads, path=path
+            )
     
     logging.info(45 * '-')
     logging.info('DRG reduction complete.')
-    logging.info(f'Skeletal model: {num_species} species and '
+    logging.info(f'Skeletal model: {reduced_model.model.n_species} species and '
                  f'{reduced_model.model.n_reactions} reactions.'
                  )
-    logging.info(f'Maximum error: {error_current:.2f}%')
+    logging.info(f'Maximum error: {reduced_model.error:.2f}%')
     return reduced_model

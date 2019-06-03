@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added testing on Windows systems via Azure Pipelines
 - Added printing support for chemically activated and Chebyshev reactions, and non-Troe falloff
 - Adds Travis-based package deploy to PyPI and Anaconda
+- Adds initial documentation site
 
 ### Changed
 - Major code restructuring.
