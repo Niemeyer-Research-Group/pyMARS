@@ -43,7 +43,6 @@ def create_pfa_matrix(state, solution):
             )
         production_A = np.sum(np.maximum(base_rates, 0), axis=1)
         consumption_A = np.sum(np.maximum(-base_rates, 0), axis=1)
-
         production_AB = np.zeros((solution.n_species, solution.n_species))
         consumption_AB = np.zeros((solution.n_species, solution.n_species))
         for sp_b in range(solution.n_species):
@@ -53,7 +52,6 @@ def create_pfa_matrix(state, solution):
             consumption_AB[:, sp_b] += np.sum(
                 np.maximum(-base_rates[:, np.where(flags[sp_b, valid_reactions])[0]], 0), axis=1
                 )
-
         # May get divide by zero if an inert species is present, and denominator
         # entry is zero.
         denominator = np.maximum(production_A, consumption_A)[:, np.newaxis]
@@ -65,16 +63,22 @@ def create_pfa_matrix(state, solution):
             r_con_AB1 = np.where(
                 denominator != 0, consumption_AB / denominator, 0
                 )
-
         # TODO: might be possible to replace this with an np.einsum() operation.
         r_pro_AB2 = np.zeros((solution.n_species, solution.n_species))
         r_con_AB2 = np.zeros((solution.n_species, solution.n_species))
         for sp_m in range(solution.n_species):
-            r_pro_AB2 += np.outer(r_pro_AB1[:, sp_m], r_pro_AB1[sp_m, :])
-            r_con_AB2 += np.outer(r_con_AB1[:, sp_m], r_con_AB1[sp_m, :])
+            pro1 = r_pro_AB1[:, sp_m]
+            pro2 = r_pro_AB1[sp_m, :]
+            con1 = r_con_AB1[:, sp_m]
+            con2 = r_con_AB1[sp_m, :]
+            pro1[sp_m] = 0
+            pro2[sp_m] = 0
+            con1[sp_m] = 0
+            con2[sp_m] = 0
+            r_pro_AB2 += np.outer(pro1, pro2)
+            r_con_AB2 += np.outer(con1, con2)
 
         adjacency_matrix = r_pro_AB1 + r_con_AB1 + r_pro_AB2 + r_con_AB2
- 
     else:
         adjacency_matrix = np.zeros((solution.n_species, solution.n_species))
 
