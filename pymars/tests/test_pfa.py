@@ -65,10 +65,9 @@ def check_equal(list1, list2):
 class TestCreatePFAMatrix:
     """Tests for create_pfa_matrix method"""
 
-    @pytest.mark.skip
     def test_qss_artificial(self):
         """Test using four species artificial model with QSS species from 2006 DRG paper.
-        # Not in use because not confirmed by hand.
+        
         # R \approx F / 1e3
         """
         R1 = ct.Reaction.fromCti('''reaction('F => R', [1.0, 0.0, 0.0])''')
@@ -87,13 +86,15 @@ class TestCreatePFAMatrix:
             thermo='IdealGas', kinetics='GasKinetics',
             species=[F, R, P, Pp], reactions=[R1, R2, R3]
             )
-        state = 1000, ct.one_atm, [1., 1./1.e3, 0., 0.]
+        mass_fracs = [1., 1./1.e3, 0., 0.]
+        state = 1000, ct.one_atm, mass_fracs
         matrix = create_pfa_matrix(state, model)
+        denom = max(mass_fracs[0], (1e3 + 1) * mass_fracs[1])
         correct = np.array([
-            [0, 1.0, 0, 0],
-            [0.5, 0, 0.5, 0.5*1e-3],
-            [0, 1.0, 0, 0],
-            [0, 1, 0, 0]
+            [0, 1.0, 1e3*mass_fracs[1] / denom, mass_fracs[1] / denom],
+            [mass_fracs[0] / denom, 0, 1e3*mass_fracs[1] / denom, mass_fracs[1] / denom],
+            [mass_fracs[0] / denom, 1.0, 0, 0],
+            [mass_fracs[0] / denom, 1.0, 0, 0]
             ])
         assert np.allclose(correct, matrix, rtol=1e-3)
 
