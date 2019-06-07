@@ -432,13 +432,13 @@ class TestRunPFA:
         error = 5.0
 
         # Run PFA
-        #with TemporaryDirectory() as temp_dir:
-        reduced_model = run_pfa(
-                model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1
+        with TemporaryDirectory() as temp_dir:
+            reduced_model = run_pfa(
+                model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1, path=temp_dir
                 )
 
         # Expected answer
-        expected_model = ct.Solution(relative_location("pfa_gri30.cti"))
+        expected_model = ct.Solution(relative_location('pfa_gri30.cti'))
         
         # Make sure models are the same
         assert check_equal(reduced_model.model.species_names, expected_model.species_names)
