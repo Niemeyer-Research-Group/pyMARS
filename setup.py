@@ -29,7 +29,8 @@ install_requires = [
     'numpy',
     'cantera>=2.3.0',
     'networkx',
-    'pytables'
+    'pytables',
+    'pyyaml'
 ]
 
 tests_require = [

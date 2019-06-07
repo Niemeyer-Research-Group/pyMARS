@@ -9,6 +9,7 @@ dependencies:
   - cantera>=2.3.0
   - networkx
   - pytables
+  - pyyaml
   - sphinx
   - nbsphinx
   - ipython
