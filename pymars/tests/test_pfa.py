@@ -170,51 +170,6 @@ class TestCreatePFAMatrix:
             [.50226468, 1, 0],
             ])
         assert np.allclose(correct, matrix, rtol=1e-3)
-    
-    @pytest.mark.skip
-    def testArtificial(self):
-        """Uses artificial mechanism to test"""
-        # Load model
-        path_to_original = relative_location("artificial-mechanism.cti")
-        solution_object = ct.Solution(path_to_original)
-
-
-        # Pull out timestep one denomenator and numerator dicts
-        ic_one = rate_edge_data[list(rate_edge_data.keys())[0]]
-        tstep_one = ic_one[list(ic_one.keys())[0]]
-        denoms = tstep_one[0]
-        numers = tstep_one[1]
-
-        # Expected values for denomenators
-        expected_denoms = {}
-        expected_denoms["H2O"] = 1.9573216e-13
-        expected_denoms["H2"] = .00025854374
-        expected_denoms["O2"] = 9.7866081e-14
-        expected_denoms["H"] = .00051708749
-
-        assert np.isclose(expected_denoms["H2O"],denoms["H2O"],abs_tol=1.0e-17)
-        assert np.isclose(expected_denoms["H2"],denoms["H2"],abs_tol=1.0e-10)
-        assert np.isclose(expected_denoms["O2"],denoms["O2"],abs_tol=1.0e-18)
-        assert np.isclose(expected_denoms["H"],denoms["H"],abs_tol=1.0e-10)
-
-        expected_numers = {}
-        expected_numers["H2O_H2"] = 1.9573216e-13
-        expected_numers["H2O_O2"] = 1.9573216e-13
-        expected_numers["H2_O2"] = 1.9573216e-13
-        expected_numers["H2_H2O"] = 1.9573216e-13
-        expected_numers["O2_H2"] = 9.7866081e-14
-        expected_numers["O2_H2O"] = 9.7866081e-14
-        expected_numers["H2_H"] = .00025854374
-        expected_numers["H_H2"] = .00051708749
-        
-        assert np.isclose(expected_numers["H2O_H2"],numers["H2O_H2"],abs_tol=1.0e-17)
-        assert np.isclose(expected_numers["H2O_O2"],numers["H2O_O2"],abs_tol=1.0e-17)
-        assert np.isclose(expected_numers["H2_O2"],numers["H2_O2"],abs_tol=1.0e-17)
-        assert np.isclose(expected_numers["H2_H2O"],numers["H2_H2O"],abs_tol=1.0e-17)
-        assert np.isclose(expected_numers["O2_H2"],numers["O2_H2"],abs_tol=1.0e-18)
-        assert np.isclose(expected_numers["O2_H2O"],numers["O2_H2O"],abs_tol=1.0e-18)
-        assert np.isclose(expected_numers["H2_H"],numers["H2_H"],abs_tol=1.0e-18)
-        assert np.isclose(expected_numers["H_H2"],numers["H_H2"],abs_tol=1.0e-18)
 
 
 class TestGraphSearch:
