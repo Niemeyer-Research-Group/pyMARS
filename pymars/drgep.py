@@ -323,7 +323,9 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
     reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
     reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}', path=path)
 
-    reduced_model_metrics = sample_metrics(sample_inputs, reduced_model_filename, num_threads)
+    reduced_model_metrics = sample_metrics(
+        sample_inputs, reduced_model_filename, num_threads=num_threads, path=path
+        )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
     return ReducedModel(
