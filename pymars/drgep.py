@@ -424,7 +424,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
         previous_model = reduced_model
     
     if error_current > error_limit:
-        threshold -= 2 * threshold_increment
+        threshold -= (2 * threshold_increment)
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
             sampled_metrics, previous_model=previous_model, num_threads=num_threads, path=path
