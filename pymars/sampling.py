@@ -87,7 +87,7 @@ def calculate_error(metrics_original, metrics_test):
     """
     error = 100 * np.max(np.abs(metrics_original - metrics_test) / metrics_original)
     # if any zero ignition delays, print warning and set error to 100
-    if any(metrics_original == 0.0):
+    if any(metrics_test == 0.0):
         error = 100.0
         logging.warning(
             'Warning: candidate reduced model did not ignite for at least one condition.'
@@ -127,7 +127,7 @@ def read_metrics(inputs):
     return ignition_delays
 
 
-def sample_metrics(inputs, model, reuse_saved=False, num_threads=None, path=''):
+def sample_metrics(inputs, model, num_threads=None, path='', reuse_saved=False):
     """Evaluates metrics used for determining error of reduced model
 
     Initially, supports autoignition delay only.
@@ -138,14 +138,14 @@ def sample_metrics(inputs, model, reuse_saved=False, num_threads=None, path=''):
         Inputs necessary for sampling
     model : str
         Filename for Cantera model for performing simulations
-    reuse_saved : bool, optional
-        Flag to reuse saved output
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = ``None``, in which case the available number of
         cores minus one is used. If 1, then do not use multiprocessing module.
     path : str, optional
         Optional path for writing files
+    reuse_saved : bool, optional
+        Flag to reuse saved output
     
     Returns
     -------
@@ -191,12 +191,10 @@ def sample_metrics(inputs, model, reuse_saved=False, num_threads=None, path=''):
             for idx, ignition_delay in results.items():
                 ignition_delays[idx] = ignition_delay
         
-    elif inputs.input_psr:
+    if inputs.input_psr:
         raise NotImplementedError('PSR calculations not currently supported.')
-    elif inputs.input_laminar_flame:
+    if inputs.input_laminar_flame:
         raise NotImplementedError('Laminar flame calculations not currently supported.')
-    else:
-        raise KeyError('No input files specified for sampling.')
 
     return ignition_delays
 
@@ -277,11 +275,10 @@ def sample(inputs, model, num_threads=None, path=''):
             np.savetxt(inputs.data_ignition, ignition_data, delimiter=',')
             np.savetxt(inputs.output_ignition, ignition_delays, delimiter=',')
 
-    elif inputs.input_psr:
+    if inputs.input_psr:
         raise NotImplementedError('PSR calculations not currently supported.')
-    elif inputs.input_laminar_flame:
+    
+    if inputs.input_laminar_flame:
         raise NotImplementedError('Laminar flame calculations not currently supported.')
-    else:
-        raise KeyError('No input files specified for sampling.')
-
+    
     return ignition_delays, ignition_data

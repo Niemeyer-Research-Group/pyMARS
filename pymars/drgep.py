@@ -1,6 +1,7 @@
 """Module containing Directed Relation Graph with Error Propagation (DRGEP) reduction method.
 """
 import logging 
+import os
 
 from collections import deque
 from heapq import heappush, heappop
@@ -417,7 +418,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
             logging.info('Threshold value too high, reducing by factor of 10')
             continue
         
-        logging.info(f'{threshold:^9.2e} | {num_species:^17} | {error_current:^.2f}')
+        logging.info(f'{threshold:^9.2e} | {num_species:^17} | {reduced_model.model.n_reactions} | {error_current:^.2f}')
 
         threshold += threshold_increment
         first = False
@@ -425,6 +426,8 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     
     if reduced_model.error > error_limit:
         threshold -= (2 * threshold_increment)
+        os.remove(reduced_model.filename)
+
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
             sampled_metrics, num_threads=num_threads, path=path

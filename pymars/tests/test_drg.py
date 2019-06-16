@@ -1,10 +1,10 @@
 """Tests for drg module"""
+
 import sys
 import os
 import pkg_resources
 
 import pytest
-
 import numpy as np
 import networkx as nx
 import cantera as ct

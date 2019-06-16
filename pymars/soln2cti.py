@@ -191,8 +191,8 @@ def write(solution, output_filename='', path=''):
 
     Examples
     --------
-    >>> gas = cantera.Solution('gri30.cti', 'copy_gri30.cti')
-    >>> soln2cti.write(gas)
+    >>> gas = cantera.Solution('gri30.cti')
+    >>> soln2cti.write(gas, 'copy_gri30.cti')
     copy_gri30.cti
 
     """
