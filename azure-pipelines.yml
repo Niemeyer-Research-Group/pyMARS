@@ -6,16 +6,16 @@ jobs:
 
   strategy:
     matrix:
-      Python35:
-        python.version: '3.6'
       Python36:
+        python.version: '3.6'
+      Python37:
         python.version: '3.7'
 
   steps:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: 'Add conda to PATH'
   
-  - script: |
+  - bash: |
       conda config --set always_yes yes --set changeps1 no
       conda config --append channels conda-forge
       conda update conda
@@ -25,7 +25,7 @@ jobs:
   - powershell: (get-content test-environment.yaml) | %{$_ -replace "\$\{PYTHON\}","$(python.version)"} | set-content test-environment.yaml
     displayName: 'Set appropriate Python version in environment file'
 
-  - script: |
+  - bash: |
       conda env create --quiet --file test-environment.yaml
       conda info -a
     displayName: 'Create Anaconda environment'
@@ -36,7 +36,7 @@ jobs:
   - bash: conda list -n py$(python.version)
     displayName: 'List package in environment'
 
-  - script: |
+  - bash: |
       call activate py$(python.version)
       conda install --yes --quiet pytest-azurepipelines
       pytest -vv --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
