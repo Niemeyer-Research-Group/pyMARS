@@ -175,7 +175,9 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
 
     # Cut the exclusion list from the model.
     reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
-    reduced_model_filename = soln2cti.write(reduced_model, f'reduced_{model_file}', path=path)
+    reduced_model_filename = soln2cti.write(
+        reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path
+        )
 
     reduced_model_metrics = sample_metrics(
         sample_inputs, reduced_model_filename, num_threads=num_threads, path=path

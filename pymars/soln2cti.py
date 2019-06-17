@@ -200,6 +200,9 @@ def write(solution, output_filename='', path=''):
         output_filename = os.path.join(path, output_filename)
     else:
         output_filename = os.path.join(path, f'{solution.name}.cti')
+    
+    if os.path.isfile(output_filename):
+        os.remove(output_filename)
 
     with open(output_filename, 'w') as the_file: 
 
