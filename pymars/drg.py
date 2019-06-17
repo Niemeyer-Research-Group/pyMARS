@@ -1,6 +1,6 @@
 """Module containing Directed Relation Graph (DRG) reduction method."""
 import logging
-
+import os
 import networkx
 import numpy as np
 import cantera as ct
@@ -286,6 +286,10 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         threshold += threshold_increment
         first = False
         previous_model = reduced_model
+
+        # cleanup files
+        if previous_model.model.n_species != reduced_model.model.n_species:
+            os.remove(reduced_model.filename)
     
     if error_current > error_limit:
         threshold -= (2 * threshold_increment)
@@ -294,6 +298,8 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
             sample_inputs, sampled_metrics, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
+    else:
+        soln2cti.write(reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path)
     
     logging.info(45 * '-')
     logging.info('DRG reduction complete.')
