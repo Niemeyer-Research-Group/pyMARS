@@ -9,29 +9,31 @@ from .tools import convert
 parser = ArgumentParser(description='pyMARS: Reduce chemical kinetic models.')
 
 parser.add_argument('-m', '--model',
-                    help='input model filename (e.g., mech.cti).',
+                    help='input model filename (e.g., "mech.cti").',
                     type=str,
                     required=True
-                    )
-parser.add_argument('--conditions',
-                    help='File with list of autoignition initial conditions.',
-                    type=str,
-                    default='ignition_input.yml'
                     )
 parser.add_argument('-e', '--error',
                     help='Maximum error percentage for the reduced model.',
                     type=float,
+                    required=True
                     )
 parser.add_argument('--method',
                     help='skeletal reduction method to use.',
                     type=str,
-                    choices=['DRG', 'DRGEP', 'PFA']
+                    choices=['DRG', 'DRGEP', 'PFA'],
+                    required=True,
                     )
 parser.add_argument('--targets',
                     help='List of target species (e.g., "CH4 O2").',
                     type=str,
                     nargs='+',
                     required=True,
+                    )
+parser.add_argument('--conditions',
+                    help='File with list of autoignition initial conditions.',
+                    type=str,
+                    default='ignition_input.yaml'
                     )
 parser.add_argument('--retained_species',
                     help='List of non-target species to always retain (e.g., "N2 Ar")',
