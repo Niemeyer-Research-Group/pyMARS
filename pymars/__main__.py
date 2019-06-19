@@ -19,7 +19,7 @@ parser.add_argument('--conditions',
                     default='ignition_input.yml'
                     )
 parser.add_argument('-e', '--error',
-                    help='Maximum error % for the reduced model.',
+                    help='Maximum error percentage for the reduced model.',
                     type=float,
                     )
 parser.add_argument('--method',
@@ -28,19 +28,18 @@ parser.add_argument('--method',
                     choices=['DRG', 'DRGEP', 'PFA']
                     )
 parser.add_argument('--targets',
-                    help="List of target species (e.g., 'CH4 O2').",
+                    help='List of target species (e.g., "CH4 O2").',
                     type=str,
                     nargs='+',
                     required=True,
                     )
 parser.add_argument('--retained_species',
-                    help="List of non-target species to always retain (e.g., 'N2 Ar')",
+                    help='List of non-target species to always retain (e.g., "N2 Ar")',
                     type=str,
                     nargs='*',
-                    default=[]
                     )
 parser.add_argument('--run_sa',
-                    help='run sensitivity analysis after completing another method.',
+                    help='Run sensitivity analysis after completing another method.',
                     action='store_true',
                     default=False,
                     )
