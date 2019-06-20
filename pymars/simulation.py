@@ -54,10 +54,15 @@ class Simulation(object):
         self.gas.TP = (
             self.properties['temperature'], self.properties['pressure'] * ct.one_atm
             )
-        self.gas.set_equivalence_ratio(self.properties['equivalence-ratio'],
-                                       self.properties['fuel'],
-                                       self.properties['oxidizer']
-                                      )
+        # set initial composition using either equivalence ratio or general reactant composition
+        if 'equivalence-ratio' in self.properties:
+            self.gas.set_equivalence_ratio(
+                self.properties['equivalence-ratio'],
+                self.properties['fuel'],
+                self.properties['oxidizer']
+                )
+        else:
+            self.gas.X = self.properties['reactants']
 
         if self.properties['kind'] == 'constant pressure':
             self.reac = ct.IdealGasConstPressureReactor(self.gas)

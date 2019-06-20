@@ -1,4 +1,4 @@
-.. Installation documentation
+.. _sec_installation:
 
 ==================
 Installation Guide
@@ -16,14 +16,14 @@ by editing your conda configuration::
     conda config --append channels conda-forge
     conda install -c niemeyer-research-group pymars
 
-You can also install with ``pip``::
+You can also install from PyPI using ``pip``::
 
     pip install pymars
 
 Development
 -----------
 
-PyKED can be installed from source by cloning the git repository
+pyMARS can be installed from source by cloning the git repository
 and changing into that directory::
 
     git clone https://github.com/Niemeyer-Research-Group/pyMARS/

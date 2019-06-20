@@ -33,7 +33,7 @@ except ImportError:
 
 
 def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limbo, 
-                            num_threads=None
+                            num_threads=1
                             ):
     """Calculate error induced by removal of each limbo species
 
@@ -49,8 +49,9 @@ def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limb
         List of species to consider removal
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     
     Returns
     -------
@@ -76,8 +77,8 @@ def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limb
 
 
 def run_sa(model_file, starting_error, sample_inputs, error_limit, 
-           species_safe, algorithm_type='initial', species_limbo=[], 
-           num_threads=None, path=''
+           species_safe, algorithm_type='greedy', species_limbo=[], 
+           num_threads=1, path=''
            ):
     """Runs a sensitivity analysis to remove species on a given model.
     
@@ -100,8 +101,9 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
         List of species to consider; if empty, consider all not in ``species_safe``
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
     

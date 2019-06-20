@@ -236,17 +236,23 @@ def write_transport_data(species_list, filename='generated_transport.dat'):
             the_file.write(species_string)
 
 
-def write(solution, write_thermo=False, write_transport=False):
+def write(solution, output_filename='', path='', 
+          skip_thermo=False, skip_transport=False
+          ):
     """Writes Cantera solution object to Chemkin-format file.
 
     Parameters
     ----------
     solution : cantera.Solution
         Model to be written
-    write_thermo : bool, optional
-        Flag to write thermo data in separate file
-    write_transport : bool, optional
-        Flag to write transport data in separate file
+    output_filename : str, optional
+        Name of file to be written; if not provided, use ``solution.name``
+    path : str, optional
+        Path for writing file.
+    skip_thermo : bool, optional
+        Flag to skip writing thermo data in separate file
+    skip_transport : bool, optional
+        Flag to skip writing transport data in separate file
 
     Returns
     -------
@@ -260,11 +266,15 @@ def write(solution, write_thermo=False, write_transport=False):
     reduced_gri30.inp
 
     """
-    # Remove extension from filename
-    input_file_name = os.path.splitext(os.path.basename(solution.name))[0]
-    output_file_name = f'reduced_{input_file_name}.inp'
+    if output_filename:
+        output_filename = os.path.join(path, output_filename)
+    else:
+        output_filename = os.path.join(path, f'{solution.name}.inp')
     
-    with open(output_file_name, 'w') as the_file:
+    if os.path.isfile(output_filename):
+        os.remove(output_filename)
+    
+    with open(output_filename, 'w') as the_file:
 
         # Write title block to file
         the_file.write(f'!Chemkin file converted from solution object: {solution.name}\n\n')
@@ -403,12 +413,17 @@ def write(solution, write_thermo=False, write_transport=False):
 
         the_file.write('END')
 
+    basename = os.path.splitext(output_filename)[0]
+    outputs = [output_filename]
+
     # write thermo data
-    if write_thermo:
-        write_thermo_data(solution.species(), f'reduced_{input_file_name}_thermo.dat')
+    if not skip_thermo:
+        write_thermo_data(solution.species(), basename + '_thermo.dat')
+        outputs.append(basename + '_thermo.dat')
 
     # TODO: more careful check for presence of transport data?
-    if write_transport and all(sp.transport for sp in solution.species()):
-        write_transport_data(solution.species(), f'reduced_{input_file_name}_transport.dat')
+    if not skip_transport and all(sp.transport for sp in solution.species()):
+        write_transport_data(solution.species(), basename + '_transport.dat')
+        outputs.append(basename + '_transport.dat')
 
-    return output_file_name
+    return outputs

@@ -127,7 +127,7 @@ def read_metrics(inputs):
     return ignition_delays
 
 
-def sample_metrics(inputs, model, num_threads=None, path='', reuse_saved=False):
+def sample_metrics(inputs, model, num_threads=1, path='', reuse_saved=False):
     """Evaluates metrics used for determining error of reduced model
 
     Initially, supports autoignition delay only.
@@ -140,8 +140,9 @@ def sample_metrics(inputs, model, num_threads=None, path='', reuse_saved=False):
         Filename for Cantera model for performing simulations
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
     reuse_saved : bool, optional
@@ -153,7 +154,7 @@ def sample_metrics(inputs, model, num_threads=None, path='', reuse_saved=False):
         Calculated metrics for model, used for evaluating error
 
     """
-    # If number of threads not specified, use either max number of available
+    # If number of threads specified as 0, use either max number of available
     # cores minus 1, or use 1 if multiple cores not available.
     if not num_threads:
         num_threads = multiprocessing.cpu_count()-1 or 1
@@ -199,7 +200,7 @@ def sample_metrics(inputs, model, num_threads=None, path='', reuse_saved=False):
     return ignition_delays
 
 
-def sample(inputs, model, num_threads=None, path=''):
+def sample(inputs, model, num_threads=1, path=''):
     """Samples thermochemical data and generates metrics for various phenomena.
 
     Initially, supports autoignition delay only.
@@ -212,8 +213,9 @@ def sample(inputs, model, num_threads=None, path=''):
         Filename for Cantera model for performing simulations
     num_threads : int
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
     
@@ -223,7 +225,7 @@ def sample(inputs, model, num_threads=None, path=''):
         Metrics, and sampled data
 
     """
-    # If number of threads not specified, use either max number of available
+    # If number of threads given as 0, use either max number of available
     # cores minus 1, or use 1 if multiple cores not available.
     if not num_threads:
         num_threads = multiprocessing.cpu_count()-1 or 1

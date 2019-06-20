@@ -118,7 +118,7 @@ def trim_drg(matrix, species_names, species_targets, threshold):
 
 def reduce_drg(model_file, species_targets, species_safe, threshold, 
                matrices, sample_inputs, sampled_metrics, 
-               previous_model=None, threshold_upper=None, num_threads=None,
+               previous_model=None, threshold_upper=None, num_threads=1,
                path=''
                ):
     """Given a threshold and DRG matrix, reduce the model and determine the error.
@@ -146,8 +146,9 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         further sensitivity analysis
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
 
@@ -202,7 +203,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
 
 
 def run_drg(model_file, sample_inputs, error_limit, species_targets,
-            species_safe, threshold_upper=None, num_threads=None, path=''
+            species_safe, threshold_upper=None, num_threads=1, path=''
             ):
     """Main function for running DRG reduction.
 
@@ -222,8 +223,9 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
 
@@ -299,7 +301,7 @@ def run_drg(model_file, sample_inputs, error_limit, species_targets,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:
-        soln2cti.write(reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path)
+        soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
     
     logging.info(45 * '-')
     logging.info('DRG reduction complete.')

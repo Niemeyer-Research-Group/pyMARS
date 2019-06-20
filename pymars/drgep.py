@@ -275,7 +275,7 @@ def get_importance_coeffs(species_names, target_species, matrices):
 
 
 def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
-                 sampled_metrics, previous_model=None, num_threads=None, path=''
+                 sampled_metrics, previous_model=None, num_threads=1, path=''
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -297,8 +297,9 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
         Model produced at previous threshold level; used to avoid repeated work.
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
 
@@ -336,7 +337,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
 
 
 def run_drgep(model_file, sample_inputs, error_limit, species_targets,
-              species_safe, threshold_upper=None, num_threads=None, path=''
+              species_safe, threshold_upper=None, num_threads=1, path=''
               ):
     """Main function for running DRGEP reduction.
     
@@ -356,8 +357,9 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
-        Optional; default = ``None``, in which case the available number of
-        cores minus one is used. If 1, then do not use multiprocessing module.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
     path : str, optional
         Optional path for writing files
 
@@ -436,7 +438,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
             sampled_metrics, num_threads=num_threads, path=path
             )
     else:
-        soln2cti.write(reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path)
+        soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
 
     if threshold_upper:
         for sp in reduced_model.model.species_names:
