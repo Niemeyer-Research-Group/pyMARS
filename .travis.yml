@@ -56,7 +56,7 @@ script:
       pytest -vv --cov=./;
       if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
         git checkout -- test-environment.yaml;
-        conda install -q sphinx doctr nbsphinx ipython;
+        conda install -q sphinx doctr nbsphinx ipython sphinxcontrib-bibtex;
         python setup.py install;
         cd docs;
         make html SPHINXOPTS="-W";
