@@ -134,7 +134,7 @@ class Simulation(object):
                 timestep['pressure'] = self.reac.thermo.P
                 timestep['mass_fractions'] = self.reac.Y
 
-                if self.reac.T > self.properties['temperature'] + 400.0 and not ignition_flag:
+                if self.reac.T >= self.properties['temperature'] + 400.0 and not ignition_flag:
                     self.ignition_delay = self.reac_net.time
                     ignition_flag = True
 
@@ -157,7 +157,7 @@ class Simulation(object):
         while self.reac_net.time < self.time_end:
             self.reac_net.step()
 
-            if self.reac.T > self.properties['temperature'] + 400.0:
+            if self.reac.T >= self.properties['temperature'] + 400.0:
                 self.ignition_delay = self.reac_net.time
                 break
 
@@ -204,7 +204,7 @@ class Simulation(object):
         for time, temp, pres, mass in zip(
             times, temperatures, pressures, mass_fractions
             ):
-            if temp > temperature_initial + 400.0 and not ignition_flag:
+            if temp >= temperature_initial + 400.0 and not ignition_flag:
                     self.ignition_delay = time
                     ignition_flag = True
                     if skip_data:

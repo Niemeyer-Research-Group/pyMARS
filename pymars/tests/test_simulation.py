@@ -1,0 +1,164 @@
+""" Tests the simulation module used by pyMARS """
+
+import os
+import pkg_resources
+import random
+from tempfile import TemporaryDirectory
+
+import pytest
+import numpy as np
+import cantera as ct
+import tables
+
+from ..simulation import Simulation
+
+def relative_location(file):
+    file_path = os.path.join(file)
+    return pkg_resources.resource_filename(__name__, file_path)
+
+
+class TestSimulation:
+    def test_process_results(self):
+        """Test processing of ignition results using artificial data.
+        """
+        table_def = {
+            'time': tables.Float64Col(pos=0),
+            'temperature': tables.Float64Col(pos=1),
+            'pressure': tables.Float64Col(pos=2),
+            'mass_fractions': tables.Float64Col(pos=3, shape=(2))
+            }
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            
+            sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
+
+            time_initial = np.arange(0, 10, 0.02)
+            temp_initial = 200 * np.ones(len(time_initial))
+
+            # ignition delay (temp = 600) will be at 10.5 s
+            time_ramp = np.arange(10, 11.001, 0.005)
+            temp_ramp = 200 + 800 * (time_ramp - 10)
+
+            time_flat = np.arange(11.005, 15, 0.01)
+            temp_flat = 1000 * np.ones(len(time_flat))
+            
+            times = np.concatenate((time_initial, time_ramp, time_flat))
+            temps = np.concatenate((temp_initial, temp_ramp, temp_flat))
+
+            # add a very small number to account for floating-point roundoff error
+            idx = len(temp_initial) + int((len(time_ramp) - 1) / 2)
+            temps[idx] += 1e-9
+
+            with tables.open_file(sim.save_file, mode='w', title='0') as h5file:
+
+                table = h5file.create_table(where=h5file.root, name='simulation',
+                                            description=table_def
+                                            )
+                # Row instance to save timestep information to
+                timestep = table.row
+
+                for time, temp in zip(times, temps):
+                    timestep['time'] = time
+                    timestep['temperature'] = temp
+                    timestep['pressure'] = 1.0
+                    timestep['mass_fractions'] = np.ones(2)
+                    timestep.append()
+                
+                table.flush()
+            
+            ignition_delay, sampled_data = sim.process_results()
+
+            assert np.allclose(ignition_delay, 10.5)
+
+            initial_temp = 200.
+            delta = 40.
+            for idx in range(20):
+                assert np.allclose(sampled_data[idx], [initial_temp + delta, 1, 1, 1])
+                delta += 40.
+            
+    def test_process_results_skip_data(self):
+        """Test processing of ignition results, skipping data sampling, using artificial data.
+        """
+        table_def = {
+            'time': tables.Float64Col(pos=0),
+            'temperature': tables.Float64Col(pos=1),
+            'pressure': tables.Float64Col(pos=2),
+            'mass_fractions': tables.Float64Col(pos=3, shape=(2))
+            }
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            
+            sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
+
+            with tables.open_file(sim.save_file, mode='w', title='0') as h5file:
+
+                table = h5file.create_table(where=h5file.root, name='simulation',
+                                            description=table_def
+                                            )
+                # Row instance to save timestep information to
+                timestep = table.row
+
+                time_initial = np.arange(0, 10, 0.02)
+                temp_initial = 200 * np.ones(len(time_initial))
+
+                # ignition delay (temp = 600) will be at 10.5 s
+                time_ramp = np.arange(10, 11.02, 0.02)
+                temp_ramp = 200 + 800 * (time_ramp - 10)
+
+                time_flat = np.arange(11.02, 15, 0.02)
+                temp_flat = 1000 * np.ones(len(time_flat))
+                
+                times = np.concatenate((time_initial, time_ramp, time_flat))
+                temps = np.concatenate((temp_initial, temp_ramp, temp_flat))
+
+                # add a very small number to account for floating-point roundoff error
+                idx = len(temp_initial) + 25
+                temps[idx] += 1e-8
+
+                for time, temp in zip(times, temps):
+                    timestep['time'] = time
+                    timestep['temperature'] = temp
+                    timestep['pressure'] = 1.0
+                    timestep['mass_fractions'] = np.ones(2)
+                    timestep.append()
+                
+                table.flush()
+            
+            sim.process_results(skip_data=True)
+
+            assert np.allclose(sim.ignition_delay, 10.5)
+            assert not hasattr(sim, 'sampled_data')
+
+    def test_clean(self):
+        """Test successful cleaning up of data.
+        """
+        table_def = {
+            'time': tables.Float64Col(pos=0),
+            'temperature': tables.Float64Col(pos=1),
+            'pressure': tables.Float64Col(pos=2),
+            'mass_fractions': tables.Float64Col(pos=3, shape=(2))
+            }
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
+
+            with tables.open_file(sim.save_file, mode='w', title='0') as h5file:
+
+                table = h5file.create_table(where=h5file.root, name='simulation',
+                                            description=table_def
+                                            )
+                # Row instance to save timestep information to
+                timestep = table.row
+                timestep['time'] = 1.0
+                timestep['temperature'] = 1.0
+                timestep['pressure'] = 1.0
+                timestep['mass_fractions'] = np.ones(2)
+                timestep.append()
+                
+                table.flush()
+            
+            sim.clean()
+            assert not os.path.isfile(sim.save_file)
+
+
+
