@@ -284,3 +284,90 @@ def sample(inputs, model, num_threads=1, path=''):
         raise NotImplementedError('Laminar flame calculations not currently supported.')
     
     return ignition_delays, ignition_data
+
+
+def check_inputs(inputs):
+    """Validates input files for simulations, raising an error if any issues detected.
+
+    Parameters
+    ----------
+    inputs : SamplingInputs
+        Inputs necessary for sampling
+    
+    Returns
+    -------
+    bool
+        Returns ``True`` if no issues detected, otherwise raises an error.
+
+    """
+    if inputs.input_ignition:
+        with open(inputs.input_ignition, 'r') as the_file:
+            conditions = yaml.safe_load(the_file)
+
+        for idx, case in enumerate(conditions):
+            pre = f'Ignition input {idx} '
+            # check required keys
+            required_keys = ['kind', 'temperature', 'pressure']
+            for key in required_keys:
+                if key not in case:
+                    raise KeyError(pre + 'missing required key ' + key)
+            
+            if case['kind'] not in ['constant volume', 'constant pressure']:
+                raise ValueError(pre + '"case" needs to be "constant volume" or "constant pressure')
+            
+            if type(case['temperature']) not in [float, int] or case['temperature'] <= 0:
+                raise ValueError(pre + 'temperature needs to be a number > 0')
+            
+            if type(case['pressure']) not in [float, int] or case['pressure'] <= 0:
+                raise ValueError(pre + 'pressure needs to be a number > 0')
+            
+            if 'end-time' in case and case.get('end-time', 0) <= 0:
+                raise ValueError(pre + '"end-time" needs to be a number > 0')
+            
+            equiv_ratio = 'fuel' in case or 'oxidizer' in case or 'equivalence-ratio' in case
+            reactants = 'reactants' in case
+            if equiv_ratio and reactants:
+                raise KeyError(pre + 'should specify either fuel/oxidizer/equivalence ratio or reactants')
+            
+            if not equiv_ratio and not reactants:
+                raise KeyError(pre + 'should specify either fuel/oxidizer/equivalence ratio or reactants')
+            
+            if equiv_ratio:
+                if 'fuel' not in case:
+                    raise KeyError(pre + 'needs "fuel"')
+                if len(case['fuel']) < 1:
+                    raise KeyError(pre + '"fuel" needs at least one entry')
+                for entry in case['fuel']:
+                    if type(case['fuel'][entry]) not in [float, int] or case['fuel'][entry] <= 0:
+                        raise ValueError(pre + entry + ' value needs to be a number > 0')
+                
+                if 'oxidizer' not in case:
+                    raise KeyError(pre + 'needs "oxidizer"')
+                if len(case['oxidizer']) < 1:
+                    raise KeyError(pre + '"oxidizer" needs at least one entry')
+                for entry in case['oxidizer']:
+                    if type(case['oxidizer'][entry]) not in [float, int] or case['oxidizer'][entry] <= 0:
+                        raise ValueError(pre + entry + ' value needs to be a number > 0')
+                
+                if 'equivalence-ratio' not in case:
+                    raise KeyError(pre + 'needs "equivalence-ratio"')
+                if (type(case['equivalence-ratio']) not in [float, int] or 
+                    case['equivalence-ratio'] <= 0
+                    ):
+                    raise ValueError(pre + '"equivalence-ratio" needs to be a number > 0')
+            
+            if reactants:
+                if len(case['reactants']) < 1:
+                    raise KeyError(pre + '"reactants" needs at least one entry')
+                
+                for entry in case['reactants']:
+                    if type(case['reactants'][entry]) not in [float, int] or case['reactants'][entry] <= 0:
+                        raise ValueError(pre + entry + ' value needs to be a number > 0')
+
+    if inputs.input_psr:
+        raise NotImplementedError('PSR calculations not currently supported.')
+    
+    if inputs.input_laminar_flame:
+        raise NotImplementedError('Laminar flame calculations not currently supported.')
+
+    return True

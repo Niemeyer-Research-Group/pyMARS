@@ -3,7 +3,7 @@ import logging
 import os
 
 # local imports
-from .sampling import SamplingInputs, sample_metrics
+from .sampling import SamplingInputs, sample_metrics, check_inputs
 from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
@@ -56,6 +56,9 @@ def pymars(model_file, conditions, error_limit, method=None,
 
     # TODO: allow specification of other sampling filenames
     sampling_inputs = SamplingInputs(input_ignition=conditions)
+
+    # check validity of input file
+    assert check_inputs(sampling_inputs)
 
     if method in ['DRG', 'DRGEP', 'PFA']:
         assert target_species, 'Need to specify at least one target species for graph-based reduction methods'
