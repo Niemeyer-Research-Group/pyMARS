@@ -82,13 +82,13 @@ after_success:
       bash <(curl -s https://codecov.io/bash);
     fi
 
-deploy:
-  provider: pypi
-  user: kyleniemeyer
-  password:
-    secure: "UBg3p5gkv4r218jbvR+ivNGrvALQO3/lwL3JLvvcl1u3SoJEvMIqXE6yFtC9vE02tg1ZXe4fe7XkSn1RELWEavQlO4jNGqWfjuZ8EPwI8n6Q/ESlEDCBA411Xjx/mfNN5rMsjaFMPagRj3KEg0lUFf/UOkFn85MjH+VZxHJtxnx+OnJhixyx1sjZbHJF+3LKQlMLQOz+5JtPukFzziqzK04SDhNLsQzyayFxMf/LxM0BK8sqyk6fN+le5KcKVJaX8wqExzLrC2UxDnM/uC/pQ6wksX4J7SBDKv2UQrwiPcS2AMzWhW2cD/tnSGvgPRpShvjc0CbutOO0M5fvAozwvSL43bUXoxHvEh2QX7qyM7xzG05IjwBgRWF0pTrDhEz1X4Gr9Qi6dOPcMY4TNCc7nYI72VBT7RKizmT9YajRpAujdDRhv6fK9dKT4VV90U/URUpRzMIFzlCfgLTCEVYDOY8rM+1KmkbAc/zrMZLFY11uM2EvDutPro9ZnmPVc93kDxFrC3+2wAQC8hQxPE9uIdc1ZaJgxCSvOWjNyP75KsDKkQDNGoTo7eTkZr3koKXGYm8OC2FTr2teCZDhdxnt8m5kTtqp0xTmjPSrQsDG1N4LkoyTiSvXH4YPUsao3bx2tpKhe2kMkMwlLmTnQbbgEWEcpoXdKlfT1PUElH3Ths4="
-  on:
-    tags: true
-    condition: $TRAVIS_OS_NAME == "linux" && $PYTHON == "3.6"
-  distributions: "sdist bdist_wheel"
-  skip_upload_docs: true
+#deploy:
+#  provider: pypi
+#  user: kyleniemeyer
+#  password:
+#    secure: "UBg3p5gkv4r218jbvR+ivNGrvALQO3/lwL3JLvvcl1u3SoJEvMIqXE6yFtC9vE02tg1ZXe4fe7XkSn1RELWEavQlO4jNGqWfjuZ8EPwI8n6Q/ESlEDCBA411Xjx/mfNN5rMsjaFMPagRj3KEg0lUFf/UOkFn85MjH+VZxHJtxnx+OnJhixyx1sjZbHJF+3LKQlMLQOz+5JtPukFzziqzK04SDhNLsQzyayFxMf/LxM0BK8sqyk6fN+le5KcKVJaX8wqExzLrC2UxDnM/uC/pQ6wksX4J7SBDKv2UQrwiPcS2AMzWhW2cD/tnSGvgPRpShvjc0CbutOO0M5fvAozwvSL43bUXoxHvEh2QX7qyM7xzG05IjwBgRWF0pTrDhEz1X4Gr9Qi6dOPcMY4TNCc7nYI72VBT7RKizmT9YajRpAujdDRhv6fK9dKT4VV90U/URUpRzMIFzlCfgLTCEVYDOY8rM+1KmkbAc/zrMZLFY11uM2EvDutPro9ZnmPVc93kDxFrC3+2wAQC8hQxPE9uIdc1ZaJgxCSvOWjNyP75KsDKkQDNGoTo7eTkZr3koKXGYm8OC2FTr2teCZDhdxnt8m5kTtqp0xTmjPSrQsDG1N4LkoyTiSvXH4YPUsao3bx2tpKhe2kMkMwlLmTnQbbgEWEcpoXdKlfT1PUElH3Ths4="
+#  on:
+#    tags: true
+#    condition: $TRAVIS_OS_NAME == "linux" && $PYTHON == "3.6"
+#  distributions: "sdist bdist_wheel"
+#  skip_upload_docs: true

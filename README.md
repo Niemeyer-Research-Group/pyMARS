@@ -28,10 +28,6 @@ pyMARS supports Python 3.6 and 3.7, and can be installed easily using conda:
 
     conda install -c niemeyer-research-group pymars
 
-or pip:
-    
-    pip install pymars
-
 ## Usage
 
 For detailed usage examples, see the [online documentation](https://Niemeyer-Research-Group.github.io/pyMARS/).

@@ -16,9 +16,16 @@ by editing your conda configuration::
     conda config --append channels conda-forge
     conda install -c niemeyer-research-group pymars
 
-You can also install from PyPI using ``pip``::
+You can also install using ``pip`` by downloading the source code and changing
+into that directory::
 
+    git clone https://github.com/Niemeyer-Research-Group/pyMARS/
+    cd pyMARS
     pip install pymars
+
+Unfortunately, it is not currently possible to install using ``pip``
+from PyPI, because (1) there is no Cantera package on PyPI and
+(2) someone else claimed the ``pymars`` name.
 
 Development
 -----------
