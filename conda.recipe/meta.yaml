@@ -24,7 +24,7 @@ requirements:
     - pytables
     - cantera >=2.3.0
     - networkx
-    - pyyaml
+    - pyyaml >= 4.2b1
 
 test:
   imports:
