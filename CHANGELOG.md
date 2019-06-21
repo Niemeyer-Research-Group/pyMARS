@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+
+## [1.0.0] - 2019-06-21
+
 ### Added
+
 - Added path flux analysis, so methods now include DRG, DRGEP, PFA, and sensitivity analysis
 - Adds test suite for all current methods
 - Adds Travis CI and AppVeyor continuous integration
@@ -16,18 +21,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Adds initial documentation site
 
 ### Changed
+
 - Major code restructuring.
 - Now supports Python 3.6+
 
 ### Fixed
+
 - Fixed bugs in setup.py script and path imports 
 - Fixed model printing of Plog reactions
 
 ## [0.0.1] - 2017-04-01
+
 ### Added
-- Added preliminary project files (README, CODE_OF_CONDUCT, etc.) without any
-actual source code
+
+- Added preliminary project files (README, CODE_OF_CONDUCT, etc.) without any actual source code
 
 
-[Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.0.1...v0.1.0

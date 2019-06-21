@@ -2,6 +2,8 @@ sudo: false
 env:
   global:
     - secure: "iZnSdqfjugt49mrumF81m26rli0mIdI3NhuaEfpbRQ69DCnrCysznQ7U2gE4C0UhpKA9vVSn4WBuq9+H6L2VTCVGzAg3gYwnIKceqFHPq+9m5NFGKgiKVixufRYWlw93ucvGKBTSe+6ZQc6C4+pvQfJXrTR7COd41gNC/OadhrtyvAEWR7LY3kYIosiDdZo+16S0Yc1czYO9PjQ/Vxznyb0seEqNykBWIQqkSxU2d+5UAEiGyg5Bsu6tWEVcgXQw5KiNXwe7u5MYTp0zoBDBqrEtZ/0rFiXqPbhcwDEx1lS2DS5yX920LJnhoa6aNU/OeUj/d5zhwwPBdtwhO6cHuoigOy2AJuVQImakccniAQaBLHKOHg0zjAAvN6zRFzhramdcQRnSHEVwZnar7hqFpheykUOn9ajFEVF2vEoVxC6PCI/U3oOVNryHSFpUsXtHT7yrOrE+l8GDKX4XdyHCBjb0cadba2IJOzfwurMsbxepaK6Plr2+opZOUFQXKE8SO+gpvAJJLaHpda/cIUii3Uph54kVKiRc5urxni8XugAkuZXUdEehvHNp+QUvyms5oA7iHA63KqfQfDKfvhMfoLsqGtFVFbQqkQx3SGXBHzj0p316uzcNb07LS5AK4HWTUPXvjCfTrZ/c4emihKt4qBRE0z6iG1A87PpLu12ZPgY="
+    # Doctr deploy key for Niemeyer-Research-Group/pyMARS
+    - secure: "D8wqSImdxL8WaFUmAv/HD/x1aEyyjrojWRxHzwchEKDD43/mZPjYkrojChojM9Ybpir7ENAA/Wk+fDYzPtmX3PCEyxhm9Ryg0aiu62WhMfu8jo14JC8hK0xXL8FSXLN7qDZaXCZCKg1AcDnnYZQWLaeXFuoUkQUzRCr83qEZ9YOFiVbEBO+wuaUnas6hB7xkxGYmQe9RPCXUUdXQiOexrbExVsgBAMWXLTIEC5aGl4CqafXpR9wMkHey7s6a5OpF5APYsyNIu0+yiX7tRa5R9mILfEVrI3R0xvbOQK4gFYypHKlaBb410p9wmb94IaNVoxWG9sY0EN53dAXbdish9zvMKM8oH8J/CfSS8ToNNAYJyEcuPPT6T8fFMrEdfvh8pD5dQAaW8fe1s+uXiNBJbCZ9irOMuRG8oL+p1uAJQ5f1tA0iCihpoz5fSivjizYvEbOHVgQXKQ2bG5bWQr1ZC0PWgEtkCMl/xy/lVVMISJ+VrwdB1oCNINkB2aGyPyg4VBCUAVjduSMCng66rWh2TLQpV1Oc4fUksNu88Q6+JrvMgPudr7QZgM/wcMUE5AVxSF54X4MnE7deLQxK7GK+L1CwIvyiMzDmZumBVDmrqIqhEI0q6v8keNQX/XVixKtBg4YKIxIki9ViXZjZBbEGYeOF/c6KxEcLCwi8mlVTw20="
 
 language: generic
 
@@ -52,11 +54,23 @@ script:
   - set -e
   - if [[ -z "$TRAVIS_TAG" ]]; then
       pytest -vv --cov=./;
+      if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
+        python setup.py install;
+        cd docs;
+        make html SPHINXOPTS="-W";
+        cd ..;
+        doctr deploy devel;
+      fi
     else
       if [[ "$PYTHON" == "3.6" && "$TRAVIS_OS_NAME" == "linux" ]]; then
         conda build conda.recipe;
         anaconda -t $ANACONDA_TOKEN upload $HOME/miniconda/conda-bld/*/pymars*.tar.bz2;
         python setup.py install;
+        cd docs;
+        make html SPHINXOPTS="-W";
+        cd ..;
+        doctr deploy --build-tags .;
+        doctr deploy --build-tags "tags/${TRAVIS_TAG}";
       fi
     fi
   - set +e
