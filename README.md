@@ -1,4 +1,5 @@
 # pyMARS
+<img src="logo/pymars-logo.png" align="right" width="200" />
 
 [![DOI](https://zenodo.org/badge/51664233.svg)](https://zenodo.org/badge/latestdoi/51664233)
 [![Build Status](https://travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master)](https://travis-ci.org/Niemeyer-Research-Group/pyMARS)

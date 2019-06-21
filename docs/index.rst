@@ -9,12 +9,12 @@ pyMARS |release|
 pyMARS is a Python package for reducing the size of chemical kinetic models;
 the name stands for Python-based Model Automatic Reduction. pyMARS is licensed
 under the permissive, open-source MIT license. The source code is publicly
-available on GitHub at https://github.com/pr-omethe-us/PyKED.
+available on GitHub at https://github.com/Niemeyer-Research-Group/pyMARS.
 
 pyMARS takes models given in the standard Cantera or Chemkin file formats
 (the latter is first converted to Cantera), along with a specified error limit
 and optional lists of species to always retain, and automatically removes as
-many species and reactions possible using a specified method.
+many species and reactions as possible using a specified method.
 
 It uses provided conditions to sample thermochemical data for the reduction
 analysis and calculate global combustion metrics for determining the error.

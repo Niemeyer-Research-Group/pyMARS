@@ -33,8 +33,8 @@ The following options are available, and can also be seen by using the
         List of non-target species to always retain (e.g., "N2 Ar")
      --run_sa:
         Run sensitivity analysis after completing another method
-     --epsilon_star:
-        Epsilon^* value used to determine species for sensitivity analysis
+     --upper_threshold:
+        Upper threshold value used to determine species for sensitivity analysis
      --path:
         Path to directory for writing files
      --num_threads:
@@ -45,7 +45,6 @@ The following options are available, and can also be seen by using the
         thermodynamic data filename (only necessary for Chemkin files)
      --transport:
         transport data filename (only necessary for Chemkin files)
-
 
 Example reduction
 =================
@@ -150,6 +149,9 @@ equivalence ratio, as shown in this example:
           O2: 1.0
           N2: 3.76
 
+For convenience, and to save significant runtime, pyMARS will automatically
+reuse saved ignition data from a prior run, if the number of cases matches
+that in the input file.
 
 .. _conversion:
 

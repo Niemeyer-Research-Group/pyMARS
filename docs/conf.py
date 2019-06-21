@@ -117,6 +117,7 @@ html_theme_options = {
     'github_button': True,
     'show_powered_by': True,
     'travis_button': True,
+    'logo': 'pymars-logo.png'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
