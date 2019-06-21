@@ -39,5 +39,5 @@ jobs:
   - script: |
       call activate py$(python.version)
       pip install pytest-azurepipelines
-      pytest -v --cov=./ --cov-append
+      pytest -v --cov=./ --cov-report html
     displayName: 'test with pytest'
