@@ -3,552 +3,401 @@
 currently only works for Elementary, Falloff, Plog and ThreeBody Reactions
 Cantera development version 2.3.0a2 required
 """
-from __future__ import print_function
-from __future__ import division
 
 import os
-import textwrap
-from string import Template
-from name_trim import name_trim
+import math
+from textwrap import fill
 
 import cantera as ct
-#from test_mechanism_from_solution import test
 
-def write(solution):
+# number of calories in 1000 Joules
+CALORIES_CONSTANT = 4184.0
+
+# Conversion from 1 debye to coulomb-meters
+DEBEYE_CONVERSION = 3.33564e-30
+
+indent = ['',
+          ' ',
+          '  ',
+          '   ',
+          '    ',
+          '     ',
+          '      ',
+          '       ',
+          '        ',
+          '          ',
+          '           ',
+          '            ',
+          '             ',
+          '              ',
+          '               ',
+          '                '
+          ]
+
+
+def section_break(section_title):
+    """Return string with break and new section title
+
+    Parameters
+    ----------
+    section_title : str
+        title string for next section break
+    
+    Returns
+    -------
+    str
+        String with section title and breaks
+
+    """
+    return('#' + '-' * 75 + '\n' + 
+           f'#  {section_title}\n' +
+           '#' + '-' * 75 + '\n\n'
+           )
+
+
+def build_arrhenius(rate, reaction_order, reaction_type):
+    """Builds Arrhenius coefficient string based on reaction type.
+
+    Parameters
+    ----------
+    rate : cantera.Arrhenius
+        Arrhenius-form reaction rate coefficient
+    reaction_order : int or float
+        Order of reaction (sum of reactant stoichiometric coefficients)
+    reaction_type : {cantera.ElementaryReaction, cantera.ThreeBodyReaction, cantera.PlogReaction}
+        Type of reaction
+
+    Returns
+    -------
+    str
+        String with Arrhenius coefficients
+
+    """
+    if reaction_type in [ct.ElementaryReaction, ct.PlogReaction]:
+        pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 1)
+
+    elif reaction_type == ct.ThreeBodyReaction:
+        pre_exponential_factor = rate.pre_exponential_factor * 1e3**reaction_order
+
+    elif reaction_type in [ct.FalloffReaction, ct.ChemicallyActivatedReaction]:
+        raise ValueError('Function does not support falloff or chemically activated reactions')
+    else:
+        raise NotImplementedError('Reaction type not supported: ', reaction_type)
+    
+    arrhenius = [f'{pre_exponential_factor:.6e}', 
+                 str(rate.temperature_exponent), 
+                 str(rate.activation_energy / CALORIES_CONSTANT)
+                 ]
+    return ', '.join(arrhenius)
+
+
+def build_falloff_arrhenius(rate, reaction_order, reaction_type, pressure_limit):
+    """Builds Arrhenius coefficient strings for falloff and chemically-activated reactions.
+
+    Parameters
+    ----------
+    rate : cantera.Arrhenius
+        Arrhenius-form reaction rate coefficient
+    reaction_order : int or float
+        Order of reaction (sum of reactant stoichiometric coefficients)
+    reaction_type : {ct.FalloffReaction, ct.ChemicallyActivatedReaction}
+        Type of reaction
+    pressure_limit : {'high', 'low'}
+        string designating pressure limit
+    
+    Returns
+    -------
+    str
+        Arrhenius coefficient string
+
+    """
+    assert pressure_limit in ['low', 'high'], 'Pressure range needs to be high or low'
+
+    # Each needs more complicated handling due if high- or low-pressure limit
+    if reaction_type == ct.FalloffReaction:
+        if pressure_limit == 'low':
+            pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order)
+        elif pressure_limit == 'high':
+            pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 1)
+
+    elif reaction_type == ct.ChemicallyActivatedReaction:
+        if pressure_limit == 'low':
+            pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 1)
+        elif pressure_limit == 'high':
+            pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 2)
+    else:
+        raise ValueError('Reaction type not supported: ', reaction_type)
+
+    arrhenius = [f'{pre_exponential_factor:.6E}', 
+                 str(rate.temperature_exponent), 
+                 str(rate.activation_energy / CALORIES_CONSTANT)
+                 ]
+    return '[' + ', '.join(arrhenius) + ']'
+
+
+def build_falloff(parameters, falloff_function):
+    """Creates falloff reaction Troe parameter string
+
+    Parameters
+    ----------
+    parameters : numpy.ndarray
+        Array of falloff parameters; length varies based on ``falloff_function``
+    falloff_function : {'Troe', 'SRI'}
+        Type of falloff function
+
+    Returns
+    -------
+    falloff_string : str
+        String of falloff parameters
+
+    """
+    if falloff_function == 'Troe':
+        falloff_string = ('Troe(' +
+                          f'A = {parameters[0]}' +
+                          f', T3 = {parameters[1]}' +
+                          f', T1 = {parameters[2]}' +
+                          f', T2 = {parameters[3]})'
+                          )
+    elif falloff_function == 'SRI':
+        falloff_string = ('SRI(' + 
+                          f'A = {parameters[0]}' +
+                          f', B = {parameters[1]}' +
+                          f', C = {parameters[2]}' +
+                          f', D = {parameters[3]}' +
+                          f', E = {parameters[4]})'
+                          )
+    else:
+        raise NotImplementedError(f'Falloff function not supported: {falloff_function}')
+
+    return falloff_string
+
+
+def write(solution, output_filename='', path=''):
     """Function to write cantera solution object to cti file.
 
     Parameters
     ----------
-    solution : obj
-        Cantera solution object
+    solution : cantera.Solution
+        Model to be written
+    output_filename : str, optional
+        Name of file to be written; if not provided, use ``solution.name``
+    path : str, optional
+        Path for writing file.
 
     Returns
     -------
-    output_file_name : str
-        Name of trimmed mechanism file (.cti)
+    output_filename : str
+        Name of output model file (.cti)
 
     Examples
     --------
-        soln2cti.write(gas)
+    >>> gas = cantera.Solution('gri30.cti')
+    >>> soln2cti.write(gas, 'copy_gri30.cti')
+    copy_gri30.cti
+
     """
+    if output_filename:
+        output_filename = os.path.join(path, output_filename)
+    else:
+        output_filename = os.path.join(path, f'{solution.name}.cti')
+    
+    if os.path.isfile(output_filename):
+        os.remove(output_filename)
 
-    trimmed_solution = solution
-    input_file_name_stripped = trimmed_solution.name
-    input_file_name_stripped = name_trim(input_file_name_stripped) #Change trim name to take out the .cti as well. 
-    cwd = os.getcwd()
-    output_file_name = os.path.join(
-                                    cwd,
-                                    'pym_' +
-                                    input_file_name_stripped +
-                                    '.cti')
+    with open(output_filename, 'w') as the_file: 
 
-    f = open(output_file_name, 'w')
+        # Write title block to file
+        the_file.write(section_break('CTI file converted from solution object'))
+        the_file.write('units(length = "cm", time = "s",' +
+                       ' quantity = "mol", act_energy = "cal/mol")' +
+                       '\n\n'
+                       )
 
+        # Write Phase definition to file
+        element_names = ' '.join(solution.element_names)
+        species_names = fill(' '.join(solution.species_names), width=55, subsequent_indent=19*' ')
 
-    #Get solution temperature and pressure
-    solution_temperature = trimmed_solution.T
-    solution_pressure = trimmed_solution.P
+        the_file.write(
+            f'ideal_gas(name = "{os.path.splitext(os.path.basename(output_filename))[0]}", \n' +
+            indent[5] + f'elements = "{element_names}", \n' +
+            indent[5] + f'species = """ {species_names} """, \n' +
+            indent[5] + f'reactions = "all", \n' +
+            indent[5] + f'initial_state = state(temperature = {solution.T}, ' +
+            f'pressure = {solution.P})   )\n\n'
+            )
 
-    #Work Functions
+        # Write species data to file
+        the_file.write(section_break('Species data'))
+        
+        for species in solution.species():
+            # build strings with low- and high-temperature 7 NASA coefficients
+            nasa_range_low = f'[{species.thermo.min_temp}, {species.thermo.coeffs[0]}]'
+            nasa_coeffs_low = [f'{c:.9e}' for c in species.thermo.coeffs[8:15]]
+            nasa_coeffs_low = fill('[' + ', '.join(nasa_coeffs_low) + ']', width=50, subsequent_indent=16*' ')
+            
+            nasa_range_high = f'[{species.thermo.coeffs[0]}, {species.thermo.max_temp}]'
+            nasa_coeffs_high = [f'{c:.9e}' for c in species.thermo.coeffs[1:8]]
+            nasa_coeffs_high = fill('[' + ', '.join(nasa_coeffs_high) + ']', width=50, subsequent_indent=16*' ')
 
-    # number of calories in 1000 Joules of energy
-    calories_constant = 4184.0
+            composition = ', '.join([f'{s}:{int(v)}' for s, v in species.composition.items()])
 
-    def eliminate(input_string, char_to_replace, spaces='single'):
-        """
-        Eliminate characters from a string
+            # start writing composition and thermo data
+            species_string = (
+                f'species(name = "{species.name}",\n' +
+                f'{indent[4]}atoms = "{composition}", \n' +
+                f'{indent[4]}thermo = (\n' +
+                f'{indent[7]}NASA(   {nasa_range_low}, {nasa_coeffs_low}  ),\n' +
+                f'{indent[7]}NASA(   {nasa_range_high}, {nasa_coeffs_high}  )\n' +
+                f'{indent[15]}),\n'
+                )
 
-        :param input_string
-            string to be modified
-        :param char_to_replace
-            array of character strings to be removed
-        """
-        for char in char_to_replace:
-            input_string = input_string.replace(char, "")
-        if spaces == 'double':
-            input_string = input_string.replace(" ", "  ")
-        return input_string
-
-    def wrap_nasa(input_string):
-        """
-        Wrap string to cti NASA format width
-        """
-        output_string = textwrap.fill(
-                                    input_string,
-                                    width=50,
-                                    subsequent_indent=16 * ' '
-                                        )
-        return output_string
-
-    def section_break(title):
-        """
-        Insert break and new section title into cti file
-
-        :param title:
-            title string for next section_break
-        """
-        f.write('#' + '-' * 75 + '\n')
-        f.write('#  ' + title + '\n')
-        f.write('#' + '-' * 75 + '\n\n')
-
-    def replace_multiple(input_string, replace_list):
-        """
-        Replace multiple characters in a string
-
-        :param input_string
-            string to be modified
-        :param replace list
-            list containing items to be replaced (value replaces key)
-        """
-        for original_character, new_character in replace_list.items():
-            input_string = input_string.replace(original_character,
-                                                new_character)
-        return input_string
-
-    def build_arrhenius(equation_object, equation_type):
-        """
-        Builds Arrhenius coefficient string
-
-        :param equation_objects
-            cantera equation object
-        :param equation_type:
-            string of equation type
-        """
-        if equation_type == 'PlogReaction':
-            coeff_sum = equation_object[0]
-            equation_object = equation_object[1][1]
-            if coeff_sum == 1:
-                pre_exponential_factor = equation_object.pre_exponential_factor
-            if coeff_sum == 2:
-                pre_exponential_factor = equation_object.pre_exponential_factor*10**3
-            if coeff_sum == 3:
-                pre_exponential_factor = equation_object.pre_exponential_factor*10**6
-            temperature_exponent = equation_object.temperature_exponent
-            activation_energy = (equation_object.activation_energy /
-                                 calories_constant)
-        else:
-            coeff_sum = sum(equation_object.reactants.values())
-            pre_exponential_factor = equation_object.rate.pre_exponential_factor
-            temperature_exponent = equation_object.rate.temperature_exponent
-            activation_energy = (equation_object.rate.activation_energy /
-                                calories_constant)
-
-        if equation_type == 'ElementaryReaction':
-            if coeff_sum == 1:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor))
-            if coeff_sum == 2:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**3))
-            if coeff_sum == 3:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**6))
-        if equation_type == 'ThreeBodyReaction':
-            if coeff_sum == 1:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**3))
-            if coeff_sum == 2:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**6))
-
-        if (equation_type != 'ElementaryReaction'
-            and equation_type != 'ThreeBodyReaction'):
-            pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor))
-
-        arrhenius = [pre_exponential_factor,
-                    temperature_exponent,
-                    activation_energy
-                    ]
-        return str(arrhenius).replace("\'", "")
-
-    def build_modified_arrhenius(equation_object, t_range):
-        """
-        Builds Arrhenius coefficient strings for high and low temperature ranges
-
-        :param equation_objects
-            cantera equation object
-        :param t_range:
-            simple string ('high' or 'low') to designate temperature range
-        """
-
-        if t_range == 'high':
-            pre_exponential_factor = equation_object.high_rate.pre_exponential_factor
-            temperature_exponent = equation_object.high_rate.temperature_exponent
-            activation_energy = (equation_object.high_rate.activation_energy /
-                                calories_constant)
-            if len(equation_object.products) == 1:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**3))
-            else:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor))
-            arrhenius_high = [pre_exponential_factor,
-                                temperature_exponent,
-                                activation_energy
-                                ]
-            return str(arrhenius_high).replace("\'", "")
-
-        if t_range == 'low':
-            pre_exponential_factor = equation_object.low_rate.pre_exponential_factor
-            temperature_exponent = equation_object.low_rate.temperature_exponent
-            activation_energy = (equation_object.low_rate.activation_energy /
-                                calories_constant)
-
-            if len(equation_object.products) == 1:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**6))
-            else:
-                pre_exponential_factor = str(
-                                '{:.5E}'.format(pre_exponential_factor*10**3))
-            arrhenius_low = [pre_exponential_factor,
-                            temperature_exponent,
-                            activation_energy
-                            ]
-            return str(arrhenius_low).replace("\'", "")
-
-    def build_falloff(j):
-        """
-        Creates falloff reaction Troe parameter string
-
-        param j:
-            Cantera falloff parameters object
-        """
-        falloff_string = str(
-                    ',\n        falloff = Troe(' +
-                    'A = ' + str(j[0]) +
-                    ', T3 = ' + str(j[1]) +
-                    ', T1 = ' + str(j[2]) +
-                    ', T2 = ' + str(j[3]) + ')       )\n\n'
+            #check if species has defined transport data, and write that if so
+            if species.transport:
+                species_string += (
+                    f'    transport = gas_transport(\n' +
+                    indent[15] + f'geom = "{species.transport.geometry}",\n' +
+                    indent[15] + f'diam = {species.transport.diameter * 1e10}, \n' +
+                    indent[15] + f'well_depth = {species.transport.well_depth / ct.boltzmann}, \n' +
+                    indent[15] + f'polar = {species.transport.polarizability * 1e30}, \n' +
+                    indent[15] + f'rot_relax = {species.transport.rotational_relaxation}'
                     )
-        return falloff_string
+                if species.transport.dipole != 0:
+                    dipole = species.transport.dipole / DEBEYE_CONVERSION
+                    species_string += ', \n' + indent[15] + f'dipole= {dipole}'
+                species_string += ')\n'
+            
+            species_string += '       )\n\n'
+            the_file.write(species_string)
 
-    def build_species_string():
-        """
-        Formats species list at top of mechanism file
-        """
-        species_list_string = ''
-        line = 1
-        for sp_str in trimmed_solution.species_names:
-            #get length of string next species is added
-            length_new = len(sp_str)
-            length_string = len(species_list_string)
-            total = length_new +length_string +3
-            #if string will go over width, wrap to new line
-            if line == 1:
-                if total >= 55:
-                    species_list_string += '\n'
-                    species_list_string += ' ' * 17
-                    line += 1
-            if line > 1:
-                if total >= 70 * line:
-                    species_list_string += '\n'
-                    species_list_string += ' ' * 17
-                    line += 1
-            species_list_string += sp_str + ' '
-        return species_list_string
+        # Write reactions to file
+        the_file.write(section_break('Reactions'))
 
-    #Write title block to file
+        # write data for each reaction
+        for idx, reaction in enumerate(solution.reactions()):
 
-    section_break('CTI File converted from Solution Object')
-    unit_string = "units(length = \"cm\", time = \"s\"," +\
-                        " quantity = \"mol\", act_energy = \"cal/mol\")"
-    f.write(unit_string + '\n\n')
+            reaction_string = f'#  Reaction {idx + 1}\n'
 
-    #Write Phase definition to file
+            if type(reaction) == ct.ElementaryReaction:
+                arrhenius = build_arrhenius(reaction.rate, 
+                                            sum(reaction.reactants.values()), 
+                                            ct.ElementaryReaction
+                                            )
+                reaction_string += f'reaction( "{reaction.equation}",  [{arrhenius}]'
 
-    element_names = eliminate(str(trimmed_solution.element_names),
-                              ['[',
-                              ']',
-                              '\'',
-                              ','])
-    element_names = element_names.replace('AR', 'Ar')
-    species_names = build_species_string()
-    phase_string = Template(
-                    'ideal_gas(name = \"$input_file_name_stripped\", \n' +
-                    '     elements = \"$elements\", \n' +
-                    '     species =""" $species""", \n' +
-                    '     reactions = \"all\", \n' +
-                    '     initial_state = state(temperature = $solution_temperature, '
-                    'pressure= $solution_pressure)   )       \n\n'
-                   )
+            elif type(reaction) == ct.ThreeBodyReaction:
+                arrhenius = build_arrhenius(reaction.rate, 
+                                            sum(reaction.reactants.values()), 
+                                            ct.ThreeBodyReaction
+                                            )
+                reaction_string += f'three_body_reaction( "{reaction.equation}",  [{arrhenius}]'
 
-    f.write(phase_string.substitute(
-                            elements=element_names,
-                            species=species_names,
-                            input_file_name_stripped=input_file_name_stripped,
-                            solution_temperature=solution_temperature,
-                            solution_pressure=solution_pressure
-                            ))
+                # trims efficiencies list
+                reduced_efficiencies = {s:reaction.efficiencies[s] 
+                                        for s in reaction.efficiencies 
+                                        if s in solution.species_names
+                                        }
+                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                if efficiencies_str:
+                    reaction_string += f',\n{indent[9]}efficiencies = " {efficiencies_str} "'
+                                    
+            elif type(reaction) == ct.FalloffReaction:
+                arrhenius_high = build_falloff_arrhenius(
+                    reaction.high_rate, sum(reaction.reactants.values()), 
+                    ct.FalloffReaction, 'high'
+                    )
+                arrhenius_low = build_falloff_arrhenius(
+                    reaction.low_rate, sum(reaction.reactants.values()), 
+                    ct.FalloffReaction, 'low'
+                    )
 
-    #Write species data to file
+                reaction_string += (f'falloff_reaction( "{reaction.equation}",\n' +
+                                    f'{indent[9]}kf = {arrhenius_high},\n' +
+                                    f'{indent[9]}kf0 = {arrhenius_low}'
+                                    )
+                
+                # need to print additional falloff parameters if present
+                if reaction.falloff.parameters.size > 0:
+                    falloff_str = build_falloff(reaction.falloff.parameters, reaction.falloff.type)
+                    reaction_string += ',\n' + indent[9] + 'falloff = ' + falloff_str
+                
+                # trims efficiencies list
+                reduced_efficiencies = {s:reaction.efficiencies[s] 
+                                        for s in reaction.efficiencies 
+                                        if s in solution.species_names
+                                        }
+                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                if efficiencies_str:
+                    reaction_string += f',\n{indent[9]}efficiencies = " {efficiencies_str} "'
+            
+            elif type(reaction) == ct.ChemicallyActivatedReaction:
+                arrhenius_high = build_falloff_arrhenius(
+                    reaction.high_rate, sum(reaction.reactants.values()), 
+                    ct.ChemicallyActivatedReaction, 'high'
+                    )
+                arrhenius_low = build_falloff_arrhenius(
+                    reaction.low_rate, sum(reaction.reactants.values()), 
+                    ct.ChemicallyActivatedReaction, 'low'
+                    )
 
-    section_break('Species data')
-    for sp_index, name in enumerate(trimmed_solution.species_names):
-        #joules/kelvin, boltzmann constant
-        boltzmann = ct.boltzmann
-        #1 debye = d coulomb-meters
-        debeye_conversion_constant = 3.33564e-30
-        species = trimmed_solution.species(sp_index)
-        name = str(trimmed_solution.species(sp_index).name)
-        nasa_coeffs = trimmed_solution.species(sp_index).thermo.coeffs
-        replace_list_1 = {'{':'\"',
-                          '}':'\"',
-                          '\'':'',
-                          ':  ':':',
-                          '.0':"",
-                          ',':'',
-                          ' ': '  '
-                          }
-        replace_list_2 = {':  ':':'
-                          }
-        #build 7-coeff NASA polynomial array
-        nasa_coeffs_1 = []
-        for j, k in enumerate(nasa_coeffs):
-            coeff = "{:.9e}".format(nasa_coeffs[j+8])
-            nasa_coeffs_1.append(coeff)
-            if j == 6:
-                nasa_coeffs_1 = wrap_nasa(eliminate(str(nasa_coeffs_1),
-                                                    {'\'':""}))
-                break
-        nasa_coeffs_2 = []
-        for j, k in enumerate(nasa_coeffs):
-            coeff = "{:.9e}".format(nasa_coeffs[j+1])
-            nasa_coeffs_2.append(coeff)
-            if j == 6:
-                nasa_coeffs_2 = wrap_nasa(eliminate(
-                                            str(nasa_coeffs_2),
-                                            {'\'':""}))
-                break
-        #Species attributes from trimmed solution object
-        composition = replace_multiple(
-                                        str(species.composition),
-                                            replace_list_1)
-        composition = replace_multiple(
-                                        str(composition),
-                                            replace_list_2)
-        nasa_range_1 = str([species.thermo.min_temp, nasa_coeffs[0]])
-        nasa_range_2 = str([nasa_coeffs[0], species.thermo.max_temp])
-        #check if species has defined transport data
-        if bool(species.transport) is True:
-            transport_geometry = species.transport.geometry
-            diameter = str(species.transport.diameter*(10**10))
-            well_depth = str(species.transport.well_depth/boltzmann)
-            polar = str(species.transport.polarizability*10**30)
-            rot_relax = str(species.transport.rotational_relaxation)
-            dipole = str(species.transport.dipole/debeye_conversion_constant)
-            #create and fill string templates for each species
-            if species.transport.dipole != 0:
-                species_string = Template(
-                        'species(name = "$name",\n' +
-                        '    atoms = $composition, \n' +
-                        '    thermo = (\n' +
-                        '       NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n' +
-                        '       NASA(   $nasa_range_2, $nasa_coeffs_2  )\n' +
-                        '               ),\n'
-                        '    transport = gas_transport(\n' +
-                        '                   geom = \"$transport_geometry\",\n' +
-                        '                   diam = $diameter, \n' +
-                        '                   well_depth = $well_depth, \n' +
-                        '                   polar = $polar, \n' +
-                        '                   rot_relax = $rot_relax, \n' +
-                        '                   dipole= $dipole) \n' +
-                        '        )\n\n'
-                        )
-                f.write(species_string.substitute(
-                            name=name,
-                            composition=composition,
-                            nasa_range_1=nasa_range_1,
-                            nasa_coeffs_1=nasa_coeffs_1,
-                            nasa_range_2=nasa_range_2,
-                            nasa_coeffs_2=nasa_coeffs_2,
-                            transport_geometry=transport_geometry,
-                            diameter=diameter,
-                            well_depth=well_depth,
-                            polar=polar,
-                            rot_relax=rot_relax,
-                            dipole=dipole
-                            ))
-            if species.transport.dipole == 0:
-                species_string = Template(
-                        'species(name = "$name",\n'
-                        '    atoms = $composition, \n'
-                        '    thermo = (\n'
-                        '       NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n'
-                        '       NASA(   $nasa_range_2, $nasa_coeffs_2  )\n'
-                        '               ),\n'
-                        '    transport = gas_transport(\n'
-                        '                   geom = \"$transport_geometry\",\n'
-                        '                   diam = $diameter, \n'
-                        '                   well_depth = $well_depth, \n'
-                        '                   polar = $polar, \n'
-                        '                   rot_relax = $rot_relax) \n'
-                        '        )\n\n'
-                        )
-                f.write(species_string.substitute(
-                            name=name,
-                            composition=composition,
-                            nasa_range_1=nasa_range_1,
-                            nasa_coeffs_1=nasa_coeffs_1,
-                            nasa_range_2=nasa_range_2,
-                            nasa_coeffs_2=nasa_coeffs_2,
-                            transport_geometry=transport_geometry,
-                            diameter=diameter,
-                            well_depth=well_depth,
-                            polar=polar,
-                            rot_relax=rot_relax,
-                            ))
-        if bool(species.transport) is False:
-            species_string = Template(
-                        'species(name = "$name",\n'
-                        '    atoms = $composition, \n'
-                        '    thermo = (\n'
-                        '       NASA(   $nasa_range_1, $nasa_coeffs_1  ),\n'
-                        '       NASA(   $nasa_range_2, $nasa_coeffs_2  )\n'
-                        '               ),\n'
-                        '        )\n\n'
-                        )
-            f.write(species_string.substitute(
-                            name=name,
-                            composition=composition,
-                            nasa_range_1=nasa_range_1,
-                            nasa_coeffs_1=nasa_coeffs_1,
-                            nasa_range_2=nasa_range_2,
-                            nasa_coeffs_2=nasa_coeffs_2,
-                            ))
+                reaction_string += (f'chemically_activated_reaction( "{reaction.equation}",\n' +
+                                    f'{indent[15]} kLow = {arrhenius_low},\n' +
+                                    f'{indent[15]} kHigh = {arrhenius_high}'
+                                    )
+                
+                # need to print additional falloff parameters if present
+                if reaction.falloff.parameters.size > 0:
+                    falloff_str = build_falloff(reaction.falloff.parameters, reaction.falloff.type)
+                    reaction_string += ',\n' + indent[9] + 'falloff = ' + falloff_str
+                
+                # trims efficiencies list
+                reduced_efficiencies = {s:reaction.efficiencies[s] 
+                                        for s in reaction.efficiencies 
+                                        if s in solution.species_names
+                                        }
+                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                if efficiencies_str:
+                    reaction_string += f',\n{indent[8]} efficiencies = " {efficiencies_str} "'
 
-    #Write reactions to file
+            elif type(reaction) == ct.PlogReaction:
+                reaction_string += f'pdep_arrhenius( "{reaction.equation}",\n'
 
-    section_break('Reaction Data')
+                rates = []
+                for rate in reaction.rates:
+                    pressure = f'{rate[0] / ct.one_atm}'
+                    arrhenius = build_arrhenius(rate[1], 
+                                                sum(reaction.reactants.values()), 
+                                                ct.PlogReaction
+                                                )
+                    rates.append(f'{indent[15]}[({pressure}, "atm"), {arrhenius}]')
+                # want to get the list of rates with a comma and newline between each entry, 
+                # but not at the end.
+                reaction_string += ',\n'.join(rates)
+            
+            elif type(reaction) == ct.ChebyshevReaction:
+                reaction_string += f'chebyshev_reaction( "{reaction.equation}",\n'
+                
+                # need to modify first coefficient
+                coeffs = reaction.coeffs[:]
+                coeffs[0][0] -= math.log10(1e-3 ** (sum(reaction.reactants.values()) - 1))
 
-    #write data for each reaction in the Solution Object
-    for eq_index in range(len(trimmed_solution.reaction_equations())):
-        equation_string = str(trimmed_solution.reaction_equation(eq_index))
-        equation_object = trimmed_solution.reaction(eq_index)
-        equation_type = type(equation_object).__name__
-        m = str(eq_index+1)
-        if equation_type == 'ThreeBodyReaction':
-            #trimms efficiencies list
-            efficiencies = equation_object.efficiencies
-            trimmed_efficiencies = equation_object.efficiencies
-            for s in efficiencies:
-                if s not in trimmed_solution.species_names:
-                    del trimmed_efficiencies[s]
-            arrhenius = build_arrhenius(equation_object, equation_type)
-            replace_list_2 = {"{":  "\"",
-                              "\'": "",
-                              ": ": ":",
-                              ",":  " ",
-                              "}":  "\""
-                              }
-            efficiencies_string = replace_multiple(
-                                                str(trimmed_efficiencies),
-                                                    replace_list_2)
-            reaction_string = Template(
-                        '#  Reaction $m\n'
-                        'three_body_reaction( \"$equation_string\",  $Arr,\n'
-                        '       efficiencies = $Efficiencies) \n\n'
-                        )
-            f.write(reaction_string.substitute(
-                    m=m,
-                    equation_string=equation_string,
-                    Arr=arrhenius,
-                    Efficiencies=efficiencies_string
-                    ))
-        elif equation_type == 'ElementaryReaction':
-            arrhenius = build_arrhenius(equation_object, equation_type)
-            if equation_object.duplicate is True:
-                reaction_string = Template(
-                        '#  Reaction $m\n'
-                        'reaction( \"$equation_string\", $Arr,\n'
-                        '        options = \'duplicate\')\n\n'
-                        )
+                coeffs_strings = []
+                for coeff_row in coeffs:
+                    coeffs_strings.append('[' + ', '.join([f'{c:.6e}' for c in coeff_row]) + ']')
+                coeffs_string = f',\n{indent[15] + indent[9]}'.join(coeffs_strings)
+                
+                reaction_string += (
+                    f'{indent[15]} Tmin={reaction.Tmin}, Tmax={reaction.Tmax},\n' +
+                    f'{indent[15]} Pmin=({reaction.Pmin / ct.one_atm}, "atm"), Pmax=({reaction.Pmax / ct.one_atm}, "atm"),\n' +
+                    f'{indent[15]} coeffs=[{coeffs_string}]'
+                    )
+
             else:
-                reaction_string = Template(
-                        '#  Reaction $m\n'
-                        'reaction( \"$equation_string\", $Arr)\n\n'
-                        )
-            f.write(reaction_string.substitute(
-                    m=m,
-                    equation_string=equation_string,
-                    Arr=arrhenius
-                    ))
-        elif equation_type == 'FalloffReaction':
-            #trimms efficiencies list
-            efficiencies = equation_object.efficiencies
-            trimmed_efficiencies = equation_object.efficiencies
-            for s in efficiencies:
-                if s not in trimmed_solution.species_names:
-                    del trimmed_efficiencies[s]
-
-            kf = build_modified_arrhenius(equation_object, 'high')
-            kf0 = build_modified_arrhenius(equation_object, 'low')
-            replace_list_2 = {
-                            "{":"\"",
-                            "\'":"",
-                            ": ":":",
-                            ",":" ",
-                            "}":"\""
-                            }
-            efficiencies_string = replace_multiple(
-                                            str(trimmed_efficiencies),
-                                                replace_list_2)
-            reaction_string = Template(
-                        '#  Reaction $m\n' +
-                        'falloff_reaction( \"$equation_string\",\n' +
-                        '        kf = $kf,\n' +
-                        '        kf0   = $kf0,\n' +
-                        '        efficiencies = $Efficiencies'
-                        )
-            f.write(reaction_string.substitute(
-                    m=m,
-                    equation_string=equation_string,
-                    kf=kf,
-                    kf0=kf0,
-                    Efficiencies=efficiencies_string
-                    ))
-            j = equation_object.falloff.parameters
-            #If optional Arrhenius data included:
-            try:
-                falloff_str = build_falloff(j)
-                f.write(falloff_str)
-            except IndexError:
-                f.write('\n           )\n\n')
-        elif equation_type == 'PlogReaction':
-            reaction_string = Template('#  Reaction $m\n' + \
-                            'pdep_arrhenius( \"$equation_string\",\n')
-            reaction_string = reaction_string.substitute(
-                    m=m,
-                    equation_string=equation_string)
-            sum_coeffs = sum(equation_object.reactants.values())
-            for rate_line in equation_object.rates:
-                pressure = str('{:f}'.format(rate_line[0]/ct.one_atm))
-                arrhenius = build_arrhenius((sum_coeffs,rate_line), equation_type)
-                arrhenius = arrhenius[1:-1]
-                reaction_string = Template(
-                        reaction_string + 
-                        "               [($pressure, 'atm'), $Arr],\n")
-                reaction_string = reaction_string.substitute(
-                        pressure=pressure,
-                        Arr = arrhenius)
-            if equation_object.duplicate is True:
-                reaction_string = reaction_string + \
-                                '               options=\'duplicate\')\n\n'
-            else:
-                reaction_string = reaction_string[:-1]
-                reaction_string = reaction_string + ')\n\n'
-            f.write(reaction_string)
-        else:
-            print('Error: Unknown reaction type')
-            exit()
-    f.close()
-    return output_file_name
-
-    """
-    #test mechanism file
-
-    original_solution = solution
-    new_solution = ct.Solution(output_file_name)
-    test(original_solution, new_solution)
-    return output_file_name
-    """
+                raise NotImplementedError(f'Unsupported reaction type: {type(reaction)}')
+            
+            if reaction.duplicate:
+                reaction_string += ',\n' + indent[8] + 'options = "duplicate"'
+                                
+            reaction_string += ')\n\n'
+            the_file.write(reaction_string)
+    
+    return output_filename

@@ -1,245 +1,191 @@
+"""Module containing sensitivity analysis reduction stage. """
+import logging
+
+import numpy as np
 import cantera as ct
 
-from create_trimmed_model import trim
-from simulation import Simulation
-from drgep import get_rates
-from readin_initial_conditions import readin_conditions
-import numpy as np
-import os
-import helper
+from . import soln2cti
+from .sampling import sample_metrics, calculate_error, read_metrics, SamplingInputs
+from .reduce_model import trim, ReducedModel
+
+# Taken from http://stackoverflow.com/a/22726782/1569494
+try:
+    from tempfile import TemporaryDirectory
+except ImportError:
+    from contextlib import contextmanager
+    import shutil
+    import tempfile
+    import errno
+
+    @contextmanager
+    def TemporaryDirectory():
+        name = tempfile.mkdtemp()
+        try:
+            yield name
+        finally:
+            try:
+                shutil.rmtree(name)
+            except OSError as e:
+                # Reraise unless ENOENT: No such file or directory
+                # (ok if directory has already been deleted)
+                if e.errno != errno.ENOENT:
+                    raise
 
 
-def create_limbo(reduced_model, ep_star, drgep_coeffs, safe):
+def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limbo, 
+                            num_threads=1
+                            ):
+    """Calculate error induced by removal of each limbo species
 
-	"""
-	Creates a list of species in limbo for use during a sensitivity analysis.
+    Parameters
+    ----------
+    starting_model : ReducedModel
+        Container with model and file information
+    sample_inputs : SamplingInputs
+        Contains filenames for sampling
+    metrics : numpy.ndarray
+        Calculated metrics for starting model, used for evaluating error
+    species_limbo : list of str
+        List of species to consider removal
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
+    
+    Returns
+    -------
+    species_errors : numpy.ndarray
+        Maximum errors induced by removal of each limbo species
 
-	Parameters
-	----------
-
-	reduced_model: The model reduced by the previous reduction
-	ep_star: Epsilon star value for the sensitivity analysis
-	drgep_coeffs: The dictionary of direct interaction coefficients
-	safe: species that are safe from being removed under any condition
-
-	Returns
-	-------
-
-	A list of all species in limbo.
-	
-	"""
-	
-	limbo = []
-	reduc_species = []
-	species_objex = reduced_model.species()
-	for sp in species_objex:
-		reduc_species.append(sp.name)
-	for sp in reduc_species:
-		# All species that fit the condition of being in limbo are added to a list.
-		if sp in drgep_coeffs and drgep_coeffs[sp] < ep_star and (not sp in limbo) and (not sp in safe):
-			limbo.append(sp)
-	return limbo
-
-def get_limbo_dic(original_model, reduced_model, limbo, final_error, id_detailed, conditions_array):
-
-	"""
-	Creates a dictionary of all of the species in limbo and their errors for sensitivity analysis.
-
-	Parameters
-	----------
-
-	original_model: The original version of the model being reduced
-	reduced_model: The model produced by the previous reduction
-	limbo: A list of the species in limbo
-	final_error: Error percentage between the reduced and origanal models
-	id_detailed: The ignition delays for each simulation of the original model
-	conditions_array: An array holding the initial conditions for simulations
-	
-	Returns
-	-------
-
-	A dictionary with species error to be used for sensitivity anaylsis.
-
-	"""
-
-	dic = {}
-
-	# For information on how this is set up, refer to run_sa function.
-	og_excl = []
-	keep = []
-	og_sn = []
-	new_sn = []
-
-	# Append species names
-	species_objex = reduced_model.species()
-	for sp in species_objex:
-		new_sn.append(sp.name)
-
-	# Append species names
-	species_objex = original_model.species()
-	for sp in species_objex:
-		og_sn.append(sp.name)
-
-	# If its in original model, and new model then keep
-	for sp in og_sn:
-		if sp in new_sn:
-			keep.append(sp)
-	
-	# If its not being kept, exclude (all that were removed in original reduction)
-	for sp in original_model.species():
-		if not (sp.name in keep):
-			og_excl.append(sp.name)
-
-	for sp in limbo: # For all species in limbo
-		excluded = [sp]
-		for p in og_excl:
-			excluded.append(p) # Add that species to the list of exclusion.
-		# Remove species from the model.
-		new_sol_obs = trim(original_model,excluded,"sa_trim.cti")
-		new_sol = new_sol_obs[1]
-
-		# Simulated reduced solution
-		new_sim = helper.setup_simulations(conditions_array,new_sol) # Create simulation objects for reduced model for all conditions
-	
-		try:	
-			id_new = helper.simulate(new_sim) # Run simulations and process results
-		except ct.CanteraError:
-			limbo.remove(sp)
-			id_new = 0
-	
-		error = (abs(id_new - id_detailed)/id_detailed)*100
-		error = round(np.max(error), 2)
-		print(sp + ": " + str(error))
-		error = abs(error - final_error)
-		dic[sp] = error # Add adjusted error to dictionary.
-	return dic
-
-def dic_lowest(dic):
-
-	"""
-	Gets the key with the lowest value in the dictionary.
-
-	Parameters
-	----------
-
-	dic: The dictionary to get the lowest value out of
-
-	Returns
-	-------
-
-	The key with the lowest value in the dictionary.
-
-	"""
-
-	lowest = 100000000
-	s = "error"
-	for sp in dic:
-		if dic[sp] < lowest:
-			lowest = dic[sp]
-			s = sp
-	return s
+    """
+    species_errors = np.zeros(len(species_limbo))
+    with TemporaryDirectory() as temp_dir:
+        for idx, species in enumerate(species_limbo):
+            test_model = trim(
+                starting_model.filename, [species], f'reduced_model_{species}.cti'
+                )
+            test_model_file = soln2cti.write(
+                test_model, f'reduced_model_{species}.cti', path=temp_dir
+                )
+            reduced_model_metrics = sample_metrics(
+                sample_inputs, test_model_file, num_threads=num_threads
+                )
+            species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
+    
+    return species_errors
 
 
-def run_sa(original_model, reduced_model, final_error, conditions_file, target, keepers, error_limit, limbo):
-	"""Runs a sensitivity analysis on a resulting reduced model.
-	
-	Parameters
-	----------
-	original_model: The original version of the model being reduced
-	reduced_model: The model produced by the previous reduction
-	final_error: Error percentage between the reduced and origanal models
-	conditions_file: The file holding the initial conditions for simulations
-	target: The target species for the reduction
-	keepers: A list of species that should be retained no matter what
-	error_limit: The maximum allowed error between the reduced and original models
-	limbo: A list of species to be considered for reduction by the sensativity analysis
-	
-	Returns
-	-------
-	The model after the sensitivity analysis has been preformed on it.
+def run_sa(model_file, starting_error, sample_inputs, error_limit, 
+           species_safe, algorithm_type='greedy', species_limbo=[], 
+           num_threads=1, path=''
+           ):
+    """Runs a sensitivity analysis to remove species on a given model.
+    
+    Parameters
+    ----------
+    model_file : str
+        Model being analyzed
+    starting_error : float
+        Error percentage between the reduced and original models
+    sample_inputs : SamplingInputs
+        Contains filenames for sampling
+    error_limit : float
+        Maximum allowable error level for reduced model
+    species_safe : list of str
+        List of species names to always be retained
+    algorithm_type : {'initial', 'greedy'}
+        Type of sensitivity analysis: initial (order based on initial error), or 
+        greedy (all species error re-evaluated after each removal)
+    species_limbo : list of str, optional
+        List of species to consider; if empty, consider all not in ``species_safe``
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
+    path : str, optional
+        Optional path for writing files
+    
+    Returns
+    -------
+    ReducedModel
+        Return reduced model and associated metadata
 
-	"""
+    """
+    current_model = ReducedModel(
+        model=ct.Solution(model_file), error=starting_error, filename=model_file
+        )
 
-	if conditions_file:
-		conditions_array = readin_conditions(str(conditions_file))
-	elif not conditions_file:
-		print("Conditions file not found")
-		exit()
+    # The metrics for the starting model need to be determined or read
+    initial_metrics = sample_metrics(
+        sample_inputs, model_file, reuse_saved=True, num_threads=num_threads, path=path
+        )
 
-	# Turn conditions array into unran simulation objects for the original solution
-	sim_array = helper.setup_simulations(conditions_array, original_model)
-	id_detailed = helper.simulate(sim_array)  # Run simulations and process results
+    if not species_limbo:
+        species_limbo = [
+            sp for sp in current_model.model.species_names if sp not in species_safe
+            ]
 
-	rate_edge_data = get_rates(sim_array, original_model) # Get edge weight calculation data.
-	
-	if (id_detailed.all() == 0): # Ensure that ignition occured
-		print("Original model did not ignite.  Check initial conditions.")
-		exit()
-	old = reduced_model
+    logging.info(f'Beginning sensitivity analysis stage, using {algorithm_type} approach.')
+    logging.info(53 * '-')
+    logging.info('Number of species |  Species removed  | Max error (%)')
 
-	while True:
+    # Need to first evaluate all induced errors of species; for the ``initial`` method,
+    # this will be the only evaluation.
+    species_errors = evaluate_species_errors(
+        current_model, sample_inputs, initial_metrics, species_limbo, 
+        num_threads=num_threads
+        )
 
-		og_sn = []  # Original species names
-		new_sn = []  # Species names in current reduced model
-		keep = []  # Species retained from removals
-		og_excl = []  # Species that will be excluded from the final model (Reduction will be preformed on original model)
+    # Use a temporary directory to avoid cluttering the working directory with
+    # all the temporary model files
+    with TemporaryDirectory() as temp_dir:
+        while species_limbo:
+            # use difference between error and current error to find species to remove
+            idx = np.argmin(np.abs(species_errors - current_model.error))
+            species_errors = np.delete(species_errors, idx)
+            species_remove = species_limbo.pop(idx)
 
-		# Append species names
-		species_objex = old.species()
-		for sp in species_objex:
-			new_sn.append(sp.name)
+            test_model = trim(
+                current_model.filename, [species_remove], f'reduced_model_{species_remove}.cti'
+                )
+            test_model_file = soln2cti.write(
+                test_model, output_filename=f'reduced_model_{species_remove}.cti', path=temp_dir
+                )
 
-		# Append species names
-		species_objex = original_model.species()
-		for sp in species_objex:
-			og_sn.append(sp.name)
+            reduced_model_metrics = sample_metrics(
+                sample_inputs, test_model_file, num_threads=num_threads, path=path
+                )
+            error = calculate_error(initial_metrics, reduced_model_metrics)
 
-		# If its in original model, and new model
-		for sp in og_sn:
-			if sp in new_sn:
-				keep.append(sp)
+            logging.info(f'{test_model.n_species:^17} | {species_remove:^17} | {error:^.2f}')
 
-		# If its not being kept, exclude (all that were removed in original reduction)
-		for sp in original_model.species():
-			if not (sp.name in keep):
-				og_excl.append(sp.name)
+            # Ensure new error isn't too high
+            if error > error_limit:
+                break
+            else:
+                current_model = ReducedModel(model=test_model, filename=test_model_file, error=error)
 
-		if len(limbo) == 0:
-			return old
+            # If using the greedy algorithm, now need to reevaluate all species errors
+            if algorithm_type == 'greedy':
+                species_errors = evaluate_species_errors(
+                    current_model, sample_inputs, initial_metrics, species_limbo, 
+                    num_threads=num_threads
+                    )
+                if min(species_errors) > error_limit:
+                    break
+    
+    # Final model; may need to rewrite
+    reduced_model = ReducedModel(
+        model=current_model.model, filename='reduced_model.cti', error=current_model.error
+        )
+    soln2cti.write(reduced_model.model, reduced_model.filename, path=path)
 
-		print("In limbo:")
-		print(limbo)
-
-		# Calculate error for removing each limbo species.
-		dic = get_limbo_dic(original_model,old,limbo,final_error, id_detailed,conditions_array)
-		rm = dic_lowest(dic)  # Species that should be removed (Lowest error).
-		exclude = [rm]
-		limbo.remove(rm) # Remove species from limbo
-
-		for sp in og_excl:  # Add to list of species that should be excluded from final model.
-			exclude.append(sp)
-
-		print()
-		print("attempting to remove " + rm)
-		
-		# Remove exclusion list from original model
-		new_sol_obs = trim(original_model,exclude,"sa_trim.cti")
-		new_sol = new_sol_obs[1]
-
-		# Simulated reduced solution
-		new_sim = helper.setup_simulations(conditions_array,new_sol)  # Create simulation objects for reduced model for all conditions
-		id_new = helper.simulate(new_sim)  # Run simulations and process results
-
-		error = (abs(id_new - id_detailed)/id_detailed)*100
-		error = round(np.max(error), 2)
-		print("Error of: " + str(error))
-		print()
-
-		# If error is greater than allowed, previous reduced model was final reduction.
-		if error > error_limit:
-			print("Final Solution:")
-			print(str(old.n_species) + " Species")
-			return old
-
-		else:  # If error is still within allowed limit, loop through again to further reduce.
-			old = new_sol
+    logging.info(53 * '-')
+    logging.info('Sensitivity analysis stage complete.')
+    logging.info(f'Skeletal model: {reduced_model.model.n_species} species and '
+                 f'{reduced_model.model.n_reactions} reactions.'
+                 )
+    logging.info(f'Maximum error: {reduced_model.error:.2f}%')
+    return reduced_model

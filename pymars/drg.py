@@ -1,467 +1,312 @@
 """Module containing Directed Relation Graph (DRG) reduction method."""
-from collections import Counter
-import time
+import logging
 import os
-import sys
-
 import networkx
 import numpy as np
 import cantera as ct
 
-import soln2ck
-import soln2cti
-import helper
-from simulation import Simulation
-from create_trimmed_model import trim
-from readin_initial_conditions import readin_conditions
+from . import soln2cti
+from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
+from .reduce_model import trim, ReducedModel
 
 
-def trim_drg(total_edge_data, solution_object, threshold_value, keeper_list, done, target_species):
-    """
-    Determines which species to remove based on their DICs compared to the threshold value and a simple graph search.
+def create_drg_matrix(state, solution):
+    """Creates DRG adjacency matrix based on direct interaction coefficients
 
     Parameters
     ----------
-    total_edge_data :
-        Information for calculating the DICs for the graph edge weights
-    solution_object :
-        The solution being reduced
-    threshold_value :
-        User specified threshold value
-    keeper_list :
-        Species that should always be kept
-    done :
-        Determines wether or not the reduction is complete
-    target_species :
-        The target species for the search in the array
+    state : tuple
+        Tuple of state with temperature, pressure, and species mass fractions
+    solution : cantera.Solution
+        Cantera object of the solution being analyzed
 
     Returns
     -------
-    Array of species that should be reduced at this threshold level
+    adjacency_matrix : numpy.ndarray
+        Adjacency matrix based on calculated direct interaction coefficients
 
     """
+    temp, pressure, mass_fractions = state
+    solution.TPY = temp, pressure, mass_fractions
 
-    start_time = time.time()
+    net_stoich = solution.product_stoich_coeffs() - solution.reactant_stoich_coeffs()
+    flags = np.where(((solution.product_stoich_coeffs() != 0) |
+                        (solution.reactant_stoich_coeffs() !=0 )
+                        ), 1, 0)
 
-    # Initalize solution and components
-    solution = solution_object
-    species_objects = solution.species()
-    reaction_objects = solution.reactions()
-
-    # Use the networkx library to create a weighted graph of all of the species and their dependencies on each other.
-    graph = networkx.DiGraph()
-
-    # A list of species that are to be retained for this threshold value
-    safe = []
-
-    # Calculate edge weights based on list received from get_rate_data
-    # Initial condition
-    for ic in total_edge_data.keys():  # For each initial condition
-        # Timestep
-        # Set edge values for the graph
-        for tstep in total_edge_data[ic].keys():
-            for species in species_objects:  # Make graph
-                graph.add_node(species.name)
-            numerator = total_edge_data[ic][tstep][1]
-            denominator = total_edge_data[ic][tstep][0]
-            # Each species
-            for edge in numerator:
-                try:
-                    edge_name = edge.split('_', 1)
-                    species_a_name = edge_name[0]
-                    species_b_name = edge_name[1]
-
-                    # DRG weight between two species
-                    if denominator[species_a_name] != 0:
-                        weight = abs(
-                            float(numerator[edge]) / float(denominator[species_a_name]))
-                        if graph.has_edge(species_a_name, species_b_name):
-                            old_weight = graph[species_a_name][species_b_name]['weight']
-
-                            # Only include the weight if it is greater than the threshold value.
-                            if weight > old_weight and weight <= 1 and weight > threshold_value:
-                                graph.add_weighted_edges_from(
-                                    [(species_a_name, species_b_name, weight)])
-                            elif weight > 1:
-                                print(
-                                    "Error.  Edge weights should not be greater than one.")
-                                exit()
-                        elif threshold_value <= weight <= 1.0:
-                            graph.add_weighted_edges_from(
-                                [(species_a_name, species_b_name, weight)])
-                        elif weight > 1:
-                            print(
-                                "Error.  Edge weights should not be greater than one.")
-                            exit()
-                except IndexError:
-                    print(edge)
-                    continue
-
-            # Search graph for max values to each species based on targets
-            dic = graph_search(graph, target_species)
-            # Add to the safe list if it is not already there.
-            for sp in dic:
-                if sp not in safe:
-                    safe.append(sp)
-            graph.clear()  # Reset graph
-
-    core_species = []
-    species_objects = solution_object.species()
-
-    # Take all species that are over the threshold value and add them to essentail species.
-    essential_species = []
-    for sp in species_objects:
-        if sp.name in safe:
-            if sp not in essential_species:
-                essential_species.append(sp)
-    done[0] = False
-
-    # Add all species in essential species to core species
-    for sp in essential_species:
-        if sp not in core_species:
-            core_species.append(sp.name)
-
-    # Add all of the must keep species to core species
-    # Specified by the user.  A list of species that also need to be kept.
-    retained_species = keeper_list
-    for sp in retained_species:
-        if sp not in core_species:
-            core_species.append(sp)
-
-    exclusion_list = []
-
-    # Exclude everythong not in core species.
-    for species in solution_object.species():
-        # If its not one of our species we must keep, add it to the list of species to be trimmed.
-        if species.name not in core_species:
-            exclusion_list.append(species.name)
-
-    return exclusion_list
-
-
-def run_drg(solution_object, conditions_file, error_limit, target_species,
-            retained_species, model_file, final_error, epsilon_star=.1):
-    """
-    Main function for running DRG reduction.
-
-    Parameters
-    ----------
-    solution_object : ~cantera.Solution
-        A Cantera object of the solution to be reduced.
-    conditions_file : str
-        Name of file with list of autoignition initial conditions.
-    error_limit : float
-        Maximum allowable error level for reduced model.
-    target_species : list of str
-        List of target species
-    retained_species : list of str
-        List of species to always be retained
-    model_file : string
-        The path to the file where the solution object was generated from
-    final_error: singleton float
-        To hold the error level of simulation
-    epsilon_star: float
-        Epsilon star value for sensativity analysis
-
-    Returns
-    -------
-
-    Tuple of reduced Cantera solution object [0] and list of limbo species for SA [1]
-
-    """
-
-    assert target_species, 'Need to specify at least one target species.'
-
-    # Singleton to hold whether any more species can be cut from the simulation.
-    done = []
-    done.append(False)
-    threshold = 0.1  # Starting threshold value
-    threshold_increment = 0.1
-    num_iterations = 1
-    error = [10.0]
-
-    conditions_array = readin_conditions(conditions_file)
-
-    # Turn conditions array into unrun simulation objects for the original solution
-    sim_array = helper.setup_simulations(conditions_array, solution_object)
-    # Run simulations and process results
-    ignition_delay_detailed = helper.simulate(sim_array)
-    # Get edge weight calculation data.
-    rate_edge_data = get_rates_drg(sim_array, solution_object)
-
-    print("Testing for starting threshold value")
-    # Trim the solution at that threshold and find the error.
-    drg_loop_control(
-        solution_object, target_species, retained_species, model_file, error, threshold, done, rate_edge_data,
-        ignition_delay_detailed, conditions_array)
-
-    # While the error for trimming with that threshold value is greater than allowed.
-    while error[0] != 0 and threshold_increment > .001:
-        # Reduce the starting threshold value and try again.
-        threshold /= 10
-        threshold_increment /= 10
-        num_iterations += 1
-        drg_loop_control(
-            solution_object, target_species, retained_species, model_file,
-            error, threshold, done, rate_edge_data,
-            ignition_delay_detailed, conditions_array
+    # only consider contributions from reactions with nonzero net rates of progress
+    valid_reactions = np.where(solution.net_rates_of_progress != 0)[0]
+    if valid_reactions.size:
+        base_rates = np.abs(
+            net_stoich[:, valid_reactions] *
+            solution.net_rates_of_progress[valid_reactions]
             )
-        if error[0] <= 0.02:
-            error[0] = 0
+        denominator = np.sum(base_rates, axis=1)[:, np.newaxis]
 
-    print("Starting with a threshold value of " + str(threshold))
-    sol_new = solution_object
-    final_error[0] = 0
-    done[0] = False
+        numerator = np.zeros((solution.n_species, solution.n_species))
+        for sp_b in range(solution.n_species):
+            numerator[:, sp_b] += np.sum(
+                base_rates[:, np.where(flags[sp_b, valid_reactions])[0]], axis=1
+                )
+        #numerator = np.einsum('ij,kj->ik', base_rates, flags)
 
-    # Run the simulation until nothing else can be cut.
-    while not done[0] and error[0] < error_limit:
-        # Trim at this threshold value and calculate error.
-        sol_new = drg_loop_control(
-            solution_object, target_species, retained_species, model_file,
-            error, threshold, done, rate_edge_data,
-            ignition_delay_detailed, conditions_array
-            )
-        # If a new max species cut without exceeding what is allowed is reached, save that threshold.
-        if error_limit > error[0]:
-            max_t = threshold
-            final_error[0] = error[0]
-        # if (final_error[0] == error[0]): #If error wasn't increased, increase the threshold at a higher rate.
-        #	threshold = threshold + (threshold_increment * 4)
-        # if (threshold >= .01):
-        #        threshold_increment = .01
-        threshold += threshold_increment
-        threshold = round(threshold, num_iterations)
+        # May get divide by zero if an inert species is present, and denominator
+        # entry is zero.
+        with np.errstate(divide='ignore', invalid='ignore'):
+            adjacency_matrix = np.where(denominator != 0, numerator / denominator, 0)
 
-    limbo = []
-    if epsilon_star:
-        print("Calculating for DRGASA:")
+    else:
+        adjacency_matrix = np.zeros((solution.n_species, solution.n_species))
 
-        # Trim with ep star as threshold value and calculate error.
-        epstar_sol = drg_loop_control(
-            solution_object, target_species, retained_species, model_file,
-            error, epsilon_star, done, rate_edge_data,
-            ignition_delay_detailed, conditions_array
-            )
+    # set diagonals to zero, to avoid self-directing graph edges
+    np.fill_diagonal(adjacency_matrix, 0.0)
 
-        # Anything that was reduced at epstar threshold, add to limbo
-        for sp in sol_new.species_names:
-            if sp not in epstar_sol.species_names:
-                limbo.append(sp)
+    return adjacency_matrix
 
 
-    print("Greatest result: ")
-    sol_new = drg_loop_control(
-        solution_object, target_species, retained_species, model_file,
-        error, max_t, done, rate_edge_data,
-        ignition_delay_detailed, conditions_array
-        )
-
-    result = [sol_new, limbo]
-    return result
-
-
-def drg_loop_control(solution_object, target_species, retained_species, model_file, stored_error, threshold, done, rate_edge_data,
-                     ignition_delay_detailed, conditions_array
-                     ):
-    """Handles the reduction, simulation, and comparision for a single threshold value.
+def graph_search(graph, target_species):
+    """Search nodal graph and generate list of species to remove
 
     Parameters
     ----------
-    solution_object:
-        object being reduced
-    target_species : list of str
-        List of target species
-    retained_species : list of str
-        List of species to always be retained
-    model_file : string
-        The path to the file where the solution object was generated from
-    stored_error: signleton float
-        Error of this reduced model simulation
-    threshold : float
-        current threshold value
-    done : bool
-        are we done reducing yet?
-    rate_edge_data :
-        information for calculating the DICs for reduction
-    ignition_delay_detailed :
-        ignition delay of detailed model
-    conditions_array :
-        array holding information about initial conditions
-
-    Returns
-    -------
-    Reduced solution object for this threshold and updates error value
-
-    """
-
-    species_retained = []
-    printout = ''
-    print('Threshold     Species in Mech      Error')
-
-    # Run DRG and create new reduced solution
-    # Find out what to cut from the model
-    exclusion_list = trim_drg(
-                              rate_edge_data, solution_object, threshold,
-                              retained_species, done, target_species)
-
-    # Cut the exclusion list from the model.
-    new_solution_objects = trim(solution_object, exclusion_list, model_file)
-    species_retained.append(len(new_solution_objects[1].species()))
-
-    # Simulated reduced solution
-    # Create simulation objects for reduced model for all conditions
-    new_sim = helper.setup_simulations(conditions_array, new_solution_objects[1])
-    ignition_delay_reduced = helper.simulate(
-        new_sim)  # Run simulations and process results
-
-    if ignition_delay_detailed.all() == 0:  # Ensure that ignition occured
-        print("Original model did not ignite.  Check initial conditions.")
-        exit()
-
-    # Calculate error
-    error = (abs(ignition_delay_reduced -ignition_delay_detailed) /ignition_delay_detailed) *100  # Calculate error
-    printout += str(threshold) + '                 ' + str(len(new_solution_objects[1].species())) + '              ' + str(round(np.max(error), 2)) + '%' + '\n'
-    print(printout)
-    stored_error[0] = round(np.max(error), 2)
-
-    # Return new model.
-    new_solution_objects = new_solution_objects[1]
-    return new_solution_objects
-
-
-def get_rates_drg(sim_array, solution_object):
-    """Calculates values to be used in the calculation of Direct Interaction Coefficients
-
-    Parameters
-    ----------
-    sim_array :
-        Array of simulated simulation objects
-    solution_object :
-        Cantera object of the solution being reduced
-
-    Returns
-    -------
-    dict
-        Initial conditions and information for calculating DICs at each timestep. The subdictionaries have the
-        timestep as their keys and their values hold an array of numberator and denominator information for
-        calculating DICs
-
-    """
-
-    old_solution = solution_object
-    # Iterate through all initial conditions
-    total_edge_data = {}
-    for ic in sim_array:
-        ic_edge_data = {}
-        for tstep in ic.sample_points:  # Iterate through all timesteps
-            temp = tstep[0]  # Set up variables
-            pressure = tstep[1]
-            mass_fractions = np.array(tstep[2])
-
-            # Set up solution at current timestep
-            new_solution = old_solution
-            new_solution.TPY = temp, pressure, mass_fractions
-            new_reaction_production_rates = new_solution.net_rates_of_progress
-            new_species_prod_rates = new_solution.net_production_rates
-
-            denom = {}
-            numerator = {}
-            for spc in new_solution.species():
-                for i, reac in enumerate(new_solution.reactions()):
-                    reac_prod_rate = float(new_reaction_production_rates[i])
-                    reactants = reac.reactants
-                    products = reac.products
-                    all_species = reac.reactants
-                    all_species.update(reac.products)
-                    if reac_prod_rate != 0:
-                        if reac_prod_rate > 0:
-
-                            for species in products:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * products[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * products[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * products[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * products[species]))
-
-                            for species in reactants:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * reactants[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * reactants[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * reactants[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * reactants[species]))
-
-                        if reac_prod_rate < 0:
-
-                            for species in products:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * products[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * products[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * products[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * products[species]))
-
-                            for species in reactants:
-                                if species in denom:
-                                    denom[species] += abs(float(reac_prod_rate * reactants[species]))
-                                else:
-                                    denom[species] = abs(float(reac_prod_rate * reactants[species]))
-                                for species_b in all_species:
-                                    if species_b != species:
-                                        partial_name = species + '_' + species_b
-                                        if partial_name in numerator:
-                                            numerator[partial_name] += abs(float(reac_prod_rate * reactants[species]))
-                                        else:
-                                            numerator[partial_name] = abs(float(reac_prod_rate * reactants[species]))
-
-            ic_edge_data[temp] = [denom, numerator]
-        total_edge_data[ic] = ic_edge_data
-    return total_edge_data
-
-def graph_search(nx_graph, target_species):
-    """
-    Search nodal graph and generate list of species to remove
-
-    Parameters
-    ----------
-    nx_graph : obj
-        networkx graph object of solution
+    graph : networkx.DiGraph
+        graph representing reaction system
     target_species : list
         List of target species to search from
 
     Returns
     -------
-    essential_nodes : str
-        String containing names of essential species
+    reached_species : list of str
+        List of species reachable from targets in graph
 
     """
+    reached_species = []
+    for target in target_species:
+        reached_species += list(networkx.dfs_preorder_nodes(graph, target))
+    reached_species = list(set(reached_species))
 
-    if len(target_species) > 1:
-        essential_nodes = list()
-        for target in target_species:
-            essential = list(networkx.dfs_preorder_nodes(nx_graph, target))
-            for sp in essential:
-                if sp not in essential_nodes:
-                    essential_nodes.append(sp)
+    return reached_species
+
+
+def trim_drg(matrix, species_names, species_targets, threshold):
+    """
+
+    Parameters
+    ----------
+    matrix : np.ndarray
+        Adjacency matrix representing graph
+    species_names : list of str
+        List of all species names
+    species_targets : list of str
+        List of target species names
+    threshold : float
+        DRG threshold for trimming graph
+    
+    Returns
+    ------
+    species_reached : list of str
+        Names of species reached in graph search
+
+    """
+    name_mapping = {i: sp for i, sp in enumerate(species_names)}
+    graph = networkx.DiGraph(np.where(matrix >= threshold, matrix, 0.0))
+    networkx.relabel_nodes(graph, name_mapping, copy=False)
+    species_reached = graph_search(graph, species_targets)
+
+    return species_reached
+
+
+def reduce_drg(model_file, species_targets, species_safe, threshold, 
+               matrices, sample_inputs, sampled_metrics, 
+               previous_model=None, threshold_upper=None, num_threads=1,
+               path=''
+               ):
+    """Given a threshold and DRG matrix, reduce the model and determine the error.
+
+    Parameters
+    ----------
+    model_file : str
+        Filename for model being reduced
+    species_targets : list of str
+        List of target species names
+    species_safe : list of str
+        List of species to always be retained
+    threshold : float
+        DRG threshold for trimming graph
+    matrices : list of numpy.ndarray
+        List of DRG adjacency matrices determined from thermochemical state data
+    sample_inputs : SamplingInputs
+        Filename information for sampling (e.g., autoignition inputs/outputs)
+    sampled_metrics: numpy.ndarray
+        Global metrics from original model used to evaluate error
+    previous_model : ReducedModel, optional
+        Model produced at previous threshold level; used to avoid repeated work.
+    threshold_upper : float, optional
+        Optional upper threshold (epsilon^star) used to identify species for
+        further sensitivity analysis
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
+    path : str, optional
+        Optional path for writing files
+
+    Returns
+    -------
+    ReducedModel
+        Return reduced model and associated metadata
+
+    """
+    solution = ct.Solution(model_file)
+
+    species_retained = []
+    for matrix in matrices:
+        species_retained += trim_drg(matrix, solution.species_names, species_targets, threshold)
+    
+    # want to ensure retained species are the set of those reachable for each state
+    species_retained = list(set(species_retained))
+
+    if previous_model and len(species_retained) == previous_model.model.n_species:
+        return previous_model
+
+    species_removed = [sp for sp in solution.species_names
+                       if sp not in (species_retained + species_safe)
+                       ]
+
+    # Cut the exclusion list from the model.
+    reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
+    reduced_model_filename = soln2cti.write(
+        reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path
+        )
+
+    reduced_model_metrics = sample_metrics(
+        sample_inputs, reduced_model_filename, num_threads=num_threads, path=path
+        )
+    error = calculate_error(sampled_metrics, reduced_model_metrics)
+    
+    # If desired, now identify limbo species for future sensitivity analysis
+    limbo_species = []
+    if threshold_upper:
+        species_retained += trim_drg(
+            matrix, solution.species_names, species_targets, threshold_upper
+            )
+        limbo_species = [
+            sp for sp in solution.species_names
+            if sp not in (species_retained + species_safe + species_removed)
+            ]
+
+    return ReducedModel(
+        model=reduced_model, filename=reduced_model_filename, 
+        error=error, limbo_species=limbo_species
+        )
+
+
+def run_drg(model_file, sample_inputs, error_limit, species_targets,
+            species_safe, threshold_upper=None, num_threads=1, path=''
+            ):
+    """Main function for running DRG reduction.
+
+    Parameters
+    ----------
+    model_file : str
+        Original model file
+    sample_inputs : SamplingInputs
+        Contains filenames for sampling
+    error_limit : float
+        Maximum allowable error level for reduced model
+    species_targets : list of str
+        List of target species names
+    species_safe : list of str
+        List of species names to always be retained
+    threshold_upper: float, optional
+        Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
+    num_threads : int, optional
+        Number of CPU threads to use for performing simulations in parallel.
+        Optional; default = 1, in which the multiprocessing module is not used.
+        If 0, then use the available number of cores minus one. Otherwise,
+        use the specified number of threads.
+    path : str, optional
+        Optional path for writing files
+
+    Returns
+    -------
+    ReducedModel
+        Return reduced model and associated metadata
+
+    """
+    solution = ct.Solution(model_file)
+
+    assert species_targets, 'Need to specify at least one target species.'
+
+    # first, sample thermochemical data and generate metrics for measuring error
+    # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
+    # will be used to produce graphs for any threshold value.
+    sampled_metrics, sampled_data = sample(
+        sample_inputs, model_file, num_threads=num_threads, path=path
+        )
+
+    matrices = []
+    for state in sampled_data:
+        matrices.append(create_drg_matrix((state[0], state[1], state[2:]), solution))
+
+    # begin reduction iterations
+    logging.info('Beginning DRG reduction loop')
+    logging.info(45 * '-')
+    logging.info('Threshold | Number of species | Max error (%)')
+
+    # start with detailed (starting) model
+    previous_model = ReducedModel(model=solution, filename=model_file, error=0.0)
+
+    first = True
+    error_current = 0.0
+    threshold = 0.01
+    threshold_increment = 0.01
+    while error_current <= error_limit:
+        reduced_model = reduce_drg(
+            model_file, species_targets, species_safe, threshold, matrices, 
+            sample_inputs, sampled_metrics, previous_model=previous_model, 
+            threshold_upper=threshold_upper, num_threads=num_threads, path=path
+            )
+        error_current = reduced_model.error
+        num_species = reduced_model.model.n_species
+
+        # reduce threshold if past error limit on first iteration
+        if first and error_current > error_limit:
+            error_current = 0.0
+            threshold /= 10
+            threshold_increment /= 10
+            if threshold <= 1e-5:
+                raise SystemExit(
+                    'Threshold value dropped below 1e-5 without producing viable reduced model'
+                    )
+            logging.info('Threshold value too high, reducing by factor of 10')
+            continue
+        
+        logging.info(f'{threshold:^9.2e} | {num_species:^17} | {error_current:^.2f}')
+
+        threshold += threshold_increment
+        first = False
+        previous_model = reduced_model
+
+        # cleanup files
+        if previous_model.model.n_species != reduced_model.model.n_species:
+            os.remove(reduced_model.filename)
+    
+    if error_current > error_limit:
+        threshold -= (2 * threshold_increment)
+        reduced_model = reduce_drg(
+            model_file, species_targets, species_safe, threshold, matrices, 
+            sample_inputs, sampled_metrics, 
+            threshold_upper=threshold_upper, num_threads=num_threads, path=path
+            )
     else:
-        essential_nodes = list(
-            networkx.dfs_preorder_nodes(nx_graph, target_species[0]))
-
-    return essential_nodes
+        soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
+    
+    logging.info(45 * '-')
+    logging.info('DRG reduction complete.')
+    logging.info(f'Skeletal model: {reduced_model.model.n_species} species and '
+                 f'{reduced_model.model.n_reactions} reactions.'
+                 )
+    logging.info(f'Maximum error: {reduced_model.error:.2f}%')
+    return reduced_model

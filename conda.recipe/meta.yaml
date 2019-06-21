@@ -14,7 +14,7 @@ build:
 
 requirements:
   build:
-    - python >=3.5
+    - python >=3.6
     - setuptools
     - pip
 
@@ -24,6 +24,7 @@ requirements:
     - pytables
     - cantera >=2.3.0
     - networkx
+    - pyyaml
 
 test:
   imports:

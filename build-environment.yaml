@@ -9,7 +9,9 @@ dependencies:
   - cantera>=2.3.0
   - networkx
   - pytables
+  - pyyaml
   - sphinx
+  - sphinxcontrib-bibtex
   - nbsphinx
   - ipython
   - conda-build

@@ -1,0 +1,21 @@
+- kind: constant volume
+  pressure: 1.0
+  temperature: 1000
+  end-time: 10.0
+  fuel: 
+    CH4: 1.0
+  oxidizer:
+    O2: 1.0
+    N2: 3.76
+  equivalence-ratio: 1.0
+
+- kind: constant volume 
+  pressure: 1.0
+  temperature: 1200
+  end-time: 10.0
+  fuel: 
+    CH4: 1.0
+  oxidizer:
+    O2: 1.0
+    N2: 3.76
+  equivalence-ratio: 1.0
