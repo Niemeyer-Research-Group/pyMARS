@@ -32,7 +32,7 @@ class TestCompareModels:
         for __ in range(3):
             gas2 = ct.Solution('gri30.cti')
 
-            idx = random.randint(0, gas2.n_reactions)
+            idx = random.randint(0, gas2.n_reactions - 1)
             reactions = gas2.reactions()
             del reactions[idx]
 
@@ -51,7 +51,7 @@ class TestCompareModels:
         for __ in range(3):
             gas2 = ct.Solution('gri30.cti')
 
-            idx = random.randint(0, gas2.n_species)
+            idx = random.randint(0, gas2.n_species - 1)
             species = gas2.species()
             sp = species.pop(idx)
             
