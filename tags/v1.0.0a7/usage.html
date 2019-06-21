@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Usage &#8212; pyMARS 1.0.0a7 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Theory" href="theory.html" />
+    <link rel="prev" title="Installation Guide" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="usage">
+<span id="sec-usage"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>Once installed, pyMARS can be run as an executable. Change to the directory
+where your input files are located, then run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pymars</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The following options are available, and can also be seen by using the
+<code class="docutils literal notranslate"><span class="pre">-h</span></code> or <code class="docutils literal notranslate"><span class="pre">--help</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-h, --help:
+   show this <span class="nb">help</span> message and <span class="nb">exit</span>
+-m, --model:
+   input model filename <span class="o">(</span>e.g., mech.cti<span class="o">)</span>
+-e, --error:
+   Maximum error percentage <span class="k">for</span> the reduced model
+--method <span class="o">{</span>DRG,DRGEP,PFA<span class="o">}</span>
+   skeletal reduction method to use
+--conditions:
+   File with list of autoignition initial conditions
+--targets:
+   List of target species <span class="o">(</span>e.g., <span class="s2">&quot;CH4 O2&quot;</span><span class="o">)</span>
+--retained_species:
+   List of non-target species to always retain <span class="o">(</span>e.g., <span class="s2">&quot;N2 Ar&quot;</span><span class="o">)</span>
+--run_sa:
+   Run sensitivity analysis after completing another method
+--upper_threshold:
+   Upper threshold value used to determine species <span class="k">for</span> sensitivity analysis
+--path:
+   Path to directory <span class="k">for</span> writing files
+--num_threads:
+   Number of CPU cores to use <span class="k">for</span> running simulations in parallel
+--convert:
+   Convert files between Cantera and Chemkin formats <span class="o">(</span>.cti &lt;<span class="o">=</span>&gt; .inp<span class="o">)</span>
+--thermo:
+   thermodynamic data filename <span class="o">(</span>only necessary <span class="k">for</span> Chemkin files<span class="o">)</span>
+--transport:
+   transport data filename <span class="o">(</span>only necessary <span class="k">for</span> Chemkin files<span class="o">)</span>
+</pre></div>
+</div>
+<div class="section" id="example-reduction">
+<h2>Example reduction<a class="headerlink" href="#example-reduction" title="Permalink to this headline">¶</a></h2>
+<p>To apply the DRGEP method for reducing the GRI Mech 3.0 model (included with
+Cantera), with a maximum error of 10%, using the main reactants as targets
+(CH<sub>4</sub> and O<sub>2</sub>) and always retaining N<sub>2</sub>,
+execute this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars -m gri30.cti --method DRGEP --error <span class="m">10</span> <span class="se">\</span>
+  --conditions input.yaml --targets CH4 O2 --retained_species N2
+</pre></div>
+</div>
+<p>Note that you need to create a file <code class="docutils literal notranslate"><span class="pre">input.yaml</span></code> with a list of autoignition
+initial conditions for the reduction; download an
+<a class="reference download internal" download="" href="_downloads/c261ccca8573dfccc05fa51a1558750d/example_input_file.yaml"><code class="xref download docutils literal notranslate"><span class="pre">example</span> <span class="pre">file</span></code></a> or see the
+<a class="reference internal" href="#autoignition"><span class="std std-ref">Autoignition conditions</span></a> section for a detailed explanation.</p>
+<p><strong>Parallelization:</strong> If you have a large number of initial conditions, the
+reduction may be sped up by parallelizing the associated simulations over
+multiple CPU cores. You can do this by adding <code class="docutils literal notranslate"><span class="pre">--num_threads</span> <span class="pre">N</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code>
+is the desired number of cores. If you just specify <code class="docutils literal notranslate"><span class="pre">--num_threads</span></code>, then
+pyMARS will use the available numbera of cores minus one.</p>
+<p>(pyMARS does not currently support distributed memory parallelization, meaning
+across multiple nodes that do not share the same memory.)</p>
+<p><strong>Sensitivity analysis:</strong> To perform sensitivity analysis following DRGEP,
+add the option <code class="docutils literal notranslate"><span class="pre">--run_sa</span></code>. Generally it is a good idea to specify an upper
+threshold value of 0.2 to ensure important species are not evaluated; do this
+by adding the option <code class="docutils literal notranslate"><span class="pre">--upper_threshold</span> <span class="pre">0.2</span></code>. (In the <a class="reference internal" href="theory.html#sec-theory"><span class="std std-ref">Theory</span></a>
+guide, this variable is referred to as <span class="math notranslate nohighlight">\(\epsilon^*\)</span>.)</p>
+<p>Then, the full command for performing a reduction using DRGEPSA with
+parallelized simalations would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars -m gri30.cti --method DRGEP --error <span class="m">10</span> <span class="se">\</span>
+   --conditions input.yaml --targets CH4 O2 --retained_species N2 <span class="se">\</span>
+   --num_threads --run_sa --upper_threshold <span class="m">0</span>.2
+</pre></div>
+</div>
+</div>
+<div class="section" id="autoignition-conditions">
+<span id="autoignition"></span><h2>Autoignition conditions<a class="headerlink" href="#autoignition-conditions" title="Permalink to this headline">¶</a></h2>
+<p>pyMARS currently uses autoignition simulations to sample thermochemical data
+for the reduction and to calculate ignition delays for measuring error of
+candidate reduced models.</p>
+<p>Initial conditions need to be provided for performing these simulations,
+in a YAML file specified with the <code class="docutils literal notranslate"><span class="pre">--conditions</span></code> option.
+These files look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant volume</span>
+  <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">end-time</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
+  <span class="nt">fuel</span><span class="p">:</span>
+      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">oxidizer</span><span class="p">:</span>
+      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
+  <span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant volume</span>
+  <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1200</span>
+  <span class="nt">end-time</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
+  <span class="nt">fuel</span><span class="p">:</span>
+      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">oxidizer</span><span class="p">:</span>
+      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
+  <span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.5</span>
+</pre></div>
+</div>
+<p>This example specifies two constant-volume ignition cases, both with initial
+pressures of 1 atm and with initial temperatures of 1000 K and 1200 K. Both
+cases also specify maximum end integration times of 10 seconds.</p>
+<p>These examples specify the intitial reactant mixture with <code class="docutils literal notranslate"><span class="pre">fuel</span></code> and
+<code class="docutils literal notranslate"><span class="pre">oxidizer</span></code> fields, and the mole fractions of their respective compositions,
+followed by the equivalence ratio.</p>
+<p>In addition to constant-volume autoignition, constant-pressure simulations
+can be specified by changing <code class="docutils literal notranslate"><span class="pre">kind</span></code>  to <code class="docutils literal notranslate"><span class="pre">constant</span> <span class="pre">pressure</span></code>.
+Initial reactant composition can also be specified directly without using
+equivalence ratio, as shown in this example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant pressure</span>
+  <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
+  <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">end-time</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
+  <span class="nt">reactants</span><span class="p">:</span>
+      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
+</pre></div>
+</div>
+<p>For convenience, and to save significant runtime, pyMARS will automatically
+reuse saved ignition data from a prior run, if the number of cases matches
+that in the input file.</p>
+</div>
+<div class="section" id="conversion">
+<span id="id1"></span><h2>Conversion<a class="headerlink" href="#conversion" title="Permalink to this headline">¶</a></h2>
+<p>pyMARS provides a tool for converting between Chemkin and Cantera model
+formats. (This is used implicity if a Chemkin model is given when running
+pyMARS.) Generally this will be used to convert a Cantera reduced model
+generated by pyMARS into a Chemkin-format model.</p>
+<p>To convert a Cantera model into a Chemkin model, do</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars --convert -m model.cti
+</pre></div>
+</div>
+<p>pyMARS also provides conversion from Chemkin to Cantera for convenience:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars --convert -m model.inp --thermo thermo.dat
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">_thermo</span></code> option is not required if the thermodynamic data is contained
+within the model file (i.e., with the <code class="docutils literal notranslate"><span class="pre">THERMO</span> <span class="pre">ALL</span></code> keyword). The transport
+data can also be included in the resulting Cantera file with the
+<code class="docutils literal notranslate"><span class="pre">--transport</span></code> option.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
+    <img
+        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-reduction">Example reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#autoignition-conditions">Autoignition conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conversion">Conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Installation Guide</a></li>
+      <li>Next: <a href="theory.html" title="next chapter">Theory</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/usage.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

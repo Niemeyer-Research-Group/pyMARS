@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>sampling &#8212; pyMARS 1.0.0a7 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sensitivity_analysis" href="sensitivity_analysis.html" />
+    <link rel="prev" title="reduce_model" href="reduce_model.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymars.sampling">
+<span id="sampling"></span><h1>sampling<a class="headerlink" href="#module-pymars.sampling" title="Permalink to this headline">¶</a></h1>
+<p>Module for sampling thermochemical data and global metrics</p>
+<dl class="class">
+<dt id="pymars.sampling.SamplingInputs">
+<em class="property">class </em><code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">SamplingInputs</code><a class="headerlink" href="#pymars.sampling.SamplingInputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects input and output files for sampling (autoignition, PSR, laminar flame)</p>
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.data_ignition">
+<em class="property">property </em><code class="sig-name descname">data_ignition</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.data_ignition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.data_laminar_flame">
+<em class="property">property </em><code class="sig-name descname">data_laminar_flame</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.data_laminar_flame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.data_psr">
+<em class="property">property </em><code class="sig-name descname">data_psr</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.data_psr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.input_ignition">
+<em class="property">property </em><code class="sig-name descname">input_ignition</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.input_ignition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.input_laminar_flame">
+<em class="property">property </em><code class="sig-name descname">input_laminar_flame</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.input_laminar_flame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.input_psr">
+<em class="property">property </em><code class="sig-name descname">input_psr</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.input_psr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.output_ignition">
+<em class="property">property </em><code class="sig-name descname">output_ignition</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.output_ignition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.output_laminar_flame">
+<em class="property">property </em><code class="sig-name descname">output_laminar_flame</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.output_laminar_flame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 8</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymars.sampling.SamplingInputs.output_psr">
+<em class="property">property </em><code class="sig-name descname">output_psr</code><a class="headerlink" href="#pymars.sampling.SamplingInputs.output_psr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.calculate_error">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">calculate_error</code><span class="sig-paren">(</span><em class="sig-param">metrics_original</em>, <em class="sig-param">metrics_test</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.calculate_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates error of global metrics between test and original model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metrics_original</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Metrics serving as basis of error calculation</p></li>
+<li><p><strong>metrics_test</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Metrics for which error is being calculated with respect to <code class="docutils literal notranslate"><span class="pre">metrics_original</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>error</strong> – Maximum error over all metrics</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.check_inputs">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">check_inputs</code><span class="sig-paren">(</span><em class="sig-param">inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.check_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates input files for simulations, raising an error if any issues detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<a class="reference internal" href="#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Inputs necessary for sampling</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns <code class="docutils literal notranslate"><span class="pre">True</span></code> if no issues detected, otherwise raises an error.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.ignition_worker">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">ignition_worker</code><span class="sig-paren">(</span><em class="sig-param">sim_tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.ignition_worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Worker for multiprocessing of ignition delay only cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sim_tuple</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a>) – Tuple of Simulation object to be run and identifier</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Case identifier and calculated ignition delay</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.read_metrics">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">read_metrics</code><span class="sig-paren">(</span><em class="sig-param">inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.read_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in stored already-sampled metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<a class="reference internal" href="#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Inputs necessary for sampling</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ignition_delays</strong> – Calculated metrics for model, used for evaluating error</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.sample">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">inputs</em>, <em class="sig-param">model</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples thermochemical data and generates metrics for various phenomena.</p>
+<p>Initially, supports autoignition delay only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<a class="reference internal" href="#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Inputs necessary for sampling</p></li>
+<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Filename for Cantera model for performing simulations</p></li>
+<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of CPU threads to use for performing simulations in parallel.
+Optional; default = 1, in which the multiprocessing module is not used.
+If 0, then use the available number of cores minus one. Otherwise,
+use the specified number of threads.</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path for writing files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Metrics, and sampled data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple of numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.sample_metrics">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">sample_metrics</code><span class="sig-paren">(</span><em class="sig-param">inputs</em>, <em class="sig-param">model</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em>, <em class="sig-param">reuse_saved=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates metrics used for determining error of reduced model</p>
+<p>Initially, supports autoignition delay only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<a class="reference internal" href="#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Inputs necessary for sampling</p></li>
+<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Filename for Cantera model for performing simulations</p></li>
+<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
+Optional; default = 1, in which the multiprocessing module is not used.
+If 0, then use the available number of cores minus one. Otherwise,
+use the specified number of threads.</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path for writing files</p></li>
+<li><p><strong>reuse_saved</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a><em>, </em><em>optional</em>) – Flag to reuse saved output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ignition_delays</strong> – Calculated metrics for model, used for evaluating error</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.sampling.simulation_worker">
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">simulation_worker</code><span class="sig-paren">(</span><em class="sig-param">sim_tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.simulation_worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Worker for multiprocessing of simulation cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sim_tuple</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a>) – Contains Simulation object and other parameters needed to setup
+and run case.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>sim</strong> – Object with simulation metadata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="simulation.html#pymars.simulation.Simulation" title="pymars.simulation.Simulation">Simulation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
+    <img
+        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="reduce_model.html" title="previous chapter">reduce_model</a></li>
+      <li>Next: <a href="sensitivity_analysis.html" title="next chapter">sensitivity_analysis</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/sampling.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
