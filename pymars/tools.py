@@ -206,8 +206,8 @@ def convert(model_file, thermo_file=None, transport_file=None, path=''):
 
     """
     # check whether Chemkin or Cantera model
-    basename = os.path.splitext(model_file)[0]
-    extension = os.path.splitext(model_file)[1]
+    basename = os.path.splitext(os.path.basename(model_file))[0]
+    extension = os.path.splitext(os.path.basename(model_file))[1]
 
     # Chemkin files can have multiple extensions, so easier to check if Cantera
     if extension == '.cti':

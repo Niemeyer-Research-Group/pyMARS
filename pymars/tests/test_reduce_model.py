@@ -17,7 +17,6 @@ class TestTrim:
     def test_GRI_minus_three(self):
         """Tests removal of three species from GRI Mech 3.0.
         """
-
         # Original model to remove things from
         initial_model = 'gri30.cti'
 
@@ -43,7 +42,6 @@ class TestTrim:
     def test_GRI_minus_zero(self):
         """Tests removal of zero species from GRI Mech 3.0.
         """
-
         # Original model to remove things from
         initial_model = 'gri30.cti'
 
@@ -62,13 +60,9 @@ class TestTrim:
         assert reduced_model.n_reactions == expected_reactions_num
         assert reduced_model.name == 'reduced_gri30'
 
-        # Make sure target is not removed 
-        assert "CH4" in reduced_model.species_names
-
     def test_artificial_minus_one(self):
         """Test removing one species from artificial model.
         """
-
         # Original model to remove things from
         initial_model = relative_location('artificial-mechanism.cti')
 
@@ -88,6 +82,8 @@ class TestTrim:
 
         # Make sure removed species are not included
         assert 'H' not in reduced_model.species_names
+        for sp in exclusion_list:
+            assert all([sp not in {**rxn.reactants, **rxn.products} for rxn in reduced_model.reactions()])
         
     def testArtRemoveAll(self):
         """Test removing all four species in an artificial model.
@@ -107,7 +103,6 @@ class TestTrim:
     def testArtRemoveInvalid(self):
         """Test removing species not present in model.
         """
-
         # Original model to remove things from
         initial_model = relative_location('artificial-mechanism.cti')
 
@@ -124,11 +119,12 @@ class TestTrim:
         # Make sure number matches what is expected
         assert reduced_model.n_species == expected_species_num
         assert reduced_model.n_reactions == expected_reactions_num
+        for sp in exclusion_list:
+            assert all([sp not in {**rxn.reactants, **rxn.products} for rxn in reduced_model.reactions()])
 
     def testArtRemoveInvalidAnd1(self):
         """Test removing mixture of species both in and not in artificial model.
         """
-
         # Original model to remove things from
         initial_model = relative_location('artificial-mechanism.cti')
 
@@ -148,11 +144,12 @@ class TestTrim:
 
         # Make sure removed species are not included
         assert "H" not in reduced_model.species_names
+        for sp in exclusion_list:
+            assert all([sp not in {**rxn.reactants, **rxn.products} for rxn in reduced_model.reactions()])
 
     def test_GRI_minus_10(self):
         """Test removing 10 species from GRI Mech 3.0
         """
-
         # Original model to remove things from
         initial_model = 'gri30.cti'
 
@@ -173,3 +170,4 @@ class TestTrim:
         # Make sure removed species are not included
         for sp in exclusion_list:
             assert sp not in reduced_model.species_names
+            assert all([sp not in {**rxn.reactants, **rxn.products} for rxn in reduced_model.reactions()])        

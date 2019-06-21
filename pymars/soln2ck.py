@@ -91,7 +91,7 @@ def build_falloff_arrhenius(rate, reaction_order, reaction_type, pressure_limit)
 
     arrhenius = [f'{pre_exponential_factor:.4e}', 
                  f'{rate.temperature_exponent:.3f}', 
-                 f'{(rate.activation_energy / CALORIES_CONSTANT):.:.3e}'
+                 f'{(rate.activation_energy / CALORIES_CONSTANT):.3e}'
                  ]
     return '  '.join(arrhenius)
 
@@ -112,12 +112,12 @@ def build_falloff(parameters, falloff_function):
         String of falloff parameters
 
     """
-    if falloff_function == ct.TroeFalloff:
+    if falloff_function == 'Troe':
         falloff_string = ('TROE / ' +
                           f'{parameters[0]}  {parameters[1]}  '
                           f'{parameters[2]}  {parameters[3]} /\n'
                           )
-    elif falloff_function == ct.SriFalloff:
+    elif falloff_function == 'SRI':
         falloff_string = ('SRI / ' + 
                           f'{parameters[0]}  {parameters[1]}  ' +
                           f'{parameters[2]}  {parameters[3]}  {parameters[4]} /\n'
@@ -337,6 +337,9 @@ def write(solution, output_filename='', path='',
                     sum(reaction.reactants.values()), 
                     ct.PlogReaction
                     )
+            else:
+                raise NotImplementedError(f'Unsupported reaction type: {type(reaction)}')
+
             reaction_string += arrhenius + '\n'
             
             # need to trim and print third-body efficiencies, if present
@@ -402,9 +405,6 @@ def write(solution, output_filename='', path='',
                 for coeffs in reaction.coeffs:
                     coeffs_row = ' '.join([f'{c:.6e}' for c in coeffs])
                     reaction_string += f'CHEB / {coeffs_row} /\n'
-
-            else:
-                raise NotImplementedError(f'Unsupported reaction type: {type(reaction)}')
 
             if reaction.duplicate:
                 reaction_string += 'DUPLICATE\n'
