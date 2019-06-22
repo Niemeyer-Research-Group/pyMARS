@@ -5,9 +5,11 @@ Installation Guide
 ==================
 
 pyMARS is available for Python 3.6+ on Linux, macOS, and Windows via
-``conda`` and ``pip``. For ``conda`` installation, use the
-``niemeyer-research-group`` channel::
+``conda`` and ``pip``. pyMARS depends on ``cantera``, so you should
+first install that via the ``cantera`` channel, then install
+pyMARS via the ``niemeyer-research-group`` channel::
 
+    conda install -c cantera cantera
     conda install -c niemeyer-research-group pymars
 
 Note that you might need to include the ``conda-forge`` channel

@@ -26,6 +26,7 @@ model; however, its computational expense is high, and applying this method alon
 
 pyMARS supports Python 3.6 and 3.7, and can be installed easily using conda:
 
+    conda install -c cantera cantera
     conda install -c niemeyer-research-group pymars
 
 ## Usage
