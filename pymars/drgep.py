@@ -314,7 +314,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
                        if importance_coeffs[sp] < threshold 
                        and sp not in species_safe
                        ]
-
+    
     if (previous_model and 
         len(species_removed) == solution.n_species - previous_model.model.n_species
         ):
@@ -425,11 +425,15 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
 
         threshold += threshold_increment
         first = False
-        previous_model = reduced_model
 
         # cleanup files
         if previous_model.model.n_species != reduced_model.model.n_species:
             os.remove(reduced_model.filename)
+        
+        previous_model = ReducedModel(
+            model=reduced_model.model, filename=reduced_model.filename, 
+            error=reduced_model.error, limbo_species=reduced_model.limbo_species
+            )
     
     if reduced_model.error > error_limit:
         threshold -= (2 * threshold_increment)
@@ -451,4 +455,5 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
                  f'{reduced_model.model.n_reactions} reactions.'
                  )
     logging.info(f'Maximum error: {reduced_model.error:.2f}%')
+    logging.info('Final reduced model saved as ' + reduced_model.filename)
     return reduced_model

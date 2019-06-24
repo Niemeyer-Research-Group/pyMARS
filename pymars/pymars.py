@@ -105,7 +105,7 @@ def main(model_file, conditions, error_limit, method=None,
             num_threads=num_threads, path=path
             )
    
-    return soln2cti.write(reduced_model.model, 'reduced_model.cti', path=path)
+    return reduced_model
 
 
 def pymars(argv):
