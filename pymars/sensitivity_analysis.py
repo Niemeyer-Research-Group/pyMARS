@@ -179,7 +179,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
     
     # Final model; may need to rewrite
     reduced_model = ReducedModel(
-        model=current_model.model, filename=f'reduced_{current_model.model.n_species}', 
+        model=current_model.model, filename=f'reduced_{current_model.model.n_species}.cti', 
         error=current_model.error
         )
     soln2cti.write(reduced_model.model, reduced_model.filename, path=path)
