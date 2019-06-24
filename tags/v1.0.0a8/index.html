@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pyMARS 1.0.0a8 &#8212; pyMARS 1.0.0a8 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation Guide" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pymars-release">
+<h1>pyMARS 1.0.0a8<a class="headerlink" href="#pymars-release" title="Permalink to this headline">¶</a></h1>
+<p>pyMARS is a Python package for reducing the size of chemical kinetic models;
+the name stands for Python-based Model Automatic Reduction. pyMARS is licensed
+under the permissive, open-source MIT license. The source code is publicly
+available on GitHub at <a class="reference external" href="https://github.com/Niemeyer-Research-Group/pyMARS">https://github.com/Niemeyer-Research-Group/pyMARS</a>.</p>
+<p>pyMARS takes models given in the standard Cantera or Chemkin file formats
+(the latter is first converted to Cantera), along with a specified error limit
+and optional lists of species to always retain, and automatically removes as
+many species and reactions as possible using a specified method.</p>
+<p>It uses provided conditions to sample thermochemical data for the reduction
+analysis and calculate global combustion metrics for determining the error.
+For example, typically most reductions will use autoignition simulations
+to sample state data and determine autoignition delay over the condition
+range desired for the reduced model.</p>
+<p>pyMARS currently supports four methods for skeletal model reduction:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Directed relation graph (DRG)</p></li>
+<li><p>Directed relation graph with error propagation (DRGEP)</p></li>
+<li><p>Path flux analysis (PFA)</p></li>
+<li><p>Sensitivity analysis (SA)</p></li>
+</ol>
+</div></blockquote>
+<div class="section" id="user-s-guide">
+<h2>User’s Guide<a class="headerlink" href="#user-s-guide" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#development">Development</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#example-reduction">Example reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#autoignition-conditions">Autoignition conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#conversion">Conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#chemical-kinetics">Chemical kinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#directed-relation-graph-drg-method">Directed Relation Graph (DRG) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#drg-with-error-propagation-drgep-method">DRG with Error Propagation (DRGEP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#path-flux-analysis-pfa-method">Path Flux Analysis (PFA) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#sensitivity-analysis">Sensitivity Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#references">References</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="code-api">
+<h2>Code API<a class="headerlink" href="#code-api" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="#">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
+    <img
+        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="installation.html" title="next chapter">Installation Guide</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

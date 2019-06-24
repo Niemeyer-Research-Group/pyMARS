@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Theory &#8212; pyMARS 1.0.0a8 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="drg" href="drg.html" />
+    <link rel="prev" title="Usage" href="usage.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="theory">
+<span id="sec-theory"></span><h1>Theory<a class="headerlink" href="#theory" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="chemical-kinetics">
+<h2>Chemical kinetics<a class="headerlink" href="#chemical-kinetics" title="Permalink to this headline">¶</a></h2>
+<p>Cantera provides a great <a class="reference external" href="https://cantera.org/science/index.html">basic description</a>
+of chemical kinetic theory.</p>
+</div>
+<div class="section" id="directed-relation-graph-drg-method">
+<h2>Directed Relation Graph (DRG) method<a class="headerlink" href="#directed-relation-graph-drg-method" title="Permalink to this headline">¶</a></h2>
+<p>Lu and Law <a class="reference internal" href="#lu-2005" id="id1">[1]</a><a class="reference internal" href="#lu-2006a" id="id2">[2]</a><a class="reference internal" href="#lu-2006b" id="id3">[3]</a>, building on the earlier
+visualization work of Bendtsen et al. <a class="reference internal" href="#bendtsen-2001" id="id4">[4]</a>, first developed
+the DRG method as a way to use graphs to represent kinetic models, where
+species are nodes and directed edges in the graph represent dependence.</p>
+<p>For example, consider the example system with six species A, B, C, D, E, and F:</p>
+<div class="align-center figure" id="id17">
+<a class="reference internal image-reference" href="_images/graph.png"><img alt="example graph representing kinetic model" src="_images/graph.png" style="width: 4in;" /></a>
+<p class="caption"><span class="caption-text">Example graph respresenting model with six species.</span><a class="headerlink" href="#id17" title="Permalink to this image">¶</a></p>
+</div>
+<p>In this case, A is the user-defined target species (such as fuel or oxidizer).
+The directed edge from A to B indicates that A requires the presence of B in
+the model to accurately calculate its production and/or consumption, because
+they participate in reactions together. A also depends on D, and vice versa,
+with the thicker line indicating a stronger dependence. B depends on C and D.
+E and F depend on one another, but are not connected to the target A,
+even indirectly.</p>
+<p>In DRG, the weight of the directed edges, which represents the dependence of
+one species on another, is given by the direct interaction coefficient.
+The direct interaction coefficient for species A and B is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}r_{AB} &amp;= \frac{\sum_{i=1}^{N_{\text{reaction}}} | \nu_{A,i} \omega_i \delta_{Bi} | }{ \sum_{i=1}^{N_{\text{reaction}}} | \nu_{A,i} \omega_i | } \\
+\delta_{Bi} &amp;= \begin{cases} 1, \text{ if $i$th reaction involves B}, \\
+                             0, \text{ otherwise.} \end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(s\)</span> indicates the reaction index, <span class="math notranslate nohighlight">\(N_{\text{reaction}}\)</span> is
+the number of reactions, <span class="math notranslate nohighlight">\(\nu_{A,i}\)</span> is the overall stoichiometric
+coefficient for species A in reaction <span class="math notranslate nohighlight">\(i\)</span>, and <span class="math notranslate nohighlight">\(\omega_i\)</span> is the
+overall reaction rate of the <span class="math notranslate nohighlight">\(i\)</span>th reaction.</p>
+<p>After calculating all the direct interaction coefficients, a user-defined
+cutoff threshold <span class="math notranslate nohighlight">\(\epsilon\)</span> (e.g., 0.1) is applied to the system,
+and edges where <span class="math notranslate nohighlight">\(r_{AB} &lt; \epsilon\)</span> are removed. Then, a depth-first
+search is performed starting at the target species. Only species reachable
+via the search are retained; any reaction with an eliminated species is
+removed.</p>
+</div>
+<div class="section" id="drg-with-error-propagation-drgep-method">
+<h2>DRG with Error Propagation (DRGEP) method<a class="headerlink" href="#drg-with-error-propagation-drgep-method" title="Permalink to this headline">¶</a></h2>
+<p>Pepiot and Pitsch <a class="reference internal" href="#pepiotdesjardins-2008" id="id5">[5]</a> first presented the DRGEP
+method as an improved version of DRG that better represents the indirect
+dependence of species down graph pathways.
+Niemeyer and Sung <a class="reference internal" href="#niemeyer-2011" id="id6">[6]</a> further developed the DRGEP method,
+demonstrating the importance of graph-search algorithm choice for the method
+and in particular using Dijkstra’s algorithm <a class="reference internal" href="#dijkstra-1959" id="id7">[7]</a><a class="reference internal" href="#cormen-2001" id="id8">[8]</a>.</p>
+<p>DRGEP also defines direct interaction coefficients, although they are slightly
+different than the DRG coefficients:</p>
+<div class="math notranslate nohighlight">
+\[r_{AB} = \frac{\left| \sum_{i=1}^{N_{\text{reaction}}} \nu_{A,i} \omega_i \delta_{Bi} \right| }{ \max( P_A, C_A) }\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}P_A &amp;= \sum_{i=1}^{N_{\text{reaction}}} \max(0, \nu_{A,i} \omega_i) \\
+C_A &amp;= \sum_{i=1}^{N_{\text{reaction}}} \max(0, -\nu_{A,i} \omega_i) \\
+\delta_{Bi} &amp;= \begin{cases} 1, \text{ if $i$th reaction involves B}, \\
+                             0, \text{ otherwise.} \end{cases}\end{split}\]</div>
+<p>After calculating the direct interaction coefficients for all species pairs, a
+modified Dijkstra’s algorithm is applied from target species to calculate the
+overall interaction coefficients between the target T and all other species B:</p>
+<div class="math notranslate nohighlight">
+\[R_{TB} = \max_{\text{all paths } p} ( r_{TB, p} )\]</div>
+<p>where <span class="math notranslate nohighlight">\(r_{TB, p}\)</span> is the path-dependent interaction coefficient between
+target species <span class="math notranslate nohighlight">\(T\)</span> and species <span class="math notranslate nohighlight">\(B\)</span> along path <span class="math notranslate nohighlight">\(p\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[r_{TB, p} = \prod_{j=1}^{n-1} r_{S_j S_{j+1}}\]</div>
+<p>and <span class="math notranslate nohighlight">\(n\)</span> is the number of species between <span class="math notranslate nohighlight">\(T\)</span> and <span class="math notranslate nohighlight">\(B\)</span>
+in path <span class="math notranslate nohighlight">\(p\)</span>.</p>
+<p>To eliminate species, a cutoff threshold <span class="math notranslate nohighlight">\(\epsilon\)</span> (e.g., 0.01) is
+applied to the overall interaction coefficients; a species B is removed
+when <span class="math notranslate nohighlight">\(R_{TB} &lt; \epsilon\)</span>.</p>
+</div>
+<div class="section" id="path-flux-analysis-pfa-method">
+<h2>Path Flux Analysis (PFA) method<a class="headerlink" href="#path-flux-analysis-pfa-method" title="Permalink to this headline">¶</a></h2>
+<p>Sun et al. <a class="reference internal" href="#sun-2010" id="id9">[9]</a> developed the PFA method to build on the
+DRG and DRGEP methods by combining both direct and indirect species fluxes.
+The PFA direct interaction coefficient sums production and consumption
+interactions between two species both at the first-generation level
+(reactions where the species interact directly) and second-generation level
+(where species interact indirectly through one other species):</p>
+<div class="math notranslate nohighlight">
+\[r_{AB} = r_{AB}^{\text{pro 1st}} + r_{AB}^{\text{con 1st}} + r_{AB}^{\text{pro 2nd}} + r_{AB}^{\text{con 2nd}} \;,\]</div>
+<p>where the interaction coefficients for the production and consumption
+of species <span class="math notranslate nohighlight">\(A\)</span> via species <span class="math notranslate nohighlight">\(B\)</span> of the first generation are</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}r_{AB}^{\text{pro 1st}} &amp;= \frac{P_{AB}}{\max( P_A, C_A )} \\
+r_{AB}^{\text{con 1st}} &amp;= \frac{C_{AB}}{\max( P_A, C_A )} \;,\end{split}\]</div>
+<p>and the production and consumption fluxes of species <span class="math notranslate nohighlight">\(A\)</span>
+interacting with species <span class="math notranslate nohighlight">\(B\)</span> are</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}P_{AB} &amp;= \sum_{i=1}^{N_{\text{reaction}}} \max( \nu_{A, i} \omega_i \delta_{Bi}, 0 ) \\
+C_{AB} &amp;= \sum_{i=1}^{N_{\text{reaction}}} \max( -\nu_{A, i} \omega_i \delta_{Bi}, 0 )\end{split}\]</div>
+<p>The interaction coefficients for flux ratios between the two species of
+the second generation are then</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}r_{AB}^{\text{pro 2nd}} &amp;= \sum_{M_i \neq A, B} \left( r_{AM_i}^{\text{pro 1st}} \times r_{M_i B}^{\text{pro 1st}} \right) \\
+r_{AB}^{\text{con 2nd}} &amp;= \sum_{M_i \neq A, B} \left( r_{AM_i}^{\text{con 1st}} \times r_{M_i B}^{\text{con 1st}} \right)\end{split}\]</div>
+<p>Once all the interaction coefficient pairs are calculated, a threshold
+<span class="math notranslate nohighlight">\(\epsilon\)</span> is set (e.g., 0.1), and any edge where
+<span class="math notranslate nohighlight">\(r_{AB} &lt; \epsilon\)</span> is removed from the graph, similar to the DRG method.</p>
+</div>
+<div class="section" id="sensitivity-analysis">
+<h2>Sensitivity Analysis<a class="headerlink" href="#sensitivity-analysis" title="Permalink to this headline">¶</a></h2>
+<p>Although sensitivity analysis has been around for a while as a model
+reduction technique <a class="reference internal" href="#rabitz-1983" id="id10">[10]</a><a class="reference internal" href="#turanyi-1990" id="id11">[11]</a>, it becomes very
+computationally expensive when applied to the larger kinetic models
+regularly dealt with today (e.g., 100-1000s of species).</p>
+<p>Instead, we can use the above graph-based methods to first remove
+a significant fraction of species, and then analyze a portion of
+the remaining species using the interaction coefficient values
+to sort and identify which to consider. In particular, the DRG-aided
+sensitivity analysis (DRGASA) approach <a class="reference internal" href="#sankaran-2007" id="id12">[12]</a><a class="reference internal" href="#zheng-2007" id="id13">[13]</a>
+and DRGEP-based sensitivity analysis (DRGEPSA)
+<a class="reference internal" href="#niemeyer-2010" id="id14">[14]</a><a class="reference internal" href="#niemeyer-2015" id="id15">[15]</a> have shown great efficacy
+for reduction.</p>
+<p>In the DRGASA approach, an upper threshold value <span class="math notranslate nohighlight">\(\epsilon^*\)</span>
+(e.g., 0.4) is applied to the system, and any species that would
+be removed (but were remaining following the DRG reduction) are
+considered “limbo” species. All of the limbo species are then
+considered for removal one-by-one.
+DRGEPSA works similarly, although the upper threshold <span class="math notranslate nohighlight">\(\epsilon^*\)</span>
+is applied to the overall interaction coefficients to identify
+the set of limbo species.</p>
+<p>pyMARS implements two sensitivity analysis algorithms: <code class="docutils literal notranslate"><span class="pre">initial</span></code>
+and <code class="docutils literal notranslate"><span class="pre">greedy</span></code> <a class="reference internal" href="#niemeyer-2015" id="id16">[15]</a>. In the initial algorithm,
+the errors induced by the removal of the limbo species are evaluated
+only once, initially, and then the species are considered for removal
+in ascending order. In contrast, the greedy algorithm reevaluates
+the induced error of remaining limbo species after each removal,
+and chooses the species with the lowest induced error at that point.</p>
+<p>pyMARS also supports applying sensitivity analysis alone, although
+due to the high computational cost this approach is not recommended.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p id="bibtex-bibliography-theory-0"><dl class="citation">
+<dt class="label" id="lu-2005"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Tianfeng Lu and Chung K. Law. A directed relation graph method for mechanism reduction. <em>Proceedings of the Combustion Institute</em>, 30(1):1333–1341, 2005. <a class="reference external" href="https://doi.org/10.1016/j.proci.2004.08.145">doi:10.1016/j.proci.2004.08.145</a>.</p>
+</dd>
+<dt class="label" id="lu-2006a"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Tianfeng Lu and Chung K. Law. Linear time reduction of large kinetic mechanisms with directed relation graph: n-heptane and iso-octane. <em>Combustion and Flame</em>, 144(1-2):24–36, 2006. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2005.02.015">doi:10.1016/j.combustflame.2005.02.015</a>.</p>
+</dd>
+<dt class="label" id="lu-2006b"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Tianfeng Lu and Chung K. Law. On the applicability of directed relation graphs to the reduction of reaction mechanisms. <em>Combustion and Flame</em>, 146(3):472–483, 2006. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2006.04.017">doi:10.1016/j.combustflame.2006.04.017</a>.</p>
+</dd>
+<dt class="label" id="bendtsen-2001"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>Anders Broe Bendtsen, Peter Glarborg, and Kim Dam-Johansen. Visualization methods in analysis of detailed chemical kinetics modelling. <em>Computers &amp; Chemistry</em>, 25(2):161–170, March 2001. <a class="reference external" href="https://doi.org/10.1016/s0097-8485(00)00077-2">doi:10.1016/s0097-8485(00)00077-2</a>.</p>
+</dd>
+<dt class="label" id="pepiotdesjardins-2008"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dd><p>Perrine Pepiot-Desjardins and Heinz Pitsch. An efficient error-propagation-based reduction method for large chemical kinetic mechanisms. <em>Combustion and Flame</em>, 154(1-2):67–81, 2008. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2007.10.020">doi:10.1016/j.combustflame.2007.10.020</a>.</p>
+</dd>
+<dt class="label" id="niemeyer-2011"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
+<dd><p>Kyle E. Niemeyer and Chih-Jen Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. <em>Combustion and Flame</em>, 158(8):1439–1443, 2011. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2010.12.010">doi:10.1016/j.combustflame.2010.12.010</a>.</p>
+</dd>
+<dt class="label" id="dijkstra-1959"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
+<dd><p>E. W. Dijkstra. A note on two problems in connexion with graphs. <em>Numerische Mathematik</em>, 1(1):269–271, December 1959. <a class="reference external" href="https://doi.org/10.1007/bf01386390">doi:10.1007/bf01386390</a>.</p>
+</dd>
+<dt class="label" id="cormen-2001"><span class="brackets"><a class="fn-backref" href="#id8">8</a></span></dt>
+<dd><p>T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein. <em>Introduction to Algorithms</em>. MIT Press, Cambridge, MA, 2 edition, 2001.</p>
+</dd>
+<dt class="label" id="sun-2010"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
+<dd><p>Wenting Sun, Zheng Chen, Xiaolong Gou, and Yiguang Ju. A path flux analysis method for the reduction of detailed chemical kinetic mechanisms. <em>Combustion and Flame</em>, 157(7):1298–1307, 2010. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2010.03.006">doi:10.1016/j.combustflame.2010.03.006</a>.</p>
+</dd>
+<dt class="label" id="rabitz-1983"><span class="brackets"><a class="fn-backref" href="#id10">10</a></span></dt>
+<dd><p>H Rabitz, M Kramer, and D Dacol. Sensitivity analysis in chemical kinetics. <em>Annual Review of Physical Chemistry</em>, 34(1):419–461, October 1983. <a class="reference external" href="https://doi.org/10.1146/annurev.pc.34.100183.002223">doi:10.1146/annurev.pc.34.100183.002223</a>.</p>
+</dd>
+<dt class="label" id="turanyi-1990"><span class="brackets"><a class="fn-backref" href="#id11">11</a></span></dt>
+<dd><p>Tamás Turányi. Sensitivity analysis of complex kinetic systems. tools and applications. <em>Journal of Mathematical Chemistry</em>, 5(3):203–248, September 1990. <a class="reference external" href="https://doi.org/10.1007/bf01166355">doi:10.1007/bf01166355</a>.</p>
+</dd>
+<dt class="label" id="sankaran-2007"><span class="brackets"><a class="fn-backref" href="#id12">12</a></span></dt>
+<dd><p>Ramanan Sankaran, Evatt R. Hawkes, Jacqueline H. Chen, Tianfeng Lu, and Chung K. Law. Structure of a spatially developing turbulent lean methane–air Bunsen flame. <em>Proceedings of the Combustion Institute</em>, 31(1):1291–1298, 2007. <a class="reference external" href="https://doi.org/10.1016/j.proci.2006.08.025">doi:10.1016/j.proci.2006.08.025</a>.</p>
+</dd>
+<dt class="label" id="zheng-2007"><span class="brackets"><a class="fn-backref" href="#id13">13</a></span></dt>
+<dd><p>X. L. Zheng, T. F. Lu, and C. K. Law. Experimental counterflow ignition temperatures and reaction mechanisms of 1,3-butadiene. <em>Proceedings of the Combustion Institute</em>, 31(1):367–375, 2007. <a class="reference external" href="https://doi.org/10.1016/j.proci.2006.07.182">doi:10.1016/j.proci.2006.07.182</a>.</p>
+</dd>
+<dt class="label" id="niemeyer-2010"><span class="brackets"><a class="fn-backref" href="#id14">14</a></span></dt>
+<dd><p>Kyle E. Niemeyer, Chih-Jen Sung, and Mandhapati P. Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. <em>Combustion and Flame</em>, 157(9):1760–1770, 2010. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2009.12.022">doi:10.1016/j.combustflame.2009.12.022</a>.</p>
+</dd>
+<dt class="label" id="niemeyer-2015"><span class="brackets">15</span><span class="fn-backref">(<a href="#id15">1</a>,<a href="#id16">2</a>)</span></dt>
+<dd><p>Kyle E. Niemeyer and Chih-Jen Sung. Reduced chemistry for a gasoline surrogate valid at engine-relevant conditions. <em>Energy &amp; Fuels</em>, 29(2):1172–1185, 2015. <a class="reference external" href="https://doi.org/10.1021/ef5022126">doi:10.1021/ef5022126</a>.</p>
+</dd>
+</dl>
+</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
+    <img
+        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Theory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#chemical-kinetics">Chemical kinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#directed-relation-graph-drg-method">Directed Relation Graph (DRG) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drg-with-error-propagation-drgep-method">DRG with Error Propagation (DRGEP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#path-flux-analysis-pfa-method">Path Flux Analysis (PFA) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sensitivity-analysis">Sensitivity Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="usage.html" title="previous chapter">Usage</a></li>
+      <li>Next: <a href="drg.html" title="next chapter">drg</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/theory.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
