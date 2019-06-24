@@ -86,12 +86,9 @@ def calculate_error(metrics_original, metrics_test):
     
     """
     error = 100 * np.max(np.abs(metrics_original - metrics_test) / metrics_original)
-    # if any zero ignition delays, print warning and set error to 100
+    # if any zero ignition delays, set error to 100
     if any(metrics_test == 0.0):
         error = 100.0
-        logging.warning(
-            'Warning: candidate reduced model did not ignite for at least one condition.'
-            )
 
     return error
 
