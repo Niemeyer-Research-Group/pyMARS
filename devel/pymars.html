@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pymars &#8212; pyMARS 1.0.0a7 documentation</title>
+    <title>pymars &#8212; pyMARS 1.0.0a8 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -37,8 +37,8 @@
 <span id="pymars"></span><h1>pymars<a class="headerlink" href="#module-pymars.pymars" title="Permalink to this headline">¶</a></h1>
 <p>Contains main driver function for pyMARS program.</p>
 <dl class="function">
-<dt id="pymars.pymars.pymars">
-<code class="sig-prename descclassname">pymars.pymars.</code><code class="sig-name descname">pymars</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">method=None</em>, <em class="sig-param">target_species=[]</em>, <em class="sig-param">safe_species=[]</em>, <em class="sig-param">run_sensitivity_analysis=False</em>, <em class="sig-param">upper_threshold=None</em>, <em class="sig-param">sensitivity_type='greedy'</em>, <em class="sig-param">path=''</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.pymars.pymars" title="Permalink to this definition">¶</a></dt>
+<dt id="pymars.pymars.main">
+<code class="sig-prename descclassname">pymars.pymars.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">method=None</em>, <em class="sig-param">target_species=[]</em>, <em class="sig-param">safe_species=[]</em>, <em class="sig-param">run_sensitivity_analysis=False</em>, <em class="sig-param">upper_threshold=None</em>, <em class="sig-param">sensitivity_type='greedy'</em>, <em class="sig-param">path=''</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.pymars.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Driver function for reducing a chemical kinetic model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -66,6 +66,11 @@ use the specified number of threads.</p></li>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="function">
+<dt id="pymars.pymars.pymars">
+<code class="sig-prename descclassname">pymars.pymars.</code><code class="sig-name descname">pymars</code><span class="sig-paren">(</span><em class="sig-param">argv</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.pymars.pymars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 
