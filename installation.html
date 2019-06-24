@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Installation Guide &#8212; pyMARS 1.0.0a7 documentation</title>
+    <title>Installation Guide &#8212; pyMARS 1.0.0a8 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Usage" href="usage.html" />
-    <link rel="prev" title="pyMARS 1.0.0a7" href="index.html" />
+    <link rel="prev" title="pyMARS 1.0.0a8" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -36,9 +36,11 @@
   <div class="section" id="installation-guide">
 <span id="sec-installation"></span><h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Permalink to this headline">¶</a></h1>
 <p>pyMARS is available for Python 3.6+ on Linux, macOS, and Windows via
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code>. For <code class="docutils literal notranslate"><span class="pre">conda</span></code> installation, use the
-<code class="docutils literal notranslate"><span class="pre">niemeyer-research-group</span></code> channel:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">niemeyer</span><span class="o">-</span><span class="n">research</span><span class="o">-</span><span class="n">group</span> <span class="n">pymars</span>
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code>. pyMARS depends on <code class="docutils literal notranslate"><span class="pre">cantera</span></code>, so you should
+first install that via the <code class="docutils literal notranslate"><span class="pre">cantera</span></code> channel, then install
+pyMARS via the <code class="docutils literal notranslate"><span class="pre">niemeyer-research-group</span></code> channel:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">cantera</span> <span class="n">cantera</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">niemeyer</span><span class="o">-</span><span class="n">research</span><span class="o">-</span><span class="n">group</span> <span class="n">pymars</span>
 </pre></div>
 </div>
 <p>Note that you might need to include the <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> channel
@@ -155,7 +157,7 @@ To uninstall, run:</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">pyMARS 1.0.0a7</a></li>
+      <li>Previous: <a href="index.html" title="previous chapter">pyMARS 1.0.0a8</a></li>
       <li>Next: <a href="usage.html" title="next chapter">Usage</a></li>
   </ul></li>
 </ul>
