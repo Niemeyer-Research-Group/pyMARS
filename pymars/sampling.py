@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 import numpy as np
 import yaml
+import cantera as ct
 
 from .simulation import Simulation
 
@@ -86,12 +87,9 @@ def calculate_error(metrics_original, metrics_test):
     
     """
     error = 100 * np.max(np.abs(metrics_original - metrics_test) / metrics_original)
-    # if any zero ignition delays, print warning and set error to 100
+    # if any zero ignition delays, set error to 100
     if any(metrics_test == 0.0):
         error = 100.0
-        logging.warning(
-            'Warning: candidate reduced model did not ignite for at least one condition.'
-            )
 
     return error
 
@@ -239,14 +237,24 @@ def sample(inputs, model, num_threads=1, path=''):
         ignition_data = []
         
         # check for presence of data and output files; if present, reuse.
+        matches_number = False
+        matches_shape = False
         exists_data = os.path.isfile(inputs.data_ignition)
         exists_output = os.path.isfile(inputs.output_ignition)
         if exists_data and exists_output:
             ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
             ignition_data = np.genfromtxt(inputs.data_ignition, delimiter=',')
-            # need to check that saved data at least matches the number of 
+            # need to check that saved data at least matches the number of cases
+            matches_number = (
+                len(ignition_delays) == len(conditions) and len(ignition_data)/20 == len(conditions)
+                )
+            
+            # also check that expected data is right shape (e.g., in case number of species 
+            # has changed if running a new model)
+            gas = ct.Solution(model)
+            matches_shape = ignition_data.shape[1] == 2 + gas.n_species
         
-        if len(ignition_delays) == len(conditions) and len(ignition_data)/20 == len(conditions):
+        if matches_number and matches_shape:
             logging.info('Reusing existing autoignition samples for the starting model.')
         else:
             logging.info('Running autoignition simulations for starting model.')

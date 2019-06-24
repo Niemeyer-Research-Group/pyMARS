@@ -116,6 +116,8 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
     current_model = ReducedModel(
         model=ct.Solution(model_file), error=starting_error, filename=model_file
         )
+    
+    logging.info(f'Beginning sensitivity analysis stage, using {algorithm_type} approach.')
 
     # The metrics for the starting model need to be determined or read
     initial_metrics = sample_metrics(
@@ -127,7 +129,6 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
             sp for sp in current_model.model.species_names if sp not in species_safe
             ]
 
-    logging.info(f'Beginning sensitivity analysis stage, using {algorithm_type} approach.')
     logging.info(53 * '-')
     logging.info('Number of species |  Species removed  | Max error (%)')
 
@@ -178,7 +179,8 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
     
     # Final model; may need to rewrite
     reduced_model = ReducedModel(
-        model=current_model.model, filename='reduced_model.cti', error=current_model.error
+        model=current_model.model, filename=f'reduced_{current_model.model.n_species}.cti', 
+        error=current_model.error
         )
     soln2cti.write(reduced_model.model, reduced_model.filename, path=path)
 
