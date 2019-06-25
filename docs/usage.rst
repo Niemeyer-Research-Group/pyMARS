@@ -31,8 +31,10 @@ The following options are available, and can also be seen by using the
         List of target species (e.g., "CH4 O2")
      --retained_species:
         List of non-target species to always retain (e.g., "N2 Ar")
-     --run_sa:
+     --sensitivity_analysis:
         Run sensitivity analysis after completing another method
+     --sensitivity_type {initial, greedy}
+        Sensitivity analysis method to use
      --upper_threshold:
         Upper threshold value used to determine species for sensitivity analysis
      --path:
@@ -74,7 +76,8 @@ pyMARS will use the available numbera of cores minus one.
 across multiple nodes that do not share the same memory.)
 
 **Sensitivity analysis:** To perform sensitivity analysis following DRGEP,
-add the option ``--run_sa``. Generally it is a good idea to specify an upper
+add the option ``--sensitivity_analysis``. Select the type of sensitivity analysis
+with the ``--sensitivity_method`` option. Generally it is a good idea to specify an upper
 threshold value of 0.2 to ensure important species are not evaluated; do this
 by adding the option ``--upper_threshold 0.2``. (In the :ref:`sec_theory`
 guide, this variable is referred to as :math:`\epsilon^*`.)
@@ -86,7 +89,7 @@ parallelized simalations would be:
 
    pymars -m gri30.cti --method DRGEP --error 10 \
       --conditions input.yaml --targets CH4 O2 --retained_species N2 \
-      --num_threads --run_sa --upper_threshold 0.2
+      --num_threads --sensitivity_analysis --sensitvity_method initial --upper_threshold 0.2
 
 .. _autoignition:
 
