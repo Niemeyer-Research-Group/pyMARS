@@ -58,8 +58,10 @@ where your input files are located, then run:</p>
    List of target species <span class="o">(</span>e.g., <span class="s2">&quot;CH4 O2&quot;</span><span class="o">)</span>
 --retained_species:
    List of non-target species to always retain <span class="o">(</span>e.g., <span class="s2">&quot;N2 Ar&quot;</span><span class="o">)</span>
---run_sa:
+--sensitivity_analysis:
    Run sensitivity analysis after completing another method
+--sensitivity_type <span class="o">{</span>initial, greedy<span class="o">}</span>
+   Sensitivity analysis method to use
 --upper_threshold:
    Upper threshold value used to determine species <span class="k">for</span> sensitivity analysis
 --path:
@@ -96,7 +98,8 @@ pyMARS will use the available numbera of cores minus one.</p>
 <p>(pyMARS does not currently support distributed memory parallelization, meaning
 across multiple nodes that do not share the same memory.)</p>
 <p><strong>Sensitivity analysis:</strong> To perform sensitivity analysis following DRGEP,
-add the option <code class="docutils literal notranslate"><span class="pre">--run_sa</span></code>. Generally it is a good idea to specify an upper
+add the option <code class="docutils literal notranslate"><span class="pre">--sensitivity_analysis</span></code>. Select the type of sensitivity analysis
+with the <code class="docutils literal notranslate"><span class="pre">--sensitivity_method</span></code> option. Generally it is a good idea to specify an upper
 threshold value of 0.2 to ensure important species are not evaluated; do this
 by adding the option <code class="docutils literal notranslate"><span class="pre">--upper_threshold</span> <span class="pre">0.2</span></code>. (In the <a class="reference internal" href="theory.html#sec-theory"><span class="std std-ref">Theory</span></a>
 guide, this variable is referred to as <span class="math notranslate nohighlight">\(\epsilon^*\)</span>.)</p>
@@ -104,7 +107,7 @@ guide, this variable is referred to as <span class="math notranslate nohighlight
 parallelized simalations would be:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars -m gri30.cti --method DRGEP --error <span class="m">10</span> <span class="se">\</span>
    --conditions input.yaml --targets CH4 O2 --retained_species N2 <span class="se">\</span>
-   --num_threads --run_sa --upper_threshold <span class="m">0</span>.2
+   --num_threads --sensitivity_analysis --sensitvity_method initial --upper_threshold <span class="m">0</span>.2
 </pre></div>
 </div>
 </div>
