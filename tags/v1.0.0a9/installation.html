@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Installation Guide &#8212; pyMARS 1.0.0a9 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="pyMARS 1.0.0a9" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="installation-guide">
+<span id="sec-installation"></span><h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Permalink to this headline">¶</a></h1>
+<p>pyMARS is available for Python 3.6+ on Linux, macOS, and Windows via
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code>. pyMARS depends on <code class="docutils literal notranslate"><span class="pre">cantera</span></code>, so you should
+first install that via the <code class="docutils literal notranslate"><span class="pre">cantera</span></code> channel, then install
+pyMARS via the <code class="docutils literal notranslate"><span class="pre">niemeyer-research-group</span></code> channel:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">cantera</span> <span class="n">cantera</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">niemeyer</span><span class="o">-</span><span class="n">research</span><span class="o">-</span><span class="n">group</span> <span class="n">pymars</span>
+</pre></div>
+</div>
+<p>Note that you might need to include the <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> channel
+by editing your conda configuration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">config</span> <span class="o">--</span><span class="n">append</span> <span class="n">channels</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">niemeyer</span><span class="o">-</span><span class="n">research</span><span class="o">-</span><span class="n">group</span> <span class="n">pymars</span>
+</pre></div>
+</div>
+<p>You can also install using <code class="docutils literal notranslate"><span class="pre">pip</span></code> by downloading the source code and changing
+into that directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Niemeyer</span><span class="o">-</span><span class="n">Research</span><span class="o">-</span><span class="n">Group</span><span class="o">/</span><span class="n">pyMARS</span><span class="o">/</span>
+<span class="n">cd</span> <span class="n">pyMARS</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">pymars</span>
+</pre></div>
+</div>
+<p>Unfortunately, it is not currently possible to install using <code class="docutils literal notranslate"><span class="pre">pip</span></code>
+from PyPI, because (1) there is no Cantera package on PyPI and
+(2) someone else claimed the <code class="docutils literal notranslate"><span class="pre">pymars</span></code> name.</p>
+<div class="section" id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>pyMARS can be installed from source by cloning the git repository
+and changing into that directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Niemeyer</span><span class="o">-</span><span class="n">Research</span><span class="o">-</span><span class="n">Group</span><span class="o">/</span><span class="n">pyMARS</span><span class="o">/</span>
+<span class="n">cd</span> <span class="n">pyMARS</span>
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">develop</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>if you’re using <code class="docutils literal notranslate"><span class="pre">conda</span></code> (you may need to install <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> first).
+To uninstall, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">develop</span> <span class="o">.</span> <span class="o">--</span><span class="n">uninstall</span>
+</pre></div>
+</div>
+<p>Note that this doesn’t install the standalone converter scripts. With
+<code class="docutils literal notranslate"><span class="pre">pip</span></code>, installing is done by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>To uninstall with <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">uninstall</span> <span class="n">pymars</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span></code> does install the standalone scripts.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
+    <img
+        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#development">Development</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">pyMARS 1.0.0a9</a></li>
+      <li>Next: <a href="usage.html" title="next chapter">Usage</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/installation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
