@@ -36,22 +36,6 @@
   <div class="section" id="module-pymars.sensitivity_analysis">
 <span id="sensitivity-analysis"></span><h1>sensitivity_analysis<a class="headerlink" href="#module-pymars.sensitivity_analysis" title="Permalink to this headline">¶</a></h1>
 <p>Module containing sensitivity analysis reduction stage.</p>
-<dl class="class">
-<dt id="pymars.sensitivity_analysis.TemporaryDirectory">
-<em class="property">class </em><code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">TemporaryDirectory</code><span class="sig-paren">(</span><em class="sig-param">suffix=None</em>, <em class="sig-param">prefix=None</em>, <em class="sig-param">dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.TemporaryDirectory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create and return a temporary directory.  This has the same
-behavior as mkdtemp but can be used as a context manager.  For
-example:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>with TemporaryDirectory() as tmpdir:</dt><dd><p>…</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>Upon exiting the context, the directory and everything contained
-in it are removed.</p>
-</dd></dl>
-
 <dl class="function">
 <dt id="pymars.sensitivity_analysis.evaluate_species_errors">
 <code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">evaluate_species_errors</code><span class="sig-paren">(</span><em class="sig-param">starting_model</em>, <em class="sig-param">sample_inputs</em>, <em class="sig-param">metrics</em>, <em class="sig-param">species_limbo</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Permalink to this definition">¶</a></dt>
@@ -207,7 +191,7 @@ use the specified number of threads.</p></li>
       &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
