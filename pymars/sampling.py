@@ -246,7 +246,8 @@ def sample(inputs, model, num_threads=1, path=''):
             ignition_data = np.genfromtxt(inputs.data_ignition, delimiter=',')
             # need to check that saved data at least matches the number of cases
             matches_number = (
-                len(ignition_delays) == len(conditions) and len(ignition_data)/20 == len(conditions)
+                ignition_delays.size == len(conditions) and 
+                ignition_data.shape[0] / 20 == len(conditions)
                 )
             
             # also check that expected data is right shape (e.g., in case number of species 
