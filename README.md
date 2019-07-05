@@ -7,6 +7,7 @@
 [![codecov](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS/branch/master/graph/badge.svg)](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
+[![Anaconda-Server Badge](https://anaconda.org/niemeyer-research-group/pymars/badges/version.svg)](https://anaconda.org/niemeyer-research-group/pymars)
 
 Python-based (chemical kinetic) Model Automatic Reduction Software (pyMARS) implements multiple techniques for reducing the size and complexity of detailed chemical kinetic models.
 
