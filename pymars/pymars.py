@@ -226,6 +226,12 @@ def pymars(argv):
 
         if not args.method and not args.sensitivity_analysis:
             parser.error('Either --method or --sensitivity_analysis (or both) must be given.')
+        
+        if not os.path.isfile(args.conditions):
+            parser.error(
+                f'Autoignition initial conditions file {args.conditions} missing; '
+                'check spelling or specify correct file with --conditions'
+                )
 
         if args.method and not args.targets:
             parser.error(
