@@ -65,7 +65,8 @@ setup(
     package_dir={'pymars': 'pymars'},
     include_package_data=True,
     package_data={'pymars': [
-        'tests/*.cti', 'tests/inputfiles/*.yaml', 'tests/*.txt', 'tests/*.dat', 'tests/*.inp',
+        'tests/assets/*.cti', 'tests/assets/*.yaml', 'tests/assets/*.txt', 
+        'tests/assets/*.dat', 'tests/assets/*.inp',
         ]},
     entry_points={
         'console_scripts': ['pymars=pymars.__main__:main']

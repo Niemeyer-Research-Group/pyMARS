@@ -1,8 +1,0 @@
-- kind: constant pressure
-  pressure: 1.0
-  temperature: 1000
-  end-time: 10.0
-  reactants: 
-    CH4: 1.0
-    O2: 1.0
-    N2: 3.76

@@ -212,6 +212,6 @@ class TestConvert:
         """Test converting Chemkin version of gri30 to Cantera.
         """
         with TemporaryDirectory() as temp_dir:
-            output = convert(relative_location('gri30.inp'), path=temp_dir)
+            output = convert(relative_location(os.path.join('assets', 'gri30.inp')), path=temp_dir)
             assert output == os.path.join(temp_dir, 'gri30.cti')
             assert compare_models(ct.Solution(output), ct.Solution('gri30.cti'))

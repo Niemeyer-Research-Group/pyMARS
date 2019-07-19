@@ -53,7 +53,9 @@ class TestWrite:
     def test_artificial_write(self):
         """Test writing unmodified artificial model.
         """
-        solution = ct.Solution(relative_location('artificial-mechanism.cti'))
+        solution = ct.Solution(
+            relative_location(os.path.join('assets', 'artificial-mechanism.cti'))
+            )
 
         with TemporaryDirectory() as temp_dir:
             output = write(solution, 'pym_gas.cti', path=temp_dir)
@@ -70,20 +72,27 @@ class TestWrite:
             output = write(solution, 'reduced_gri30.cti', path=temp_dir)
             new_solution = ct.Solution(output)
 
-        expected_solution = ct.Solution(relative_location('eout_gri30.cti'))
+        expected_solution = ct.Solution(
+            relative_location(os.path.join('assets', 'eout_gri30.cti'))
+            )
 
         assert compare_models(new_solution, expected_solution)
 
     def test_artificial_write_red(self):
         """Test writing slightly reduced version of artificial model.
         """
-        solution = trim(relative_location('artificial-mechanism.cti'), ['H', 'O2'], 'gas.cti')
+        solution = trim(
+            relative_location(os.path.join('assets', 'artificial-mechanism.cti')), 
+            ['H', 'O2'], 'gas.cti'
+            )
 
         with TemporaryDirectory() as temp_dir:        
             output = write(solution, 'gas.cti', path=temp_dir)
             new_solution = ct.Solution(output)
 
-        expected_solution = ct.Solution(relative_location('eout_artificial-mechanism.cti'))
+        expected_solution = ct.Solution(
+            relative_location(os.path.join('assets', 'eout_artificial-mechanism.cti'))
+            )
 
         assert compare_models(new_solution, expected_solution)
 

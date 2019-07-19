@@ -399,7 +399,10 @@ class TestReducePFA:
                 ),
         ]
 
-        data = np.genfromtxt(relative_location('example_ignition_data.dat'), delimiter=',')
+        data = np.genfromtxt(
+            relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
+            delimiter=','
+            )
 
         model = ct.Solution(model_file)
         matrices = []
@@ -440,8 +443,12 @@ class TestRunPFA:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
-        data_files['output_ignition'] = relative_location('example_ignition_output.txt')
-        data_files['data_ignition'] = relative_location('example_ignition_data.dat')
+        data_files['output_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_output.txt')
+            )
+        data_files['data_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_data.dat')
+            )
         error = 5.0
 
         # Run PFA
@@ -452,7 +459,7 @@ class TestRunPFA:
                 )
 
         # Expected answer
-        expected_model = ct.Solution(relative_location('pfa_gri30.cti'))
+        expected_model = ct.Solution(relative_location(os.path.join('assets', 'pfa_gri30.cti')))
         
         # Make sure models are the same
         assert check_equal(reduced_model.model.species_names, expected_model.species_names)

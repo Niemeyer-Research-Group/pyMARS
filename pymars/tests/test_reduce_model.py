@@ -64,7 +64,7 @@ class TestTrim:
         """Test removing one species from artificial model.
         """
         # Original model to remove things from
-        initial_model = relative_location('artificial-mechanism.cti')
+        initial_model = relative_location(os.path.join('assets', 'artificial-mechanism.cti'))
 
         # Create exclusion list for test case
         exclusion_list = ['H']
@@ -92,7 +92,7 @@ class TestTrim:
         """
 
         # Original model to remove things from
-        initial_model = relative_location('artificial-mechanism.cti')
+        initial_model = relative_location(os.path.join('assets', 'artificial-mechanism.cti'))
 
         # Create exclusion list for test case
         exclusion_list = ["H", "H2", "O2", "H2O"]
@@ -104,7 +104,7 @@ class TestTrim:
         """Test removing species not present in model.
         """
         # Original model to remove things from
-        initial_model = relative_location('artificial-mechanism.cti')
+        initial_model = relative_location(os.path.join('assets', 'artificial-mechanism.cti'))
 
         # Create exclusion list for test case
         exclusion_list = ['CH4']
@@ -126,7 +126,7 @@ class TestTrim:
         """Test removing mixture of species both in and not in artificial model.
         """
         # Original model to remove things from
-        initial_model = relative_location('artificial-mechanism.cti')
+        initial_model = relative_location(os.path.join('assets', 'artificial-mechanism.cti'))
 
         # Create exclusion list for test case
         exclusion_list = ["H", "CH4"]
