@@ -11,7 +11,7 @@ import networkx
 import cantera as ct
 
 from . import soln2cti
-from .sampling import sample, sample_metrics, calculate_error, SamplingInputs
+from .sampling import sample, sample_metrics, calculate_error
 from .reduce_model import trim, ReducedModel
 
 
@@ -274,7 +274,7 @@ def get_importance_coeffs(species_names, target_species, matrices):
     return importance_coefficients
 
 
-def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
+def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
                  sampled_metrics, previous_model=None, num_threads=1, path=''
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
@@ -289,8 +289,8 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
         DRG threshold for trimming graph
     importance_coeffs : dict
         Dictionary with species and their overall interaction coefficients.
-    sample_inputs : SamplingInputs
-        Filename information for sampling (e.g., autoignition inputs/outputs)
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
     previous_model : ReducedModel, optional
@@ -327,7 +327,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
         )
 
     reduced_model_metrics = sample_metrics(
-        sample_inputs, reduced_model_filename, num_threads=num_threads, path=path
+        reduced_model_filename, ignition_conditions, num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
@@ -336,8 +336,9 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sample_
         )
 
 
-def run_drgep(model_file, sample_inputs, error_limit, species_targets,
-              species_safe, threshold_upper=None, num_threads=1, path=''
+def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions, 
+              error_limit, species_targets, species_safe, 
+              threshold_upper=None, num_threads=1, path=''
               ):
     """Main function for running DRGEP reduction.
     
@@ -345,8 +346,12 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     ----------
     model_file : str
         Original model file
-    sample_inputs : SamplingInputs
-        Contains filenames for sampling
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
+    psr_conditions : list of InputPSR
+        List of PSR simulation conditions.
+    flame_conditions : list of InputLaminarFlame
+        List of laminar flame simulation conditions.
     error_limit : float
         Maximum allowable error level for reduced model
     species_targets : list of str
@@ -376,7 +381,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_metrics, sampled_data = sample(
-        sample_inputs, model_file, num_threads=num_threads, path=path
+        model_file, ignition_conditions, num_threads=num_threads, path=path
         )
     
     matrices = []
@@ -403,7 +408,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
+            model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
             sampled_metrics, previous_model=previous_model, num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
@@ -438,7 +443,7 @@ def run_drgep(model_file, sample_inputs, error_limit, species_targets,
     if reduced_model.error > error_limit:
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, sample_inputs, 
+            model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
             sampled_metrics, num_threads=num_threads, path=path
             )
     else:

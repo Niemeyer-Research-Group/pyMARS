@@ -5,7 +5,7 @@ import numpy as np
 import cantera as ct
 
 from . import soln2cti
-from .sampling import sample_metrics, calculate_error, read_metrics, SamplingInputs
+from .sampling import sample_metrics, calculate_error, read_metrics
 from .reduce_model import trim, ReducedModel
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
@@ -32,7 +32,7 @@ except ImportError:
                     raise
 
 
-def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limbo, 
+def evaluate_species_errors(starting_model, ignition_conditions, metrics, species_limbo, 
                             num_threads=1
                             ):
     """Calculate error induced by removal of each limbo species
@@ -41,8 +41,8 @@ def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limb
     ----------
     starting_model : ReducedModel
         Container with model and file information
-    sample_inputs : SamplingInputs
-        Contains filenames for sampling
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
     metrics : numpy.ndarray
         Calculated metrics for starting model, used for evaluating error
     species_limbo : list of str
@@ -69,15 +69,15 @@ def evaluate_species_errors(starting_model, sample_inputs, metrics, species_limb
                 test_model, f'reduced_model_{species}.cti', path=temp_dir
                 )
             reduced_model_metrics = sample_metrics(
-                sample_inputs, test_model_file, num_threads=num_threads
+                test_model_file, ignition_conditions, num_threads=num_threads
                 )
             species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
     
     return species_errors
 
 
-def run_sa(model_file, starting_error, sample_inputs, error_limit, 
-           species_safe, algorithm_type='greedy', species_limbo=[], 
+def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flame_conditions,
+           error_limit, species_safe, algorithm_type='greedy', species_limbo=[], 
            num_threads=1, path=''
            ):
     """Runs a sensitivity analysis to remove species on a given model.
@@ -88,8 +88,12 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
         Model being analyzed
     starting_error : float
         Error percentage between the reduced and original models
-    sample_inputs : SamplingInputs
-        Contains filenames for sampling
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
+    psr_conditions : list of InputPSR, optional
+        List of PSR simulation conditions.
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     error_limit : float
         Maximum allowable error level for reduced model
     species_safe : list of str
@@ -121,7 +125,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
 
     # The metrics for the starting model need to be determined or read
     initial_metrics = sample_metrics(
-        sample_inputs, model_file, reuse_saved=True, num_threads=num_threads, path=path
+        model_file, ignition_conditions, reuse_saved=True, num_threads=num_threads, path=path
         )
 
     if not species_limbo:
@@ -135,7 +139,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
     # Need to first evaluate all induced errors of species; for the ``initial`` method,
     # this will be the only evaluation.
     species_errors = evaluate_species_errors(
-        current_model, sample_inputs, initial_metrics, species_limbo, 
+        current_model, ignition_conditions, initial_metrics, species_limbo, 
         num_threads=num_threads
         )
 
@@ -156,7 +160,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
                 )
 
             reduced_model_metrics = sample_metrics(
-                sample_inputs, test_model_file, num_threads=num_threads, path=path
+                test_model_file, ignition_conditions, num_threads=num_threads, path=path
                 )
             error = calculate_error(initial_metrics, reduced_model_metrics)
 
@@ -171,7 +175,7 @@ def run_sa(model_file, starting_error, sample_inputs, error_limit,
             # If using the greedy algorithm, now need to reevaluate all species errors
             if algorithm_type == 'greedy':
                 species_errors = evaluate_species_errors(
-                    current_model, sample_inputs, initial_metrics, species_limbo, 
+                    current_model, ignition_conditions, initial_metrics, species_limbo, 
                     num_threads=num_threads
                     )
                 if min(species_errors) > error_limit:

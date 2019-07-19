@@ -2,7 +2,7 @@
 import os
 import multiprocessing
 import logging
-from typing import NamedTuple
+from typing import NamedTuple, Dict
 
 import numpy as np
 import yaml
@@ -10,20 +10,35 @@ import cantera as ct
 
 from .simulation import Simulation
 
-class SamplingInputs(NamedTuple):
-    """Collects input and output files for sampling (autoignition, PSR, laminar flame)
+data_files = {
+    'data_ignition': 'ignition_data.dat', 'output_ignition': 'ignition_output.txt',
+    'data_psr': 'psr_data.dat', 'output_psr': 'psr_output.txt',
+    'data_flame': 'laminarflame_data.dat', 'output_flame': 'laminarflame_output.txt'
+    }
+
+class InputIgnition(NamedTuple):
+    """Holds input parameters for a single autoignition case.
     """
-    input_ignition: str = ''
-    data_ignition: str = 'ignition_data.dat'
-    output_ignition: str = 'ignition_output.txt'
+    kind: str
+    temperature: float
+    pressure: float
 
-    input_psr: str = ''
-    data_psr: str = 'psr_data.dat'
-    output_psr: str = 'psr_output.txt'
+    end_time: float = 0.0
 
-    input_laminar_flame: str = ''
-    data_laminar_flame: str = 'laminarflame_data.dat'
-    output_laminar_flame: str = 'laminarflame_output.txt'
+    equivalence_ratio: float = 0.0
+    fuel: Dict = {}
+    oxidizer: Dict = {}
+    reactants: Dict = {}
+
+
+class InputPSR(NamedTuple):
+    """Holds input parameters for single PSR simulation.
+    """
+
+
+class InputLaminarFlame(NamedTuple):
+    """Holds input parameters for single laminar flame simulation.
+    """
 
 
 def simulation_worker(sim_tuple):
@@ -94,13 +109,17 @@ def calculate_error(metrics_original, metrics_test):
     return error
 
 
-def read_metrics(inputs):
+def read_metrics(ignition_conditions, psr_conditions=[], flame_conditions=[]):
     """Reads in stored already-sampled metrics.
 
     Parameters
     ----------
-    inputs : SamplingInputs
-        Inputs necessary for sampling
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
+    psr_conditions : list of InputPSR, optional
+        List of PSR simulation conditions.
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
 
     Returns
     -------
@@ -108,34 +127,39 @@ def read_metrics(inputs):
         Calculated metrics for model, used for evaluating error
 
     """
-    if inputs.input_ignition:
-        exists_output = os.path.isfile(inputs.output_ignition)
+    if ignition_conditions:
+        exists_output = os.path.isfile(data_files['output_ignition'])
         if exists_output:
-            ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
+            ignition_delays = np.genfromtxt(data_files['output_ignition'], delimiter=',')
         else:
             raise SystemError('Error, no ignition output file present.')
 
-    elif inputs.input_psr:
+    if psr_conditions:
         raise NotImplementedError('PSR calculations not currently supported.')
-    elif inputs.input_laminar_flame:
+    
+    if flame_conditions:
         raise NotImplementedError('Laminar flame calculations not currently supported.')
-    else:
-        raise KeyError('No input files specified for sampling.')
 
     return ignition_delays
 
 
-def sample_metrics(inputs, model, num_threads=1, path='', reuse_saved=False):
+def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
+                   num_threads=1, path='', reuse_saved=False
+                   ):
     """Evaluates metrics used for determining error of reduced model
 
     Initially, supports autoignition delay only.
 
     Parameters
     ----------
-    inputs : SamplingInputs
-        Inputs necessary for sampling
     model : str
         Filename for Cantera model for performing simulations
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
+    psr_conditions : list of InputPSR, optional
+        List of PSR simulation conditions.
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = 1, in which the multiprocessing module is not used.
@@ -157,22 +181,19 @@ def sample_metrics(inputs, model, num_threads=1, path='', reuse_saved=False):
     if not num_threads:
         num_threads = multiprocessing.cpu_count()-1 or 1
 
-    if inputs.input_ignition:
-        with open(inputs.input_ignition, 'r') as the_file:
-            conditions = yaml.safe_load(the_file)
-
-        ignition_delays = np.zeros(len(conditions))
+    if ignition_conditions:
+        ignition_delays = np.zeros(len(ignition_conditions))
         
-        exists_output = os.path.isfile(inputs.output_ignition)
+        exists_output = os.path.isfile(data_files['output_ignition'])
         if reuse_saved and exists_output:
-            ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
+            ignition_delays = np.genfromtxt(data_files['output_ignition'], delimiter=',')
         
-        if reuse_saved and len(ignition_delays) == len(conditions):
+        if reuse_saved and len(ignition_delays) == len(ignition_conditions):
             logging.info('Reusing existing autoignition samples for the starting model.')
         else:
             simulations = []
-            for idx, properties in enumerate(conditions):
-                simulations.append([Simulation(idx, properties, model, path), idx])
+            for idx, case in enumerate(ignition_conditions):
+                simulations.append([Simulation(idx, case, model, path), idx])
 
             jobs = tuple(simulations)
             if num_threads == 1:
@@ -190,25 +211,32 @@ def sample_metrics(inputs, model, num_threads=1, path='', reuse_saved=False):
             for idx, ignition_delay in results.items():
                 ignition_delays[idx] = ignition_delay
         
-    if inputs.input_psr:
+    if psr_conditions:
         raise NotImplementedError('PSR calculations not currently supported.')
-    if inputs.input_laminar_flame:
+    
+    if flame_conditions:
         raise NotImplementedError('Laminar flame calculations not currently supported.')
 
     return ignition_delays
 
 
-def sample(inputs, model, num_threads=1, path=''):
+def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
+           num_threads=1, path=''
+           ):
     """Samples thermochemical data and generates metrics for various phenomena.
 
     Initially, supports autoignition delay only.
 
     Parameters
     ----------
-    inputs : SamplingInputs
-        Inputs necessary for sampling
     model : str
         Filename for Cantera model for performing simulations
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
+    psr_conditions : list of InputPSR, optional
+        List of PSR simulation conditions.
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     num_threads : int
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = 1, in which the multiprocessing module is not used.
@@ -228,26 +256,22 @@ def sample(inputs, model, num_threads=1, path=''):
     if not num_threads:
         num_threads = multiprocessing.cpu_count()-1 or 1
 
-    if inputs.input_ignition:
-        with open(inputs.input_ignition, 'r') as the_file:
-            conditions = yaml.safe_load(the_file)
-        # TODO: validate input file for correctness.
-
-        ignition_delays = np.zeros(len(conditions))
+    if ignition_conditions:
+        ignition_delays = np.zeros(len(ignition_conditions))
         ignition_data = []
         
         # check for presence of data and output files; if present, reuse.
         matches_number = False
         matches_shape = False
-        exists_data = os.path.isfile(inputs.data_ignition)
-        exists_output = os.path.isfile(inputs.output_ignition)
+        exists_data = os.path.isfile(data_files['data_ignition'])
+        exists_output = os.path.isfile(data_files['output_ignition'])
         if exists_data and exists_output:
-            ignition_delays = np.genfromtxt(inputs.output_ignition, delimiter=',')
-            ignition_data = np.genfromtxt(inputs.data_ignition, delimiter=',')
+            ignition_delays = np.genfromtxt(data_files['output_ignition'], delimiter=',')
+            ignition_data = np.genfromtxt(data_files['data_ignition'], delimiter=',')
             # need to check that saved data at least matches the number of cases
             matches_number = (
-                ignition_delays.size == len(conditions) and 
-                ignition_data.shape[0] / 20 == len(conditions)
+                ignition_delays.size == len(ignition_conditions) and 
+                ignition_data.shape[0] / 20 == len(ignition_conditions)
                 )
             
             # also check that expected data is right shape (e.g., in case number of species 
@@ -261,8 +285,8 @@ def sample(inputs, model, num_threads=1, path=''):
             logging.info('Running autoignition simulations for starting model.')
             stop_at_ignition = False
             simulations = []
-            for idx, properties in enumerate(conditions):
-                simulations.append([Simulation(idx, properties, model, path), stop_at_ignition])
+            for idx, case in enumerate(ignition_conditions):
+                simulations.append([Simulation(idx, case, model, path), stop_at_ignition])
 
             jobs = tuple(simulations)
             if num_threads == 1:
@@ -275,7 +299,7 @@ def sample(inputs, model, num_threads=1, path=''):
                 pool.close()
                 pool.join()
 
-            ignition_delays = np.zeros(len(conditions))
+            ignition_delays = np.zeros(len(ignition_conditions))
             ignition_data = []     
             for idx, sim in enumerate(results):
                 ignition_delays[idx], data = sim.process_results()
@@ -283,100 +307,128 @@ def sample(inputs, model, num_threads=1, path=''):
                 sim.clean()
             ignition_data = np.array(ignition_data)
 
-            np.savetxt(inputs.data_ignition, ignition_data, delimiter=',')
-            np.savetxt(inputs.output_ignition, ignition_delays, delimiter=',')
+            np.savetxt(data_files['data_ignition'], ignition_data, delimiter=',')
+            np.savetxt(data_files['output_ignition'], ignition_delays, delimiter=',')
 
-    if inputs.input_psr:
+    if psr_conditions:
         raise NotImplementedError('PSR calculations not currently supported.')
     
-    if inputs.input_laminar_flame:
+    if flame_conditions:
         raise NotImplementedError('Laminar flame calculations not currently supported.')
     
     return ignition_delays, ignition_data
 
 
-def check_inputs(inputs):
-    """Validates input files for simulations, raising an error if any issues detected.
+def parse_ignition_inputs(model, conditions):
+    """Parses input for autoignition simulations, raising an error on any errors.
 
     Parameters
     ----------
-    inputs : SamplingInputs
-        Inputs necessary for sampling
+    model : str
+        Name of Cantera-format kinetic model
+    conditions : dict
+        Dictionary with list of autoignition inputs
     
     Returns
     -------
-    bool
-        Returns ``True`` if no issues detected, otherwise raises an error.
+    list of InputIgnition
+        List of validated objects with autoignition input parameters
 
     """
-    if inputs.input_ignition:
-        with open(inputs.input_ignition, 'r') as the_file:
-            conditions = yaml.safe_load(the_file)
-
-        for idx, case in enumerate(conditions):
-            pre = f'Ignition input {idx} '
-            # check required keys
-            required_keys = ['kind', 'temperature', 'pressure']
-            for key in required_keys:
-                if key not in case:
-                    raise KeyError(pre + 'missing required key ' + key)
-            
-            if case['kind'] not in ['constant volume', 'constant pressure']:
-                raise ValueError(pre + '"case" needs to be "constant volume" or "constant pressure')
-            
-            if type(case['temperature']) not in [float, int] or case['temperature'] <= 0:
-                raise ValueError(pre + 'temperature needs to be a number > 0')
-            
-            if type(case['pressure']) not in [float, int] or case['pressure'] <= 0:
-                raise ValueError(pre + 'pressure needs to be a number > 0')
-            
-            if 'end-time' in case and case.get('end-time', 0) <= 0:
-                raise ValueError(pre + '"end-time" needs to be a number > 0')
-            
-            equiv_ratio = 'fuel' in case or 'oxidizer' in case or 'equivalence-ratio' in case
-            reactants = 'reactants' in case
-            if equiv_ratio and reactants:
-                raise KeyError(pre + 'should specify either fuel/oxidizer/equivalence ratio or reactants')
-            
-            if not equiv_ratio and not reactants:
-                raise KeyError(pre + 'should specify either fuel/oxidizer/equivalence ratio or reactants')
-            
-            if equiv_ratio:
-                if 'fuel' not in case:
-                    raise KeyError(pre + 'needs "fuel"')
-                if len(case['fuel']) < 1:
-                    raise KeyError(pre + '"fuel" needs at least one entry')
-                for entry in case['fuel']:
-                    if type(case['fuel'][entry]) not in [float, int] or case['fuel'][entry] <= 0:
-                        raise ValueError(pre + entry + ' value needs to be a number > 0')
-                
-                if 'oxidizer' not in case:
-                    raise KeyError(pre + 'needs "oxidizer"')
-                if len(case['oxidizer']) < 1:
-                    raise KeyError(pre + '"oxidizer" needs at least one entry')
-                for entry in case['oxidizer']:
-                    if type(case['oxidizer'][entry]) not in [float, int] or case['oxidizer'][entry] <= 0:
-                        raise ValueError(pre + entry + ' value needs to be a number > 0')
-                
-                if 'equivalence-ratio' not in case:
-                    raise KeyError(pre + 'needs "equivalence-ratio"')
-                if (type(case['equivalence-ratio']) not in [float, int] or 
-                    case['equivalence-ratio'] <= 0
-                    ):
-                    raise ValueError(pre + '"equivalence-ratio" needs to be a number > 0')
-            
-            if reactants:
-                if len(case['reactants']) < 1:
-                    raise KeyError(pre + '"reactants" needs at least one entry')
-                
-                for entry in case['reactants']:
-                    if type(case['reactants'][entry]) not in [float, int] or case['reactants'][entry] <= 0:
-                        raise ValueError(pre + entry + ' value needs to be a number > 0')
-
-    if inputs.input_psr:
-        raise NotImplementedError('PSR calculations not currently supported.')
+    gas = ct.Solution(model)
     
-    if inputs.input_laminar_flame:
-        raise NotImplementedError('Laminar flame calculations not currently supported.')
+    inputs = []
+    for idx, case in enumerate(conditions):
+        pre = f'Ignition input {idx}: '
+        
+        # check required keys        
+        kind = case.get('kind', '')
+        temperature = case.get('temperature', 0.0)
+        pressure = case.get('pressure', 0.0)
 
-    return True
+        assert kind in ['constant volume', 'constant pressure'], (
+            pre + '"case" needs to be "constant volume" or "constant pressure'
+            )
+        assert temperature > 0.0, pre + '"temperature" needs to be > 0'
+        assert pressure > 0.0, pre + '"pressure" needs to be a number > 0'
+
+        end_time = case.get('end-time', 0)
+        
+        equiv_ratio = case.get('equivalence-ratio', 0.0)
+        fuel = case.get('fuel', [])
+        oxidizer = case.get('oxidizer', [])
+
+        reactants = case.get('reactants', [])
+
+        assert (bool(equiv_ratio or fuel or oxidizer) + bool(reactants)) == 1, (
+            pre + 'should specify either equivalence-ratio/fuel/oxidizer or reactants.'
+            )
+        
+        if equiv_ratio or fuel or oxidizer:
+            assert equiv_ratio > 0.0, pre + 'needs non-zero "equivalence-ratio"'
+
+            assert fuel, pre + 'needs "fuel" with at least one entry'
+            for entry in fuel:
+                assert fuel[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert entry in gas.species_names, (
+                    pre + 'fuel species not in model: ' + entry
+                    )
+            
+            assert oxidizer, pre + 'needs "oxidizer" with at least one entry'
+            for entry in oxidizer:
+                assert oxidizer[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert entry in gas.species_names, (
+                    pre + 'oxidizer species not in model: ' + entry
+                    )
+        
+        if reactants:
+            for entry in reactants:
+                assert reactants[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert entry in gas.species_names, (
+                    pre + 'reactant not in model: ' + entry
+                    )
+        
+        inputs.append(InputIgnition(
+            kind, temperature, pressure, end_time, 
+            equiv_ratio, fuel, oxidizer, reactants
+        ))
+
+    return inputs
+
+
+def parse_psr_inputs(model, conditions):
+    """Parses input for PSR simulations, raising an error on any errors.
+
+    Parameters
+    ----------
+    model : str
+        Name of Cantera-format kinetic model
+    conditions : dict
+        Dictionary with list of PSR inputs
+    
+    Returns
+    -------
+    list of InputPSR
+        List of validated objects with PSR input parameters
+
+    """
+    return None
+
+
+def parse_flame_inputs(model, conditions):
+    """Parses input for laminar flame simulations, raising an error on any errors.
+
+    Parameters
+    ----------
+    model : str
+        Name of Cantera-format kinetic model
+    conditions : dict
+        Dictionary with list of laminar flame inputs
+    
+    Returns
+    -------
+    list of InputLaminarFlame
+        List of validated objects with laminar flame input parameters
+
+    """
+    return None

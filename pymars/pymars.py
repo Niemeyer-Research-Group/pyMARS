@@ -2,12 +2,15 @@
 import os
 import sys
 import logging
-
 from argparse import ArgumentParser
+from typing import List, Dict, NamedTuple
 
+import yaml
+import cantera as ct
 
 # local imports
-from .sampling import SamplingInputs, sample_metrics, check_inputs
+from .sampling import sample_metrics, parse_ignition_inputs, parse_psr_inputs, parse_flame_inputs
+from .sampling import InputIgnition, InputPSR, InputLaminarFlame
 from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
@@ -15,9 +18,100 @@ from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
 from .tools import convert
 
+#: Supported reduction methods
+METHODS = ['DRG', 'DRGEP', 'PFA']
 
-def main(model_file, conditions, error_limit, method=None, 
-         target_species=[], safe_species=[], 
+class ReductionInputs(NamedTuple):
+    """Collects inputs for overall reduction process.
+    """
+    model: str
+    error: float
+    ignition_conditions: List[InputIgnition]
+    psr_conditions: List[InputPSR]
+    flame_conditions: List[InputLaminarFlame]
+    method: str
+    target_species: List[str]
+    safe_species: List[str] = []
+    sensitivity_analysis: bool = False
+    upper_threshold: float = 0.1
+    sensitivity_type: str = 'greedy'
+
+
+def parse_inputs(input_dict):
+    """Parses and checks dictionary of inputs for consistency and correctness.
+
+    Parameters
+    ----------
+    input_dict : dict
+        Inputs for reduction
+
+    Returns
+    -------
+    ReductionInputs
+        Object with checked inputs
+    
+    """
+    model = input_dict.get('model', '')
+    assert model, 'Input file requires specifying "model".'
+    
+    error = input_dict.get('error', 0.0)
+    assert error, 'Input file requires an error limit specified by "error".'
+
+    method = input_dict.get('method', '')
+    sensitivity_analysis = input_dict.get('sensitivity-analysis', False)
+    
+    assert method or sensitivity_analysis, (
+        'Input file requires either "method" or "sensitivity-analysis" to be given.'
+        )
+    
+    if method:
+        assert method in METHODS, 'Reduction method must be one of ' + ', '.join(METHODS)
+
+        target_species = input_dict.get('targets', [])
+        assert target_species, (
+            'At least one "target" species must be specified for graph-based reduction methods.'
+            )
+    
+    upper_threshold = input_dict.get('upper-threshold', 0.1)
+    sensitivity_type = input_dict.get('sensitivity-type', 'initial')
+
+    safe_species = input_dict.get('retained-species', [])
+    
+    # check that species are present in model
+    gas = ct.Solution(model)
+    for sp in target_species:
+        assert sp in gas.species_names, f'Specified target species {sp} not in model'
+    
+    for sp in safe_species:
+        assert sp in gas.species_names, f'Specified retained species {sp} not in model'
+    
+    ignition_conditions = input_dict.get('autoignition-conditions', {})
+    assert ignition_conditions, 'autoignition-conditions need to be specified'
+
+    psr_conditions = input_dict.get('psr-conditions', {})
+    flame_conditions = input_dict.get('laminar-flame-conditions', {})
+    if psr_conditions:
+        raise NotImplementedError('PSR sampling not implemented yet, sorry!')
+    if flame_conditions:
+        raise NotImplementedError('Laminar flame sampling not implemented yet, sorry!')
+
+    # check validity of input file
+    ignition_inputs = parse_ignition_inputs(model, ignition_conditions)
+    psr_inputs = parse_psr_inputs(model, psr_conditions)
+    flame_inputs = parse_flame_inputs(model, flame_conditions)
+
+    return ReductionInputs(
+        model=model, error=error, 
+        ignition_conditions=ignition_inputs, 
+        psr_conditions=psr_inputs, flame_conditions=flame_inputs,
+        method=method, target_species=target_species, safe_species=safe_species,
+        sensitivity_analysis=sensitivity_analysis, upper_threshold=upper_threshold,
+        sensitivity_type=sensitivity_type
+        )
+
+
+def main(model_file, error_limit, ignition_conditions, psr_conditions=[], flame_conditions=[],
+         method=None, target_species=[], safe_species=[], 
          run_sensitivity_analysis=False, upper_threshold=None, sensitivity_type='greedy',
          path='', num_threads=1
          ):
@@ -27,10 +121,14 @@ def main(model_file, conditions, error_limit, method=None,
     ----------
     model_file : str
         Cantera-format model to be reduced (e.g., 'mech.cti').
-    conditions : str
-        File with list of autoignition initial conditions.
     error_limit : float
-        Maximum error % for the reduced model.
+        Maximum error percentage for the reduced model.
+    ignition_conditions : list of InputIgnition
+        List of autoignition initial conditions.
+    psr_conditions : list of InputPSR, optional
+        List of PSR simulation conditions.
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     method : {'DRG', 'DRGEP', 'PFA'}, optional
         Skeletal reduction method to use.
     target_species: list of str, optional
@@ -52,39 +150,34 @@ def main(model_file, conditions, error_limit, method=None,
         If 0, then use the available number of cores minus one. Otherwise,
         use the specified number of threads.
 
-    Examples
-    --------
-    >>> pymars('gri30.cti', conditions_file, 10.0, 'DRGEP', ['CH4', 'O2'], safe_species=['N2'])
-
     """
 
-    # TODO: allow specification of other sampling filenames
-    sampling_inputs = SamplingInputs(input_ignition=conditions)
-
-    # check validity of input file
-    assert check_inputs(sampling_inputs)
-
     if method in ['DRG', 'DRGEP', 'PFA']:
-        assert target_species, 'Need to specify at least one target species for graph-based reduction methods'
+        assert target_species, (
+            'Need to specify at least one target species for graph-based reduction methods'
+            )
     
     if not method and not run_sensitivity_analysis:
         raise ValueError(
-            'Either a graph-based method or sensitivity analysis (or both) nmust be specified.'
+            'Either a graph-based method or sensitivity analysis (or both) must be specified.'
             )
     
     if method == 'DRG':
         reduced_model = run_drg(
-            model_file, sampling_inputs, error_limit, target_species, safe_species, 
+            model_file, ignition_conditions, psr_conditions, flame_conditions,
+            error_limit, target_species, safe_species, 
             threshold_upper=upper_threshold, num_threads=num_threads, path=path
             )    
     elif method == 'DRGEP':
         reduced_model = run_drgep(
-            model_file, sampling_inputs, error_limit, target_species, safe_species, 
+            model_file, ignition_conditions, psr_conditions, flame_conditions, 
+            error_limit, target_species, safe_species, 
             threshold_upper=upper_threshold, num_threads=num_threads, path=path
             )
     elif method == 'PFA':
         reduced_model = run_pfa(
-            model_file, sampling_inputs, error_limit, target_species, safe_species,
+            model_file, ignition_conditions, psr_conditions, flame_conditions,
+            error_limit, target_species, safe_species,
             num_threads=num_threads, path=path
             )
     
@@ -100,7 +193,8 @@ def main(model_file, conditions, error_limit, method=None,
             sensitivity_type = 'greedy'
 
         reduced_model = run_sa(
-            model_file, error, sampling_inputs, error_limit, target_species + safe_species, 
+            model_file, error, ignition_conditions, psr_conditions, flame_conditions, 
+            error_limit, target_species + safe_species, 
             algorithm_type=sensitivity_type, species_limbo=limbo_species, 
             num_threads=num_threads, path=path
             )
@@ -113,90 +207,60 @@ def pymars(argv):
     """
     parser = ArgumentParser(description='pyMARS: Reduce chemical kinetic models.')
 
-    parser.add_argument('-m', '--model',
-                        help='input model filename (e.g., "mech.cti").',
-                        type=str,
-                        )
-    parser.add_argument('-e', '--error',
-                        help='Maximum error percentage for the reduced model.',
-                        type=float,
-                        )
-    parser.add_argument('--method',
-                        help='skeletal reduction method to use.',
-                        type=str,
-                        choices=['DRG', 'DRGEP', 'PFA'],
-                        default=None
-                        )
-    parser.add_argument('--targets',
-                        help='List of target species (e.g., "CH4 O2").',
-                        type=str,
-                        nargs='+',
-                        default=[]
-                        )
-    parser.add_argument('--conditions',
-                        help='File with list of autoignition initial conditions.',
-                        type=str,
-                        default='ignition_input.yaml'
-                        )
-    parser.add_argument('--retained_species',
-                        help='List of non-target species to always retain (e.g., "N2 Ar")',
-                        type=str,
-                        nargs='*',
-                        default=[]
-                        )
-    parser.add_argument('--sensitivity_analysis',
-                        help='Run sensitivity analysis after completing another method.',
-                        action='store_true',
-                        default=False,
-                        )
-    parser.add_argument('--sensitivity_type',
-                        help='Sensitivity analysis algorithm to be used',
-                        choices=['initial', 'greedy'],
-                        type=str,
-                        default='greedy'
-                        )
-    parser.add_argument('--upper_threshold',
-                        help='Upper threshold value used to determine species for sensitivity analysis.',
-                        type=float,
-                        default=1.0
-                        )
-    parser.add_argument('--path',
-                        help='Path to directory for writing files.',
-                        type=str,
-                        default=''
-                        )
-    parser.add_argument('--num_threads',
-                        help=(
-                            'Number of CPU cores to use for running simulations in parallel. '
-                            'If no number, then use available number of cores minus 1.'
-                            ),
-                        nargs='?',
-                        const=0,
-                        default=1,
-                        type=int
-                        )
+    parser.add_argument(
+        '-i', '--input',
+        help='YAML file with reduction inputs',
+        type=str
+        )
+
+    parser.add_argument(
+        '--path',
+        help='Path to directory for writing files.',
+        type=str,
+        default=''
+        )
+    parser.add_argument(
+        '--num_threads',
+        help=('Number of CPU cores to use for running simulations in parallel. '
+              'If no number, then use available number of cores minus 1.'
+              ),
+        nargs='?',
+        const=0,
+        default=1,
+        type=int
+        )
 
     # Specifying conversion requires its own set of options
-    parser.add_argument('--convert',
-                        help='Convert files between Cantera and Chemkin formats (.cti <=> .inp)',
-                        action='store_true',
-                        default=False,
-                        )
-    parser.add_argument('--thermo',
-                        help='thermodynamic data filename (only necessary for Chemkin files).',
-                        type=str,
-                        default=None
-                        )
-    parser.add_argument('--transport',
-                        help='transport data filename (only necessary for Chemkin files).',
-                        type=str,
-                        default=None
-                        )
+    parser.add_argument(
+        '--convert',
+        help='Convert files between Cantera and Chemkin formats (.cti <=> .inp)',
+        action='store_true',
+        default=False,
+        )
+    parser.add_argument(
+        '-m', '--model',
+        help='input model filename for conversion (e.g., "mech.cti").',
+        type=str,
+        )
+    parser.add_argument(
+        '--thermo',
+        help='thermodynamic data filename (only necessary for Chemkin files).',
+        type=str,
+        default=None
+        )
+    parser.add_argument(
+        '--transport',
+        help='transport data filename (only necessary for Chemkin files).',
+        type=str,
+        default=None
+        )
 
-    parser.add_argument('-V', '--version',
-                        action='store_true',
-                        help='Show the version of pyMARS and quit')
-    
+    parser.add_argument(
+        '-V', '--version',
+        action='store_true',
+        help='Show the version of pyMARS and quit'
+        )
+
     if len(argv) == 0:
         parser.print_help()
         sys.exit(1)
@@ -214,6 +278,9 @@ def pymars(argv):
         parser.error('A model file is a required input using -m or --model')
 
     if args.convert:
+        if not args.model:
+            parser.error('Conversion requires specifying a model file.')
+
         # Convert model and exit
         files = convert(args.model, args.thermo, args.transport, args.path)
         if isinstance(files, list):
@@ -221,23 +288,13 @@ def pymars(argv):
         else:
             logging.info('Converted file: ' + files)
     else:
-        if not args.error:
-            parser.error('An error limit is required using -e or --error.')
+        if not args.input:
+            parser.error('A YAML input file needs to be specified using -i or --input')
 
-        if not args.method and not args.sensitivity_analysis:
-            parser.error('Either --method or --sensitivity_analysis (or both) must be given.')
+        with open(args.input, 'r') as the_file:
+            input_dict = yaml.safe_load(the_file)
         
-        if not os.path.isfile(args.conditions):
-            parser.error(
-                f'Autoignition initial conditions file {args.conditions} missing; '
-                'check spelling or specify correct file with --conditions'
-                )
-
-        if args.method and not args.targets:
-            parser.error(
-                'At least one target species must be specified for the graph-based '
-                'reduction methods.'
-                )
+        inputs = parse_inputs(input_dict)
 
         # Check for Chemkin format and convert if needed
         if os.path.splitext(args.model)[1] != '.cti':
@@ -245,9 +302,11 @@ def pymars(argv):
             args.model = convert(args.model, args.thermo, args.transport, args.path)
 
         main(
-            args.model, args.conditions, args.error, 
-            method=args.method, target_species=args.targets,
-            safe_species=args.retained_species, run_sensitivity_analysis=args.sensitivity_analysis, 
-            upper_threshold=args.upper_threshold, sensitivity_type=args.sensitivity_type, 
+            inputs.model, inputs.error, 
+            inputs.ignition_conditions, inputs.psr_conditions, inputs.flame_conditions,
+            method=inputs.method, target_species=inputs.target_species,
+            safe_species=inputs.safe_species, 
+            run_sensitivity_analysis=inputs.sensitivity_analysis, 
+            upper_threshold=inputs.upper_threshold, sensitivity_type=inputs.sensitivity_type, 
             path=args.path, num_threads=args.num_threads
             )

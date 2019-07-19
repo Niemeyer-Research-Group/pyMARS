@@ -28,8 +28,8 @@ class Simulation(object):
     ----------
     idx : int
         Identifer index for case
-    properties : dict
-        Dictionary with all properties needed
+    properties : InputIgnition
+        Object with initial conditions for simulation
     model : str
         Filename for Cantera-format model to be used
     path : str, optional
@@ -48,23 +48,23 @@ class Simulation(object):
         self.gas = ct.Solution(self.model)
 
         self.time_end = 10.0
-        if 'end-time' in self.properties:
-            self.time_end = self.properties['end-time']
+        if self.properties.end_time:
+            self.time_end = self.properties.end_time
 
         self.gas.TP = (
-            self.properties['temperature'], self.properties['pressure'] * ct.one_atm
+            self.properties.temperature, self.properties.pressure * ct.one_atm
             )
         # set initial composition using either equivalence ratio or general reactant composition
-        if 'equivalence-ratio' in self.properties:
+        if self.properties.equivalence_ratio:
             self.gas.set_equivalence_ratio(
-                self.properties['equivalence-ratio'],
-                self.properties['fuel'],
-                self.properties['oxidizer']
+                self.properties.equivalence_ratio,
+                self.properties.fuel,
+                self.properties.oxidizer
                 )
         else:
-            self.gas.X = self.properties['reactants']
+            self.gas.X = self.properties.reactants
 
-        if self.properties['kind'] == 'constant pressure':
+        if self.properties.kind == 'constant pressure':
             self.reac = ct.IdealGasConstPressureReactor(self.gas)
         else:
             self.reac = ct.IdealGasReactor(self.gas)
@@ -134,7 +134,7 @@ class Simulation(object):
                 timestep['pressure'] = self.reac.thermo.P
                 timestep['mass_fractions'] = self.reac.Y
 
-                if self.reac.T >= self.properties['temperature'] + 400.0 and not ignition_flag:
+                if self.reac.T >= self.properties.temperature + 400.0 and not ignition_flag:
                     self.ignition_delay = self.reac_net.time
                     ignition_flag = True
 
@@ -157,7 +157,7 @@ class Simulation(object):
         while self.reac_net.time < self.time_end:
             self.reac_net.step()
 
-            if self.reac.T >= self.properties['temperature'] + 400.0:
+            if self.reac.T >= self.properties.temperature + 400.0:
                 self.ignition_delay = self.reac_net.time
                 break
 
