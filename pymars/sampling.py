@@ -29,6 +29,7 @@ class InputIgnition(NamedTuple):
     fuel: Dict = {}
     oxidizer: Dict = {}
     reactants: Dict = {}
+    composition_type: str = 'mole'
 
 
 class InputPSR(NamedTuple):
@@ -388,9 +389,15 @@ def parse_ignition_inputs(model, conditions):
                     pre + 'reactant not in model: ' + entry
                     )
         
+        composition_type = case.get('composition-type', 'mole')
+        assert composition_type in ['mole', 'mass'], pre + 'composition-type must be "mole" or "mass"'
+        assert not (composition_type == 'mass' and equiv_ratio), (
+            pre + 'composition-type: must be mole when specifying equivalence ratio'
+            )
+        
         inputs.append(InputIgnition(
             kind, temperature, pressure, end_time, 
-            equiv_ratio, fuel, oxidizer, reactants
+            equiv_ratio, fuel, oxidizer, reactants, composition_type
         ))
 
     return inputs

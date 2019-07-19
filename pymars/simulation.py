@@ -62,7 +62,16 @@ class Simulation(object):
                 self.properties.oxidizer
                 )
         else:
-            self.gas.X = self.properties.reactants
+            if self.properties.composition_type == 'mole':
+                self.gas.TPX = (
+                    self.properties.temperature, self.properties.pressure * ct.one_atm, 
+                    self.properties.reactants
+                    )
+            else:
+                self.gas.TPY = (
+                    self.properties.temperature, self.properties.pressure * ct.one_atm, 
+                    self.properties.reactants
+                    )
 
         if self.properties.kind == 'constant pressure':
             self.reac = ct.IdealGasConstPressureReactor(self.gas)

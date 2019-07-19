@@ -10,6 +10,7 @@ import numpy as np
 import cantera as ct
 import tables
 
+from ..sampling import InputIgnition
 from ..simulation import Simulation
 
 def relative_location(file):
@@ -18,6 +19,61 @@ def relative_location(file):
 
 
 class TestSimulation:
+    def test_setup_case_equivalence_ratio(self):
+        """Test setting up case that specifies equivalence ratio.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+            fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+            )
+        sim = Simulation(0, case, 'gri30.cti')
+        sim.setup_case()
+
+        assert type(sim.reac) == ct.IdealGasReactor
+        assert np.allclose(sim.gas.T, 1000.0)
+        assert np.allclose(sim.gas.P, ct.one_atm)
+
+        assert np.allclose(sim.gas.X[sim.gas.species_index('CH4')], 1.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
+    
+    def test_setup_case_reactants(self):
+        """Test setting up case that specifies reactants.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0,
+            reactants={'CH4': 1.0, 'O2': 2.0, 'N2': 7.52}
+            )
+        sim = Simulation(0, case, 'gri30.cti')
+        sim.setup_case()
+
+        assert type(sim.reac) == ct.IdealGasReactor
+        assert np.allclose(sim.gas.T, 1000.0)
+        assert np.allclose(sim.gas.P, ct.one_atm)
+
+        assert np.allclose(sim.gas.X[sim.gas.species_index('CH4')], 1.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
+    
+    def test_setup_case_reactants_mass(self):
+        """Test setting up case that specifies reactants using mass fraction.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0,
+            reactants={'CH4': 0.05518632, 'O2': 0.22014867, 'N2': 0.724665}, composition_type='mass'
+            )
+        sim = Simulation(0, case, 'gri30.cti')
+        sim.setup_case()
+
+        assert type(sim.reac) == ct.IdealGasReactor
+        assert np.allclose(sim.gas.T, 1000.0)
+        assert np.allclose(sim.gas.P, ct.one_atm)
+
+        assert np.allclose(sim.gas.X[sim.gas.species_index('CH4')], 1.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
+
+
     def test_process_results(self):
         """Test processing of ignition results using artificial data.
         """
@@ -28,7 +84,7 @@ class TestSimulation:
             'mass_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
-            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
             
             sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
 
@@ -86,7 +142,7 @@ class TestSimulation:
             'mass_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
-            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
             
             sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
 
@@ -139,7 +195,7 @@ class TestSimulation:
             'mass_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
-            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
             sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
 
             with tables.open_file(sim.save_file, mode='w', title='0') as h5file:

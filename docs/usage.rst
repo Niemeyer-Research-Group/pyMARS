@@ -230,8 +230,19 @@ moles of each species in the initial mixture:
 
     reactants:
       CH4: 1.0
-      O2: 1.0
-      N2: 3.76
+      O2: 2.0
+      N2: 7.52
+
+When giving the composition as a list of reactants, you can also specify the
+mass fraction of the mixture using ``composition-type: mass``:
+
+.. code-block:: yaml
+
+    reactants:
+      CH4: 0.05518632
+      O2: 0.22014867
+      N2: 0.724665
+    composition-type: mass
 
 For convenience, and to save significant runtime, pyMARS will automatically
 reuse saved ignition data from a prior run, if the number of cases matches
