@@ -275,7 +275,7 @@ def get_importance_coeffs(species_names, target_species, matrices):
 
 
 def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-                 sampled_metrics, previous_model=None, num_threads=1, path=''
+                 sampled_metrics, phase_name='', previous_model=None, num_threads=1, path=''
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -293,6 +293,8 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
         List of autoignition initial conditions.
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     previous_model : ReducedModel, optional
         Model produced at previous threshold level; used to avoid repeated work.
     num_threads : int, optional
@@ -309,7 +311,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
         Return reduced model and associated metadata
 
     """
-    solution = ct.Solution(model_file)
+    solution = ct.Solution(model_file, phase_name)
     species_removed = [sp for sp in solution.species_names
                        if importance_coeffs[sp] < threshold 
                        and sp not in species_safe
@@ -321,13 +323,16 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
         return previous_model
 
     # Cut the exclusion list from the model.
-    reduced_model = trim(model_file, species_removed, f'reduced_{model_file}')
+    reduced_model = trim(
+        model_file, species_removed, f'reduced_{model_file}', phase_name=phase_name
+        )
     reduced_model_filename = soln2cti.write(
         reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path
         )
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, num_threads=num_threads, path=path
+        reduced_model_filename, ignition_conditions, phase_name=phase_name, 
+        num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
@@ -337,7 +342,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
 
 
 def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions, 
-              error_limit, species_targets, species_safe, 
+              error_limit, species_targets, species_safe, phase_name='',
               threshold_upper=None, num_threads=1, path=''
               ):
     """Main function for running DRGEP reduction.
@@ -358,6 +363,8 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
         List of target species names
     species_safe : list of str
         List of species names to always be retained
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     threshold_upper : float, optional
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
     num_threads : int, optional
@@ -374,14 +381,14 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
         Return reduced model and associated metadata
     
     """
-    solution = ct.Solution(model_file)
+    solution = ct.Solution(model_file, phase_name)
     assert species_targets, 'Need to specify at least one target species.'
 
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, num_threads=num_threads, path=path
+        model_file, ignition_conditions, phase_name=phase_name, num_threads=num_threads, path=path
         )
     
     matrices = []
@@ -409,7 +416,8 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-            sampled_metrics, previous_model=previous_model, num_threads=num_threads, path=path
+            sampled_metrics, phase_name=phase_name, previous_model=previous_model, 
+            num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
         num_species = reduced_model.model.n_species
@@ -444,7 +452,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-            sampled_metrics, num_threads=num_threads, path=path
+            sampled_metrics, phase_name=phase_name, num_threads=num_threads, path=path
             )
     else:
         soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)

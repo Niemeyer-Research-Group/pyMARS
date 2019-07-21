@@ -62,7 +62,7 @@ def simulation_worker(sim_tuple):
     sim.setup_case()
     sim.run_case(stop_at_ignition)
 
-    sim = Simulation(sim.idx, sim.properties, sim.model, path=sim.path)
+    sim = Simulation(sim.idx, sim.properties, sim.model, phase_name=sim.phase_name, path=sim.path)
     return sim
 
 
@@ -145,7 +145,7 @@ def read_metrics(ignition_conditions, psr_conditions=[], flame_conditions=[]):
 
 
 def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
-                   num_threads=1, path='', reuse_saved=False
+                   phase_name='', num_threads=1, path='', reuse_saved=False
                    ):
     """Evaluates metrics used for determining error of reduced model
 
@@ -161,6 +161,8 @@ def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditio
         List of PSR simulation conditions.
     flame_conditions : list of InputLaminarFlame, optional
         List of laminar flame simulation conditions.
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = 1, in which the multiprocessing module is not used.
@@ -194,7 +196,9 @@ def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditio
         else:
             simulations = []
             for idx, case in enumerate(ignition_conditions):
-                simulations.append([Simulation(idx, case, model, path), idx])
+                simulations.append([
+                    Simulation(idx, case, model, phase_name=phase_name, path=path), idx
+                    ])
 
             jobs = tuple(simulations)
             if num_threads == 1:
@@ -222,7 +226,7 @@ def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditio
 
 
 def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
-           num_threads=1, path=''
+           phase_name='', num_threads=1, path=''
            ):
     """Samples thermochemical data and generates metrics for various phenomena.
 
@@ -238,6 +242,8 @@ def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
         List of PSR simulation conditions.
     flame_conditions : list of InputLaminarFlame, optional
         List of laminar flame simulation conditions.
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     num_threads : int
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = 1, in which the multiprocessing module is not used.
@@ -277,7 +283,7 @@ def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
             
             # also check that expected data is right shape (e.g., in case number of species 
             # has changed if running a new model)
-            gas = ct.Solution(model)
+            gas = ct.Solution(model, phase_name)
             matches_shape = ignition_data.shape[1] == 2 + gas.n_species
         
         if matches_number and matches_shape:
@@ -287,7 +293,9 @@ def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
             stop_at_ignition = False
             simulations = []
             for idx, case in enumerate(ignition_conditions):
-                simulations.append([Simulation(idx, case, model, path), stop_at_ignition])
+                simulations.append([
+                    Simulation(idx, case, model, phase_name=phase_name, path=path), stop_at_ignition
+                    ])
 
             jobs = tuple(simulations)
             if num_threads == 1:
@@ -320,7 +328,7 @@ def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
     return ignition_delays, ignition_data
 
 
-def parse_ignition_inputs(model, conditions):
+def parse_ignition_inputs(model, conditions, phase_name=''):
     """Parses input for autoignition simulations, raising an error on any errors.
 
     Parameters
@@ -329,6 +337,8 @@ def parse_ignition_inputs(model, conditions):
         Name of Cantera-format kinetic model
     conditions : dict
         Dictionary with list of autoignition inputs
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     
     Returns
     -------
@@ -336,7 +346,7 @@ def parse_ignition_inputs(model, conditions):
         List of validated objects with autoignition input parameters
 
     """
-    gas = ct.Solution(model)
+    gas = ct.Solution(model, phase_name)
     
     inputs = []
     for idx, case in enumerate(conditions):
@@ -403,7 +413,7 @@ def parse_ignition_inputs(model, conditions):
     return inputs
 
 
-def parse_psr_inputs(model, conditions):
+def parse_psr_inputs(model, conditions, phase_name=''):
     """Parses input for PSR simulations, raising an error on any errors.
 
     Parameters
@@ -412,6 +422,8 @@ def parse_psr_inputs(model, conditions):
         Name of Cantera-format kinetic model
     conditions : dict
         Dictionary with list of PSR inputs
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     
     Returns
     -------
@@ -422,7 +434,7 @@ def parse_psr_inputs(model, conditions):
     return None
 
 
-def parse_flame_inputs(model, conditions):
+def parse_flame_inputs(model, conditions, phase_name=''):
     """Parses input for laminar flame simulations, raising an error on any errors.
 
     Parameters
@@ -431,6 +443,8 @@ def parse_flame_inputs(model, conditions):
         Name of Cantera-format kinetic model
     conditions : dict
         Dictionary with list of laminar flame inputs
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     
     Returns
     -------

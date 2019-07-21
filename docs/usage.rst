@@ -15,32 +15,17 @@ where your input files are located, then run::
 The following options are available, and can also be seen by using the
 ``-h`` or ``--help`` option:
 
-.. code-block:: bash
+.. code-block:: none
 
      -h, --help:
         show this help message and exit
-     -m, --model:
-        input model filename (e.g., mech.cti)
-     -e, --error:
-        Maximum error percentage for the reduced model
-     --method {DRG,DRGEP,PFA}
-        skeletal reduction method to use
-     --conditions:
-        File with list of autoignition initial conditions
-     --targets:
-        List of target species (e.g., "CH4 O2")
-     --retained_species:
-        List of non-target species to always retain (e.g., "N2 Ar")
-     --sensitivity_analysis:
-        Run sensitivity analysis after completing another method
-     --sensitivity_type {initial, greedy}
-        Sensitivity analysis method to use
-     --upper_threshold:
-        Upper threshold value used to determine species for sensitivity analysis
+     -i, --input:
+        YAML file with reduction inputs
      --path:
         Path to directory for writing files
      --num_threads:
-        Number of CPU cores to use for running simulations in parallel
+        Number of CPU cores to use for running simulations in parallel.
+        If no number, then use available number of cores minus 1.
      --convert:
         Convert files between Cantera and Chemkin formats (.cti <=> .inp)
      --thermo:
@@ -172,6 +157,7 @@ You control the model reduction process in pyMARS through a YAML input file,
 indicated with the ``--input`` or ``-i`` command-line argument. Keys include:
 
 - ``model:`` filename of kinetic model being reduced (Chemkin or Cantera)
+- ``phase-name:`` Optional name of phase in Cantera CTI file to be reduced
 - ``targets:`` List of one or more target species; required for DRG, DRGEP,
   and PFA methods
 - ``retained-species:`` Optional list of one or more species to never remove.

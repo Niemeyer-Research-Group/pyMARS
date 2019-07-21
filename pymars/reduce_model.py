@@ -13,7 +13,7 @@ class ReducedModel(NamedTuple):
     limbo_species: list = []
     
 
-def trim(initial_model_file, exclusion_list, new_model_file):
+def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     """Function to eliminate species and corresponding reactions from model
 
     Parameters
@@ -24,6 +24,8 @@ def trim(initial_model_file, exclusion_list, new_model_file):
         List of species names that will be removed
     new_model_file : str
         Name of new reduced model file
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
 
     Returns
     -------
@@ -31,7 +33,7 @@ def trim(initial_model_file, exclusion_list, new_model_file):
         Model with species and associated reactions eliminated
 
     """
-    solution = ct.Solution(initial_model_file)
+    solution = ct.Solution(initial_model_file, phase_name)
 
     # Remove species if in list to be removed
     final_species = [sp for sp in solution.species() if sp.name not in exclusion_list]
@@ -56,6 +58,9 @@ def trim(initial_model_file, exclusion_list, new_model_file):
         thermo='IdealGas', kinetics='GasKinetics'
         )
     new_solution.TP = solution.TP
-    new_solution.name = os.path.splitext(new_model_file)[0]
+    if phase_name:
+        new_solution.name = phase_name
+    else:
+        new_solution.name = os.path.splitext(new_model_file)[0]
 
     return new_solution

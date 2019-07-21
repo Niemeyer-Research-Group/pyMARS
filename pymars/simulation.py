@@ -32,20 +32,23 @@ class Simulation(object):
         Object with initial conditions for simulation
     model : str
         Filename for Cantera-format model to be used
+    phase_name : str, optional
+        Optional name for phase to load from CTI file (e.g., 'gas'). 
     path : str, optional
         Path for location of output files
         
     """
-    def __init__(self, idx, properties, model, path=''):
+    def __init__(self, idx, properties, model, phase_name='', path=''):
         self.idx = idx
         self.properties = properties
         self.model = model
+        self.phase_name = phase_name
         self.path = path
 
     def setup_case(self):
         """Initialize simulation case.
         """
-        self.gas = ct.Solution(self.model)
+        self.gas = ct.Solution(self.model, self.phase_name)
 
         self.time_end = 10.0
         if self.properties.end_time:
