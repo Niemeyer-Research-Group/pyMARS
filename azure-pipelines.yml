@@ -16,7 +16,7 @@ jobs:
     displayName: 'Add conda to PATH'
   
   - script: |
-      call C:\Miniconda3\Scripts\activate
+      call $env:CONDA\Scripts\activate
       conda config --set always_yes yes --set changeps1 no
       conda config --append channels conda-forge
       conda update conda
