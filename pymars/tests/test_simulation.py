@@ -90,15 +90,20 @@ class TestSimulation:
                 temperatures = table.col('temperature')
                 pressures = table.col('pressure')
                 mass_fractions = table.col('mass_fractions')
-
+            
             final_state = np.concatenate((
                 np.array([temperatures[-1], pressures[-1]]), mass_fractions[-1]
                 ))
             next_to_final_state = np.concatenate((
                 np.array([temperatures[-2], pressures[-2]]), mass_fractions[-2]
                 ))
+            max_state_values = np.maximum(np.zeros(len(final_state)), final_state)
+            for row in range(len(temperatures)):
+                state = np.concatenate((
+                np.array([temperatures[row], pressures[row]]), mass_fractions[row]
+                ))
+                max_state_values = np.maximum(max_state_values, state)
             
-            max_state_values = np.maximum(next_to_final_state, final_state)
             residual = np.linalg.norm(
                 (final_state - next_to_final_state) / (max_state_values + 1.e-15)
                 ) / np.sqrt(sim.sim.n_vars - 1)
