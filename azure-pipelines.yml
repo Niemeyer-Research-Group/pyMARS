@@ -16,7 +16,7 @@ jobs:
     displayName: 'Add conda to PATH'
   
   - script: |
-      call $env:CONDA\Scripts\activate
+      call activate
       conda config --set always_yes yes --set changeps1 no
       conda config --append channels conda-forge
       conda update conda
