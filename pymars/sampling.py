@@ -24,6 +24,7 @@ class InputIgnition(NamedTuple):
     pressure: float
 
     end_time: float = 0.0
+    max_steps: int = 10000
 
     equivalence_ratio: float = 0.0
     fuel: Dict = {}
@@ -364,6 +365,7 @@ def parse_ignition_inputs(model, conditions, phase_name=''):
         assert pressure > 0.0, pre + '"pressure" needs to be a number > 0'
 
         end_time = case.get('end-time', 0)
+        max_steps = case.get('max-steps', 10000)
         
         equiv_ratio = case.get('equivalence-ratio', 0.0)
         fuel = case.get('fuel', [])
@@ -406,7 +408,7 @@ def parse_ignition_inputs(model, conditions, phase_name=''):
             )
         
         inputs.append(InputIgnition(
-            kind, temperature, pressure, end_time, 
+            kind, temperature, pressure, end_time, max_steps,
             equiv_ratio, fuel, oxidizer, reactants, composition_type
         ))
 

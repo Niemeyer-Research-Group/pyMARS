@@ -190,7 +190,6 @@ These initial conditions are given as a list, with these required keys:
   ``constant volume`` or ``constant pressure``
 - ``pressure``: initial pressure, given in atm
 - ``temperature``: initial temperature, given in K
-- ``end-time``: Optional; used to set a maximum integration time, in sec
 
 The initial reactant mixture can be given using either an equivalence
 ratio with separate fuel and oxidizer specifications, or as list of
@@ -230,9 +229,19 @@ mass fraction of the mixture using ``composition-type: mass``:
       N2: 0.724665
     composition-type: mass
 
-For convenience, and to save significant runtime, pyMARS will automatically
-reuse saved ignition data from a prior run, if the number of cases matches
-that in the input file.
+**Note:** By default, pyMARS automatically integrates each autoignition case
+to steady state, or to a maximum of 10,000 integration steps. This can be
+bypassed by specifying either a different number of maximum steps with
+``max-steps:`` or a maximum integration end time with ``end-time:``
+(in seconds). During initial sampling, pyMARS will raise an error if it
+does not detect autoignition, based on reaching the initial temperature +
+400 K.
+
+For convenience, and to save significant runtime when reducing the same
+model with different parameters, pyMARS will automatically
+reuse saved ignition data from a prior run. It semi-intelligently checks
+if the number of cases matches that in the input file, but to be safe
+output files should be cleaned between applications.
 
 
 .. _conversion:

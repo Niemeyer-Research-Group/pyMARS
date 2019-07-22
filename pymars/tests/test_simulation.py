@@ -73,6 +73,88 @@ class TestSimulation:
         assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
         assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
 
+    def test_run_case_steady_state(self):
+        """Test running a case without specifying end time.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+            fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            assert np.allclose(sim.run_case(), 1.066766)
+
+            with tables.open_file(sim.save_file, mode='r') as h5file:
+                table = h5file.root.simulation
+                temperatures = table.col('temperature')
+                pressures = table.col('pressure')
+                mass_fractions = table.col('mass_fractions')
+
+            final_state = np.concatenate((
+                np.array([temperatures[-1], pressures[-1]]), mass_fractions[-1]
+                ))
+            next_to_final_state = np.concatenate((
+                np.array([temperatures[-2], pressures[-2]]), mass_fractions[-2]
+                ))
+            
+            max_state_values = np.maximum(next_to_final_state, final_state)
+            residual = np.linalg.norm(
+                (final_state - next_to_final_state) / (max_state_values + 1.e-15)
+                ) / np.sqrt(sim.sim.n_vars - 1)
+            assert residual < 1.e-8
+            
+
+    def test_run_case_end_time(self):
+        """Test running a case with a specified end time.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+            fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}, end_time=2.0
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            assert np.allclose(sim.run_case(), 1.066766)
+            assert sim.sim.time >= case.end_time
+    
+    def test_run_case_noignition(self):
+        """Test running a case with no ignition.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, reactants={'N2': 1.0}
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError) as excinfo:
+                sim.run_case()
+                assert 'No ignition detected for integration case 0' in str(excinfo.value)
+
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, reactants={'N2': 1.0}, 
+            end_time=1.0
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError) as excinfo:
+                sim.run_case()
+                assert 'No ignition detected for integration case 0' in str(excinfo.value)
+
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, reactants={'N2': 1.0}, 
+            max_steps=1
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError) as excinfo:
+                sim.run_case()
+                assert (
+                    'Maximum number of steps reached before convergence for integration case 0' 
+                    in str(excinfo.value)
+                    )
 
     def test_process_results(self):
         """Test processing of ignition results using artificial data.

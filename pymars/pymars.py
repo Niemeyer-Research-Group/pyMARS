@@ -321,3 +321,5 @@ def pymars(argv):
             upper_threshold=inputs.upper_threshold, sensitivity_type=inputs.sensitivity_type, 
             path=args.path, num_threads=args.num_threads
             )
+    
+    logging.shutdown()

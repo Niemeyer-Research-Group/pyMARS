@@ -5,21 +5,15 @@
 
 # Standard libraries
 import os
-import numpy as np
+import logging
 
 # Related modules
-try:
-    import cantera as ct
-    ct.suppress_thermo_warnings()
-except ImportError:
-    print("Error: Cantera must be installed.")
-    raise
+import numpy as np
+import tables
+import cantera as ct
 
-try:
-    import tables
-except ImportError:
-    print('PyTables must be installed')
-    raise
+
+ct.suppress_thermo_warnings()
 
 class Simulation(object):
     """Class for ignition delay simulations
@@ -50,10 +44,18 @@ class Simulation(object):
         """
         self.gas = ct.Solution(self.model, self.phase_name)
 
-        self.time_end = 10.0
+        # Default maximum number of steps
+        self.max_steps = 10000
+        if self.properties.max_steps:
+            self.max_steps = self.properties.max_steps
+
+        # By default, simulations will run to steady state, with the maximum number of steps
+        # given by ``self.max_steps``. Alternatively, an end time (in seconds) can be
+        # given in cases where something specific is needed (e.g., longer than normal)
+        self.time_end = 0.0
         if self.properties.end_time:
             self.time_end = self.properties.end_time
-
+    
         self.gas.TP = (
             self.properties.temperature, self.properties.pressure * ct.one_atm
             )
@@ -82,7 +84,7 @@ class Simulation(object):
             self.reac = ct.IdealGasReactor(self.gas)
 
         # Create ``ReactorNet`` newtork
-        self.reac_net = ct.ReactorNet([self.reac])
+        self.sim = ct.ReactorNet([self.reac])
 
         # Set file for later data file
         self.save_file = os.path.join(self.path, str(self.idx) + '.h5')
@@ -93,12 +95,23 @@ class Simulation(object):
     def run_case(self, stop_at_ignition=False, restart=False):
         """Run simulation case set up ``setup_case``.
 
+        If no end time is specified for the integration, the function integrates
+        to steady state (or a maximum of 10,000 steps, by default). This is done
+        by checking whether the system state changes below a certain threshold,
+        with the residual computed using feature checking. This is blatantly stolen
+        from Cantera's :meth:`cantera.ReactorNet.advance_to_steady_state` method.
+
         Parameters
         ----------
         stop_at_ignition : bool
             If ``True``, stop integration at ignition point, don't save data.
         restart : bool
             If ``True``, skip if results file exists.
+        
+        Returns
+        -------
+        self.ignition_delay : float
+            Computed ignition delay in seconds
 
         """
 
@@ -126,7 +139,7 @@ class Simulation(object):
             # Row instance to save timestep information to
             timestep = table.row
             # Save initial conditions
-            timestep['time'] = self.reac_net.time
+            timestep['time'] = self.sim.time
             timestep['temperature'] = self.reac.T
             timestep['pressure'] = self.reac.thermo.P
             timestep['mass_fractions'] = self.reac.Y
@@ -135,43 +148,107 @@ class Simulation(object):
 
             ignition_flag = False
 
-            # Main time integration loop; continue integration while time of
-            # the ``ReactorNet`` is less than specified end time.
-            while self.reac_net.time < self.time_end:
-                self.reac_net.step()
+            # Main time integration loop
+            if self.time_end:
+                # if end time specified, continue integration until reaching that time
+                while self.sim.time < self.time_end:
+                    self.sim.step()
 
-                # Save new timestep information
-                timestep['time'] = self.reac_net.time
-                timestep['temperature'] = self.reac.T
-                timestep['pressure'] = self.reac.thermo.P
-                timestep['mass_fractions'] = self.reac.Y
+                    # Save new timestep information
+                    timestep['time'] = self.sim.time
+                    timestep['temperature'] = self.reac.T
+                    timestep['pressure'] = self.reac.thermo.P
+                    timestep['mass_fractions'] = self.reac.Y
 
-                if self.reac.T >= self.properties.temperature + 400.0 and not ignition_flag:
-                    self.ignition_delay = self.reac_net.time
-                    ignition_flag = True
+                    if self.reac.T >= self.properties.temperature + 400.0 and not ignition_flag:
+                        self.ignition_delay = self.sim.time
+                        ignition_flag = True
 
-                    if stop_at_ignition:
+                        if stop_at_ignition:
+                            break
+
+                    # Add ``timestep`` to table
+                    timestep.append()
+                
+            else:
+                # otherwise, integrate until steady state, or maximum number of steps reached
+                self.sim.reinitialize()
+                max_state_values = self.sim.get_state()
+                residual_threshold = 10. * self.sim.rtol
+                absolute_tolerance = self.sim.atol
+
+                for step in range(self.max_steps):
+                    previous_state = self.sim.get_state()
+
+                    self.sim.step()
+
+                    # Save new timestep information
+                    timestep['time'] = self.sim.time
+                    timestep['temperature'] = self.reac.T
+                    timestep['pressure'] = self.reac.thermo.P
+                    timestep['mass_fractions'] = self.reac.Y
+
+                    if self.reac.T >= self.properties.temperature + 400.0 and not ignition_flag:
+                        self.ignition_delay = self.sim.time
+                        ignition_flag = True
+
+                        if stop_at_ignition:
+                            break
+
+                    # Add ``timestep`` to table
+                    timestep.append()
+
+                    state = self.sim.get_state()
+                    max_state_values = np.maximum(max_state_values, state)
+                    residual = np.linalg.norm(
+                        (state - previous_state) / (max_state_values + absolute_tolerance)
+                        ) / np.sqrt(self.sim.n_vars)
+
+                    if residual < residual_threshold:
                         break
-
-                # Add ``timestep`` to table
-                timestep.append()
+                
+                if step == self.max_steps - 1:
+                    logging.error(
+                        'Maximum number of steps reached before '
+                        f'convergence for integration case {self.idx}'
+                        )
+                    raise RuntimeError(
+                        'Maximum number of steps reached before '
+                        f'convergence for integration case {self.idx}'
+                    )
 
             # Write ``table`` to disk
             table.flush()
+
+            if not ignition_flag:
+                logging.error(f'No ignition detected for integration case {self.idx}')
+                raise RuntimeError(f'No ignition detected for integration case {self.idx}')
 
         return self.ignition_delay
 
     def calculate_ignition(self):
         """Run simulation case set up ``setup_case``, just for ignition delay.
-        """
-        # Main time integration loop; continue integration while time of
-        # the ``ReactorNet`` is less than specified end time.
-        while self.reac_net.time < self.time_end:
-            self.reac_net.step()
+        """        
+        # Main time integration loop
+        if self.time_end:
+            # if end time specified, continue integration until reaching that time
+            while self.sim.time < self.time_end:
+                self.sim.step()
+                if self.reac.T >= self.properties.temperature + 400.0:
+                    self.ignition_delay = self.sim.time
+                    break
+        else:
+            # otherwise, integrate until steady state, or maximum number of steps reached
+            for _ in range(self.max_steps):
+                self.sim.step()
+                if self.reac.T >= self.properties.temperature + 400.0:
+                    self.ignition_delay = self.sim.time
+                    break
 
-            if self.reac.T >= self.properties.temperature + 400.0:
-                self.ignition_delay = self.reac_net.time
-                break
+        logging.warning(
+            'Maximum number of steps reached before '
+            f'convergence for integration case {self.idx}'
+            )
 
         return self.ignition_delay
 
