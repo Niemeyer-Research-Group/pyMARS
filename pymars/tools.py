@@ -10,6 +10,7 @@ from cantera import ck2cti
 
 from . import soln2ck
 
+
 def compare_models(model1, model2):
     """Checks whether two Cantera models are equivalent.
 

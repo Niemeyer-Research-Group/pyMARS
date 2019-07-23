@@ -16,6 +16,7 @@ jobs:
     displayName: 'Add conda to PATH'
   
   - script: |
+      call activate
       conda config --set always_yes yes --set changeps1 no
       conda config --append channels conda-forge
       conda update conda
@@ -27,6 +28,7 @@ jobs:
 
   - script: |
       conda env create --quiet --file test-environment.yaml
+      call activate py$(python.version)
       conda info -a
     displayName: 'Create Anaconda environment'
   
@@ -38,6 +40,6 @@ jobs:
 
   - script: |
       call activate py$(python.version)
-      pip install pytest-azurepipelines
+      pip install pytest-cov pytest-azurepipelines
       pytest -v --cov=./ --cov-report html
     displayName: 'test with pytest'

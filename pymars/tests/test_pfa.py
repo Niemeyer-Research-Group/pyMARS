@@ -9,7 +9,7 @@ import numpy as np
 import networkx as nx
 import cantera as ct
 
-from ..sampling import SamplingInputs
+from ..sampling import data_files, InputIgnition
 from ..pfa import graph_search, create_pfa_matrix, run_pfa, reduce_pfa
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
@@ -388,11 +388,21 @@ class TestReducePFA:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        inputs = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml'))
-            )
+        conditions = [
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
 
-        data = np.genfromtxt(relative_location('example_ignition_data.dat'), delimiter=',')
+        data = np.genfromtxt(
+            relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
+            delimiter=','
+            )
 
         model = ct.Solution(model_file)
         matrices = []
@@ -402,7 +412,7 @@ class TestReducePFA:
         with TemporaryDirectory() as temp_dir:
             reduced_model = reduce_pfa(
                 model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
-                inputs, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
+                conditions, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
                 previous_model=None, threshold_upper=None, num_threads=1, path=temp_dir
                 )
         
@@ -412,7 +422,6 @@ class TestReducePFA:
             'C2H4', 'C2H5', 'C2H6', 'HCCO', 'CH2CO', 'N', 'NH', 'NH2', 'NNH', 'NO', 'N2O',
             'HNO', 'CN', 'HCN', 'H2CN', 'HCNN', 'HCNO', 'HOCN', 'HNCO', 'NCO', 'N2', 'CH2CHO'
             ]
-        print(reduced_model.model.species_names)
         assert check_equal(reduced_model.model.species_names, expected_species)
         assert reduced_model.model.n_reactions == 281
         assert round(reduced_model.error, 2) == .14
@@ -424,21 +433,33 @@ class TestRunPFA:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        conditions = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml')),
-            output_ignition=relative_location('example_ignition_output.txt'),
-            data_ignition=relative_location('example_ignition_data.dat')
+        conditions = [
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        data_files['output_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_output.txt')
+            )
+        data_files['data_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_data.dat')
             )
         error = 5.0
 
         # Run PFA
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_pfa(
-                model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1, path=temp_dir
+                model_file, conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
+                num_threads=1, path=temp_dir
                 )
 
         # Expected answer
-        expected_model = ct.Solution(relative_location('pfa_gri30.cti'))
+        expected_model = ct.Solution(relative_location(os.path.join('assets', 'pfa_gri30.cti')))
         
         # Make sure models are the same
         assert check_equal(reduced_model.model.species_names, expected_model.species_names)

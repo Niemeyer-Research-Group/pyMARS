@@ -9,7 +9,7 @@ import numpy as np
 import networkx as nx
 import cantera as ct
 
-from ..sampling import SamplingInputs
+from ..sampling import data_files, InputIgnition
 from ..drg import graph_search, create_drg_matrix, run_drg, trim_drg, reduce_drg
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
@@ -192,10 +192,10 @@ class TestCreateDRGMatrix:
         expected_denoms["O2"] = 9.7866081e-14
         expected_denoms["H"] = .00051708749
 
-        assert np.isclose(expected_denoms["H2O"],denoms["H2O"],abs_tol=1.0e-17)
-        assert np.isclose(expected_denoms["H2"],denoms["H2"],abs_tol=1.0e-10)
-        assert np.isclose(expected_denoms["O2"],denoms["O2"],abs_tol=1.0e-18)
-        assert np.isclose(expected_denoms["H"],denoms["H"],abs_tol=1.0e-10)
+        assert np.isclose(expected_denoms["H2O"], denoms["H2O"],abs_tol=1.0e-17)
+        assert np.isclose(expected_denoms["H2"], denoms["H2"],abs_tol=1.0e-10)
+        assert np.isclose(expected_denoms["O2"], denoms["O2"],abs_tol=1.0e-18)
+        assert np.isclose(expected_denoms["H"], denoms["H"],abs_tol=1.0e-10)
 
         expected_numers = {}
         expected_numers["H2O_H2"] = 1.9573216e-13
@@ -514,11 +514,21 @@ class TestReduceDRG:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        inputs = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml'))
+        conditions = [
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        
+        data = np.genfromtxt(
+            relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
+            delimiter=','
             )
-
-        data = np.genfromtxt(relative_location('example_ignition_data.dat'), delimiter=',')
 
         model = ct.Solution(model_file)
         matrices = []
@@ -528,7 +538,7 @@ class TestReduceDRG:
         with TemporaryDirectory() as temp_dir:
             reduced_model = reduce_drg(
                 model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
-                inputs, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
+                conditions, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
                 previous_model=None, threshold_upper=None, num_threads=1, path=temp_dir
                 )
         
@@ -549,21 +559,33 @@ class TestRunDRG:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        conditions = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml')),
-            output_ignition=relative_location('example_ignition_output.txt'),
-            data_ignition=relative_location('example_ignition_data.dat')
+        conditions = [
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        data_files['output_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_output.txt')
+            )
+        data_files['data_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_data.dat')
             )
         error = 5.0
 
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drg(
-                model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1, path=temp_dir
+                model_file, conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
+                num_threads=1, path=temp_dir
                 )
 
         # Expected answer
-        expected_model = ct.Solution(relative_location("drg_gri30.cti"))
+        expected_model = ct.Solution(relative_location(os.path.join('assets', 'drg_gri30.cti')))
         
         # Make sure models are the same
         assert check_equal(reduced_model.model.species_names, expected_model.species_names)

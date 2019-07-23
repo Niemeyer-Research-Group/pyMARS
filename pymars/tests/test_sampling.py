@@ -8,7 +8,7 @@ import numpy as np
 import cantera as ct
 import yaml
 
-from ..sampling import SamplingInputs, check_inputs
+from ..sampling import parse_ignition_inputs, InputIgnition
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
 try:
@@ -42,20 +42,28 @@ class TestCheckInputs:
     def test_good_example(self):
         """Tests (good) sample input file.
         """
-        inputs = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml')),
-            )
+        inputs = [
+            {'kind': 'constant volume', 'pressure': 1.0, 'temperature': 1000.0,
+             'fuel': {'CH4': 1.0}, 'oxidizer': {'O2': 1.0, 'N2': 3.76}, 'equivalence-ratio': 1.0},
+            {'kind': 'constant volume', 'pressure': 1.0, 'temperature': 1200.0,
+             'fuel': {'CH4': 1.0}, 'oxidizer': {'O2': 1.0, 'N2': 3.76}, 'equivalence-ratio': 1.0}
+             ]
         
-        assert check_inputs(inputs)
+        conditions = parse_ignition_inputs('gri30.cti', inputs)
+        for item in conditions:
+            assert type(item) == InputIgnition
     
     def test_good_example_alternate(self):
         """Tests correct sample input file with alternate values.
         """
-        inputs = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file2.yaml')),
-            )
+        inputs = [
+            {'kind': 'constant pressure', 'pressure': 1.0, 'temperature': 1000.0,
+             'end time': 10.0, 'reactants': {'CH4': 1.0, 'O2': 1.0, 'N2': 3.76}},
+             ]
         
-        assert check_inputs(inputs)
+        conditions = parse_ignition_inputs('gri30.cti', inputs)
+        for item in conditions:
+            assert type(item) == InputIgnition
     
     @pytest.mark.parametrize('key', [
         'kind', 'pressure', 'temperature', 'fuel', 'oxidizer', 'equivalence-ratio'
@@ -66,7 +74,7 @@ class TestCheckInputs:
         case = [{
             'kind': 'constant volume',
             'pressure': 1.0,
-            'temperature': 1000,
+            'temperature': 1000.0,
             'end-time': 10.0,
             'fuel': {'CH4': 1.0},
             'oxidizer': {'O2': 1.0, 'N2': 3.76},
@@ -74,15 +82,8 @@ class TestCheckInputs:
             }]
         del case[0][key]
 
-        with TemporaryDirectory() as temp_dir:
-            filename = os.path.join(temp_dir, 'file.yaml')
-            with open(filename, 'w') as the_file:
-                yaml.dump(case, the_file)
-            
-            inputs = SamplingInputs(input_ignition=filename)
-
-            with pytest.raises(KeyError):
-                check_inputs(inputs)
+        with pytest.raises(AssertionError):
+            parse_ignition_inputs('gri30.cti', case)
     
     def test_bad_fuel_oxidizer_value(self):
         """Tests correct errors for improper value.
@@ -96,15 +97,8 @@ class TestCheckInputs:
             'oxidizer': {'O2': 1.0, 'N2': 3.76},
             'equivalence-ratio': 1.0
             }]
-        with TemporaryDirectory() as temp_dir:
-            filename = os.path.join(temp_dir, 'file.yaml')
-            with open(filename, 'w') as the_file:
-                yaml.dump(case, the_file)
-            
-            inputs = SamplingInputs(input_ignition=filename)
-
-            with pytest.raises(ValueError):
-                check_inputs(inputs)
+        with pytest.raises(AssertionError):
+            parse_ignition_inputs('gri30.cti', case)
         
         case = [{
             'kind': 'constant volume',
@@ -115,12 +109,42 @@ class TestCheckInputs:
             'oxidizer': {'O2': 0.0, 'N2': 3.76},
             'equivalence-ratio': 1.0
             }]
-        with TemporaryDirectory() as temp_dir:
-            filename = os.path.join(temp_dir, 'file.yaml')
-            with open(filename, 'w') as the_file:
-                yaml.dump(case, the_file)
-            
-            inputs = SamplingInputs(input_ignition=filename)
+        with pytest.raises(AssertionError):
+            parse_ignition_inputs('gri30.cti', case)
+    
+    def test_bad_species(self):
+        """Tests raising error for species not in model.
+        """
+        case = [{
+            'kind': 'constant volume',
+            'pressure': 1.0,
+            'temperature': 1000,
+            'end-time': 10.0,
+            'fuel': {'C4H10': 0.0},
+            'oxidizer': {'O2': 1.0, 'N2': 3.76},
+            'equivalence-ratio': 1.0
+            }]
+        with pytest.raises(AssertionError):
+            parse_ignition_inputs('gri30.cti', case)
+        
+        case = [{
+            'kind': 'constant volume',
+            'pressure': 1.0,
+            'temperature': 1000,
+            'end-time': 10.0,
+            'fuel': {'CH4': 1.0},
+            'oxidizer': {'O2': 0.0, 'HE': 3.76},
+            'equivalence-ratio': 1.0
+            }]
+        with pytest.raises(AssertionError):
+            parse_ignition_inputs('gri30.cti', case)
 
-            with pytest.raises(ValueError):
-                check_inputs(inputs)
+        case = [{
+            'kind': 'constant volume',
+            'pressure': 1.0,
+            'temperature': 1000,
+            'end-time': 10.0,
+            'reactants': {'C4H10': 1.0, 'O2': 1.0, 'N2': 3.76}
+            }]
+        with pytest.raises(AssertionError):
+            parse_ignition_inputs('gri30.cti', case)

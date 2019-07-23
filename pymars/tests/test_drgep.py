@@ -8,7 +8,7 @@ import pytest
 import cantera as ct
 import networkx as nx
 
-from ..sampling import SamplingInputs
+from ..sampling import data_files, InputIgnition
 from ..drgep import create_drgep_matrix, graph_search_drgep, get_importance_coeffs
 from ..drgep import reduce_drgep, run_drgep
 
@@ -649,21 +649,33 @@ class TestRunDRGEP:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        conditions = SamplingInputs(
-            input_ignition=relative_location(os.path.join('inputfiles', 'example_input_file.yaml')),
-            output_ignition=relative_location('example_ignition_output.txt'),
-            data_ignition=relative_location('example_ignition_data.dat')
+        conditions = [
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        data_files['output_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_output.txt')
+            )
+        data_files['data_ignition'] = relative_location(
+            os.path.join('assets', 'example_ignition_data.dat')
             )
         error = 5.0
 
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drgep(
-                model_file, conditions, error, ['CH4', 'O2'], ['N2'], num_threads=1, path=temp_dir
+                model_file, conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
+                num_threads=1, path=temp_dir
                 )
 
         # Expected answer
-        expected_model = ct.Solution(relative_location("drgep_gri30.cti"))
+        expected_model = ct.Solution(relative_location(os.path.join('assets', 'drgep_gri30.cti')))
         
         # Make sure models are the same
         assert check_equal(reduced_model.model.species_names, expected_model.species_names)

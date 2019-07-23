@@ -10,6 +10,7 @@ import numpy as np
 import cantera as ct
 import tables
 
+from ..sampling import InputIgnition
 from ..simulation import Simulation
 
 def relative_location(file):
@@ -18,6 +19,148 @@ def relative_location(file):
 
 
 class TestSimulation:
+    def test_setup_case_equivalence_ratio(self):
+        """Test setting up case that specifies equivalence ratio.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+            fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+            )
+        sim = Simulation(0, case, 'gri30.cti')
+        sim.setup_case()
+
+        assert type(sim.reac) == ct.IdealGasReactor
+        assert np.allclose(sim.gas.T, 1000.0)
+        assert np.allclose(sim.gas.P, ct.one_atm)
+
+        assert np.allclose(sim.gas.X[sim.gas.species_index('CH4')], 1.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
+    
+    def test_setup_case_reactants(self):
+        """Test setting up case that specifies reactants.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0,
+            reactants={'CH4': 1.0, 'O2': 2.0, 'N2': 7.52}
+            )
+        sim = Simulation(0, case, 'gri30.cti')
+        sim.setup_case()
+
+        assert type(sim.reac) == ct.IdealGasReactor
+        assert np.allclose(sim.gas.T, 1000.0)
+        assert np.allclose(sim.gas.P, ct.one_atm)
+
+        assert np.allclose(sim.gas.X[sim.gas.species_index('CH4')], 1.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
+    
+    def test_setup_case_reactants_mass(self):
+        """Test setting up case that specifies reactants using mass fraction.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0,
+            reactants={'CH4': 0.05518632, 'O2': 0.22014867, 'N2': 0.724665}, composition_type='mass'
+            )
+        sim = Simulation(0, case, 'gri30.cti')
+        sim.setup_case()
+
+        assert type(sim.reac) == ct.IdealGasReactor
+        assert np.allclose(sim.gas.T, 1000.0)
+        assert np.allclose(sim.gas.P, ct.one_atm)
+
+        assert np.allclose(sim.gas.X[sim.gas.species_index('CH4')], 1.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('O2')], 2.0 / (1.0 + 2.0 + 7.52))
+        assert np.allclose(sim.gas.X[sim.gas.species_index('N2')], 7.52 / (1.0 + 2.0 + 7.52))
+
+    def test_run_case_steady_state(self):
+        """Test running a case without specifying end time.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+            fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            assert np.allclose(sim.run_case(), 1.066766)
+
+            with tables.open_file(sim.save_file, mode='r') as h5file:
+                table = h5file.root.simulation
+                temperatures = table.col('temperature')
+                pressures = table.col('pressure')
+                mass_fractions = table.col('mass_fractions')
+            
+            final_state = np.concatenate((
+                np.array([temperatures[-1], pressures[-1]]), mass_fractions[-1]
+                ))
+            next_to_final_state = np.concatenate((
+                np.array([temperatures[-2], pressures[-2]]), mass_fractions[-2]
+                ))
+            max_state_values = np.maximum(np.zeros(len(final_state)), final_state)
+            for row in range(len(temperatures)):
+                state = np.concatenate((
+                np.array([temperatures[row], pressures[row]]), mass_fractions[row]
+                ))
+                max_state_values = np.maximum(max_state_values, state)
+            
+            residual = np.linalg.norm(
+                (final_state - next_to_final_state) / (max_state_values + 1.e-15)
+                ) / np.sqrt(sim.sim.n_vars - 1)
+            assert residual < 1.e-8
+            
+
+    def test_run_case_end_time(self):
+        """Test running a case with a specified end time.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+            fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}, end_time=2.0
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            assert np.allclose(sim.run_case(), 1.066766)
+            assert sim.sim.time >= case.end_time
+    
+    def test_run_case_noignition(self):
+        """Test running a case with no ignition.
+        """
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, reactants={'N2': 1.0}
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError) as excinfo:
+                sim.run_case()
+                assert 'No ignition detected for integration case 0' in str(excinfo.value)
+
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, reactants={'N2': 1.0}, 
+            end_time=1.0
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError) as excinfo:
+                sim.run_case()
+                assert 'No ignition detected for integration case 0' in str(excinfo.value)
+
+        case = InputIgnition(
+            kind='constant volume', pressure=1.0, temperature=1000.0, reactants={'N2': 1.0}, 
+            max_steps=1
+            )
+        with TemporaryDirectory() as temp_dir:
+            sim = Simulation(0, case, 'gri30.cti', path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError) as excinfo:
+                sim.run_case()
+                assert (
+                    'Maximum number of steps reached before convergence for integration case 0' 
+                    in str(excinfo.value)
+                    )
+
     def test_process_results(self):
         """Test processing of ignition results using artificial data.
         """
@@ -28,7 +171,7 @@ class TestSimulation:
             'mass_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
-            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
             
             sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
 
@@ -86,7 +229,7 @@ class TestSimulation:
             'mass_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
-            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
             
             sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
 
@@ -139,7 +282,7 @@ class TestSimulation:
             'mass_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
-            sim = Simulation(0, {}, 'gri30.cti', path=temp_dir)
+            sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
             sim.save_file = os.path.join(sim.path, str(sim.idx) + '.h5')
 
             with tables.open_file(sim.save_file, mode='w', title='0') as h5file:

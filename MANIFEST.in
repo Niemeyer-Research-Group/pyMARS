@@ -2,8 +2,8 @@ include LICENSE
 include AUTHORS.md
 include CHANGELOG.md
 include CONTRIBUTING.md
-include pymars/tests/*.cti
-include pymars/tests/*.txt
-include pymars/tests/*.dat
-include pymars/tests/*.inp
-include pymars/tests/inputfiles/*.yaml
+include pymars/tests/assets/*.cti
+include pymars/tests/assets/*.txt
+include pymars/tests/assets/*.dat
+include pymars/tests/assets/*.inp
+include pymars/tests/assets/*.yaml
