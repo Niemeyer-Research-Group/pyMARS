@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2019-07-22
+
+### Added
+
+- Added checks to ensure any species in inputs are in the starting model
+- Added ability to specify `ideal_gas` object name for reduction, if model in model file
+
+### Changed
+
+- Moved all reduction inputs to a YAML file, and updated associated docs
+- Autoignition simulations now run to steady state by default, with optional
+  options of `end-time` or `max-steps` to override
+
 
 ## [1.0.0] - 2019-06-21
 
@@ -37,6 +50,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added preliminary project files (README, CODE_OF_CONDUCT, etc.) without any actual source code
 
 
-[Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.1.0...HEAD
+[1.0.1]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.1.0...v1.0.1
 [1.0.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.0.1...v0.1.0
