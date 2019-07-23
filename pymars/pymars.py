@@ -305,9 +305,9 @@ def pymars(argv):
         inputs = parse_inputs(input_dict)
 
         # Check for Chemkin format and convert if needed
-        if os.path.splitext(args.model)[1] != '.cti':
+        if os.path.splitext(inputs.model)[1] != '.cti':
             logging.info('Chemkin file detected; converting before reduction.')
-            args.model = convert(args.model, args.thermo, args.transport, args.path)
+            inputs.model = convert(inputs.model, args.thermo, args.transport, args.path)
 
         main(
             inputs.model, inputs.error, 
