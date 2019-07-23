@@ -284,9 +284,6 @@ def pymars(argv):
             version=__version__,
             path=os.path.abspath(os.path.dirname(__file__))))
         sys.exit(0)
-    
-    if not args.model:
-        parser.error('A model file is a required input using -m or --model')
 
     if args.convert:
         if not args.model:
