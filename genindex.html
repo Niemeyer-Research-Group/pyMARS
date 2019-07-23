@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Index &#8212; pyMARS 1.0.0a9 documentation</title>
+    <title>Index &#8212; pyMARS 1.0.0a10 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -38,11 +38,11 @@
 <div class="genindex-jumpbox">
  <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
- | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
@@ -50,6 +50,7 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
 </div>
@@ -86,13 +87,13 @@
 </li>
       <li><a href="simulation.html#pymars.simulation.Simulation.calculate_ignition">calculate_ignition() (pymars.simulation.Simulation method)</a>
 </li>
-      <li><a href="sampling.html#pymars.sampling.check_inputs">check_inputs() (in module pymars.sampling)</a>
-</li>
       <li><a href="simulation.html#pymars.simulation.Simulation.clean">clean() (pymars.simulation.Simulation method)</a>
+</li>
+      <li><a href="tools.html#pymars.tools.compare_models">compare_models() (in module pymars.tools)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tools.html#pymars.tools.compare_models">compare_models() (in module pymars.tools)</a>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.composition_type">composition_type() (pymars.sampling.InputIgnition property)</a>
 </li>
       <li><a href="tools.html#pymars.tools.convert">convert() (in module pymars.tools)</a>
 </li>
@@ -105,27 +106,21 @@
   </ul></td>
 </tr></table>
 
-<h2 id="D">D</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.data_ignition">data_ignition() (pymars.sampling.SamplingInputs property)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.data_laminar_flame">data_laminar_flame() (pymars.sampling.SamplingInputs property)</a>
-</li>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.data_psr">data_psr() (pymars.sampling.SamplingInputs property)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reduce_model.html#pymars.reduce_model.ReducedModel.error">error() (pymars.reduce_model.ReducedModel property)</a>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.end_time">end_time() (pymars.sampling.InputIgnition property)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.equivalence_ratio">equivalence_ratio() (pymars.sampling.InputIgnition property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.error">error() (pymars.pymars.ReductionInputs property)</a>
+
+      <ul>
+        <li><a href="reduce_model.html#pymars.reduce_model.ReducedModel.error">(pymars.reduce_model.ReducedModel property)</a>
+</li>
+      </ul></li>
       <li><a href="sensitivity_analysis.html#pymars.sensitivity_analysis.evaluate_species_errors">evaluate_species_errors() (in module pymars.sensitivity_analysis)</a>
 </li>
   </ul></td>
@@ -135,6 +130,12 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reduce_model.html#pymars.reduce_model.ReducedModel.filename">filename() (pymars.reduce_model.ReducedModel property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.flame_conditions">flame_conditions() (pymars.pymars.ReductionInputs property)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.fuel">fuel() (pymars.sampling.InputIgnition property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -160,15 +161,25 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sampling.html#pymars.sampling.ignition_worker">ignition_worker() (in module pymars.sampling)</a>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.ignition_conditions">ignition_conditions() (pymars.pymars.ReductionInputs property)</a>
 </li>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.input_ignition">input_ignition() (pymars.sampling.SamplingInputs property)</a>
+      <li><a href="sampling.html#pymars.sampling.ignition_worker">ignition_worker() (in module pymars.sampling)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.input_laminar_flame">input_laminar_flame() (pymars.sampling.SamplingInputs property)</a>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition">InputIgnition (class in pymars.sampling)</a>
 </li>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.input_psr">input_psr() (pymars.sampling.SamplingInputs property)</a>
+      <li><a href="sampling.html#pymars.sampling.InputLaminarFlame">InputLaminarFlame (class in pymars.sampling)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.InputPSR">InputPSR (class in pymars.sampling)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.kind">kind() (pymars.sampling.InputIgnition property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -186,25 +197,29 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pymars.html#pymars.pymars.main">main() (in module pymars.pymars)</a>
 </li>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.max_steps">max_steps() (pymars.sampling.InputIgnition property)</a>
+</li>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.method">method() (pymars.pymars.ReductionInputs property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.METHODS">METHODS (in module pymars.pymars)</a>
+</li>
       <li><a href="drgep.html#pymars.drgep.mod_dijkstra">mod_dijkstra() (in module pymars.drgep)</a>
 </li>
-      <li><a href="reduce_model.html#pymars.reduce_model.ReducedModel.model">model() (pymars.reduce_model.ReducedModel property)</a>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.model">model() (pymars.pymars.ReductionInputs property)</a>
+
+      <ul>
+        <li><a href="reduce_model.html#pymars.reduce_model.ReducedModel.model">(pymars.reduce_model.ReducedModel property)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.output_ignition">output_ignition() (pymars.sampling.SamplingInputs property)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.output_laminar_flame">output_laminar_flame() (pymars.sampling.SamplingInputs property)</a>
-</li>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs.output_psr">output_psr() (pymars.sampling.SamplingInputs property)</a>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.oxidizer">oxidizer() (pymars.sampling.InputIgnition property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -212,20 +227,34 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sampling.html#pymars.sampling.parse_flame_inputs">parse_flame_inputs() (in module pymars.sampling)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.parse_ignition_inputs">parse_ignition_inputs() (in module pymars.sampling)</a>
+</li>
+      <li><a href="pymars.html#pymars.pymars.parse_inputs">parse_inputs() (in module pymars.pymars)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.parse_psr_inputs">parse_psr_inputs() (in module pymars.sampling)</a>
+</li>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.phase_name">phase_name() (pymars.pymars.ReductionInputs property)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.pressure">pressure() (pymars.sampling.InputIgnition property)</a>
+</li>
       <li><a href="simulation.html#pymars.simulation.Simulation.process_results">process_results() (pymars.simulation.Simulation method)</a>
+</li>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.psr_conditions">psr_conditions() (pymars.pymars.ReductionInputs property)</a>
 </li>
       <li><a href="pymars.html#pymars.pymars.pymars">pymars() (in module pymars.pymars)</a>
 </li>
       <li><a href="drg.html#module-pymars.drg">pymars.drg (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="drgep.html#module-pymars.drgep">pymars.drgep (module)</a>
 </li>
       <li><a href="pfa.html#module-pymars.pfa">pymars.pfa (module)</a>
 </li>
       <li><a href="pymars.html#module-pymars.pymars">pymars.pymars (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reduce_model.html#module-pymars.reduce_model">pymars.reduce_model (module)</a>
 </li>
       <li><a href="sampling.html#module-pymars.sampling">pymars.sampling (module)</a>
@@ -246,6 +275,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.reactants">reactants() (pymars.sampling.InputIgnition property)</a>
+</li>
       <li><a href="sampling.html#pymars.sampling.read_metrics">read_metrics() (in module pymars.sampling)</a>
 </li>
       <li><a href="drg.html#pymars.drg.reduce_drg">reduce_drg() (in module pymars.drg)</a>
@@ -258,6 +289,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs">ReductionInputs (class in pymars.pymars)</a>
+</li>
       <li><a href="simulation.html#pymars.simulation.Simulation.run_case">run_case() (pymars.simulation.Simulation method)</a>
 </li>
       <li><a href="drg.html#pymars.drg.run_drg">run_drg() (in module pymars.drg)</a>
@@ -274,16 +307,20 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.safe_species">safe_species() (pymars.pymars.ReductionInputs property)</a>
+</li>
       <li><a href="sampling.html#pymars.sampling.sample">sample() (in module pymars.sampling)</a>
 </li>
       <li><a href="sampling.html#pymars.sampling.sample_metrics">sample_metrics() (in module pymars.sampling)</a>
 </li>
-      <li><a href="sampling.html#pymars.sampling.SamplingInputs">SamplingInputs (class in pymars.sampling)</a>
-</li>
       <li><a href="soln2cti.html#pymars.soln2cti.section_break">section_break() (in module pymars.soln2cti)</a>
+</li>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.sensitivity_analysis">sensitivity_analysis() (pymars.pymars.ReductionInputs property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.sensitivity_type">sensitivity_type() (pymars.pymars.ReductionInputs property)</a>
+</li>
       <li><a href="simulation.html#pymars.simulation.Simulation.setup_case">setup_case() (pymars.simulation.Simulation method)</a>
 </li>
       <li><a href="simulation.html#pymars.simulation.Simulation">Simulation (class in pymars.simulation)</a>
@@ -298,13 +335,25 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reduce_model.html#pymars.reduce_model.trim">trim() (in module pymars.reduce_model)</a>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.target_species">target_species() (pymars.pymars.ReductionInputs property)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.InputIgnition.temperature">temperature() (pymars.sampling.InputIgnition property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reduce_model.html#pymars.reduce_model.trim">trim() (in module pymars.reduce_model)</a>
+</li>
       <li><a href="drg.html#pymars.drg.trim_drg">trim_drg() (in module pymars.drg)</a>
 </li>
       <li><a href="pfa.html#pymars.pfa.trim_pfa">trim_pfa() (in module pymars.pfa)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pymars.html#pymars.pymars.ReductionInputs.upper_threshold">upper_threshold() (pymars.pymars.ReductionInputs property)</a>
 </li>
   </ul></td>
 </tr></table>

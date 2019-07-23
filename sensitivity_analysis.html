@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>sensitivity_analysis &#8212; pyMARS 1.0.0a9 documentation</title>
+    <title>sensitivity_analysis &#8212; pyMARS 1.0.0a10 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -38,15 +38,16 @@
 <p>Module containing sensitivity analysis reduction stage.</p>
 <dl class="function">
 <dt id="pymars.sensitivity_analysis.evaluate_species_errors">
-<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">evaluate_species_errors</code><span class="sig-paren">(</span><em class="sig-param">starting_model</em>, <em class="sig-param">sample_inputs</em>, <em class="sig-param">metrics</em>, <em class="sig-param">species_limbo</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">evaluate_species_errors</code><span class="sig-paren">(</span><em class="sig-param">starting_model</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">metrics</em>, <em class="sig-param">species_limbo</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate error induced by removal of each limbo species</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>starting_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a>) – Container with model and file information</p></li>
-<li><p><strong>sample_inputs</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Contains filenames for sampling</p></li>
+<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
 <li><p><strong>metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Calculated metrics for starting model, used for evaluating error</p></li>
 <li><p><strong>species_limbo</strong> (<em>list of str</em>) – List of species to consider removal</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
 Optional; default = 1, in which the multiprocessing module is not used.
 If 0, then use the available number of cores minus one. Otherwise,
@@ -64,16 +65,19 @@ use the specified number of threads.</p></li>
 
 <dl class="function">
 <dt id="pymars.sensitivity_analysis.run_sa">
-<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">run_sa</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">starting_error</em>, <em class="sig-param">sample_inputs</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">algorithm_type='greedy'</em>, <em class="sig-param">species_limbo=[]</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.run_sa" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">run_sa</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">starting_error</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions</em>, <em class="sig-param">flame_conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">algorithm_type='greedy'</em>, <em class="sig-param">species_limbo=[]</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.run_sa" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs a sensitivity analysis to remove species on a given model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Model being analyzed</p></li>
 <li><p><strong>starting_error</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Error percentage between the reduced and original models</p></li>
-<li><p><strong>sample_inputs</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Contains filenames for sampling</p></li>
+<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
+<li><p><strong>psr_conditions</strong> (<em>list of InputPSR</em><em>, </em><em>optional</em>) – List of PSR simulation conditions.</p></li>
+<li><p><strong>flame_conditions</strong> (<em>list of InputLaminarFlame</em><em>, </em><em>optional</em>) – List of laminar flame simulation conditions.</p></li>
 <li><p><strong>error_limit</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Maximum allowable error level for reduced model</p></li>
 <li><p><strong>species_safe</strong> (<em>list of str</em>) – List of species names to always be retained</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>algorithm_type</strong> (<em>{'initial'</em><em>, </em><em>'greedy'}</em>) – Type of sensitivity analysis: initial (order based on initial error), or
 greedy (all species error re-evaluated after each removal)</p></li>
 <li><p><strong>species_limbo</strong> (<em>list of str</em><em>, </em><em>optional</em>) – List of species to consider; if empty, consider all not in <code class="docutils literal notranslate"><span class="pre">species_safe</span></code></p></li>
