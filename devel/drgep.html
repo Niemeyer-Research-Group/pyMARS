@@ -133,7 +133,7 @@ of a node and the distance to each node.</p></li>
 
 <dl class="function">
 <dt id="pymars.drgep.reduce_drgep">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">reduce_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">threshold</em>, <em class="sig-param">importance_coeffs</em>, <em class="sig-param">sample_inputs</em>, <em class="sig-param">sampled_metrics</em>, <em class="sig-param">previous_model=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.reduce_drgep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">reduce_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">threshold</em>, <em class="sig-param">importance_coeffs</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">sampled_metrics</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">previous_model=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.reduce_drgep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a threshold and DRGEP coefficients, reduce the model and determine the error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -142,8 +142,9 @@ of a node and the distance to each node.</p></li>
 <li><p><strong>species_safe</strong> (<em>list of str</em>) – List of species to always be retained</p></li>
 <li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – DRG threshold for trimming graph</p></li>
 <li><p><strong>importance_coeffs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Dictionary with species and their overall interaction coefficients.</p></li>
-<li><p><strong>sample_inputs</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Filename information for sampling (e.g., autoignition inputs/outputs)</p></li>
+<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
 <li><p><strong>sampled_metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Global metrics from original model used to evaluate error</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>previous_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a><em>, </em><em>optional</em>) – Model produced at previous threshold level; used to avoid repeated work.</p></li>
 <li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
 Optional; default = 1, in which the multiprocessing module is not used.
@@ -163,16 +164,19 @@ use the specified number of threads.</p></li>
 
 <dl class="function">
 <dt id="pymars.drgep.run_drgep">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">run_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">sample_inputs</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_targets</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">threshold_upper=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.run_drgep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">run_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions</em>, <em class="sig-param">flame_conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_targets</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">threshold_upper=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.run_drgep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function for running DRGEP reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Original model file</p></li>
-<li><p><strong>sample_inputs</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.SamplingInputs" title="pymars.sampling.SamplingInputs"><em>SamplingInputs</em></a>) – Contains filenames for sampling</p></li>
+<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
+<li><p><strong>psr_conditions</strong> (<em>list of InputPSR</em>) – List of PSR simulation conditions.</p></li>
+<li><p><strong>flame_conditions</strong> (<em>list of InputLaminarFlame</em>) – List of laminar flame simulation conditions.</p></li>
 <li><p><strong>error_limit</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Maximum allowable error level for reduced model</p></li>
 <li><p><strong>species_targets</strong> (<em>list of str</em>) – List of target species names</p></li>
 <li><p><strong>species_safe</strong> (<em>list of str</em>) – List of species names to always be retained</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>threshold_upper</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis</p></li>
 <li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
 Optional; default = 1, in which the multiprocessing module is not used.

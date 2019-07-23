@@ -38,14 +38,15 @@
 <p>Autoignition simulation module</p>
 <dl class="class">
 <dt id="pymars.simulation.Simulation">
-<em class="property">class </em><code class="sig-prename descclassname">pymars.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param">idx</em>, <em class="sig-param">properties</em>, <em class="sig-param">model</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pymars.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param">idx</em>, <em class="sig-param">properties</em>, <em class="sig-param">model</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for ignition delay simulations</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Identifer index for case</p></li>
-<li><p><strong>properties</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Dictionary with all properties needed</p></li>
+<li><p><strong>properties</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition" title="pymars.sampling.InputIgnition"><em>InputIgnition</em></a>) – Object with initial conditions for simulation</p></li>
 <li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Filename for Cantera-format model to be used</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Path for location of output files</p></li>
 </ul>
 </dd>
@@ -83,12 +84,23 @@
 <dt id="pymars.simulation.Simulation.run_case">
 <code class="sig-name descname">run_case</code><span class="sig-paren">(</span><em class="sig-param">stop_at_ignition=False</em>, <em class="sig-param">restart=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.run_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run simulation case set up <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>.</p>
+<p>If no end time is specified for the integration, the function integrates
+to steady state (or a maximum of 10,000 steps, by default). This is done
+by checking whether the system state changes below a certain threshold,
+with the residual computed using feature checking. This is blatantly stolen
+from Cantera’s <a class="reference external" href="https://cantera.org/documentation/docs-2.4/sphinx/html/cython/zerodim.html#cantera.ReactorNet.advance_to_steady_state" title="(in Cantera v2.4)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cantera.ReactorNet.advance_to_steady_state()</span></code></a> method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_at_ignition</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, stop integration at ignition point, don’t save data.</p></li>
 <li><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, skip if results file exists.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>self.ignition_delay</strong> – Computed ignition delay in seconds</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </dd>
 </dl>
 </dd></dl>

@@ -68,7 +68,7 @@
 
 <dl class="function">
 <dt id="pymars.reduce_model.trim">
-<code class="sig-prename descclassname">pymars.reduce_model.</code><code class="sig-name descname">trim</code><span class="sig-paren">(</span><em class="sig-param">initial_model_file</em>, <em class="sig-param">exclusion_list</em>, <em class="sig-param">new_model_file</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.reduce_model.trim" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.reduce_model.</code><code class="sig-name descname">trim</code><span class="sig-paren">(</span><em class="sig-param">initial_model_file</em>, <em class="sig-param">exclusion_list</em>, <em class="sig-param">new_model_file</em>, <em class="sig-param">phase_name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.reduce_model.trim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to eliminate species and corresponding reactions from model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -76,6 +76,7 @@
 <li><p><strong>initial_model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Filename for initial model to be reduced</p></li>
 <li><p><strong>exclusion_list</strong> (<em>list of str</em>) – List of species names that will be removed</p></li>
 <li><p><strong>new_model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of new reduced model file</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
