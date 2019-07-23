@@ -210,19 +210,19 @@ class Simulation(object):
                 if step == self.max_steps - 1:
                     logging.error(
                         'Maximum number of steps reached before '
-                        f'convergence for integration case {self.idx}'
+                        f'convergence for ignition case {self.idx}'
                         )
                     raise RuntimeError(
                         'Maximum number of steps reached before '
-                        f'convergence for integration case {self.idx}'
+                        f'convergence for ignition case {self.idx}'
                     )
 
             # Write ``table`` to disk
             table.flush()
 
             if not ignition_flag:
-                logging.error(f'No ignition detected for integration case {self.idx}')
-                raise RuntimeError(f'No ignition detected for integration case {self.idx}')
+                logging.error(f'No ignition detected for ignition case {self.idx}')
+                raise RuntimeError(f'No ignition detected for ignition case {self.idx}')
 
         return self.ignition_delay
 
@@ -237,18 +237,22 @@ class Simulation(object):
                 if self.reac.T >= self.properties.temperature + 400.0:
                     self.ignition_delay = self.sim.time
                     break
+            if not self.ignition_delay:
+                logging.warning(
+                    f'No ignition detected before end time for ignition case {self.idx}'
+                    )
         else:
             # otherwise, integrate until steady state, or maximum number of steps reached
-            for _ in range(self.max_steps):
+            for step in range(self.max_steps):
                 self.sim.step()
                 if self.reac.T >= self.properties.temperature + 400.0:
                     self.ignition_delay = self.sim.time
                     break
-
-        logging.warning(
-            'Maximum number of steps reached before '
-            f'convergence for integration case {self.idx}'
-            )
+            if step == self.max_steps - 1:
+                logging.warning(
+                    'Maximum number of steps reached before '
+                    f'convergence for ignition case {self.idx}'
+                    )
 
         return self.ignition_delay
 
