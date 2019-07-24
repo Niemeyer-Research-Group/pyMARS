@@ -30,13 +30,8 @@ jobs:
       conda env create --quiet --file test-environment.yaml
       call activate py$(python.version)
       conda info -a
-    displayName: 'Create Anaconda environment'
-  
-  - powershell: Write-Host "Packages in py3.x Environment:"
-    displayName: 'List packages'
-    
-  - script: conda list -n py$(python.version)
-    displayName: 'List package in environment'
+      conda list -n py$(python.version)
+    displayName: 'Create Anaconda environment and list packages'
 
   - script: |
       call activate py$(python.version)
