@@ -5,6 +5,7 @@ import os
 import pkg_resources
 
 import pytest
+import numpy as np
 import cantera as ct
 import networkx as nx
 
@@ -641,6 +642,37 @@ class TestGraphSearchDRGEP:
         assert 'A' in max_dic
         assert [n in max_dic for n in ['A', 'C', 'D', 'I', 'O', 'F', 'E', 'H']]
         assert [n not in max_dic for n in ['B', 'G', 'J', 'K', 'L', 'M', 'N']]
+
+
+class TestGetImportanceCoeffs:
+    def test_one_condition_multiple_targets(self):
+        """Tests correct coefficients with one condition but multiple targets"""
+        matrices = [
+            np.array([[0, 0.6, 0], [1.0, 0, 1.0], [0, 0.1, 0]])
+            ]
+        coefficients = get_importance_coeffs(['A', 'B', 'C'], ['A', 'C'], matrices)
+        assert coefficients['A'] == 1.0
+        assert coefficients['B'] == 0.6
+        assert coefficients['C'] == 1.0
+
+        matrices = [
+            np.array([[0, 0.1, 0], [1.0, 0, 1.0], [0, 0.6, 0]])
+            ]
+        coefficients = get_importance_coeffs(['A', 'B', 'C'], ['A', 'C'], matrices)
+        assert coefficients['A'] == 1.0
+        assert coefficients['B'] == 0.6
+        assert coefficients['C'] == 1.0
+
+    def test_multiple_conditions(self):
+        """Tests correct coefficients with multiple conditions"""
+        matrices = [
+            np.array([[0, 0.6], [1.0, 0.0]]),
+            np.array([[0, 0.0], [1.0, 0.0]]),
+            np.array([[0, 0.1], [1.0, 0.0]]),
+            ]
+        coefficients = get_importance_coeffs(['A', 'B'], ['A'], matrices)
+        assert coefficients['A'] == 1.0
+        assert coefficients['B'] == 0.6
 
 
 class TestRunDRGEP:
