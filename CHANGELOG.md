@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.1.0] - 2019-07-22
-
 ### Added
 
 - Added checks to ensure any species in inputs are in the starting model
@@ -19,6 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Moved all reduction inputs to a YAML file, and updated associated docs
 - Autoignition simulations now run to steady state by default, with optional
   options of `end-time` or `max-steps` to override
+
+### Fixed
+
+- Fixed bug in DRGEP overall interaction coefficient calculation with multiple conditions
+- Removed erroneous message from ignition simulations about lack of convergence
 
 
 ## [1.0.0] - 2019-06-21
