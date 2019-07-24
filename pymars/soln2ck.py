@@ -286,7 +286,12 @@ def write(solution, output_filename='', path='',
             f'{element_names}\n' +
             'END\n\n'
             )
-        species_names = fill('  '.join(solution.species_names), width=60)
+        species_names = fill(
+            '  '.join(solution.species_names), 
+            width=60,
+            break_long_words=False,
+            break_on_hyphens=False
+            )
         the_file.write(
             'SPECIES\n' + 
             f'{species_names}\n'

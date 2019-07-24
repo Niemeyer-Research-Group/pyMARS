@@ -215,7 +215,13 @@ def write(solution, output_filename='', path=''):
 
         # Write Phase definition to file
         element_names = ' '.join(solution.element_names)
-        species_names = fill(' '.join(solution.species_names), width=55, subsequent_indent=19*' ')
+        species_names = fill(
+            ' '.join(solution.species_names), 
+            width=55, 
+            subsequent_indent=19*' ',
+            break_long_words=False,
+            break_on_hyphens=False
+            )
 
         the_file.write(
             f'ideal_gas(name = "{os.path.splitext(os.path.basename(output_filename))[0]}", \n' +
@@ -233,11 +239,23 @@ def write(solution, output_filename='', path=''):
             # build strings with low- and high-temperature 7 NASA coefficients
             nasa_range_low = f'[{species.thermo.min_temp}, {species.thermo.coeffs[0]}]'
             nasa_coeffs_low = [f'{c:.9e}' for c in species.thermo.coeffs[8:15]]
-            nasa_coeffs_low = fill('[' + ', '.join(nasa_coeffs_low) + ']', width=50, subsequent_indent=16*' ')
+            nasa_coeffs_low = fill(
+                '[' + ', '.join(nasa_coeffs_low) + ']', 
+                width=50, 
+                subsequent_indent=16*' ',
+                break_long_words=False,
+                break_on_hyphens=False
+                )
             
             nasa_range_high = f'[{species.thermo.coeffs[0]}, {species.thermo.max_temp}]'
             nasa_coeffs_high = [f'{c:.9e}' for c in species.thermo.coeffs[1:8]]
-            nasa_coeffs_high = fill('[' + ', '.join(nasa_coeffs_high) + ']', width=50, subsequent_indent=16*' ')
+            nasa_coeffs_high = fill(
+                '[' + ', '.join(nasa_coeffs_high) + ']', 
+                width=50, 
+                subsequent_indent=16*' ',
+                break_long_words=False,
+                break_on_hyphens=False
+                )
 
             composition = ', '.join([f'{s}:{int(v)}' for s, v in species.composition.items()])
 
