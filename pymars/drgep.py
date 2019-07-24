@@ -255,21 +255,17 @@ def get_importance_coeffs(species_names, target_species, matrices):
         Maximum coefficients over all sampled states
 
     """
-    importance_coefficients = {}
+    importance_coefficients = {sp:0.0 for sp in species_names}
     name_mapping = {i: sp for i, sp in enumerate(species_names)}
     for matrix in matrices:
         graph = networkx.DiGraph(matrix)
         networkx.relabel_nodes(graph, name_mapping, copy=False)
         coefficients = graph_search_drgep(graph, target_species)
-
+        
         importance_coefficients = {
-            sp:max(importance_coefficients.get(sp, 0.0), coefficients[sp]) for sp in coefficients
-            }
-    
-    # Make sure all species are present in the dict; inerts/non-participating species won't be
-    for sp in species_names:
-        if sp not in importance_coefficients:
-            importance_coefficients[sp] = 0.0
+            sp:max(coefficients.get(sp, 0.0), importance_coefficients[sp]) 
+            for sp in importance_coefficients
+        }
     
     return importance_coefficients
 
