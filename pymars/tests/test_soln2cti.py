@@ -9,7 +9,7 @@ import cantera as ct
 
 from ..tools import compare_models
 from ..reduce_model import trim
-from ..soln2cti import write
+from ..soln2cti import write, build_efficiencies
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
 try:
@@ -37,6 +37,44 @@ except ImportError:
 def relative_location(file):
     file_path = os.path.join(file)
     return pkg_resources.resource_filename(__name__, file_path)
+
+class TestBuildEfficiencies:
+    def test_regular_efficiencies(self):
+        """Test returning regular efficiency string.
+        """
+        efficiencies = {
+            'co': 2.8, 'co2': 1.6, 'h2': 3.7, 'h2o': 0.0, 'h2o2': 7.7, 
+            'he': 0.65, 'n2': 1.5, 'o2': 1.2
+            }
+        species = ['co', 'co2', 'h2', 'h2o', 'h2o2', 'he', 'n2', 'o2']
+        efficiency_str = build_efficiencies(efficiencies, species)
+        assert efficiency_str == 'co:2.8  co2:1.6  h2:3.7  h2o:0.0  h2o2:7.7  he:0.65  n2:1.5  o2:1.2'
+    
+    def test_regular_efficiencies(self):
+        """Test returning regular efficiency string with removed species.
+        """
+        efficiencies = {
+            'co': 2.8, 'co2': 1.6, 'h2': 3.7, 'h2o': 0.0, 'h2o2': 7.7, 
+            'he': 0.65, 'n2': 1.5, 'o2': 1.2
+            }
+        species = ['co', 'co2', 'h2', 'h2o', 'h2o2', 'n2', 'o2']
+        efficiency_str = build_efficiencies(efficiencies, species)
+        assert efficiency_str == 'co:2.8  co2:1.6  h2:3.7  h2o:0.0  h2o2:7.7  n2:1.5  o2:1.2'
+    
+    def test_explicit_third_body(self):
+        """Test appropriate handling of reaction with explicit third body.
+        """
+        rxn = ct.FalloffReaction.fromCti(
+        "units(length='cm', quantity='mol')\n" +
+        '''falloff_reaction('h2o2 (+ h2o) <=> oh + oh (+ h2o)',
+            kf=[2.000000e+12, 0.9, 48749.0],
+            kf0=[1.865000e+25, -2.3, 48749.0],
+            falloff=Troe(A=0.51, T3=1e-30, T1=1e+30))'''
+        )
+        efficiency_str = build_efficiencies(
+            rxn.efficiencies, ['h2o2', 'h2o', 'oh'], rxn.default_efficiency
+            )
+        assert not efficiency_str
 
 
 class TestWrite:

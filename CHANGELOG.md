@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed bug in DRGEP overall interaction coefficient calculation with multiple conditions
 - Removed erroneous message from ignition simulations about lack of convergence
 - Fixed potenetial bug when printing CTI files with hyphens in species names
+- Fixed bug that printed efficiency list for pressure-dependent reactions with explicit third body
 
 
 ## [1.0.0] - 2019-06-21

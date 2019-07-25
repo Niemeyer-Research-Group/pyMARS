@@ -172,6 +172,33 @@ def build_falloff(parameters, falloff_function):
     return falloff_string
 
 
+def build_efficiencies(efficiencies, species_names, default_efficiency=1.0):
+    """Creates line with list of third-body species efficiencies.
+
+    Parameters
+    ----------
+    efficiencies : dict
+        Dictionary of species efficiencies
+    species_names : dict of str
+        List of all species names
+    default_efficiency : float, optional
+        Default efficiency for all species; will be 0.0 for reactions with explicit third body
+
+    Returns
+    -------
+    str
+        Line with list of efficiencies
+
+    """
+    # Reactions with a default_efficiency of 0 and a single entry in the efficiencies dict
+    # have an explicit third body specified.
+    if len(efficiencies) == 1 and not default_efficiency:
+        return ''
+
+    reduced_efficiencies = {s:efficiencies[s] for s in efficiencies if s in species_names}
+    return '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+
+
 def write(solution, output_filename='', path=''):
     """Function to write cantera solution object to cti file.
 
@@ -309,14 +336,10 @@ def write(solution, output_filename='', path=''):
                                             )
                 reaction_string += f'three_body_reaction( "{reaction.equation}",  [{arrhenius}]'
 
-                # trims efficiencies list
-                reduced_efficiencies = {s:reaction.efficiencies[s] 
-                                        for s in reaction.efficiencies 
-                                        if s in solution.species_names
-                                        }
-                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                # potentially trimmed efficiencies list
+                efficiencies_str = build_efficiencies(reaction.efficiencies, solution.species_names)
                 if efficiencies_str:
-                    reaction_string += f',\n{indent[9]}efficiencies = " {efficiencies_str} "'
+                    reaction_string += f',\n{indent[9]}efficiencies = "{efficiencies_str}"'
                                     
             elif type(reaction) == ct.FalloffReaction:
                 arrhenius_high = build_falloff_arrhenius(
@@ -338,14 +361,12 @@ def write(solution, output_filename='', path=''):
                     falloff_str = build_falloff(reaction.falloff.parameters, reaction.falloff.type)
                     reaction_string += ',\n' + indent[9] + 'falloff = ' + falloff_str
                 
-                # trims efficiencies list
-                reduced_efficiencies = {s:reaction.efficiencies[s] 
-                                        for s in reaction.efficiencies 
-                                        if s in solution.species_names
-                                        }
-                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                # potentially trimmed efficiencies list
+                efficiencies_str = build_efficiencies(
+                    reaction.efficiencies, solution.species_names, reaction.default_efficiency
+                    )
                 if efficiencies_str:
-                    reaction_string += f',\n{indent[9]}efficiencies = " {efficiencies_str} "'
+                    reaction_string += f',\n{indent[9]}efficiencies = "{efficiencies_str}"'
             
             elif type(reaction) == ct.ChemicallyActivatedReaction:
                 arrhenius_high = build_falloff_arrhenius(
@@ -367,14 +388,12 @@ def write(solution, output_filename='', path=''):
                     falloff_str = build_falloff(reaction.falloff.parameters, reaction.falloff.type)
                     reaction_string += ',\n' + indent[9] + 'falloff = ' + falloff_str
                 
-                # trims efficiencies list
-                reduced_efficiencies = {s:reaction.efficiencies[s] 
-                                        for s in reaction.efficiencies 
-                                        if s in solution.species_names
-                                        }
-                efficiencies_str = '  '.join([f'{s}:{v}' for s, v in reduced_efficiencies.items()])
+                # potentially trimmed efficiencies list
+                efficiencies_str = build_efficiencies(
+                    reaction.efficiencies, solution.species_names, reaction.default_efficiency
+                    )
                 if efficiencies_str:
-                    reaction_string += f',\n{indent[8]} efficiencies = " {efficiencies_str} "'
+                    reaction_string += f',\n{indent[8]} efficiencies = "{efficiencies_str}"'
 
             elif type(reaction) == ct.PlogReaction:
                 reaction_string += f'pdep_arrhenius( "{reaction.equation}",\n'
