@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>soln2cti &#8212; pyMARS 1.1.0a5 documentation</title>
+    <title>soln2cti &#8212; pyMARS 1.1.0a6 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -52,6 +52,27 @@ Cantera development version 2.3.0a2 required</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>String with Arrhenius coefficients</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.soln2cti.build_efficiencies">
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_efficiencies</code><span class="sig-paren">(</span><em class="sig-param">efficiencies</em>, <em class="sig-param">species_names</em>, <em class="sig-param">default_efficiency=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_efficiencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates line with list of third-body species efficiencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>efficiencies</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Dictionary of species efficiencies</p></li>
+<li><p><strong>species_names</strong> (<em>dict of str</em>) – List of all species names</p></li>
+<li><p><strong>default_efficiency</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – Default efficiency for all species; will be 0.0 for reactions with explicit third body</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Line with list of efficiencies</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></p>
