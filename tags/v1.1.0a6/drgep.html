@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>drgep &#8212; pyMARS 1.1.0a6 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pfa" href="pfa.html" />
+    <link rel="prev" title="drg" href="drg.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymars.drgep">
+<span id="drgep"></span><h1>drgep<a class="headerlink" href="#module-pymars.drgep" title="Permalink to this headline">¶</a></h1>
+<p>Module containing Directed Relation Graph with Error Propagation (DRGEP) reduction method.</p>
+<dl class="function">
+<dt id="pymars.drgep.create_drgep_matrix">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">create_drgep_matrix</code><span class="sig-paren">(</span><em class="sig-param">state</em>, <em class="sig-param">solution</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.create_drgep_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates DRGEP graph adjacency matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a>) – Tuple of state with temperature, pressure, and species mass fractions</p></li>
+<li><p><strong>solution</strong> (<a class="reference external" href="https://cantera.org/documentation/docs-2.4/sphinx/html/cython/importing.html#cantera.Solution" title="(in Cantera v2.4)"><em>cantera.Solution</em></a>) – Cantera object of the solution being analyzed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>adjacency_matrix</strong> – Adjacency matrix based on calculated direct interaction coefficients</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.drgep.get_importance_coeffs">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">get_importance_coeffs</code><span class="sig-paren">(</span><em class="sig-param">species_names</em>, <em class="sig-param">target_species</em>, <em class="sig-param">matrices</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.get_importance_coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate importance coefficients for all species</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species_names</strong> (<em>list of str</em>) – Species names</p></li>
+<li><p><strong>target_species</strong> (<em>list of str</em>) – List of target species</p></li>
+<li><p><strong>matrices</strong> (<em>list of numpy.ndarray</em>) – List of adjacency matrices</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>importance_coefficients</strong> – Maximum coefficients over all sampled states</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.drgep.graph_search_drgep">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">graph_search_drgep</code><span class="sig-paren">(</span><em class="sig-param">graph</em>, <em class="sig-param">target_species</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.graph_search_drgep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches graph to generate a dictionary of the greatest paths to all species from one of the targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<a class="reference external" href="https://networkx.github.io/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v2.3)"><em>networkx.DiGraph</em></a>) – Graph representing model</p></li>
+<li><p><strong>target_species</strong> (<em>list of str</em>) – List of target species to search from</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>overall_coefficients</strong> – Overall interaction coefficients; maximum over all paths from all targets to each species</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.drgep.mod_dijkstra">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">mod_dijkstra</code><span class="sig-paren">(</span><em class="sig-param">G</em>, <em class="sig-param">source</em>, <em class="sig-param">get_weight</em>, <em class="sig-param">pred=None</em>, <em class="sig-param">paths=None</em>, <em class="sig-param">cutoff=None</em>, <em class="sig-param">target=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.mod_dijkstra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modified implementation of Dijkstra’s algorithm for DRGEP method.</p>
+<p>Multiples values along graph pathways instead of adding and returns a dictionary
+with nodes as keys and values containing the greatest path to that node.
+Each edge weight must be &lt;= 1 so that the further they are from the source,
+the less important they are.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<a class="reference external" href="https://networkx.github.io/documentation/stable/reference/classes/graph.html#networkx.Graph" title="(in NetworkX v2.3)"><em>networkx.Graph</em></a>) – Graph to be considered</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Starting node for path</p></li>
+<li><p><strong>get_weight</strong> (<em>function</em>) – Function for getting edge weight</p></li>
+<li><p><strong>pred</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>, </em><em>optional</em>) – List of predecessors of a node</p></li>
+<li><p><strong>paths</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a><em>, </em><em>optional</em>) – Path from the source to a target node.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Ending node for path</p></li>
+<li><p><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – Depth to stop the search. Only paths of length &lt;= cutoff are returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>distance, path</strong> (<em>dict</em>) – Returns a tuple of two dictionaries keyed by node.
+The first dictionary stores distance from the source.
+The second stores the path from the source to that node.</p></li>
+<li><p><strong>pred, distance</strong> (<em>dict</em>) – Returns two dictionaries representing a list of predecessors
+of a node and the distance to each node.</p></li>
+<li><p><strong>distance</strong> (<em>dict</em>) – Dictionary of greatest lengths keyed by target.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.drgep.reduce_drgep">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">reduce_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">threshold</em>, <em class="sig-param">importance_coeffs</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">sampled_metrics</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">previous_model=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.reduce_drgep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a threshold and DRGEP coefficients, reduce the model and determine the error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Filename for model being reduced</p></li>
+<li><p><strong>species_safe</strong> (<em>list of str</em>) – List of species to always be retained</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – DRG threshold for trimming graph</p></li>
+<li><p><strong>importance_coeffs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Dictionary with species and their overall interaction coefficients.</p></li>
+<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
+<li><p><strong>sampled_metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Global metrics from original model used to evaluate error</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
+<li><p><strong>previous_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a><em>, </em><em>optional</em>) – Model produced at previous threshold level; used to avoid repeated work.</p></li>
+<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
+Optional; default = 1, in which the multiprocessing module is not used.
+If 0, then use the available number of cores minus one. Otherwise,
+use the specified number of threads.</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path for writing files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return reduced model and associated metadata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel">ReducedModel</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.drgep.run_drgep">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">run_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions</em>, <em class="sig-param">flame_conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_targets</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">threshold_upper=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.run_drgep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function for running DRGEP reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Original model file</p></li>
+<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
+<li><p><strong>psr_conditions</strong> (<em>list of InputPSR</em>) – List of PSR simulation conditions.</p></li>
+<li><p><strong>flame_conditions</strong> (<em>list of InputLaminarFlame</em>) – List of laminar flame simulation conditions.</p></li>
+<li><p><strong>error_limit</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Maximum allowable error level for reduced model</p></li>
+<li><p><strong>species_targets</strong> (<em>list of str</em>) – List of target species names</p></li>
+<li><p><strong>species_safe</strong> (<em>list of str</em>) – List of species names to always be retained</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
+<li><p><strong>threshold_upper</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis</p></li>
+<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
+Optional; default = 1, in which the multiprocessing module is not used.
+If 0, then use the available number of cores minus one. Otherwise,
+use the specified number of threads.</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path for writing files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return reduced model and associated metadata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel">ReducedModel</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymars.drgep.ss_dijkstra_path_length_modified">
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">ss_dijkstra_path_length_modified</code><span class="sig-paren">(</span><em class="sig-param">G</em>, <em class="sig-param">source</em>, <em class="sig-param">cutoff=None</em>, <em class="sig-param">weight='weight'</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.ss_dijkstra_path_length_modified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the greatest path length via multiplication between source and all other
+reachable nodes for a weighted graph with all weights &lt;= 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<a class="reference external" href="https://networkx.github.io/documentation/stable/reference/classes/graph.html#networkx.Graph" title="(in NetworkX v2.3)"><em>networkx.Graph</em></a>) – Graph to be considered</p></li>
+<li><p><strong>source</strong> (<em>node label</em>) – Starting node for path</p></li>
+<li><p><strong>weight</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em><em> (</em><em>default='weight'</em><em>)</em>) – Edge data key corresponding to the edge weight.</p></li>
+<li><p><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – Depth to stop the search. Only paths of length &lt;= cutoff are returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>length</strong> – Dictionary of shortest lengths keyed by target.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">=</span><span class="n">networkx</span><span class="o">.</span><span class="n">path_graph</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">length</span><span class="o">=</span><span class="n">networkx</span><span class="o">.</span><span class="n">ss_dijkstra_path_length_modified</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">length</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+<span class="go">{0: 0, 1: 1, 2: 1, 3: 1, 4: 1}</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Edge weight attributes must be numerical and &lt;= 1.
+Distances are calculated as products of weighted edges traversed.
+Don’t use a cutoff.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">single_source_dijkstra()</span></code></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
+    <img
+        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="drg.html" title="previous chapter">drg</a></li>
+      <li>Next: <a href="pfa.html" title="next chapter">pfa</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/drgep.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
