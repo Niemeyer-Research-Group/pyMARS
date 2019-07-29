@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pfa &#8212; pyMARS 1.1.0a6 documentation</title>
+    <title>pfa &#8212; pyMARS 1.1.0a8 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -51,7 +51,7 @@
 <dd class="field-even"><p><strong>adjacency_matrix</strong> – Adjacency matrix based on calculated direct interaction coefficients</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -89,7 +89,7 @@
 <li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – PFA threshold for trimming graph</p></li>
 <li><p><strong>matrices</strong> (<em>list of numpy.ndarray</em>) – List of PFA adjacency matrices determined from thermochemical state data</p></li>
 <li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
-<li><p><strong>sampled_metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Global metrics from original model used to evaluate error</p></li>
+<li><p><strong>sampled_metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Global metrics from original model used to evaluate error</p></li>
 <li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>previous_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a><em>, </em><em>optional</em>) – Model produced at previous threshold level; used to avoid repeated work.</p></li>
 <li><p><strong>threshold_upper</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a><em>, </em><em>optional</em>) – Optional upper threshold (epsilon^star) used to identify species for
