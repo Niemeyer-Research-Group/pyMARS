@@ -170,4 +170,13 @@ class TestTrim:
         # Make sure removed species are not included
         for sp in exclusion_list:
             assert sp not in reduced_model.species_names
-            assert all([sp not in {**rxn.reactants, **rxn.products} for rxn in reduced_model.reactions()])        
+            assert all([sp not in {**rxn.reactants, **rxn.products} for rxn in reduced_model.reactions()])
+    
+    def test_remove_explicit_third_bodies(self):
+        """Tests appropriate removal of reactions with explicit third body species.
+        """
+        initial_model = relative_location(os.path.join('assets', 'model-third-bodies.cti'))
+        reduced_model = trim(initial_model, ['ar', 'he'], 'test.cti')
+
+        assert reduced_model.n_species == 4
+        assert reduced_model.n_reactions == 1

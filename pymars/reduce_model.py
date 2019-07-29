@@ -42,6 +42,13 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     # Remove reactions that use eliminated species
     final_reactions = []
     for reaction in solution.reactions():
+        # remove reactions with an explicit third body that has been removed
+        if hasattr(reaction, 'efficiencies') and not getattr(reaction, 'default_efficiency', 1.0):
+            if (len(reaction.efficiencies) == 1 and 
+                list(reaction.efficiencies.keys())[0] in exclusion_list
+                ):
+                continue
+
         reaction_species = list(reaction.products.keys()) + list(reaction.reactants.keys())
         if all([sp in final_species_names for sp in reaction_species]):
             # remove any eliminated species from third-body efficiencies

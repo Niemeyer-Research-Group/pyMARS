@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Removed erroneous message from ignition simulations about lack of convergence
 - Fixed potenetial bug when printing CTI files with hyphens in species names
 - Fixed bug that printed efficiency list for pressure-dependent reactions with explicit third body
+- Fixed bug that retained reactions with explicit third bodies that were removed.
 
 
 ## [1.0.0] - 2019-06-21

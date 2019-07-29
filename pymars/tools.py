@@ -157,6 +157,10 @@ def compare_models(model1, model2):
                 if not np.allclose(rxn1.coeffs, rxn2.coeffs):
                     return False
         
+        # ensure matching default efficiencies, if present
+        if getattr(rxn1, 'default_efficiency', 1.0) != getattr(rxn2, 'default_efficiency', 1.0):
+            return False
+        
         if hasattr(rxn1, 'efficiencies') or hasattr(rxn2, 'efficiencies'):
             if hasattr(rxn1, 'efficiencies') and hasattr(rxn2, 'efficiencies'):
                 if rxn1.efficiencies != rxn2.efficiencies:
