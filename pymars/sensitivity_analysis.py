@@ -71,10 +71,14 @@ def evaluate_species_errors(starting_model, ignition_conditions, metrics, specie
             test_model_file = soln2cti.write(
                 test_model, f'reduced_model_{species}.cti', path=temp_dir
                 )
-            reduced_model_metrics = sample_metrics(
-                test_model_file, ignition_conditions, phase_name=phase_name, 
-                num_threads=num_threads
-                )
+            try: 
+                reduced_model_metrics = sample_metrics(
+                    test_model_file, ignition_conditions, phase_name=phase_name, 
+                    num_threads=num_threads
+                    )
+            except ct.CanteraError:
+                species_errors[idx] = 100.0
+                continue
             species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
     
     return species_errors
