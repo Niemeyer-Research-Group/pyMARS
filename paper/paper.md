@@ -64,20 +64,22 @@ information; this increases computational expense significantly, but generates a
 
 Required inputs for pyMARS to perform model reduction include the starting chemical kinetic model
 in the standard Cantera [@cantera] or Chemkin [@Kee1996] formats (it first converts the latter
-to the former), a maximum error limit to constrain the reduced model, and a YAML file with initial
-conditions for homogeneous autoignition simulations. These simulations are used both to obtain
+to the former) and a YAML file with reduction parameters (including method and a maximum error limit
+to constrain the reduced model) and a list of initial conditions for homogeneous autoignition simulations.
+These simulations are used both to obtain
 ignition delay values for gauging the error of a candidate model, and also to sample thermochemical
 state data for the reduction methods (where 20 points are sampled during the ignition temperature rise).
-A graph-based reduction method can be specified, the ``--run_sensitivity_analysis`` flag can be
-given to perform standalone sensitivity analysis, or both can be given to perform DRG/DRGEP/PFA-informed
-sensitivity analysis. Additional inputs include target species for DRG/DRGEP/PFA and optionally
+A graph-based reduction method can be specified using the ``method`` key, 
+the ``sensitivity-analysis`` key can be specified as ``True``
+to perform standalone sensitivity analysis, or both can be given to perform DRG/DRGEP/PFA-informed
+sensitivity analysis. Additional input keys include target species for DRG/DRGEP/PFA and optionally
 specifying a list of species to always retain.
 
 Additional features include:
 
 - Simulations can be parallelized via the ``multiprocessing`` module by adding the ``--num_threads``
-option and specifying a value greater than one. (Including the option alone will lead to pyMARS
-using the available number of threads minus one.)
+command-line option and specifying a value greater than one. (Including the option alone will lead to 
+pyMARS using the available number of threads minus one.)
 - To save (potentially significant) time when performing multiple reductions for the same model,
 pyMARS saves and automatically reuses sampled autoignition data when possible.
 - pyMARS provides a conversion functionality between the Cantera and Chemkin model formats,
