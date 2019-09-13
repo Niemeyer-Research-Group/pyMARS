@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.1.0] - 2019-09-06
+
+### Added
+
 - Added checks to ensure any species in inputs are in the starting model
 - Added ability to specify `ideal_gas` object name for reduction, if model in model file
 
@@ -57,6 +65,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 [Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.1.0...HEAD
-[1.0.1]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.1.0...v1.0.1
+[1.1.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.0.1...v0.1.0
