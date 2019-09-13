@@ -432,7 +432,7 @@ def write(solution, output_filename='', path=''):
                 raise NotImplementedError(f'Unsupported reaction type: {type(reaction)}')
             
             if reaction.duplicate:
-                if getattr(reaction, 'allow_negative_pre_exponential_factor', default=False):
+                if getattr(reaction, 'allow_negative_pre_exponential_factor', False):
                     reaction_string += ',\n' + indent[8] + 'options = ["negative_A", "duplicate"]'
                 else:
                     reaction_string += ',\n' + indent[8] + 'options = "duplicate"'
