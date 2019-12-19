@@ -44,8 +44,8 @@ of chemical kinetic theory.</p>
 </div>
 <div class="section" id="directed-relation-graph-drg-method">
 <h2>Directed Relation Graph (DRG) method<a class="headerlink" href="#directed-relation-graph-drg-method" title="Permalink to this headline">¶</a></h2>
-<p>Lu and Law <a class="reference internal" href="#lu-2005" id="id1">[1]</a><a class="reference internal" href="#lu-2006a" id="id2">[2]</a><a class="reference internal" href="#lu-2006b" id="id3">[3]</a>, building on the earlier
-visualization work of Bendtsen et al. <a class="reference internal" href="#bendtsen-2001" id="id4">[4]</a>, first developed
+<p>Lu and Law <a class="bibtex reference internal" href="#lu-2005" id="id1">[1]</a><a class="bibtex reference internal" href="#lu-2006a" id="id2">[2]</a><a class="bibtex reference internal" href="#lu-2006b" id="id3">[3]</a>, building on the earlier
+visualization work of Bendtsen et al. <a class="bibtex reference internal" href="#bendtsen-2001" id="id4">[4]</a>, first developed
 the DRG method as a way to use graphs to represent kinetic models, where
 species are nodes and directed edges in the graph represent dependence.</p>
 <p>For example, consider the example system with six species A, B, C, D, E, and F:</p>
@@ -80,12 +80,12 @@ removed.</p>
 </div>
 <div class="section" id="drg-with-error-propagation-drgep-method">
 <h2>DRG with Error Propagation (DRGEP) method<a class="headerlink" href="#drg-with-error-propagation-drgep-method" title="Permalink to this headline">¶</a></h2>
-<p>Pepiot and Pitsch <a class="reference internal" href="#pepiotdesjardins-2008" id="id5">[5]</a> first presented the DRGEP
+<p>Pepiot and Pitsch <a class="bibtex reference internal" href="#pepiotdesjardins-2008" id="id5">[5]</a> first presented the DRGEP
 method as an improved version of DRG that better represents the indirect
 dependence of species down graph pathways.
-Niemeyer and Sung <a class="reference internal" href="#niemeyer-2011" id="id6">[6]</a> further developed the DRGEP method,
+Niemeyer and Sung <a class="bibtex reference internal" href="#niemeyer-2011" id="id6">[6]</a> further developed the DRGEP method,
 demonstrating the importance of graph-search algorithm choice for the method
-and in particular using Dijkstra’s algorithm <a class="reference internal" href="#dijkstra-1959" id="id7">[7]</a><a class="reference internal" href="#cormen-2001" id="id8">[8]</a>.</p>
+and in particular using Dijkstra’s algorithm <a class="bibtex reference internal" href="#dijkstra-1959" id="id7">[7]</a><a class="bibtex reference internal" href="#cormen-2001" id="id8">[8]</a>.</p>
 <p>DRGEP also defines direct interaction coefficients, although they are slightly
 different than the DRG coefficients:</p>
 <div class="math notranslate nohighlight">
@@ -113,7 +113,7 @@ when <span class="math notranslate nohighlight">\(R_{TB} &lt; \epsilon\)</span>.
 </div>
 <div class="section" id="path-flux-analysis-pfa-method">
 <h2>Path Flux Analysis (PFA) method<a class="headerlink" href="#path-flux-analysis-pfa-method" title="Permalink to this headline">¶</a></h2>
-<p>Sun et al. <a class="reference internal" href="#sun-2010" id="id9">[9]</a> developed the PFA method to build on the
+<p>Sun et al. <a class="bibtex reference internal" href="#sun-2010" id="id9">[9]</a> developed the PFA method to build on the
 DRG and DRGEP methods by combining both direct and indirect species fluxes.
 The PFA direct interaction coefficient sums production and consumption
 interactions between two species both at the first-generation level
@@ -143,16 +143,16 @@ r_{AB}^{\text{con 2nd}} &amp;= \sum_{M_i \neq A, B} \left( r_{AM_i}^{\text{con 1
 <div class="section" id="sensitivity-analysis">
 <h2>Sensitivity Analysis<a class="headerlink" href="#sensitivity-analysis" title="Permalink to this headline">¶</a></h2>
 <p>Although sensitivity analysis has been around for a while as a model
-reduction technique <a class="reference internal" href="#rabitz-1983" id="id10">[10]</a><a class="reference internal" href="#turanyi-1990" id="id11">[11]</a>, it becomes very
+reduction technique <a class="bibtex reference internal" href="#rabitz-1983" id="id10">[10]</a><a class="bibtex reference internal" href="#turanyi-1990" id="id11">[11]</a>, it becomes very
 computationally expensive when applied to the larger kinetic models
 regularly dealt with today (e.g., 100-1000s of species).</p>
 <p>Instead, we can use the above graph-based methods to first remove
 a significant fraction of species, and then analyze a portion of
 the remaining species using the interaction coefficient values
 to sort and identify which to consider. In particular, the DRG-aided
-sensitivity analysis (DRGASA) approach <a class="reference internal" href="#sankaran-2007" id="id12">[12]</a><a class="reference internal" href="#zheng-2007" id="id13">[13]</a>
+sensitivity analysis (DRGASA) approach <a class="bibtex reference internal" href="#sankaran-2007" id="id12">[12]</a><a class="bibtex reference internal" href="#zheng-2007" id="id13">[13]</a>
 and DRGEP-based sensitivity analysis (DRGEPSA)
-<a class="reference internal" href="#niemeyer-2010" id="id14">[14]</a><a class="reference internal" href="#niemeyer-2015" id="id15">[15]</a> have shown great efficacy
+<a class="bibtex reference internal" href="#niemeyer-2010" id="id14">[14]</a><a class="bibtex reference internal" href="#niemeyer-2015" id="id15">[15]</a> have shown great efficacy
 for reduction.</p>
 <p>In the DRGASA approach, an upper threshold value <span class="math notranslate nohighlight">\(\epsilon^*\)</span>
 (e.g., 0.4) is applied to the system, and any species that would
@@ -163,7 +163,7 @@ DRGEPSA works similarly, although the upper threshold <span class="math notransl
 is applied to the overall interaction coefficients to identify
 the set of limbo species.</p>
 <p>pyMARS implements two sensitivity analysis algorithms: <code class="docutils literal notranslate"><span class="pre">initial</span></code>
-and <code class="docutils literal notranslate"><span class="pre">greedy</span></code> <a class="reference internal" href="#niemeyer-2015" id="id16">[15]</a>. In the initial algorithm,
+and <code class="docutils literal notranslate"><span class="pre">greedy</span></code> <a class="bibtex reference internal" href="#niemeyer-2015" id="id16">[15]</a>. In the initial algorithm,
 the errors induced by the removal of the limbo species are evaluated
 only once, initially, and then the species are considered for removal
 in ascending order. In contrast, the greedy algorithm reevaluates
@@ -175,49 +175,49 @@ due to the high computational cost this approach is not recommended.</p>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <p id="bibtex-bibliography-theory-0"><dl class="citation">
-<dt class="label" id="lu-2005"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dt class="bibtex label" id="lu-2005"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
 <dd><p>Tianfeng Lu and Chung K. Law. A directed relation graph method for mechanism reduction. <em>Proceedings of the Combustion Institute</em>, 30(1):1333–1341, 2005. <a class="reference external" href="https://doi.org/10.1016/j.proci.2004.08.145">doi:10.1016/j.proci.2004.08.145</a>.</p>
 </dd>
-<dt class="label" id="lu-2006a"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dt class="bibtex label" id="lu-2006a"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
 <dd><p>Tianfeng Lu and Chung K. Law. Linear time reduction of large kinetic mechanisms with directed relation graph: n-heptane and iso-octane. <em>Combustion and Flame</em>, 144(1-2):24–36, 2006. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2005.02.015">doi:10.1016/j.combustflame.2005.02.015</a>.</p>
 </dd>
-<dt class="label" id="lu-2006b"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dt class="bibtex label" id="lu-2006b"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
 <dd><p>Tianfeng Lu and Chung K. Law. On the applicability of directed relation graphs to the reduction of reaction mechanisms. <em>Combustion and Flame</em>, 146(3):472–483, 2006. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2006.04.017">doi:10.1016/j.combustflame.2006.04.017</a>.</p>
 </dd>
-<dt class="label" id="bendtsen-2001"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dt class="bibtex label" id="bendtsen-2001"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
 <dd><p>Anders Broe Bendtsen, Peter Glarborg, and Kim Dam-Johansen. Visualization methods in analysis of detailed chemical kinetics modelling. <em>Computers &amp; Chemistry</em>, 25(2):161–170, March 2001. <a class="reference external" href="https://doi.org/10.1016/s0097-8485(00)00077-2">doi:10.1016/s0097-8485(00)00077-2</a>.</p>
 </dd>
-<dt class="label" id="pepiotdesjardins-2008"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dt class="bibtex label" id="pepiotdesjardins-2008"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
 <dd><p>Perrine Pepiot-Desjardins and Heinz Pitsch. An efficient error-propagation-based reduction method for large chemical kinetic mechanisms. <em>Combustion and Flame</em>, 154(1-2):67–81, 2008. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2007.10.020">doi:10.1016/j.combustflame.2007.10.020</a>.</p>
 </dd>
-<dt class="label" id="niemeyer-2011"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
+<dt class="bibtex label" id="niemeyer-2011"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
 <dd><p>Kyle E. Niemeyer and Chih-Jen Sung. On the importance of graph search algorithms for DRGEP-based mechanism reduction methods. <em>Combustion and Flame</em>, 158(8):1439–1443, 2011. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2010.12.010">doi:10.1016/j.combustflame.2010.12.010</a>.</p>
 </dd>
-<dt class="label" id="dijkstra-1959"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
+<dt class="bibtex label" id="dijkstra-1959"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
 <dd><p>E. W. Dijkstra. A note on two problems in connexion with graphs. <em>Numerische Mathematik</em>, 1(1):269–271, December 1959. <a class="reference external" href="https://doi.org/10.1007/bf01386390">doi:10.1007/bf01386390</a>.</p>
 </dd>
-<dt class="label" id="cormen-2001"><span class="brackets"><a class="fn-backref" href="#id8">8</a></span></dt>
+<dt class="bibtex label" id="cormen-2001"><span class="brackets"><a class="fn-backref" href="#id8">8</a></span></dt>
 <dd><p>T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein. <em>Introduction to Algorithms</em>. MIT Press, Cambridge, MA, 2 edition, 2001.</p>
 </dd>
-<dt class="label" id="sun-2010"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
+<dt class="bibtex label" id="sun-2010"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
 <dd><p>Wenting Sun, Zheng Chen, Xiaolong Gou, and Yiguang Ju. A path flux analysis method for the reduction of detailed chemical kinetic mechanisms. <em>Combustion and Flame</em>, 157(7):1298–1307, 2010. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2010.03.006">doi:10.1016/j.combustflame.2010.03.006</a>.</p>
 </dd>
-<dt class="label" id="rabitz-1983"><span class="brackets"><a class="fn-backref" href="#id10">10</a></span></dt>
+<dt class="bibtex label" id="rabitz-1983"><span class="brackets"><a class="fn-backref" href="#id10">10</a></span></dt>
 <dd><p>H Rabitz, M Kramer, and D Dacol. Sensitivity analysis in chemical kinetics. <em>Annual Review of Physical Chemistry</em>, 34(1):419–461, October 1983. <a class="reference external" href="https://doi.org/10.1146/annurev.pc.34.100183.002223">doi:10.1146/annurev.pc.34.100183.002223</a>.</p>
 </dd>
-<dt class="label" id="turanyi-1990"><span class="brackets"><a class="fn-backref" href="#id11">11</a></span></dt>
+<dt class="bibtex label" id="turanyi-1990"><span class="brackets"><a class="fn-backref" href="#id11">11</a></span></dt>
 <dd><p>Tamás Turányi. Sensitivity analysis of complex kinetic systems. tools and applications. <em>Journal of Mathematical Chemistry</em>, 5(3):203–248, September 1990. <a class="reference external" href="https://doi.org/10.1007/bf01166355">doi:10.1007/bf01166355</a>.</p>
 </dd>
-<dt class="label" id="sankaran-2007"><span class="brackets"><a class="fn-backref" href="#id12">12</a></span></dt>
+<dt class="bibtex label" id="sankaran-2007"><span class="brackets"><a class="fn-backref" href="#id12">12</a></span></dt>
 <dd><p>Ramanan Sankaran, Evatt R. Hawkes, Jacqueline H. Chen, Tianfeng Lu, and Chung K. Law. Structure of a spatially developing turbulent lean methane–air Bunsen flame. <em>Proceedings of the Combustion Institute</em>, 31(1):1291–1298, 2007. <a class="reference external" href="https://doi.org/10.1016/j.proci.2006.08.025">doi:10.1016/j.proci.2006.08.025</a>.</p>
 </dd>
-<dt class="label" id="zheng-2007"><span class="brackets"><a class="fn-backref" href="#id13">13</a></span></dt>
+<dt class="bibtex label" id="zheng-2007"><span class="brackets"><a class="fn-backref" href="#id13">13</a></span></dt>
 <dd><p>X. L. Zheng, T. F. Lu, and C. K. Law. Experimental counterflow ignition temperatures and reaction mechanisms of 1,3-butadiene. <em>Proceedings of the Combustion Institute</em>, 31(1):367–375, 2007. <a class="reference external" href="https://doi.org/10.1016/j.proci.2006.07.182">doi:10.1016/j.proci.2006.07.182</a>.</p>
 </dd>
-<dt class="label" id="niemeyer-2010"><span class="brackets"><a class="fn-backref" href="#id14">14</a></span></dt>
+<dt class="bibtex label" id="niemeyer-2010"><span class="brackets"><a class="fn-backref" href="#id14">14</a></span></dt>
 <dd><p>Kyle E. Niemeyer, Chih-Jen Sung, and Mandhapati P. Raju. Skeletal mechanism generation for surrogate fuels using directed relation graph with error propagation and sensitivity analysis. <em>Combustion and Flame</em>, 157(9):1760–1770, 2010. <a class="reference external" href="https://doi.org/10.1016/j.combustflame.2009.12.022">doi:10.1016/j.combustflame.2009.12.022</a>.</p>
 </dd>
-<dt class="label" id="niemeyer-2015"><span class="brackets">15</span><span class="fn-backref">(<a href="#id15">1</a>,<a href="#id16">2</a>)</span></dt>
+<dt class="bibtex label" id="niemeyer-2015"><span class="brackets">15</span><span class="fn-backref">(<a href="#id15">1</a>,<a href="#id16">2</a>)</span></dt>
 <dd><p>Kyle E. Niemeyer and Chih-Jen Sung. Reduced chemistry for a gasoline surrogate valid at engine-relevant conditions. <em>Energy &amp; Fuels</em>, 29(2):1172–1185, 2015. <a class="reference external" href="https://doi.org/10.1021/ef5022126">doi:10.1021/ef5022126</a>.</p>
 </dd>
 </dl>
@@ -329,7 +329,7 @@ due to the high computational cost this approach is not recommended.</p>
       &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
