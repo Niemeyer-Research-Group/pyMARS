@@ -2,6 +2,7 @@
 <img src="logo/pymars-logo.png" align="right" width="200" />
 
 [![DOI](https://zenodo.org/badge/51664233.svg)](https://zenodo.org/badge/latestdoi/51664233)
+[![JOSS DOI](https://joss.theoj.org/papers/10.21105/joss.01543/status.svg)](https://doi.org/10.21105/joss.01543)
 [![Build Status](https://travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master)](https://travis-ci.org/Niemeyer-Research-Group/pyMARS)
 [![Build Status](https://dev.azure.com/kyleniemeyer/pyMARS/_apis/build/status/Niemeyer-Research-Group.pyMARS?branchName=master)](https://dev.azure.com/kyleniemeyer/pyMARS/_build/latest?definitionId=1&branchName=master)
 [![codecov](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS/branch/master/graph/badge.svg)](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS)
