@@ -88,7 +88,7 @@ You can also download an annotated version of the
 reduction may be sped up by parallelizing the associated simulations over
 multiple CPU cores. You can do this by adding ``--num_threads N``, where ``N``
 is the desired number of cores. If you just specify ``--num_threads``, then
-pyMARS will use the available numbera of cores minus one.
+pyMARS will use the available number of cores minus one.
 
 (pyMARS does not currently support distributed memory parallelization, meaning
 across multiple nodes that do not share the same memory.)
