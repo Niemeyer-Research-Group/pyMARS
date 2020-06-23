@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>simulation &#8212; pyMARS 1.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="soln2ck" href="soln2ck.html" />
@@ -36,9 +37,9 @@
   <div class="section" id="module-pymars.simulation">
 <span id="simulation"></span><h1>simulation<a class="headerlink" href="#module-pymars.simulation" title="Permalink to this headline">¶</a></h1>
 <p>Autoignition simulation module</p>
-<dl class="class">
+<dl class="py class">
 <dt id="pymars.simulation.Simulation">
-<em class="property">class </em><code class="sig-prename descclassname">pymars.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param">idx</em>, <em class="sig-param">properties</em>, <em class="sig-param">model</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pymars.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">properties</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for ignition delay simulations</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -51,21 +52,21 @@
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.simulation.Simulation.calculate_ignition">
 <code class="sig-name descname">calculate_ignition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.calculate_ignition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run simulation case set up <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>, just for ignition delay.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.simulation.Simulation.clean">
 <code class="sig-name descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.clean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete HDF5 file with full integration data.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.simulation.Simulation.process_results">
-<code class="sig-name descname">process_results</code><span class="sig-paren">(</span><em class="sig-param">skip_data=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.process_results" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">process_results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">skip_data</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.process_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process integration results to sample data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -75,14 +76,14 @@
 <dd class="field-even"><p>Ignition delay, or ignition delay and sampled data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple of float, <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+<dd class="field-odd"><p>tuple of float, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.simulation.Simulation.run_case">
-<code class="sig-name descname">run_case</code><span class="sig-paren">(</span><em class="sig-param">stop_at_ignition=False</em>, <em class="sig-param">restart=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.run_case" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stop_at_ignition</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">restart</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.run_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run simulation case set up <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>.</p>
 <p>If no end time is specified for the integration, the function integrates
 to steady state (or a maximum of 10,000 steps, by default). This is done
@@ -105,7 +106,7 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.simulation.Simulation.setup_case">
 <code class="sig-name descname">setup_case</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.setup_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize simulation case.</p>
@@ -194,7 +195,7 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -208,10 +209,10 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &copy;2020, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

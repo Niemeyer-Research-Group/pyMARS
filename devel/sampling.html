@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>sampling &#8212; pyMARS 1.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="sensitivity_analysis" href="sensitivity_analysis.html" />
@@ -36,65 +37,65 @@
   <div class="section" id="module-pymars.sampling">
 <span id="sampling"></span><h1>sampling<a class="headerlink" href="#module-pymars.sampling" title="Permalink to this headline">¶</a></h1>
 <p>Module for sampling thermochemical data and global metrics</p>
-<dl class="class">
+<dl class="py class">
 <dt id="pymars.sampling.InputIgnition">
-<em class="property">class </em><code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">InputIgnition</code><a class="headerlink" href="#pymars.sampling.InputIgnition" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">InputIgnition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></span></em>, <em class="sig-param"><span class="n">temperature</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></span></em>, <em class="sig-param"><span class="n">pressure</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></span></em>, <em class="sig-param"><span class="n">end_time</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">max_steps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)">int</a></span> <span class="o">=</span> <span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">equivalence_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">fuel</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">oxidizer</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">reactants</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">composition_type</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></span> <span class="o">=</span> <span class="default_value">'mole'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.InputIgnition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Holds input parameters for a single autoignition case.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.composition_type">
 <em class="property">property </em><code class="sig-name descname">composition_type</code><a class="headerlink" href="#pymars.sampling.InputIgnition.composition_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 9</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.end_time">
 <em class="property">property </em><code class="sig-name descname">end_time</code><a class="headerlink" href="#pymars.sampling.InputIgnition.end_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 3</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.equivalence_ratio">
 <em class="property">property </em><code class="sig-name descname">equivalence_ratio</code><a class="headerlink" href="#pymars.sampling.InputIgnition.equivalence_ratio" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 5</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.fuel">
 <em class="property">property </em><code class="sig-name descname">fuel</code><a class="headerlink" href="#pymars.sampling.InputIgnition.fuel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 6</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.kind">
 <em class="property">property </em><code class="sig-name descname">kind</code><a class="headerlink" href="#pymars.sampling.InputIgnition.kind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.max_steps">
 <em class="property">property </em><code class="sig-name descname">max_steps</code><a class="headerlink" href="#pymars.sampling.InputIgnition.max_steps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 4</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.oxidizer">
 <em class="property">property </em><code class="sig-name descname">oxidizer</code><a class="headerlink" href="#pymars.sampling.InputIgnition.oxidizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 7</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.pressure">
 <em class="property">property </em><code class="sig-name descname">pressure</code><a class="headerlink" href="#pymars.sampling.InputIgnition.pressure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 2</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.reactants">
 <em class="property">property </em><code class="sig-name descname">reactants</code><a class="headerlink" href="#pymars.sampling.InputIgnition.reactants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 8</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pymars.sampling.InputIgnition.temperature">
 <em class="property">property </em><code class="sig-name descname">temperature</code><a class="headerlink" href="#pymars.sampling.InputIgnition.temperature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
@@ -102,27 +103,27 @@
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="pymars.sampling.InputLaminarFlame">
 <em class="property">class </em><code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">InputLaminarFlame</code><a class="headerlink" href="#pymars.sampling.InputLaminarFlame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Holds input parameters for single laminar flame simulation.</p>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="pymars.sampling.InputPSR">
 <em class="property">class </em><code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">InputPSR</code><a class="headerlink" href="#pymars.sampling.InputPSR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Holds input parameters for single PSR simulation.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.calculate_error">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">calculate_error</code><span class="sig-paren">(</span><em class="sig-param">metrics_original</em>, <em class="sig-param">metrics_test</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.calculate_error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">calculate_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metrics_original</span></em>, <em class="sig-param"><span class="n">metrics_test</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.calculate_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates error of global metrics between test and original model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>metrics_original</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Metrics serving as basis of error calculation</p></li>
-<li><p><strong>metrics_test</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Metrics for which error is being calculated with respect to <code class="docutils literal notranslate"><span class="pre">metrics_original</span></code></p></li>
+<li><p><strong>metrics_original</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – Metrics serving as basis of error calculation</p></li>
+<li><p><strong>metrics_test</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – Metrics for which error is being calculated with respect to <code class="docutils literal notranslate"><span class="pre">metrics_original</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -134,9 +135,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.ignition_worker">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">ignition_worker</code><span class="sig-paren">(</span><em class="sig-param">sim_tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.ignition_worker" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">ignition_worker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sim_tuple</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.ignition_worker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Worker for multiprocessing of ignition delay only cases.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -151,9 +152,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.parse_flame_inputs">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">parse_flame_inputs</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">conditions</em>, <em class="sig-param">phase_name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.parse_flame_inputs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">parse_flame_inputs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.parse_flame_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses input for laminar flame simulations, raising an error on any errors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -172,9 +173,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.parse_ignition_inputs">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">parse_ignition_inputs</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">conditions</em>, <em class="sig-param">phase_name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.parse_ignition_inputs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">parse_ignition_inputs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.parse_ignition_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses input for autoignition simulations, raising an error on any errors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -193,9 +194,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.parse_psr_inputs">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">parse_psr_inputs</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">conditions</em>, <em class="sig-param">phase_name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.parse_psr_inputs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">parse_psr_inputs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.parse_psr_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses input for PSR simulations, raising an error on any errors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -214,9 +215,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.read_metrics">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">read_metrics</code><span class="sig-paren">(</span><em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions=[]</em>, <em class="sig-param">flame_conditions=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.read_metrics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">read_metrics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">psr_conditions</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">flame_conditions</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.read_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in stored already-sampled metrics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -230,14 +231,14 @@
 <dd class="field-even"><p><strong>ignition_delays</strong> – Calculated metrics for model, used for evaluating error</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.sample">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions=[]</em>, <em class="sig-param">flame_conditions=[]</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">psr_conditions</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">flame_conditions</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Samples thermochemical data and generates metrics for various phenomena.</p>
 <p>Initially, supports autoignition delay only.</p>
 <dl class="field-list simple">
@@ -264,9 +265,9 @@ use the specified number of threads.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.sample_metrics">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">sample_metrics</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions=[]</em>, <em class="sig-param">flame_conditions=[]</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em>, <em class="sig-param">reuse_saved=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample_metrics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">sample_metrics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">psr_conditions</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">flame_conditions</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">reuse_saved</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluates metrics used for determining error of reduced model</p>
 <p>Initially, supports autoignition delay only.</p>
 <dl class="field-list simple">
@@ -289,14 +290,14 @@ use the specified number of threads.</p></li>
 <dd class="field-even"><p><strong>ignition_delays</strong> – Calculated metrics for model, used for evaluating error</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sampling.simulation_worker">
-<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">simulation_worker</code><span class="sig-paren">(</span><em class="sig-param">sim_tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.simulation_worker" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sampling.</code><code class="sig-name descname">simulation_worker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sim_tuple</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.simulation_worker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Worker for multiprocessing of simulation cases.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -393,7 +394,7 @@ and run case.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -407,10 +408,10 @@ and run case.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &copy;2020, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>sensitivity_analysis &#8212; pyMARS 1.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="simulation" href="simulation.html" />
@@ -36,16 +37,16 @@
   <div class="section" id="module-pymars.sensitivity_analysis">
 <span id="sensitivity-analysis"></span><h1>sensitivity_analysis<a class="headerlink" href="#module-pymars.sensitivity_analysis" title="Permalink to this headline">¶</a></h1>
 <p>Module containing sensitivity analysis reduction stage.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sensitivity_analysis.evaluate_species_errors">
-<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">evaluate_species_errors</code><span class="sig-paren">(</span><em class="sig-param">starting_model</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">metrics</em>, <em class="sig-param">species_limbo</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">evaluate_species_errors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">starting_model</span></em>, <em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">metrics</span></em>, <em class="sig-param"><span class="n">species_limbo</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate error induced by removal of each limbo species</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>starting_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a>) – Container with model and file information</p></li>
 <li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
-<li><p><strong>metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Calculated metrics for starting model, used for evaluating error</p></li>
+<li><p><strong>metrics</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – Calculated metrics for starting model, used for evaluating error</p></li>
 <li><p><strong>species_limbo</strong> (<em>list of str</em>) – List of species to consider removal</p></li>
 <li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
@@ -58,14 +59,14 @@ use the specified number of threads.</p></li>
 <dd class="field-even"><p><strong>species_errors</strong> – Maximum errors induced by removal of each limbo species</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.sensitivity_analysis.run_sa">
-<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">run_sa</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">starting_error</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions</em>, <em class="sig-param">flame_conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">algorithm_type='greedy'</em>, <em class="sig-param">species_limbo=[]</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.run_sa" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">run_sa</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_file</span></em>, <em class="sig-param"><span class="n">starting_error</span></em>, <em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">psr_conditions</span></em>, <em class="sig-param"><span class="n">flame_conditions</span></em>, <em class="sig-param"><span class="n">error_limit</span></em>, <em class="sig-param"><span class="n">species_safe</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">algorithm_type</span><span class="o">=</span><span class="default_value">'greedy'</span></em>, <em class="sig-param"><span class="n">species_limbo</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.run_sa" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs a sensitivity analysis to remove species on a given model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -178,7 +179,7 @@ use the specified number of threads.</p></li>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -192,10 +193,10 @@ use the specified number of threads.</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &copy;2020, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

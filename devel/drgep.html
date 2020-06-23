@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>drgep &#8212; pyMARS 1.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pfa" href="pfa.html" />
@@ -36,9 +37,9 @@
   <div class="section" id="module-pymars.drgep">
 <span id="drgep"></span><h1>drgep<a class="headerlink" href="#module-pymars.drgep" title="Permalink to this headline">¶</a></h1>
 <p>Module containing Directed Relation Graph with Error Propagation (DRGEP) reduction method.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.create_drgep_matrix">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">create_drgep_matrix</code><span class="sig-paren">(</span><em class="sig-param">state</em>, <em class="sig-param">solution</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.create_drgep_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">create_drgep_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">solution</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.create_drgep_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates DRGEP graph adjacency matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -51,14 +52,14 @@
 <dd class="field-even"><p><strong>adjacency_matrix</strong> – Adjacency matrix based on calculated direct interaction coefficients</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.get_importance_coeffs">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">get_importance_coeffs</code><span class="sig-paren">(</span><em class="sig-param">species_names</em>, <em class="sig-param">target_species</em>, <em class="sig-param">matrices</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.get_importance_coeffs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">get_importance_coeffs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">species_names</span></em>, <em class="sig-param"><span class="n">target_species</span></em>, <em class="sig-param"><span class="n">matrices</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.get_importance_coeffs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate importance coefficients for all species</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -77,9 +78,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.graph_search_drgep">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">graph_search_drgep</code><span class="sig-paren">(</span><em class="sig-param">graph</em>, <em class="sig-param">target_species</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.graph_search_drgep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">graph_search_drgep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">graph</span></em>, <em class="sig-param"><span class="n">target_species</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.graph_search_drgep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches graph to generate a dictionary of the greatest paths to all species from one of the targets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -97,9 +98,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.mod_dijkstra">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">mod_dijkstra</code><span class="sig-paren">(</span><em class="sig-param">G</em>, <em class="sig-param">source</em>, <em class="sig-param">get_weight</em>, <em class="sig-param">pred=None</em>, <em class="sig-param">paths=None</em>, <em class="sig-param">cutoff=None</em>, <em class="sig-param">target=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.mod_dijkstra" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">mod_dijkstra</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span></em>, <em class="sig-param"><span class="n">source</span></em>, <em class="sig-param"><span class="n">get_weight</span></em>, <em class="sig-param"><span class="n">pred</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">paths</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cutoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.mod_dijkstra" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modified implementation of Dijkstra’s algorithm for DRGEP method.</p>
 <p>Multiples values along graph pathways instead of adding and returns a dictionary
 with nodes as keys and values containing the greatest path to that node.
@@ -131,9 +132,9 @@ of a node and the distance to each node.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.reduce_drgep">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">reduce_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">threshold</em>, <em class="sig-param">importance_coeffs</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">sampled_metrics</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">previous_model=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.reduce_drgep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">reduce_drgep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_file</span></em>, <em class="sig-param"><span class="n">species_safe</span></em>, <em class="sig-param"><span class="n">threshold</span></em>, <em class="sig-param"><span class="n">importance_coeffs</span></em>, <em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">sampled_metrics</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">previous_model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.reduce_drgep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a threshold and DRGEP coefficients, reduce the model and determine the error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -143,7 +144,7 @@ of a node and the distance to each node.</p></li>
 <li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – DRG threshold for trimming graph</p></li>
 <li><p><strong>importance_coeffs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Dictionary with species and their overall interaction coefficients.</p></li>
 <li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
-<li><p><strong>sampled_metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Global metrics from original model used to evaluate error</p></li>
+<li><p><strong>sampled_metrics</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – Global metrics from original model used to evaluate error</p></li>
 <li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>previous_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a><em>, </em><em>optional</em>) – Model produced at previous threshold level; used to avoid repeated work.</p></li>
 <li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
@@ -162,9 +163,9 @@ use the specified number of threads.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.run_drgep">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">run_drgep</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions</em>, <em class="sig-param">flame_conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_targets</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">threshold_upper=None</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.run_drgep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">run_drgep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_file</span></em>, <em class="sig-param"><span class="n">ignition_conditions</span></em>, <em class="sig-param"><span class="n">psr_conditions</span></em>, <em class="sig-param"><span class="n">flame_conditions</span></em>, <em class="sig-param"><span class="n">error_limit</span></em>, <em class="sig-param"><span class="n">species_targets</span></em>, <em class="sig-param"><span class="n">species_safe</span></em>, <em class="sig-param"><span class="n">phase_name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">threshold_upper</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.run_drgep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function for running DRGEP reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -194,9 +195,9 @@ use the specified number of threads.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.drgep.ss_dijkstra_path_length_modified">
-<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">ss_dijkstra_path_length_modified</code><span class="sig-paren">(</span><em class="sig-param">G</em>, <em class="sig-param">source</em>, <em class="sig-param">cutoff=None</em>, <em class="sig-param">weight='weight'</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.ss_dijkstra_path_length_modified" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.drgep.</code><code class="sig-name descname">ss_dijkstra_path_length_modified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span></em>, <em class="sig-param"><span class="n">source</span></em>, <em class="sig-param"><span class="n">cutoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">weight</span><span class="o">=</span><span class="default_value">'weight'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.drgep.ss_dijkstra_path_length_modified" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the greatest path length via multiplication between source and all other
 reachable nodes for a weighted graph with all weights &lt;= 1.</p>
 <dl class="field-list simple">
@@ -315,7 +316,7 @@ Don’t use a cutoff.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -329,10 +330,10 @@ Don’t use a cutoff.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &copy;2020, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>soln2cti &#8212; pyMARS 1.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="tools" href="tools.html" />
@@ -38,9 +39,9 @@
 <p>writes a solution object to a cantera cti file.</p>
 <p>currently only works for Elementary, Falloff, Plog and ThreeBody Reactions
 Cantera development version 2.3.0a2 required</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.soln2cti.build_arrhenius">
-<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_arrhenius</code><span class="sig-paren">(</span><em class="sig-param">rate</em>, <em class="sig-param">reaction_order</em>, <em class="sig-param">reaction_type</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_arrhenius" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_arrhenius</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rate</span></em>, <em class="sig-param"><span class="n">reaction_order</span></em>, <em class="sig-param"><span class="n">reaction_type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_arrhenius" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds Arrhenius coefficient string based on reaction type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -59,9 +60,9 @@ Cantera development version 2.3.0a2 required</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.soln2cti.build_efficiencies">
-<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_efficiencies</code><span class="sig-paren">(</span><em class="sig-param">efficiencies</em>, <em class="sig-param">species_names</em>, <em class="sig-param">default_efficiency=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_efficiencies" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_efficiencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">efficiencies</span></em>, <em class="sig-param"><span class="n">species_names</span></em>, <em class="sig-param"><span class="n">default_efficiency</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_efficiencies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates line with list of third-body species efficiencies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -80,14 +81,14 @@ Cantera development version 2.3.0a2 required</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.soln2cti.build_falloff">
-<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_falloff</code><span class="sig-paren">(</span><em class="sig-param">parameters</em>, <em class="sig-param">falloff_function</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_falloff" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_falloff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parameters</span></em>, <em class="sig-param"><span class="n">falloff_function</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_falloff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates falloff reaction Troe parameter string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Array of falloff parameters; length varies based on <code class="docutils literal notranslate"><span class="pre">falloff_function</span></code></p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – Array of falloff parameters; length varies based on <code class="docutils literal notranslate"><span class="pre">falloff_function</span></code></p></li>
 <li><p><strong>falloff_function</strong> (<em>{'Troe'</em><em>, </em><em>'SRI'}</em>) – Type of falloff function</p></li>
 </ul>
 </dd>
@@ -100,9 +101,9 @@ Cantera development version 2.3.0a2 required</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.soln2cti.build_falloff_arrhenius">
-<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_falloff_arrhenius</code><span class="sig-paren">(</span><em class="sig-param">rate</em>, <em class="sig-param">reaction_order</em>, <em class="sig-param">reaction_type</em>, <em class="sig-param">pressure_limit</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_falloff_arrhenius" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">build_falloff_arrhenius</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rate</span></em>, <em class="sig-param"><span class="n">reaction_order</span></em>, <em class="sig-param"><span class="n">reaction_type</span></em>, <em class="sig-param"><span class="n">pressure_limit</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.build_falloff_arrhenius" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds Arrhenius coefficient strings for falloff and chemically-activated reactions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -122,9 +123,9 @@ Cantera development version 2.3.0a2 required</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.soln2cti.section_break">
-<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">section_break</code><span class="sig-paren">(</span><em class="sig-param">section_title</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.section_break" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">section_break</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">section_title</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.section_break" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return string with break and new section title</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -139,9 +140,9 @@ Cantera development version 2.3.0a2 required</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pymars.soln2cti.write">
-<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">solution</em>, <em class="sig-param">output_filename=''</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.write" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pymars.soln2cti.</code><code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">solution</span></em>, <em class="sig-param"><span class="n">output_filename</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.soln2cti.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to write cantera solution object to cti file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -247,7 +248,7 @@ Cantera development version 2.3.0a2 required</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -261,10 +262,10 @@ Cantera development version 2.3.0a2 required</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &copy;2020, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
