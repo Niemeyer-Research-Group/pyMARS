@@ -9,7 +9,7 @@ import numpy as np
 import networkx as nx
 import cantera as ct
 
-from ..sampling import data_files, InputIgnition
+from ..sampling import data_files, InputIgnition, InputLaminarFlame
 from ..drg import graph_search, create_drg_matrix, run_drg, trim_drg, reduce_drg
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
@@ -514,7 +514,7 @@ class TestReduceDRG:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        conditions = [
+        ignition_conditions = [
             InputIgnition(
                 kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
@@ -524,6 +524,17 @@ class TestReduceDRG:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
+        flame_conditions = [
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+
         
         data = np.genfromtxt(
             relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
@@ -538,7 +549,7 @@ class TestReduceDRG:
         with TemporaryDirectory() as temp_dir:
             reduced_model = reduce_drg(
                 model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
-                conditions, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
+                ignition_conditions, flame_conditions, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
                 previous_model=None, threshold_upper=None, num_threads=1, path=temp_dir
                 )
         
@@ -598,7 +609,7 @@ class TestRunDRG:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        conditions = [
+        ignition_conditions = [
             InputIgnition(
                 kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
@@ -608,6 +619,17 @@ class TestRunDRG:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
+        flame_conditions = [
+            InputLaminarFlame(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputLaminarFlame(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+
         data_files['output_ignition'] = relative_location(
             os.path.join('assets', 'example_ignition_output.txt')
             )
@@ -619,7 +641,7 @@ class TestRunDRG:
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drg(
-                model_file, conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
+                model_file, ignition_conditions, flame_conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
                 num_threads=1, path=temp_dir
                 )
 

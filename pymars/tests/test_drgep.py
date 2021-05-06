@@ -9,9 +9,9 @@ import numpy as np
 import cantera as ct
 import networkx as nx
 
-from ..sampling import data_files, InputIgnition
+from ..sampling import data_files, InputIgnition, InputLaminarFlame
 from ..drgep import create_drgep_matrix, graph_search_drgep, get_importance_coeffs
-from ..drgep import reduce_drgep, run_drgep
+from ..drgep import reduce_drgep, run_drgep, trim
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
 try:
@@ -681,13 +681,23 @@ class TestRunDRGEP:
         model_file = 'gri30.cti'
 
         # Conditions for reduction
-        conditions = [
+        ignition_conditions = [
             InputIgnition(
                 kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
             InputIgnition(
                 kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        flame_conditions = [
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
@@ -702,7 +712,7 @@ class TestRunDRGEP:
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drgep(
-                model_file, conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
+                model_file, ignition_conditions, flame_conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
                 num_threads=1, path=temp_dir
                 )
 

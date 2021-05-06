@@ -7,7 +7,7 @@ import numpy as np
 import networkx as nx
 import cantera as ct
 
-from ..sampling import data_files, InputIgnition
+from ..sampling import data_files, InputIgnition, InputLaminarFlame
 from ..sensitivity_analysis import run_sa
 
 # Taken from http://stackoverflow.com/a/22726782/1569494
@@ -65,13 +65,24 @@ class TestRunSA:
         """Test SA using stored DRGEP result with upper_threshold = 0.5
         """
         starting_model = relative_location(os.path.join('assets', 'drgep_gri30.cti'))
-        conditions = [
+         # Conditions for reduction
+        ignition_conditions = [
             InputIgnition(
                 kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
             InputIgnition(
                 kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        flame_conditions = [
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
@@ -90,7 +101,7 @@ class TestRunSA:
         # try using initial SA method
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_sa(
-                starting_model, 3.22, conditions, [], [], 5.0, ['N2'], 
+                starting_model, 3.22, ignition_conditions, flame_conditions, [], [], 5.0, ['N2'], 
                 algorithm_type='initial', species_limbo=limbo_species[:], num_threads=1, 
                 path=temp_dir
                 )
@@ -103,7 +114,7 @@ class TestRunSA:
         # try using greedy SA method
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_sa(
-                starting_model, 3.22, conditions, [], [], 5.0, ['N2'], 
+                starting_model, 3.22, ignition_conditions, flame_conditions, [], [], 5.0, ['N2'], 
                 algorithm_type='greedy', species_limbo=limbo_species[:], num_threads=1, 
                 path=temp_dir
                 )
