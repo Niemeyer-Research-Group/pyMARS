@@ -101,10 +101,10 @@ def parse_inputs(input_dict):
 
     psr_conditions = input_dict.get('psr-conditions', {})
     flame_conditions = input_dict.get('laminar-flame-conditions', {})
+    #no assert because not required
     if psr_conditions:
         raise NotImplementedError('PSR sampling not implemented yet, sorry!')
-    if flame_conditions:
-        raise NotImplementedError('Laminar flame sampling not implemented yet, sorry!')
+    
 
     # check validity of input file
     ignition_inputs = parse_ignition_inputs(model, ignition_conditions, phase_name)

@@ -5,10 +5,11 @@ import logging
 from typing import NamedTuple, Dict
 
 import numpy as np
-import yaml
+#import yaml
 import cantera as ct
 
 from .simulation import Simulation
+from .simulation_flame import FlameSimulation
 
 data_files = {
     'data_ignition': 'ignition_data.dat', 'output_ignition': 'ignition_output.txt',
@@ -42,9 +43,23 @@ class InputLaminarFlame(NamedTuple):
     """Holds input parameters for single laminar flame simulation.
     """
 
+    kind: str #adding this to see if it fixes issue
+    temperature: float
+    pressure: float
+
+    width: float = 0.0
+    
+    equivalence_ratio: float = 0.0
+    fuel: Dict = {}
+    oxidizer: Dict = {}
+    reactants: Dict = {}
+    composition_type: str = 'mole'
+    
+
+    
 
 def simulation_worker(sim_tuple):
-    """Worker for multiprocessing of simulation cases.
+    """Worker for multiprocessing of ignition simulation cases.
 
     Parameters
     ----------
@@ -61,10 +76,34 @@ def simulation_worker(sim_tuple):
     sim, stop_at_ignition = sim_tuple
 
     sim.setup_case()
-    sim.run_case(stop_at_ignition)
+    sim.run_case(stop_at_ignition) 
 
     sim = Simulation(sim.idx, sim.properties, sim.model, phase_name=sim.phase_name, path=sim.path)
     return sim
+
+
+def flamesimulation_worker(sim_tuple):
+    """Worker for multiprocessing of ignition simulation cases.
+
+    Parameters
+    ----------
+    sim_tuple : tuple
+        Contains Simulation object and other parameters needed to setup
+        and run case.
+
+    Returns
+    -------
+    sim : Simulation
+        Object with simulation metadata
+
+    """
+    sim, stop_at_flame = sim_tuple
+
+    sim.setup_case()
+    sim.run_case() 
+
+    flame_sim = FlameSimulation(sim.idx, sim.properties, sim.model, phase_name=sim.phase_name, path=sim.path)
+    return flame_sim
 
 
 def ignition_worker(sim_tuple):
@@ -87,6 +126,26 @@ def ignition_worker(sim_tuple):
     return {idx: ignition_delay}
 
 
+def flame_worker(flamesim_tuple):
+    """Worker for multiprocessing of one dimensional flame only cases.
+
+    Parameters
+    ----------
+    sim_tuple : tuple
+        Tuple of Simulation object to be run and identifier
+
+    Returns
+    -------
+    dict
+        Case identifier and calculated flame speed
+
+    """
+    sim, idx = flamesim_tuple
+    sim.setup_case()
+    flame_speed = sim.calculate_flamespeed() 
+    return {idx: flame_speed}
+
+
 def calculate_error(metrics_original, metrics_test):
     """Calculates error of global metrics between test and original model.
 
@@ -103,15 +162,17 @@ def calculate_error(metrics_original, metrics_test):
         Maximum error over all metrics
     
     """
+ 
     error = 100 * np.max(np.abs(metrics_original - metrics_test) / metrics_original)
-    # if any zero ignition delays, set error to 100
+
+    # if any zero ignition delays or flame speed, set error to 100
     if any(metrics_test == 0.0):
         error = 100.0
 
     return error
 
 
-def read_metrics(ignition_conditions, psr_conditions=[], flame_conditions=[]):
+def read_metrics(ignition_conditions, flame_conditions=[], psr_conditions=[]):
     """Reads in stored already-sampled metrics.
 
     Parameters
@@ -128,6 +189,8 @@ def read_metrics(ignition_conditions, psr_conditions=[], flame_conditions=[]):
     ignition_delays : numpy.ndarray
         Calculated metrics for model, used for evaluating error
 
+    flame speeds : numpy.ndarray
+        Calculated metrics for model, used for evaluating error
     """
     if ignition_conditions:
         exists_output = os.path.isfile(data_files['output_ignition'])
@@ -140,12 +203,16 @@ def read_metrics(ignition_conditions, psr_conditions=[], flame_conditions=[]):
         raise NotImplementedError('PSR calculations not currently supported.')
     
     if flame_conditions:
-        raise NotImplementedError('Laminar flame calculations not currently supported.')
+        exists_output = os.path.isfile(data_files['output_flame']) #what is this, give it new name?
+        if exists_output:
+            flame_speeds = np.genfromtxt(data_files['output_flame'], delimiter=',')
+        else:
+            raise NotImplementedError('Error, no flame output file present.')
 
-    return ignition_delays
+    return ignition_delays, flame_speeds #is this how we want it returned or in if statemetns
 
 
-def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
+def sample_metrics(model, ignition_conditions, flame_conditions=[], psr_conditions=[], 
                    phase_name='', num_threads=1, path='', reuse_saved=False
                    ):
     """Evaluates metrics used for determining error of reduced model
@@ -179,14 +246,18 @@ def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditio
     ignition_delays : numpy.ndarray
         Calculated metrics for model, used for evaluating error
 
+    flame_speeds : numpy.ndarray
+        Calculated metrics for model, used for evaluating error
+
     """
+    print('Flame conditions seen.')
     # If number of threads specified as 0, use either max number of available
     # cores minus 1, or use 1 if multiple cores not available.
     if not num_threads:
         num_threads = multiprocessing.cpu_count()-1 or 1
 
+    ignition_delays = np.zeros(len(ignition_conditions))
     if ignition_conditions:
-        ignition_delays = np.zeros(len(ignition_conditions))
         
         exists_output = os.path.isfile(data_files['output_ignition'])
         if reuse_saved and exists_output:
@@ -220,13 +291,44 @@ def sample_metrics(model, ignition_conditions, psr_conditions=[], flame_conditio
     if psr_conditions:
         raise NotImplementedError('PSR calculations not currently supported.')
     
+    flame_speeds = np.zeros(len(flame_conditions))
     if flame_conditions:
-        raise NotImplementedError('Laminar flame calculations not currently supported.')
+        
+        exists_output = os.path.isfile(data_files['output_flame'])
+        if reuse_saved and exists_output:
+            flame_speeds = np.genfromtxt(data_files['output_flame'], delimiter=',')
+        
+        if reuse_saved and len(flame_speeds) == len(flame_conditions):
+            logging.info('Reusing existing laminar flame speed samples for the starting model.')
+        else:
+            simulations = []
+            for idx, case in enumerate(flame_conditions):
+                simulations.append([
+                    FlameSimulation(idx, case, model, phase_name=phase_name, path=path), idx
+                    ])
 
-    return ignition_delays
+            jobs = tuple(simulations)
+            if num_threads == 1:
+                results = []
+                for job in jobs:
+                    results.append(flame_worker(job))
+            else:
+                pool = multiprocessing.Pool(processes=num_threads)
+                results = pool.map(flame_worker, jobs)
+                pool.close()
+                pool.join()
+
+            results = {key:val for k in results for key, val in k.items()}
+            flame_speeds = np.zeros(len(results))
+            for idx, flame_speed in results.items():
+                flame_speeds[idx] = flame_speed
+
+    model_metrics = np.concatenate(ignition_delays, flame_speeds)
+
+    return model_metrics
 
 
-def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
+def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
            phase_name='', num_threads=1, path=''
            ):
     """Samples thermochemical data and generates metrics for various phenomena.
@@ -259,6 +361,12 @@ def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
         Metrics, and sampled data
 
     """
+    #initialize outputs as empty to be returned
+    ignition_delays = []
+    ignition_data = []
+    flame_speeds = [] 
+    flame_data = []
+
     # If number of threads given as 0, use either max number of available
     # cores minus 1, or use 1 if multiple cores not available.
     if not num_threads:
@@ -321,12 +429,68 @@ def sample(model, ignition_conditions, psr_conditions=[], flame_conditions=[],
             np.savetxt(data_files['output_ignition'], ignition_delays, delimiter=',')
 
     if psr_conditions:
+    
         raise NotImplementedError('PSR calculations not currently supported.')
     
+    flame_speeds = np.zeros(len(flame_conditions))
+    flame_data = []
+        
     if flame_conditions:
-        raise NotImplementedError('Laminar flame calculations not currently supported.')
+        # check for presence of data and output files; if present, reuse.
+        matches_number = False
+        matches_shape = False
+        exists_data = os.path.isfile(data_files['data_flame'])
+        exists_output = os.path.isfile(data_files['output_flame'])
+        if exists_data and exists_output:
+            flame_speeds = np.genfromtxt(data_files['output_flame'], delimiter=',')
+            flame_data = np.genfromtxt(data_files['data_flame'], delimiter=',')
+            # need to check that saved data at least matches the number of cases
+            matches_number = (
+                flame_speeds.size == len(flame_conditions) and 
+                flame_data.shape[0] / 20 == len(flame_conditions)
+                )
+            
+            # also check that expected data is right shape (e.g., in case number of species 
+            # has changed if running a new model)
+            gas = ct.Solution(model, phase_name)
+            matches_shape = flame_data.shape[1] == 2 + gas.n_species
+        
+        if matches_number and matches_shape:
+            logging.info('Reusing existing laminar flame samples for the starting model.')
+        else:
+            logging.info('Running laminar flame simulations for starting model.')
+            simulations = []
+            for idx, case in enumerate(flame_conditions):
+                simulations.append([
+                    FlameSimulation(idx, case, model, phase_name=phase_name, path=path)
+                    ])
+
+            jobs = tuple(simulations)
+            if num_threads == 1:
+                results = []
+                for job in jobs:
+                    results.append(flamesimulation_worker(job))
+            else:
+                pool = multiprocessing.Pool(processes=num_threads)
+                results = pool.map(flamesimulation_worker, jobs)
+                pool.close()
+                pool.join()
+
+            flame_speeds = np.zeros(len(flame_conditions))
+            flame_data = []     
+            for idx, sim in enumerate(results):
+                flame_speeds[idx], data = sim.process_results()
+                flame_data += list(data)
+                sim.clean()
+            flame_data = np.array(flame_data)
+
+            np.savetxt(data_files['data_flame'], flame_data, delimiter=',')
+            np.savetxt(data_files['output_flame'], flame_speeds, delimiter=',')
     
-    return ignition_delays, ignition_data
+    metrics = np.concatenate(ignition_delays, flame_speeds)
+    data = np.concatenate(ignition_data, flame_data)
+
+    return metrics, data
 
 
 def parse_ignition_inputs(model, conditions, phase_name=''):
@@ -454,4 +618,71 @@ def parse_flame_inputs(model, conditions, phase_name=''):
         List of validated objects with laminar flame input parameters
 
     """
-    return None
+    gas = ct.Solution(model, phase_name)
+    
+    inputs = []
+    for idx, case in enumerate(conditions):
+        pre = f'Flame input {idx}: '
+        
+        # check required keys        
+        #kind = case.get('kind', '') 
+        temperature = case.get('temperature', 0.0)
+        pressure = case.get('pressure', 0.0)
+
+        """assert kind in ['constant volume', 'constant pressure'], (
+            pre + '"case" needs to be "constant volume" or "constant pressure'
+            )
+            """
+        assert temperature > 0.0, pre + '"temperature" needs to be > 0'
+        assert pressure > 0.0, pre + '"pressure" needs to be a number > 0'
+
+        width = case.get('width', [])
+        if width: 
+            assert width > 0, pre + 'width needs to be a number > 0'
+        else:
+            width = 0.014
+    
+        equiv_ratio = case.get('equivalence-ratio', 0.0)
+        fuel = case.get('fuel', [])
+        oxidizer = case.get('oxidizer', [])
+
+        reactants = case.get('reactants', [])
+
+        assert (bool(equiv_ratio or fuel or oxidizer) + bool(reactants)) == 1, (
+            pre + 'should specify either equivalence-ratio/fuel/oxidizer or reactants.'
+            )
+        
+        if equiv_ratio or fuel or oxidizer:
+            assert equiv_ratio > 0.0, pre + 'needs non-zero "equivalence-ratio"'
+
+            assert fuel, pre + 'needs "fuel" with at least one entry'
+            for entry in fuel:
+                assert fuel[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert entry in gas.species_names, (
+                    pre + 'fuel species not in model: ' + entry
+                    )
+            
+            assert oxidizer, pre + 'needs "oxidizer" with at least one entry'
+            for entry in oxidizer:
+                assert oxidizer[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert entry in gas.species_names, (
+                    pre + 'oxidizer species not in model: ' + entry
+                    )
+        
+        if reactants:
+            for entry in reactants:
+                assert reactants[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert entry in gas.species_names, (
+                    pre + 'reactant not in model: ' + entry
+                    )
+        
+        composition_type = case.get('composition-type', 'mole')
+        assert composition_type in ['mole', 'mass'], pre + 'composition-type must be "mole" or "mass"'
+        assert not (composition_type == 'mass' and equiv_ratio), (
+            pre + 'composition-type: must be mole when specifying equivalence ratio'
+            )
+        
+        inputs.append(InputLaminarFlame(
+            temperature, pressure, width, equiv_ratio, fuel, oxidizer, reactants, composition_type))
+
+    return inputs

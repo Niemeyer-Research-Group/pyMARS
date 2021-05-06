@@ -117,7 +117,7 @@ def trim_drg(matrix, species_names, species_targets, threshold):
 
 
 def reduce_drg(model_file, species_targets, species_safe, threshold, 
-               matrices, ignition_conditions, sampled_metrics, 
+               matrices, ignition_conditions, flame_conditions, sampled_metrics,
                phase_name='', previous_model=None, threshold_upper=None, 
                num_threads=1, path=''
                ):
@@ -137,8 +137,12 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         List of DRG adjacency matrices determined from thermochemical state data
     ignition_conditions : list of InputIgnition
         List of autoignition initial conditions.
-    sampled_metrics: numpy.ndarray
-        Global metrics from original model used to evaluate error
+    flame_conditions : list of InputLaminarFlame, optional 
+        List of laminar flame speed initial conditions
+    ignition_sampled_metrics: numpy.ndarray
+        Metrics from original model used to evaluate error of ignition delay
+    flame_sampled_metrics: numpy.ndarray
+        Metrics from original model used to evaluate error of flame speed
     phase_name : str, optional
         Optional name for phase to load from CTI file (e.g., 'gas'). 
     previous_model : ReducedModel, optional
@@ -185,9 +189,10 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         )
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, phase_name=phase_name, 
+        reduced_model_filename, ignition_conditions, flame_conditions = flame_conditions, phase_name=phase_name, 
         num_threads=num_threads, path=path
         )
+    
     error = calculate_error(sampled_metrics, reduced_model_metrics)
     
     # If desired, now identify limbo species for future sensitivity analysis
@@ -246,6 +251,7 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
         Return reduced model and associated metadata
 
     """
+
     solution = ct.Solution(model_file, phase_name)
 
     assert species_targets, 'Need to specify at least one target species.'
@@ -254,7 +260,7 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, phase_name=phase_name, num_threads=num_threads, path=path
+        model_file, ignition_conditions, flame_conditions = flame_conditions, phase_name=phase_name, num_threads=num_threads, path=path
         )
 
     matrices = []
@@ -276,7 +282,7 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
     while error_current <= error_limit:
         reduced_model = reduce_drg(
             model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, sampled_metrics, 
+            ignition_conditions, flame_conditions, sampled_metrics,
             phase_name=phase_name, previous_model=previous_model, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
@@ -313,7 +319,7 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drg(
             model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, sampled_metrics, phase_name=phase_name,
+            ignition_conditions, flame_conditions, sampled_metrics, phase_name=phase_name,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:
