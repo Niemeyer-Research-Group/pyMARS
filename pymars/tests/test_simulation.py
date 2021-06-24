@@ -60,7 +60,7 @@ class TestSimulation:
         """
         case = InputIgnition(
             kind='constant volume', pressure=1.0, temperature=1000.0,
-            reactants={'CH4': 0.05518632, 'O2': 0.22014867, 'N2': 0.724665}, composition_type='mass'
+            reactants={'CH4': 0.05518667, 'O2': 0.22014124, 'N2': 0.7246721}, composition_type='mass'
             )
         sim = Simulation(0, case, 'gri30.cti')
         sim.setup_case()
