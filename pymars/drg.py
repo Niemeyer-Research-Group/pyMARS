@@ -193,13 +193,12 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
     # If desired, now identify limbo species for future sensitivity analysis
     limbo_species = []
     if threshold_upper:
-        species_retained += trim_drg(
-            matrix, solution.species_names, species_targets, threshold_upper
-            )
-        limbo_species = [
-            sp for sp in solution.species_names
-            if sp not in (species_retained + species_safe + species_removed)
-            ]
+        species_retained = []
+        for matrix in matrices:
+            species_retained += trim_drg(
+                matrix, solution.species_names, species_targets, threshold_upper
+                )
+        limbo_species = list(set(species_retained))
 
     return ReducedModel(
         model=reduced_model, filename=reduced_model_filename, 
