@@ -33,7 +33,7 @@ class ReductionInputs(NamedTuple):
     target_species: List[str]
     safe_species: List[str] = []
     sensitivity_analysis: bool = False
-    upper_threshold: float = 0.1
+    upper_threshold: float = 0.4
     sensitivity_type: str = 'greedy'
     phase_name: str = ''
 
@@ -73,7 +73,10 @@ def parse_inputs(input_dict):
             'At least one "target" species must be specified for graph-based reduction methods.'
             )
     
-    upper_threshold = input_dict.get('upper-threshold', 0.1)
+    upper_threshold = input_dict.get('upper-threshold', None)
+    if not upper_threshold and sensitivity_analysis:
+        logging.info('Warning: using default upper threshold value (0.1)')
+        upper_threshold = 0.1
     sensitivity_type = input_dict.get('sensitivity-type', 'initial')
 
     safe_species = input_dict.get('retained-species', [])
