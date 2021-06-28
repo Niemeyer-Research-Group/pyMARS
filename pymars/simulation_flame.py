@@ -70,11 +70,6 @@ class FlameSimulation(object):
 
         self.sim = ct.ReactorNet([self.reac])
         
-        # implementation of allowing option for width to be input - would this be in properties 
-        #if not self.properties.width:
-            #default flame width to 25 cm 
-        #self.properties.width = 0.014
-
         # Create the flame object
         self.flame = ct.FreeFlame(self.gas, width=self.properties.width)
 
@@ -108,7 +103,7 @@ class FlameSimulation(object):
         
         try:
             self.flame.solve(loglevel=0, refine_grid=True, auto=True)
-            self.Su0 = self.flame.u[0]
+            self.Su0 = self.flame.velocity[0]
         except:
             logging.error(f'No flame detected for laminar flame case {self.idx}')
             raise RuntimeError(f'No flame detected for laminar flame case {self.idx}')
@@ -116,10 +111,10 @@ class FlameSimulation(object):
         return self.Su0
 
     def calculate_flamespeed(self):
-        """Run simulation case set up ``setup_case``, just for flame speed.
+        """Run simulation case set up ``run_case``, just for flame speed.
         """    
         try:
-            self.run_case()
+            self.Su0 = self.run_case()
         except:
             logging.error(f'No flame detected for laminar flame case {self.idx}')
             raise RuntimeError(f'No flame detected for laminar flame case {self.idx}')
@@ -144,32 +139,32 @@ class FlameSimulation(object):
 
         delta = 0.05
         deltas = np.arange(delta, 1 + delta, delta)
-        
+
         temperatures = self.flame.T
-        pressures = self.flame.P
+        pressures = np.ones((len(temperatures))) * self.flame.P
         mass_fractions = self.flame.Y
-        flame_speeds = self.Su0
+        flame_speed = self.Su0
 
         temperature_initial = temperatures[0]
         temperature_max = temperatures[len(temperatures)-1]
         temperature_diff = temperature_max - temperature_initial 
 
-        sampled_data = np.zeros((len(deltas), 4 + mass_fractions.shape[1]))
+        sampled_data = np.zeros((len(deltas), 2 + mass_fractions.shape[0]))
 
         #processing to get the 20 data points here
         idx = 0
-        for temp, pres, mass in zip(
-            temperatures, pressures, mass_fractions
+        for temp, pres in zip(
+            temperatures, pressures
             ):
             
             if temp >= temperature_initial + (deltas[idx] * temperature_diff):
                 sampled_data[idx, 0:2] = [temp, pres]
-                sampled_data[idx, 2:] = mass
+                sampled_data[idx, 2:] = mass_fractions[:, idx]
 
                 idx += 1
                 if idx == 20:
                     self.sampled_data = sampled_data
-                    return flame_speeds, sampled_data
+                    return flame_speed, sampled_data
         #processing to get 20 data points for additional parameters with different sizes? 
 
     def clean(self):

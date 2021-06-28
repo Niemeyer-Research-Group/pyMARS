@@ -712,7 +712,7 @@ class TestRunDRGEP:
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drgep(
-                model_file, ignition_conditions, flame_conditions, [], [], error, ['CH4', 'O2'], ['N2'], 
+                model_file, error, ['CH4', 'O2'], ['N2'], ignition_conditions, flame_conditions=flame_conditions,
                 num_threads=1, path=temp_dir
                 )
 

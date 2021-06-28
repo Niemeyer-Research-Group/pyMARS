@@ -117,7 +117,7 @@ def trim_drg(matrix, species_names, species_targets, threshold):
 
 
 def reduce_drg(model_file, species_targets, species_safe, threshold, 
-               matrices, ignition_conditions, flame_conditions, sampled_metrics,
+               matrices, sampled_metrics, ignition_conditions, psr_conditions=[], flame_conditions=[], 
                phase_name='', previous_model=None, threshold_upper=None, 
                num_threads=1, path=''
                ):
@@ -211,8 +211,8 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         )
 
 
-def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions, 
-            error_limit, species_targets, species_safe, phase_name='',
+def run_drg(model_file, error_limit, species_targets, species_safe, 
+            ignition_conditions, psr_conditions=[], flame_conditions=[], phase_name='',
             threshold_upper=None, num_threads=1, path=''
             ):
     """Main function for running DRG reduction.
@@ -281,8 +281,8 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drg(
-            model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, flame_conditions, sampled_metrics,
+            model_file, species_targets, species_safe, threshold, matrices, sampled_metrics,
+            ignition_conditions, flame_conditions=flame_conditions, 
             phase_name=phase_name, previous_model=previous_model, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
@@ -318,8 +318,8 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
     if error_current > error_limit:
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drg(
-            model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, flame_conditions, sampled_metrics, phase_name=phase_name,
+            model_file, species_targets, species_safe, threshold, matrices, sampled_metrics,
+            ignition_conditions, flame_conditions=flame_conditions,  phase_name=phase_name,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:

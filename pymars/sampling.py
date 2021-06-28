@@ -83,12 +83,12 @@ def simulation_worker(sim_tuple):
 
 
 def flamesimulation_worker(sim_tuple):
-    """Worker for multiprocessing of ignition simulation cases.
+    """Worker for multiprocessing of flame simulation cases.
 
     Parameters
     ----------
     sim_tuple : tuple
-        Contains Simulation object and other parameters needed to setup
+        Contains FlameSimulation object and other parameters needed to setup
         and run case.
 
     Returns
@@ -97,12 +97,14 @@ def flamesimulation_worker(sim_tuple):
         Object with simulation metadata
 
     """
-    sim, stop_at_flame = sim_tuple
+    flame_sim = sim_tuple[0]
 
-    sim.setup_case()
-    sim.run_case() 
-
-    flame_sim = FlameSimulation(sim.idx, sim.properties, sim.model, phase_name=sim.phase_name, path=sim.path)
+    flame_sim.setup_case()
+    
+    flame_sim = FlameSimulation(flame_sim.idx, flame_sim.properties, flame_sim.model, phase_name=flame_sim.phase_name, path=flame_sim.path)
+    flame_sim.setup_case()
+    flame_sim.run_case()
+    
     return flame_sim
 
 
@@ -250,20 +252,19 @@ def sample_metrics(model, ignition_conditions, flame_conditions=[], psr_conditio
         Calculated metrics for model, used for evaluating error
 
     """
-    print('Flame conditions seen.')
     # If number of threads specified as 0, use either max number of available
     # cores minus 1, or use 1 if multiple cores not available.
     if not num_threads:
         num_threads = multiprocessing.cpu_count()-1 or 1
 
-    ignition_delays = np.zeros(len(ignition_conditions))
+    
     if ignition_conditions:
-        
+        ignition_delays = np.zeros(len(ignition_conditions))
         exists_output = os.path.isfile(data_files['output_ignition'])
         if reuse_saved and exists_output:
             ignition_delays = np.genfromtxt(data_files['output_ignition'], delimiter=',')
-        
-        if reuse_saved and len(ignition_delays) == len(ignition_conditions):
+
+        if reuse_saved and ignition_delays.size == len(ignition_conditions):
             logging.info('Reusing existing autoignition samples for the starting model.')
         else:
             simulations = []
@@ -293,12 +294,12 @@ def sample_metrics(model, ignition_conditions, flame_conditions=[], psr_conditio
     
     flame_speeds = np.zeros(len(flame_conditions))
     if flame_conditions:
-        
+
         exists_output = os.path.isfile(data_files['output_flame'])
         if reuse_saved and exists_output:
             flame_speeds = np.genfromtxt(data_files['output_flame'], delimiter=',')
-        
-        if reuse_saved and len(flame_speeds) == len(flame_conditions):
+
+        if reuse_saved and flame_speeds.size == len(flame_conditions):
             logging.info('Reusing existing laminar flame speed samples for the starting model.')
         else:
             simulations = []
@@ -323,10 +324,17 @@ def sample_metrics(model, ignition_conditions, flame_conditions=[], psr_conditio
             for idx, flame_speed in results.items():
                 flame_speeds[idx] = flame_speed
 
-    model_metrics = np.concatenate(ignition_delays, flame_speeds)
+    if flame_speeds.any() and ignition_delays.any():
+        if flame_speeds.size and ignition_delays.size == 1:
+            model_metrics = np.array([float(ignition_delays), float(flame_speeds)])
+        else:
+            model_metrics = np.concatenate((ignition_delays, flame_speeds))
+    elif flame_speeds:
+        model_metrics = flame_speeds
+    else:
+        model_metrics = ignition_delays
 
     return model_metrics
-
 
 def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
            phase_name='', num_threads=1, path=''
@@ -361,11 +369,6 @@ def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
         Metrics, and sampled data
 
     """
-    #initialize outputs as empty to be returned
-    ignition_delays = []
-    ignition_data = []
-    flame_speeds = [] 
-    flame_data = []
 
     # If number of threads given as 0, use either max number of available
     # cores minus 1, or use 1 if multiple cores not available.
@@ -416,7 +419,7 @@ def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
                 results = pool.map(simulation_worker, jobs)
                 pool.close()
                 pool.join()
-
+            
             ignition_delays = np.zeros(len(ignition_conditions))
             ignition_data = []     
             for idx, sim in enumerate(results):
@@ -433,9 +436,9 @@ def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
         raise NotImplementedError('PSR calculations not currently supported.')
     
     flame_speeds = np.zeros(len(flame_conditions))
-    flame_data = []
-        
     if flame_conditions:
+        flame_speeds = np.zeros(len(flame_conditions))
+        flame_data = []
         # check for presence of data and output files; if present, reuse.
         matches_number = False
         matches_shape = False
@@ -466,15 +469,11 @@ def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
                     ])
 
             jobs = tuple(simulations)
-            if num_threads == 1:
-                results = []
-                for job in jobs:
-                    results.append(flamesimulation_worker(job))
-            else:
-                pool = multiprocessing.Pool(processes=num_threads)
-                results = pool.map(flamesimulation_worker, jobs)
-                pool.close()
-                pool.join()
+            #if num_threads == 1:
+            results = []
+            for job in jobs:
+                results.append(flamesimulation_worker(job))
+
 
             flame_speeds = np.zeros(len(flame_conditions))
             flame_data = []     
@@ -486,9 +485,19 @@ def sample(model, ignition_conditions, flame_conditions=[], psr_conditions=[],
 
             np.savetxt(data_files['data_flame'], flame_data, delimiter=',')
             np.savetxt(data_files['output_flame'], flame_speeds, delimiter=',')
-    
-    metrics = np.concatenate(ignition_delays, flame_speeds)
-    data = np.concatenate(ignition_data, flame_data)
+
+    if flame_speeds.any() and ignition_delays.any():
+        if flame_speeds.size and ignition_delays.size == 1:
+            metrics = np.array([float(ignition_delays), float(flame_speeds)])
+        else:
+            metrics = np.concatenate((ignition_delays, flame_speeds))
+        data = np.row_stack((ignition_data, flame_data))
+    elif flame_speeds.any():
+        metrics = flame_speeds
+        data = flame_data
+    elif ignition_delays.any():
+        metrics = ignition_delays
+        data = ignition_data
 
     return metrics, data
 
@@ -625,7 +634,7 @@ def parse_flame_inputs(model, conditions, phase_name=''):
         pre = f'Flame input {idx}: '
         
         # check required keys        
-        #kind = case.get('kind', '') 
+        kind = case.get('kind', '') 
         temperature = case.get('temperature', 0.0)
         pressure = case.get('pressure', 0.0)
 
@@ -681,8 +690,8 @@ def parse_flame_inputs(model, conditions, phase_name=''):
         assert not (composition_type == 'mass' and equiv_ratio), (
             pre + 'composition-type: must be mole when specifying equivalence ratio'
             )
-        
+
         inputs.append(InputLaminarFlame(
-            temperature, pressure, width, equiv_ratio, fuel, oxidizer, reactants, composition_type))
+            kind, temperature, pressure, width, equiv_ratio, fuel, oxidizer, reactants, composition_type))
 
     return inputs

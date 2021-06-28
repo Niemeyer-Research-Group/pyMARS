@@ -297,6 +297,7 @@ class Simulation(object):
         for time, temp, pres, mass in zip(
             times, temperatures, pressures, mass_fractions
             ):
+
             if temp >= temperature_initial + 400.0 and not ignition_flag:
                     self.ignition_delay = time
                     ignition_flag = True

@@ -339,8 +339,8 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sampled
         )
 
 
-def run_drgep(model_file, ignition_conditions, flame_conditions,
-              error_limit, species_targets, species_safe, psr_conditions=[], phase_name='',
+def run_drgep(model_file, error_limit, species_targets, species_safe, ignition_conditions, flame_conditions=[],
+               psr_conditions=[], phase_name='',
               threshold_upper=None, num_threads=1, path=''
               ):
     """Main function for running DRGEP reduction.

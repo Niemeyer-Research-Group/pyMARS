@@ -227,6 +227,11 @@ def write(solution, output_filename='', path=''):
         output_filename = os.path.join(path, output_filename)
     else:
         output_filename = os.path.join(path, f'{solution.name}.cti')
+
+    if output_filename.find("*") != -1:
+        print('hello')
+        output_filename= output_filename.replace('*', '')
+        print(output_filename)
     
     if os.path.isfile(output_filename):
         os.remove(output_filename)

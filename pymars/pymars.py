@@ -87,7 +87,7 @@ def parse_inputs(input_dict):
     try:
         gas = ct.Solution(model, phase_name)
     except ValueError:
-        raise ValueError(model + ' does not contain phase ' + phase_name)
+        raise ValueError(model + ' does not contain phase ' + phase_name) 
 
     # check that species are present in model
     for sp in target_species:
@@ -97,10 +97,10 @@ def parse_inputs(input_dict):
         assert sp in gas.species_names, f'Specified retained species {sp} not in model'
     
     ignition_conditions = input_dict.get('autoignition-conditions', {})
-    assert ignition_conditions, 'autoignition-conditions need to be specified'
+    #assert ignition_conditions, 'autoignition-conditions need to be specified'
 
     psr_conditions = input_dict.get('psr-conditions', {})
-    flame_conditions = input_dict.get('laminar-flame-conditions', {})
+    flame_conditions = input_dict.get('flame-conditions', {})
     #no assert because not required
     if psr_conditions:
         raise NotImplementedError('PSR sampling not implemented yet, sorry!')
@@ -178,20 +178,20 @@ def main(model_file, error_limit,
     
     if method == 'DRG':
         reduced_model = run_drg(
-            model_file, ignition_conditions, psr_conditions, flame_conditions,
-            error_limit, target_species, safe_species, phase_name=phase_name,
+            model_file, error_limit, target_species, safe_species, ignition_conditions, psr_conditions=psr_conditions, flame_conditions=flame_conditions,
+            phase_name=phase_name,
             threshold_upper=upper_threshold, num_threads=num_threads, path=path
             )    
     elif method == 'DRGEP':
         reduced_model = run_drgep(
-            model_file, ignition_conditions, psr_conditions, flame_conditions, 
-            error_limit, target_species, safe_species, phase_name=phase_name,
+            model_file, error_limit, target_species, safe_species, ignition_conditions, psr_conditions=psr_conditions, flame_conditions=flame_conditions, 
+            phase_name=phase_name,
             threshold_upper=upper_threshold, num_threads=num_threads, path=path
             )
     elif method == 'PFA':
         reduced_model = run_pfa(
-            model_file, ignition_conditions, psr_conditions, flame_conditions,
-            error_limit, target_species, safe_species, phase_name=phase_name,
+            model_file, error_limit, target_species, safe_species, ignition_conditions, psr_conditions=psr_conditions, flame_conditions=flame_conditions,
+            phase_name=phase_name,
             num_threads=num_threads, path=path
             )
     
@@ -207,9 +207,8 @@ def main(model_file, error_limit,
             sensitivity_type = 'greedy'
 
         reduced_model = run_sa(
-            model_file, error, ignition_conditions, psr_conditions, flame_conditions, 
-            error_limit, target_species + safe_species, phase_name=phase_name,
-            algorithm_type=sensitivity_type, species_limbo=limbo_species, 
+            model_file, error, error_limit, target_species + safe_species, ignition_conditions, psr_conditions=[], flame_conditions=flame_conditions, 
+            phase_name=phase_name, algorithm_type=sensitivity_type, species_limbo=limbo_species, 
             num_threads=num_threads, path=path
             )
    

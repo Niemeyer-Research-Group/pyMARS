@@ -285,7 +285,7 @@ def run_pfa(model_file, ignition_conditions, error_limit, species_targets, speci
 
     matrices = []
     for state in sampled_data:
-        matrices.append(create_drg_matrix((state[0], state[1], state[2:]), solution))
+        matrices.append(create_pfa_matrix((state[0], state[1], state[2:]), solution))
  
 
     # begin reduction iterations
@@ -303,7 +303,7 @@ def run_pfa(model_file, ignition_conditions, error_limit, species_targets, speci
     while error_current <= error_limit:
         reduced_model = reduce_pfa(
             model_file, species_targets, species_safe, threshold, matrices, sampled_metrics,
-            ignition_conditions, flame_conditions, phase_name=phase_name, 
+            ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, 
             previous_model=previous_model, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
