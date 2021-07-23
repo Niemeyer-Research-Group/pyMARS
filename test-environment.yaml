@@ -1,15 +1,15 @@
-name: py${PYTHON}
+name: env
 channels:
 - defaults
 - conda-forge
 - cantera
 dependencies:
-  - python=${PYTHON}
+  - python>=3.7
   - numpy>=1.13.1
-  - cantera>=2.3.0
+  - cantera>=2.5.1
   - networkx
   - pytables
-  - pyyaml>=4.2b1
+  - ruamel_yaml
   - pytest>=3.2.0
   - pytest-cov>=2.3.1
   - codecov

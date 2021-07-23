@@ -5,7 +5,7 @@ import logging
 from argparse import ArgumentParser
 from typing import List, Dict, NamedTuple
 
-import yaml
+import ruamel_yaml as yaml
 import cantera as ct
 
 # local imports
