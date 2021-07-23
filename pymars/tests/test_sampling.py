@@ -6,7 +6,7 @@ import pkg_resources
 import pytest
 import numpy as np
 import cantera as ct
-import yaml
+import ruamel_yaml as yaml
 
 from ..sampling import parse_ignition_inputs, InputIgnition
 

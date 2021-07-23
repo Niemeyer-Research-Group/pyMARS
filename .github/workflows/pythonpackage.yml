@@ -1,0 +1,49 @@
+name: Python package
+
+on:
+  push:
+    # Build on tags that look like releases
+    tags:
+      - v*
+    # Build when main is pushed to
+    branches:
+      - main
+  pull_request:
+    # Build when a pull request targets main
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        experimental: [false]
+      fail-fast: false
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Setup conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        auto-activate-base: false
+        environment-file: test-environment.yaml
+        activate-environment: env
+        python-version: ${{ matrix.python-version }}
+    - name: Test with pytest
+      shell: bash -l {0}
+      run: pytest -vv --cov=./
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
