@@ -3,8 +3,7 @@
 
 [![DOI](https://zenodo.org/badge/51664233.svg)](https://zenodo.org/badge/latestdoi/51664233)
 [![JOSS DOI](https://joss.theoj.org/papers/10.21105/joss.01543/status.svg)](https://doi.org/10.21105/joss.01543)
-[![Build Status](https://travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master)](https://travis-ci.org/Niemeyer-Research-Group/pyMARS)
-[![Build Status](https://dev.azure.com/kyleniemeyer/pyMARS/_apis/build/status/Niemeyer-Research-Group.pyMARS?branchName=master)](https://dev.azure.com/kyleniemeyer/pyMARS/_build/latest?definitionId=1&branchName=master)
+![Build Status](https://github.com/Niemeyer-Research-Group/pyMARS/actions/workflows/pythonpackage.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS/branch/master/graph/badge.svg)](https://codecov.io/gh/Niemeyer-Research-Group/pyMARS)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
@@ -26,7 +25,7 @@ model; however, its computational expense is high, and applying this method alon
 
 ## Installation
 
-pyMARS supports Python 3.6 and 3.7, and can be installed easily using conda:
+pyMARS supports Python 3.7, 3.8, and 3.9, and can be installed easily using conda:
 
     conda install -c cantera cantera
     conda install -c niemeyer-research-group pymars

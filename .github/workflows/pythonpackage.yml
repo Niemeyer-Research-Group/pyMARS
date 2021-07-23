@@ -1,4 +1,4 @@
-name: Python package
+name: pyMARS
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
         os: [ubuntu-latest, macos-latest, windows-latest]
         experimental: [false]
       fail-fast: false
