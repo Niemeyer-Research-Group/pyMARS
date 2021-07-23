@@ -37,8 +37,8 @@ except ImportError:
 
 
 def relative_location(file):
-	file_path = os.path.join(file)
-	return pkg_resources.resource_filename(__name__, file_path)
+    file_path = os.path.join(file)
+    return pkg_resources.resource_filename(__name__, file_path)
 
 
 def check_equal(list1, list2):
@@ -509,8 +509,8 @@ class TestGraphSearch:
 
 
 class TestReduceDRG:
-    def test_gri_reduction_multiple_thresholds(self):
-        """Tests reduce_drg method with multiple thresholds"""
+    def test_gri_reduction_multiple_cases(self):
+        """Tests reduce_drg method with multiple cases"""
         model_file = 'gri30.cti'
 
         # Conditions for reduction
@@ -551,6 +551,45 @@ class TestReduceDRG:
         assert check_equal(reduced_model.model.species_names, expected_species)
         assert reduced_model.model.n_reactions == 245
         assert round(reduced_model.error, 2) == 3.64
+
+    def test_gri_reduction_limbo(self):
+        """Tests reduce_drg method with limbo species"""
+        model_file = 'gri30.cti'
+
+        # Conditions for reduction
+        conditions = [
+            InputIgnition(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
+                ),
+        ]
+        
+        data = np.genfromtxt(
+            relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
+            delimiter=','
+            )
+
+        model = ct.Solution(model_file)
+        matrices = []
+        for state in data:
+            matrices.append(create_drg_matrix((state[0], state[1], state[2:]), model))
+        
+        with TemporaryDirectory() as temp_dir:
+            reduced_model = reduce_drg(
+                model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
+                conditions, np.array([1.066766136745876281e+00]),
+                previous_model=None, threshold_upper=0.6, num_threads=1, path=temp_dir
+                )
+        
+        expected_species = [
+            'H2', 'H', 'O', 'O2', 'OH', 'H2O', 'HO2', 'H2O2', 'C', 'CH', 'CH2', 'CH2(S)', 
+            'CH3', 'CH4', 'CO', 'CO2', 'HCO', 'CH2O', 'CH2OH', 'CH3O', 'C2H2', 'C2H3',
+            'C2H4', 'C2H5', 'C2H6', 'HCCO', 'CH2CO', 'N', 'NH', 'NNH', 'NO', 'N2O',
+            'HNO', 'CN', 'HCN', 'H2CN', 'HCNN', 'NCO', 'N2', 'CH2CHO'
+            ]
+        expected_limbo_species = ['H', 'CH3', 'CH4', 'OH', 'HO2', 'O', 'H2O', 'O2']
+        assert check_equal(reduced_model.model.species_names, expected_species)
+        assert check_equal(reduced_model.limbo_species, expected_limbo_species)
 
 
 class TestRunDRG:
