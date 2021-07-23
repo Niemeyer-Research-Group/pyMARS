@@ -40,6 +40,7 @@ jobs:
         activate-environment: env
         python-version: ${{ matrix.python-version }}
     - name: Test with pytest
+      shell: bash -l {0}
       run: pytest -vv --cov=./
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
