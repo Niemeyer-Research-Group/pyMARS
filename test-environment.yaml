@@ -8,6 +8,7 @@ dependencies:
   - numpy>=1.13.1
   - cantera>=2.5.1
   - networkx
+  - blosc=1.20.0
   - pytables
   - ruamel_yaml
   - pytest>=3.2.0
