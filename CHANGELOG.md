@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed bug in soln2ck.py where the reaction high rate was being used instead of the reaction low rate.
+- Fixed issue #12 from git: made sure input species are included in target or retained species
 
 ## [1.1.0] - 2019-09-06
 
