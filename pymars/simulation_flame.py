@@ -94,7 +94,7 @@ class FlameSimulation(object):
         Returns
         -------
         self. : float
-            Computed ignition delay in seconds
+            Computed flame speed in m/s
         """
 
         if restart and os.path.isfile(self.save_file):
@@ -150,7 +150,6 @@ class FlameSimulation(object):
         temperature_diff = temperature_max - temperature_initial 
 
         sampled_data = np.zeros((len(deltas), 2 + mass_fractions.shape[0]))
-
         #processing to get the 20 data points here
         idx = 0
         for temp, pres in zip(
@@ -164,14 +163,5 @@ class FlameSimulation(object):
                 idx += 1
                 if idx == 20:
                     self.sampled_data = sampled_data
-                    return flame_speed, sampled_data
-        #processing to get 20 data points for additional parameters with different sizes? 
-
-    def clean(self):
-        """Delete HDF5 file with full integration data.
-        """
-        try:
-            os.remove(self.save_file)
-        except OSError:
-            pass        
+                    return flame_speed, sampled_data  
     

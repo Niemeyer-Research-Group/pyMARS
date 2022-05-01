@@ -398,16 +398,6 @@ class TestReducePFA:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
-        flame_conditions = [
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-        ]
 
         data = np.genfromtxt(
             relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
@@ -422,7 +412,7 @@ class TestReducePFA:
         with TemporaryDirectory() as temp_dir:
             reduced_model = reduce_pfa(
                 model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
-                ignition_conditions, flame_conditions, np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
+                np.array([1.066766136745876281e+00, 4.334773545084597696e-02]), ignition_conditions=ignition_conditions,
                 previous_model=None, threshold_upper=None, num_threads=1, path=temp_dir
                 )
         
@@ -453,16 +443,7 @@ class TestRunPFA:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
-        flame_conditions = [
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-        ]
+        
         data_files['output_ignition'] = relative_location(
             os.path.join('assets', 'example_ignition_output.txt')
             )
@@ -474,7 +455,7 @@ class TestRunPFA:
         # Run PFA
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_pfa(
-                model_file, ignition_conditions, [], [], error, flame_conditions,  ['CH4', 'O2'], ['N2'], 
+                model_file, error,  ['CH4', 'O2'], ['N2'], ignition_conditions=ignition_conditions,
                 num_threads=1, path=temp_dir
                 )
 

@@ -117,7 +117,7 @@ def trim_drg(matrix, species_names, species_targets, threshold):
 
 
 def reduce_drg(model_file, species_targets, species_safe, threshold, 
-               matrices, sampled_metrics, ignition_conditions, psr_conditions=[], flame_conditions=[], 
+               matrices, sampled_metrics, ignition_conditions=[], psr_conditions=[], flame_conditions=[], 
                phase_name='', previous_model=None, threshold_upper=None, 
                num_threads=1, path=''
                ):
@@ -137,7 +137,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         List of DRG adjacency matrices determined from thermochemical state data
     ignition_conditions : list of InputIgnition
         List of autoignition initial conditions.
-    flame_conditions : list of InputLaminarFlame, optional 
+    flame_conditions : list of InputLaminarFlame 
         List of laminar flame speed initial conditions
     ignition_sampled_metrics: numpy.ndarray
         Metrics from original model used to evaluate error of ignition delay
@@ -189,7 +189,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         )
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, flame_conditions = flame_conditions, phase_name=phase_name, 
+        reduced_model_filename, ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, 
         num_threads=num_threads, path=path
         )
     
@@ -212,7 +212,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
 
 
 def run_drg(model_file, error_limit, species_targets, species_safe, 
-            ignition_conditions, psr_conditions=[], flame_conditions=[], phase_name='',
+            ignition_conditions=[], psr_conditions=[], flame_conditions=[], phase_name='',
             threshold_upper=None, num_threads=1, path=''
             ):
     """Main function for running DRG reduction.
@@ -225,7 +225,7 @@ def run_drg(model_file, error_limit, species_targets, species_safe,
         List of autoignition initial conditions.
     psr_conditions : list of InputPSR, optional
         List of PSR simulation conditions.
-    flame_conditions : list of InputLaminarFlame, optional
+    flame_conditions : list of InputLaminarFlame
         List of laminar flame simulation conditions.
     error_limit : float
         Maximum allowable error level for reduced model
@@ -259,8 +259,9 @@ def run_drg(model_file, error_limit, species_targets, species_safe,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
+
     sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, flame_conditions = flame_conditions, phase_name=phase_name, num_threads=num_threads, path=path
+        model_file, ignition_conditions=ignition_conditions, flame_conditions = flame_conditions, phase_name=phase_name, num_threads=num_threads, path=path
         )
 
     matrices = []
@@ -282,7 +283,7 @@ def run_drg(model_file, error_limit, species_targets, species_safe,
     while error_current <= error_limit:
         reduced_model = reduce_drg(
             model_file, species_targets, species_safe, threshold, matrices, sampled_metrics,
-            ignition_conditions, flame_conditions=flame_conditions, 
+            ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, 
             phase_name=phase_name, previous_model=previous_model, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
@@ -319,7 +320,7 @@ def run_drg(model_file, error_limit, species_targets, species_safe,
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drg(
             model_file, species_targets, species_safe, threshold, matrices, sampled_metrics,
-            ignition_conditions, flame_conditions=flame_conditions,  phase_name=phase_name,
+            ignition_conditions=ignition_conditions, flame_conditions=flame_conditions,  phase_name=phase_name,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:

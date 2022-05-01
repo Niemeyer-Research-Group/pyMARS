@@ -76,16 +76,7 @@ class TestRunSA:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
-        flame_conditions = [
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-        ]
+
         data_files['output_ignition'] = relative_location(
             os.path.join('assets', 'example_ignition_output.txt')
             )
@@ -101,7 +92,7 @@ class TestRunSA:
         # try using initial SA method
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_sa(
-                starting_model, 3.22, ignition_conditions, flame_conditions, [], [], 5.0, ['N2'], 
+                starting_model, 3.22,  5.0, ['N2'], ignition_conditions=ignition_conditions,
                 algorithm_type='initial', species_limbo=limbo_species[:], num_threads=1, 
                 path=temp_dir
                 )
@@ -114,7 +105,7 @@ class TestRunSA:
         # try using greedy SA method
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_sa(
-                starting_model, 3.22, ignition_conditions, flame_conditions, [], [], 5.0, ['N2'], 
+                starting_model, 3.22, 5.0, ['N2'], ignition_conditions=ignition_conditions, 
                 algorithm_type='greedy', species_limbo=limbo_species[:], num_threads=1, 
                 path=temp_dir
                 )

@@ -524,18 +524,6 @@ class TestReduceDRG:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
-        flame_conditions = [
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-        ]
-
-        
         data = np.genfromtxt(
             relative_location(os.path.join('assets', 'example_ignition_data.dat')), 
             delimiter=','
@@ -549,7 +537,7 @@ class TestReduceDRG:
         with TemporaryDirectory() as temp_dir:
             reduced_model = reduce_drg(
                 model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices,  np.array([1.066766136745876281e+00, 4.334773545084597696e-02]),
-                ignition_conditions, flame_conditions=flame_conditions,
+                ignition_conditions,
                 previous_model=None, threshold_upper=None, num_threads=1, path=temp_dir
                 )
         
@@ -562,6 +550,55 @@ class TestReduceDRG:
         assert check_equal(reduced_model.model.species_names, expected_species)
         assert reduced_model.model.n_reactions == 245
         assert round(reduced_model.error, 2) == 3.64
+
+
+    def test_gri_reductionflameonly(self):
+        """Tests reduce_drg method with only flame inputs"""
+        model_file = 'gri30.cti'
+        
+        flame_conditions = [InputLaminarFlame(
+                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}, width=0.01
+                ),
+            InputLaminarFlame(
+                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}, width=0.01
+                ),
+            ]
+
+        """data = np.genfromtxt(
+            relative_location(os.path.join('assets', 'example_flame_data.dat')), 
+            delimiter=','
+            )
+        """
+        data_files['output_flame'] = relative_location(
+            os.path.join('assets', 'example_flame_output.txt')
+            )
+        data_files['data_flame'] = relative_location(
+            os.path.join('assets', 'example_flame_data.dat')
+            )
+
+        error = 5.0
+
+        # Run DRG
+        with TemporaryDirectory() as temp_dir:
+            reduced_model = run_drg(
+                model_file, error, ['CH4', 'O2'], ['N2'], flame_conditions=flame_conditions,
+                num_threads=1, path=temp_dir
+                )
+
+        # Expected answer
+        expected_model = ct.Solution(relative_location(os.path.join('assets', 'drg_gri30.cti')))
+        expected_species = [
+                'H2', 'H', 'O', 'O2', 'OH', 'H2O', 'HO2', 'H2O2', 'CH2', 'CH2(S)', 
+                'CH3', 'CH4', 'CO', 'CO2', 'HCO', 'CH2O', 'CH3O', 'C2H2', 
+                'C2H3', 'C2H4', 'C2H5', 'C2H6', 'CH2CO', 'NNH', 'N2O', 'N2', 'CH2CHO'
+                ]
+             
+        # Make sure models are the same
+        assert check_equal(reduced_model.model.species_names, expected_species)
+        assert reduced_model.model.n_reactions == 142
+        assert round(reduced_model.error, 2) == 2.73
 
     def test_gri_reduction_limbo(self):
         """Tests reduce_drg method with limbo species"""
@@ -588,7 +625,7 @@ class TestReduceDRG:
         with TemporaryDirectory() as temp_dir:
             reduced_model = reduce_drg(
                 model_file, ['CH4', 'O2'], ['N2'], 0.14, matrices, 
-                conditions, np.array([1.066766136745876281e+00]),
+                np.array([1.066766136745876281e+00]), ignition_conditions=conditions,
                 previous_model=None, threshold_upper=0.6, num_threads=1, path=temp_dir
                 )
         
@@ -619,16 +656,6 @@ class TestRunDRG:
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
         ]
-        flame_conditions = [
-            InputLaminarFlame(
-                kind='constant volume', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-            InputLaminarFlame(
-                kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-        ]
 
         data_files['output_ignition'] = relative_location(
             os.path.join('assets', 'example_ignition_output.txt')
@@ -641,7 +668,7 @@ class TestRunDRG:
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drg(
-                model_file, error, ['CH4', 'O2'], ['N2'], ignition_conditions, flame_conditions=flame_conditions,
+                model_file, error, ['CH4', 'O2'], ['N2'], ignition_conditions=ignition_conditions,
                 num_threads=1, path=temp_dir
                 )
 

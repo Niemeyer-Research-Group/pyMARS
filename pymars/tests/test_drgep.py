@@ -690,17 +690,8 @@ class TestRunDRGEP:
                 kind='constant volume', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
                 fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
                 ),
-        ]
-        flame_conditions = [
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-            InputLaminarFlame(
-                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
-                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}
-                ),
-        ]
+                ]
+
         data_files['output_ignition'] = relative_location(
             os.path.join('assets', 'example_ignition_output.txt')
             )
@@ -712,7 +703,7 @@ class TestRunDRGEP:
         # Run DRG
         with TemporaryDirectory() as temp_dir:
             reduced_model = run_drgep(
-                model_file, error, ['CH4', 'O2'], ['N2'], ignition_conditions, flame_conditions=flame_conditions,
+                model_file, error, ['CH4', 'O2'], ['N2'], ignition_conditions,
                 num_threads=1, path=temp_dir
                 )
 
@@ -723,3 +714,41 @@ class TestRunDRGEP:
         assert check_equal(reduced_model.model.species_names, expected_model.species_names)
         assert reduced_model.model.n_reactions == expected_model.n_reactions
         assert round(reduced_model.error, 2) == 3.22
+    
+    def test_dri_reductionflame(self):
+        """Tests driver run_drgep method with only flame input data"""
+        model_file = 'gri30.cti'
+
+        flame_conditions = [
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1000.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}, width=0.01
+                ),
+            InputLaminarFlame(
+                kind='constant pressure', pressure=1.0, temperature=1200.0, equivalence_ratio=1.0,
+                fuel={'CH4': 1.0}, oxidizer={'O2': 1.0, 'N2': 3.76}, width=0.1
+                ),
+        ]
+        
+        data_files['output_flame'] = relative_location(
+            os.path.join('assets', 'example_flame_output.txt')
+            )
+        data_files['data_flame'] = relative_location(
+            os.path.join('assets', 'example_flame_data.dat')
+            )
+        error = 5.0
+
+        # Run DRG
+        with TemporaryDirectory() as temp_dir:
+            reduced_model = run_drgep(
+                model_file, error, ['CH4', 'O2'], ['N2'],  flame_conditions=flame_conditions,
+                num_threads=1, path=temp_dir
+                )
+
+        # Expected answer
+        expected_model = ct.Solution(relative_location(os.path.join('assets', 'drgep_gri30.cti')))
+        
+        # Make sure models are the same
+        #assert check_equal(reduced_model.model.species_names, expected_model.species_names)
+        #assert reduced_model.model.n_reactions == expected_model.n_reactions
+        #assert round(reduced_model.error, 2) == 3.22

@@ -161,6 +161,8 @@ def reduce_pfa(model_file, species_targets, species_safe, threshold,
         List of PFA adjacency matrices determined from thermochemical state data
     ignition_conditions : list of InputIgnition
         List of autoignition initial conditions.
+    flame_conditions : list of InputLaminarFlame
+        List of laminar flame speed initial conditions
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
     phase_name : str, optional
@@ -231,7 +233,7 @@ def reduce_pfa(model_file, species_targets, species_safe, threshold,
         )
 
 
-def run_pfa(model_file, ignition_conditions, error_limit, species_targets, species_safe, psr_conditions=[], flame_conditions=[], 
+def run_pfa(model_file, error_limit, species_targets, species_safe, ignition_conditions=[], psr_conditions=[], flame_conditions=[], 
             phase_name='',
             threshold_upper=None, num_threads=1, path=''
             ):
@@ -303,7 +305,7 @@ def run_pfa(model_file, ignition_conditions, error_limit, species_targets, speci
     while error_current <= error_limit:
         reduced_model = reduce_pfa(
             model_file, species_targets, species_safe, threshold, matrices, sampled_metrics,
-            ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, 
+            ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, 
             previous_model=previous_model, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
@@ -340,7 +342,7 @@ def run_pfa(model_file, ignition_conditions, error_limit, species_targets, speci
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_pfa(
             model_file, species_targets, species_safe, threshold, matrices, sampled_metrics, 
-            ignition_conditions, flame_conditions, phase_name=phase_name,
+            ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:

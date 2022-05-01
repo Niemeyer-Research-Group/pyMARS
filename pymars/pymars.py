@@ -27,8 +27,8 @@ class ReductionInputs(NamedTuple):
     model: str
     error: float
     ignition_conditions: List[InputIgnition]
-    psr_conditions: List[InputPSR]
     flame_conditions: List[InputLaminarFlame]
+    psr_conditions: List[InputPSR]
     method: str
     target_species: List[str]
     safe_species: List[str] = []
@@ -97,8 +97,6 @@ def parse_inputs(input_dict):
         assert sp in gas.species_names, f'Specified retained species {sp} not in model'
     
     ignition_conditions = input_dict.get('autoignition-conditions', {})
-    #assert ignition_conditions, 'autoignition-conditions need to be specified'
-
     psr_conditions = input_dict.get('psr-conditions', {})
     flame_conditions = input_dict.get('flame-conditions', {})
     #no assert because not required
@@ -114,7 +112,7 @@ def parse_inputs(input_dict):
     return ReductionInputs(
         model=model, error=error, 
         ignition_conditions=ignition_inputs, 
-        psr_conditions=psr_inputs, flame_conditions=flame_inputs,
+        flame_conditions=flame_inputs, psr_conditions=psr_inputs,
         method=method, target_species=target_species, safe_species=safe_species,
         sensitivity_analysis=sensitivity_analysis, upper_threshold=upper_threshold,
         sensitivity_type=sensitivity_type, phase_name=phase_name
@@ -122,7 +120,7 @@ def parse_inputs(input_dict):
 
 
 def main(model_file, error_limit, 
-         ignition_conditions, psr_conditions=[], flame_conditions=[],
+         ignition_conditions=[], flame_conditions=[], psr_conditions=[],
          method=None, target_species=[], safe_species=[], phase_name='',
          run_sensitivity_analysis=False, upper_threshold=None, sensitivity_type='greedy',
          path='', num_threads=1
@@ -178,19 +176,19 @@ def main(model_file, error_limit,
     
     if method == 'DRG':
         reduced_model = run_drg(
-            model_file, error_limit, target_species, safe_species, ignition_conditions, psr_conditions=psr_conditions, flame_conditions=flame_conditions,
+            model_file, error_limit, target_species, safe_species, ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, psr_conditions=[],
             phase_name=phase_name,
             threshold_upper=upper_threshold, num_threads=num_threads, path=path
             )    
     elif method == 'DRGEP':
         reduced_model = run_drgep(
-            model_file, error_limit, target_species, safe_species, ignition_conditions, psr_conditions=psr_conditions, flame_conditions=flame_conditions, 
+            model_file, error_limit, target_species, safe_species, ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, psr_conditions=[],
             phase_name=phase_name,
             threshold_upper=upper_threshold, num_threads=num_threads, path=path
             )
     elif method == 'PFA':
         reduced_model = run_pfa(
-            model_file, error_limit, target_species, safe_species, ignition_conditions, psr_conditions=psr_conditions, flame_conditions=flame_conditions,
+            model_file, error_limit, target_species, safe_species, ignition_conditions=ignition_conditions, flame_conditions=flame_conditions, psr_conditions=[],
             phase_name=phase_name,
             num_threads=num_threads, path=path
             )
@@ -207,7 +205,7 @@ def main(model_file, error_limit,
             sensitivity_type = 'greedy'
 
         reduced_model = run_sa(
-            model_file, error, error_limit, target_species + safe_species, ignition_conditions, psr_conditions=[], flame_conditions=flame_conditions, 
+            model_file, error, error_limit, target_species + safe_species, ignition_conditions, flame_conditions, psr_conditions=[],
             phase_name=phase_name, algorithm_type=sensitivity_type, species_limbo=limbo_species, 
             num_threads=num_threads, path=path
             )
@@ -313,7 +311,7 @@ def pymars(argv):
 
         main(
             inputs.model, inputs.error, 
-            inputs.ignition_conditions, inputs.psr_conditions, inputs.flame_conditions,
+            inputs.ignition_conditions, inputs.flame_conditions, inputs.psr_conditions,
             method=inputs.method, target_species=inputs.target_species,
             safe_species=inputs.safe_species, phase_name=inputs.phase_name,
             run_sensitivity_analysis=inputs.sensitivity_analysis, 
