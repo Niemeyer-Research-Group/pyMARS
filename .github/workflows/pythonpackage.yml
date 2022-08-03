@@ -79,7 +79,7 @@ jobs:
 
       - name: Install sphinx and dependencies
         run: |
-        conda install -q sphinx nbsphinx ipython sphinxcontrib-bibtex
+          conda install -q sphinx nbsphinx ipython sphinxcontrib-bibtex
 
       - run: mkdocs build
 
