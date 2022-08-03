@@ -63,10 +63,10 @@ napoleon_numpy_docstring = True
 napoleon_google_docstring = False
 
 intersphinx_mapping = {
-  'python': ('https://docs.python.org/3.6', None),
+  'python': ('https://docs.python.org/3.10', None),
   'numpy': ('https://docs.scipy.org/doc/numpy/', None),
   'networkx': ('https://networkx.github.io/documentation/stable/', None),
-  'cantera': ('https://cantera.org/documentation/docs-2.4/sphinx/html/', None),
+  'cantera': ('https://cantera.org/documentation/docs-2.6/sphinx/html/', None),
   #'pytables': ('http://www.pytables.org/usersguide/libref/', None)
 }
 

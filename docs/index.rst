@@ -29,6 +29,11 @@ pyMARS currently supports four methods for skeletal model reduction:
  3. Path flux analysis (PFA)
  4. Sensitivity analysis (SA)
 
+Citation
+--------
+
+If you use pyMARS, please cite it in any resulting publications. Thank you!
+
 
 User's Guide
 ------------
