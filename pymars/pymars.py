@@ -111,6 +111,13 @@ def parse_inputs(input_dict):
     psr_inputs = parse_psr_inputs(model, psr_conditions, phase_name)
     flame_inputs = parse_flame_inputs(model, flame_conditions, phase_name)
 
+    # check all input species included in target or retained species
+    combined_species = target_species + safe_species
+    for case in  ignition_conditions:
+        for inputs in list(case['fuel'].keys()) + list(case['oxidizer'].keys()):
+            if inputs not in combined_species:
+                safe_species.append(inputs)
+
     return ReductionInputs(
         model=model, error=error, 
         ignition_conditions=ignition_inputs, 

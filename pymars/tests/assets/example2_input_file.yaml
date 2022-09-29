@@ -1,0 +1,46 @@
+model: gri30.cti
+# List of target species
+targets: 
+  - CH4
+  - O2
+# List of species to be always retained
+retained-species:
+  - N2
+# options: DRG, DRGEP, PFA
+method: DRG
+# Error limit, in percentage
+error: 10.0
+
+# Sensitivity analysis inputs
+# True to enable sensitivity analysis
+sensitivity-analysis: False
+# options: initial, greedy
+sensitivity-type: initial
+upper-threshold: 0.2
+
+autoignition-conditions:
+  - kind: constant volume
+    # units: atm
+    pressure: 1.0
+    # units: K
+    temperature: 1000
+    # species given in mole fractions
+    fuel: 
+      CH4: 0.5
+      H2: 0.5
+      AR: 0.5
+    oxidizer:
+      O2: 1.0
+      N2: 3.76
+    equivalence-ratio: 1.0
+
+  - kind: constant volume 
+    pressure: 1.0
+    temperature: 1200
+    end-time: 10.0
+    fuel: 
+      CH4: 1.0
+    oxidizer:
+      O2: 1.0
+      N2: 3.76
+    equivalence-ratio: 0.5
