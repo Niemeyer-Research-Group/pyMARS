@@ -27,10 +27,10 @@ class Simulation(object):
     model : str
         Filename for Cantera-format model to be used
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas'). 
+        Optional name for phase to load from CTI file (e.g., 'gas').
     path : str, optional
         Path for location of output files
-        
+
     """
     def __init__(self, idx, properties, model, phase_name='', path=''):
         self.idx = idx
@@ -55,7 +55,7 @@ class Simulation(object):
         self.time_end = 0.0
         if self.properties.end_time:
             self.time_end = self.properties.end_time
-    
+
         self.gas.TP = (
             self.properties.temperature, self.properties.pressure * ct.one_atm
             )
@@ -69,23 +69,23 @@ class Simulation(object):
         else:
             if self.properties.composition_type == 'mole':
                 self.gas.TPX = (
-                    self.properties.temperature, self.properties.pressure * ct.one_atm, 
+                    self.properties.temperature, self.properties.pressure * ct.one_atm,
                     self.properties.reactants
                     )
             else:
                 self.gas.TPY = (
-                    self.properties.temperature, self.properties.pressure * ct.one_atm, 
+                    self.properties.temperature, self.properties.pressure * ct.one_atm,
                     self.properties.reactants
                     )
 
         if self.properties.kind == 'constant pressure':
-            self.reac = ct.IdealGasConstPressureReactor(self.gas)
+            self.reac = ct.IdealGasConstPressureMoleReactor(self.gas)
         else:
-            self.reac = ct.IdealGasReactor(self.gas)
+            self.reac = ct.IdealGasMoleReactor(self.gas)
 
         # Create ``ReactorNet`` newtork
         self.sim = ct.ReactorNet([self.reac])
-
+        self.sim.preconditioner = ct.AdaptivePreconditioner()
         # Set file for later data file
         self.save_file = os.path.join(self.path, str(self.idx) + '.h5')
         self.sample_points = []
@@ -107,7 +107,7 @@ class Simulation(object):
             If ``True``, stop integration at ignition point, don't save data.
         restart : bool
             If ``True``, skip if results file exists.
-        
+
         Returns
         -------
         self.ignition_delay : float
@@ -169,7 +169,7 @@ class Simulation(object):
 
                     # Add ``timestep`` to table
                     timestep.append()
-                
+
             else:
                 # otherwise, integrate until steady state, or maximum number of steps reached
                 self.sim.reinitialize()
@@ -206,7 +206,7 @@ class Simulation(object):
 
                     if residual < residual_threshold:
                         break
-                
+
                 if step == self.max_steps - 1:
                     logging.error(
                         'Maximum number of steps reached before '
@@ -228,7 +228,7 @@ class Simulation(object):
 
     def calculate_ignition(self):
         """Run simulation case set up ``setup_case``, just for ignition delay.
-        """        
+        """
         # Main time integration loop
         if self.time_end:
             # if end time specified, continue integration until reaching that time
@@ -286,7 +286,7 @@ class Simulation(object):
 
         temperature_initial = temperatures[0]
         temperature_max = temperatures[len(temperatures)-1]
-        temperature_diff = temperature_max - temperature_initial 
+        temperature_diff = temperature_max - temperature_initial
 
         sampled_data = np.zeros((len(deltas), 2 + mass_fractions.shape[1]))
 
@@ -302,7 +302,7 @@ class Simulation(object):
                     ignition_flag = True
                     if skip_data:
                         return self.ignition_delay
-            
+
             if temp >= temperature_initial + (deltas[idx] * temperature_diff):
                 sampled_data[idx, 0:2] = [temp, pres]
                 sampled_data[idx, 2:] = mass

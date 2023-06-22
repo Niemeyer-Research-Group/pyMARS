@@ -11,7 +11,7 @@ class ReducedModel(NamedTuple):
     filename: str = ''
     error: float = 0.0
     limbo_species: list = []
-    
+
 
 def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     """Function to eliminate species and corresponding reactions from model
@@ -25,7 +25,7 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     new_model_file : str
         Name of new reduced model file
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas'). 
+        Optional name for phase to load from CTI file (e.g., 'gas').
 
     Returns
     -------
@@ -43,8 +43,8 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     final_reactions = []
     for reaction in solution.reactions():
         # remove reactions with an explicit third body that has been removed
-        if hasattr(reaction, 'efficiencies') and not getattr(reaction, 'default_efficiency', 1.0):
-            if (len(reaction.efficiencies) == 1 and 
+        if reaction.third_body is not None:
+            if (len(reaction.efficiencies) == 1 and
                 list(reaction.efficiencies.keys())[0] in exclusion_list
                 ):
                 continue
@@ -52,9 +52,9 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
         reaction_species = list(reaction.products.keys()) + list(reaction.reactants.keys())
         if all([sp in final_species_names for sp in reaction_species]):
             # remove any eliminated species from third-body efficiencies
-            if hasattr(reaction, 'efficiencies'):
+            if reaction.third_body is not None:
                 reaction.efficiencies = {
-                    sp:val for sp, val in reaction.efficiencies.items() 
+                    sp:val for sp, val in reaction.efficiencies.items()
                     if sp in final_species_names
                     }
             final_reactions.append(reaction)

@@ -29,9 +29,9 @@ def create_drg_matrix(state, solution):
     temp, pressure, mass_fractions = state
     solution.TPY = temp, pressure, mass_fractions
 
-    net_stoich = solution.product_stoich_coeffs() - solution.reactant_stoich_coeffs()
-    flags = np.where(((solution.product_stoich_coeffs() != 0) |
-                        (solution.reactant_stoich_coeffs() !=0 )
+    net_stoich = solution.product_stoich_coeffs - solution.reactant_stoich_coeffs
+    flags = np.where(((solution.product_stoich_coeffs != 0) |
+                        (solution.reactant_stoich_coeffs !=0 )
                         ), 1, 0)
 
     # only consider contributions from reactions with nonzero net rates of progress
@@ -101,7 +101,7 @@ def trim_drg(matrix, species_names, species_targets, threshold):
         List of target species names
     threshold : float
         DRG threshold for trimming graph
-    
+
     Returns
     ------
     species_reached : list of str
@@ -116,9 +116,9 @@ def trim_drg(matrix, species_names, species_targets, threshold):
     return species_reached
 
 
-def reduce_drg(model_file, species_targets, species_safe, threshold, 
-               matrices, ignition_conditions, sampled_metrics, 
-               phase_name='', previous_model=None, threshold_upper=None, 
+def reduce_drg(model_file, species_targets, species_safe, threshold,
+               matrices, ignition_conditions, sampled_metrics,
+               phase_name='', previous_model=None, threshold_upper=None,
                num_threads=1, path=''
                ):
     """Given a threshold and DRG matrix, reduce the model and determine the error.
@@ -140,7 +140,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas'). 
+        Optional name for phase to load from CTI file (e.g., 'gas').
     previous_model : ReducedModel, optional
         Model produced at previous threshold level; used to avoid repeated work.
     threshold_upper : float, optional
@@ -165,7 +165,7 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
     species_retained = []
     for matrix in matrices:
         species_retained += trim_drg(matrix, solution.species_names, species_targets, threshold)
-    
+
     # want to ensure retained species are the set of those reachable for each state
     species_retained = list(set(species_retained))
 
@@ -185,11 +185,11 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         )
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, phase_name=phase_name, 
+        reduced_model_filename, ignition_conditions, phase_name=phase_name,
         num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
-    
+
     # If desired, now identify limbo species for future sensitivity analysis
     limbo_species = []
     if threshold_upper:
@@ -201,12 +201,12 @@ def reduce_drg(model_file, species_targets, species_safe, threshold,
         limbo_species = list(set(species_retained))
 
     return ReducedModel(
-        model=reduced_model, filename=reduced_model_filename, 
+        model=reduced_model, filename=reduced_model_filename,
         error=error, limbo_species=limbo_species
         )
 
 
-def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions, 
+def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
             error_limit, species_targets, species_safe, phase_name='',
             threshold_upper=None, num_threads=1, path=''
             ):
@@ -229,7 +229,7 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
     species_safe : list of str
         List of species names to always be retained
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas'). 
+        Optional name for phase to load from CTI file (e.g., 'gas').
     threshold_upper: float, optional
         Upper threshold (epsilon^*) to identify limbo species for sensitivity analysis
     num_threads : int, optional
@@ -275,9 +275,9 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drg(
-            model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, sampled_metrics, 
-            phase_name=phase_name, previous_model=previous_model, 
+            model_file, species_targets, species_safe, threshold, matrices,
+            ignition_conditions, sampled_metrics,
+            phase_name=phase_name, previous_model=previous_model,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
@@ -294,7 +294,7 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
                     )
             logging.info('Threshold value too high, reducing by factor of 10')
             continue
-        
+
         logging.info(f'{threshold:^9.2e} | {num_species:^17} | {error_current:^.2f}')
 
         threshold += threshold_increment
@@ -303,22 +303,22 @@ def run_drg(model_file, ignition_conditions, psr_conditions, flame_conditions,
         # cleanup files
         if previous_model.model.n_species != reduced_model.model.n_species:
             os.remove(reduced_model.filename)
-        
+
         previous_model = ReducedModel(
-            model=reduced_model.model, filename=reduced_model.filename, 
+            model=reduced_model.model, filename=reduced_model.filename,
             error=reduced_model.error, limbo_species=reduced_model.limbo_species
             )
-    
+
     if error_current > error_limit:
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drg(
-            model_file, species_targets, species_safe, threshold, matrices, 
+            model_file, species_targets, species_safe, threshold, matrices,
             ignition_conditions, sampled_metrics, phase_name=phase_name,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:
         soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
-    
+
     logging.info(45 * '-')
     logging.info('DRG reduction complete.')
     logging.info(f'Skeletal model: {reduced_model.model.n_species} species and '
