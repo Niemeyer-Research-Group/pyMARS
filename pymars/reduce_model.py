@@ -11,9 +11,10 @@ class ReducedModel(NamedTuple):
     filename: str = ''
     error: float = 0.0
     limbo_species: list = []
+    path: str = ''
     
 
-def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
+def trim(initial_model_file, exclusion_list, new_model_file, phase_name='', path=''):
     """Function to eliminate species and corresponding reactions from model
 
     Parameters
@@ -33,7 +34,7 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
         Model with species and associated reactions eliminated
 
     """
-    solution = ct.Solution(initial_model_file, phase_name)
+    solution = ct.Solution(os.path.join(path,initial_model_file), phase_name)
 
     # Remove species if in list to be removed
     final_species = [sp for sp in solution.species() if sp.name not in exclusion_list]
@@ -43,7 +44,11 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     final_reactions = []
     for reaction in solution.reactions():
         # remove reactions with an explicit third body that has been removed
-        if hasattr(reaction, 'efficiencies') and not getattr(reaction, 'default_efficiency', 1.0):
+        try:
+            effs = reaction.efficiencies
+        except ValueError:
+            effs = {}
+        if effs and not getattr(reaction, 'default_efficiency', 1.0):
             if (len(reaction.efficiencies) == 1 and 
                 list(reaction.efficiencies.keys())[0] in exclusion_list
                 ):
@@ -52,7 +57,7 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
         reaction_species = list(reaction.products.keys()) + list(reaction.reactants.keys())
         if all([sp in final_species_names for sp in reaction_species]):
             # remove any eliminated species from third-body efficiencies
-            if hasattr(reaction, 'efficiencies'):
+            if effs:
                 reaction.efficiencies = {
                     sp:val for sp, val in reaction.efficiencies.items() 
                     if sp in final_species_names

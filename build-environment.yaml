@@ -8,7 +8,7 @@ dependencies:
   - cantera>=2.3.0
   - networkx
   - pytables
-  - pyyaml>=4.2b1
+  - ruamel.yaml>=0.17.0
   - sphinx
   - sphinxcontrib-bibtex
   - nbsphinx

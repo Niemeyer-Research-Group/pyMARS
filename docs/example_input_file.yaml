@@ -1,4 +1,4 @@
-model: gri30.cti
+model: gri30.yaml
 # List of target species
 targets: 
   - CH4

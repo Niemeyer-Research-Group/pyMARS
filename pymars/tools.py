@@ -6,7 +6,6 @@ import logging
 
 import numpy as np
 import cantera as ct
-from cantera import ck2cti
 
 from . import soln2ck
 
@@ -224,22 +223,10 @@ def convert(model_file, thermo_file=None, transport_file=None, path=''):
         converted_files = soln2ck.write(solution, basename + '.inp', path=path)
         return converted_files
     else:
-        # Convert from Chemkin to Cantera format.
+        # Chemkin to Cantera format.
         logging.info('Converter detected Chemkin input model: ' + model_file)
-        logging.info('Converting to Cantera format.')
+        logging.info('You must convert Chemkin to YAML using ck2yaml BEFORE using pymars.')
 
-        converted_file = os.path.join(path, basename + '.cti')
-
-        # calls ck2cti based on given files
-        args = [f'--input={model_file}']
-        if thermo_file:
-            args.append(f'--thermo={thermo_file}')
-        if transport_file:
-            args.append(f'--transport={transport_file}')
-        args.append(f'--output={converted_file}')
-        
-        # generally Chemkin files have issues (redundant species, etc.) that require this argument
-        args.append('--permissive')
-
-        ck2cti.main(args)
-        return converted_file
+        raise ValueError(
+            "Please run 'ck2yaml' manually to create a .yaml mechanism before using pymars."
+        )

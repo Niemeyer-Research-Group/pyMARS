@@ -10,7 +10,6 @@ import numpy as np
 import networkx
 import cantera as ct
 
-from . import soln2cti
 from .sampling import sample, sample_metrics, calculate_error
 from .reduce_model import trim, ReducedModel
 
@@ -171,9 +170,9 @@ def create_drgep_matrix(state, solution):
     temp, pressure, mass_fractions = state
     solution.TPY = temp, pressure, mass_fractions
 
-    net_stoich = solution.product_stoich_coeffs() - solution.reactant_stoich_coeffs()
-    flags = np.where(((solution.product_stoich_coeffs() != 0) |
-                        (solution.reactant_stoich_coeffs() !=0 )
+    net_stoich = solution.product_stoich_coeffs - solution.reactant_stoich_coeffs
+    flags = np.where(((solution.product_stoich_coeffs != 0) |
+                        (solution.reactant_stoich_coeffs !=0 )
                         ), 1, 0)
 
     # only consider contributions from reactions with nonzero net rates of progress
@@ -322,9 +321,8 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
     reduced_model = trim(
         model_file, species_removed, f'reduced_{model_file}', phase_name=phase_name
         )
-    reduced_model_filename = soln2cti.write(
-        reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path
-        )
+    reduced_model_filename = f'reduced_{reduced_model.n_species}.yaml'
+    reduced_model.write_yaml(os.path.join(path,f'reduced_{reduced_model.n_species}.yaml'))
 
     reduced_model_metrics = sample_metrics(
         reduced_model_filename, ignition_conditions, phase_name=phase_name, 
@@ -451,7 +449,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
             sampled_metrics, phase_name=phase_name, num_threads=num_threads, path=path
             )
     else:
-        soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
+        reduced_model.write_yaml(os.path.join(path, f'reduced_{reduced_model.model.n_species}.yaml'))
 
     if threshold_upper:
         for sp in reduced_model.model.species_names:

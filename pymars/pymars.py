@@ -5,13 +5,12 @@ import logging
 from argparse import ArgumentParser
 from typing import List, Dict, NamedTuple
 
-import ruamel_yaml as yaml
+from ruamel.yaml import YAML
 import cantera as ct
 
 # local imports
 from .sampling import sample_metrics, parse_ignition_inputs, parse_psr_inputs, parse_flame_inputs
 from .sampling import InputIgnition, InputPSR, InputLaminarFlame
-from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
 from .pfa import run_pfa
@@ -132,7 +131,7 @@ def main(model_file, error_limit,
     Parameters
     ----------
     model_file : str
-        Cantera-format model to be reduced (e.g., 'mech.cti').
+        Cantera-format model to be reduced (e.g., 'mech.yaml').
     error_limit : float
         Maximum error percentage for the reduced model.
     ignition_conditions : list of InputIgnition
@@ -302,13 +301,14 @@ def pymars(argv):
         if not args.input:
             parser.error('A YAML input file needs to be specified using -i or --input')
 
+        yaml = YAML()
         with open(args.input, 'r') as the_file:
-            input_dict = yaml.safe_load(the_file)
+            input_dict = yaml.load(the_file)
         
         inputs = parse_inputs(input_dict)
 
         # Check for Chemkin format and convert if needed
-        if os.path.splitext(inputs.model)[1] != '.cti':
+        if os.path.splitext(inputs.model)[1] != '.yaml':
             logging.info('Chemkin file detected; converting before reduction.')
             inputs.model = convert(inputs.model, args.thermo, args.transport, args.path)
 

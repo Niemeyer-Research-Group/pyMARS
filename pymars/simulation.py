@@ -42,7 +42,7 @@ class Simulation(object):
     def setup_case(self):
         """Initialize simulation case.
         """
-        self.gas = ct.Solution(self.model, self.phase_name)
+        self.gas = ct.Solution(os.path.join(self.path,self.model), self.phase_name)
 
         # Default maximum number of steps
         self.max_steps = 10000
