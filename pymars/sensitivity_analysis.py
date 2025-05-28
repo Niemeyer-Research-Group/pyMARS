@@ -77,12 +77,12 @@ def evaluate_species_errors(starting_model, ignition_conditions, metrics, specie
                     )
                 species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
             except:
-                species_errors[idx] = 1000 # Set large error if cantera fails
+                species_errors[idx] = 100
     
     return species_errors
 
 
-def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flame_conditions,
+def run_sa(model_file, current_model, ignition_conditions, psr_conditions, flame_conditions,
            error_limit, species_safe, phase_name='', algorithm_type='greedy', species_limbo=[],
            num_threads=1, path=''
            ):
@@ -125,9 +125,6 @@ def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flam
         Return reduced model and associated metadata
 
     """
-    current_model = ReducedModel(
-        model=ct.Solution(model_file, phase_name), error=starting_error, filename=model_file
-        )
     
     logging.info(f'Beginning sensitivity analysis stage, using {algorithm_type} approach.')
 
@@ -154,10 +151,11 @@ def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flam
 
     # Use a temporary directory to avoid cluttering the working directory with
     # all the temporary model files
+    logging.info(f'Species to evaluate: {species_limbo}')
     with TemporaryDirectory() as temp_dir:
         while species_limbo:
-            # use difference between error and current error to find species to remove
-            idx = np.argmin(np.abs(species_errors - current_model.error))
+            # use species errors to the original mechanism
+            idx = np.argmin(np.abs(species_errors))
             species_errors = np.delete(species_errors, idx)
             species_remove = species_limbo.pop(idx)
 

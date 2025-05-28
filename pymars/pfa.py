@@ -140,7 +140,9 @@ def trim_pfa(matrix, species_names, species_targets, threshold):
 
 
 def reduce_pfa(model_file, species_targets, species_safe, threshold, 
-               matrices, ignition_conditions, sampled_metrics, phase_name='',
+               matrices, sampled_metrics, ignition_conditions=[], 
+               psr_conditions=[], flame_conditions=[], 
+               phase_name='',
                previous_model=None, threshold_upper=None, num_threads=1,
                path=''
                ):
@@ -207,7 +209,8 @@ def reduce_pfa(model_file, species_targets, species_safe, threshold,
     reduced_model.write_yaml(os.path.join(path, reduced_model_filename))
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, phase_name=phase_name, 
+        reduced_model_filename, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+        flame_conditions=flame_conditions, phase_name=phase_name, 
         num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
@@ -277,7 +280,7 @@ def run_pfa(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, phase_name=phase_name, 
+        model_file, ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, 
         num_threads=num_threads, path=path
         )
 
@@ -300,7 +303,8 @@ def run_pfa(model_file, ignition_conditions, psr_conditions, flame_conditions,
     while error_current <= error_limit:
         reduced_model = reduce_pfa(
             model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, sampled_metrics, phase_name=phase_name, 
+            sampled_metrics, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+            flame_conditions=flame_conditions, phase_name=phase_name, 
             previous_model=previous_model, 
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
@@ -337,7 +341,8 @@ def run_pfa(model_file, ignition_conditions, psr_conditions, flame_conditions,
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_pfa(
             model_file, species_targets, species_safe, threshold, matrices, 
-            ignition_conditions, sampled_metrics, phase_name=phase_name,
+            sampled_metrics, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+            flame_conditions=flame_conditions, phase_name=phase_name,
             threshold_upper=threshold_upper, num_threads=num_threads, path=path
             )
     else:

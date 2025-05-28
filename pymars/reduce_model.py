@@ -46,7 +46,7 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name='', path
         # remove reactions with an explicit third body that has been removed
         try:
             effs = reaction.efficiencies
-        except ValueError:
+        except:
             effs = {}
         if effs and not getattr(reaction, 'default_efficiency', 1.0):
             if (len(reaction.efficiencies) == 1 and 

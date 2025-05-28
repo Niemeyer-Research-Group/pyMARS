@@ -89,7 +89,7 @@ class TestSimulation:
                 table = h5file.root.simulation
                 temperatures = table.col('temperature')
                 pressures = table.col('pressure')
-                mass_fractions = table.col('mass_fractions')
+                mass_fractions = table.col('mole_fractions')
             
             final_state = np.concatenate((
                 np.array([temperatures[-1], pressures[-1]]), mass_fractions[-1]
@@ -168,7 +168,7 @@ class TestSimulation:
             'time': tables.Float64Col(pos=0),
             'temperature': tables.Float64Col(pos=1),
             'pressure': tables.Float64Col(pos=2),
-            'mass_fractions': tables.Float64Col(pos=3, shape=(2))
+            'mole_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
             sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
@@ -204,7 +204,7 @@ class TestSimulation:
                     timestep['time'] = time
                     timestep['temperature'] = temp
                     timestep['pressure'] = 1.0
-                    timestep['mass_fractions'] = np.ones(2)
+                    timestep['mole_fractions'] = np.ones(2)
                     timestep.append()
                 
                 table.flush()
@@ -226,7 +226,7 @@ class TestSimulation:
             'time': tables.Float64Col(pos=0),
             'temperature': tables.Float64Col(pos=1),
             'pressure': tables.Float64Col(pos=2),
-            'mass_fractions': tables.Float64Col(pos=3, shape=(2))
+            'mole_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
             sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
@@ -262,7 +262,7 @@ class TestSimulation:
                     timestep['time'] = time
                     timestep['temperature'] = temp
                     timestep['pressure'] = 1.0
-                    timestep['mass_fractions'] = np.ones(2)
+                    timestep['mole_fractions'] = np.ones(2)
                     timestep.append()
                 
                 table.flush()
@@ -279,7 +279,7 @@ class TestSimulation:
             'time': tables.Float64Col(pos=0),
             'temperature': tables.Float64Col(pos=1),
             'pressure': tables.Float64Col(pos=2),
-            'mass_fractions': tables.Float64Col(pos=3, shape=(2))
+            'mole_fractions': tables.Float64Col(pos=3, shape=(2))
             }
         with TemporaryDirectory() as temp_dir:
             sim = Simulation(0, None, 'gri30.cti', path=temp_dir)
@@ -295,7 +295,7 @@ class TestSimulation:
                 timestep['time'] = 1.0
                 timestep['temperature'] = 1.0
                 timestep['pressure'] = 1.0
-                timestep['mass_fractions'] = np.ones(2)
+                timestep['mole_fractions'] = np.ones(2)
                 timestep.append()
                 
                 table.flush()

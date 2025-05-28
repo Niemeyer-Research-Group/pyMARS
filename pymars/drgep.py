@@ -269,8 +269,9 @@ def get_importance_coeffs(species_names, target_species, matrices):
     return importance_coefficients
 
 
-def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-                 sampled_metrics, phase_name='', previous_model=None, num_threads=1, path=''
+def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sampled_metrics,
+                 ignition_conditions=[], psr_conditions=[], flame_conditions=[], 
+                 phase_name='', previous_model=None, num_threads=1, path=''
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -307,6 +308,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
 
     """
     solution = ct.Solution(model_file, phase_name)
+
     species_removed = [sp for sp in solution.species_names
                        if importance_coeffs[sp] < threshold 
                        and sp not in species_safe
@@ -325,8 +327,9 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
     reduced_model.write_yaml(os.path.join(path,f'reduced_{reduced_model.n_species}.yaml'))
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, phase_name=phase_name, 
-        num_threads=num_threads, path=path
+        reduced_model_filename, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+        flame_conditions=flame_conditions,
+        phase_name=phase_name, num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
@@ -382,7 +385,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, phase_name=phase_name, num_threads=num_threads, path=path
+        model_file, ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, num_threads=num_threads, path=path
         )
     
     matrices = []
@@ -409,8 +412,10 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-            sampled_metrics, phase_name=phase_name, previous_model=previous_model, 
+            model_file, species_safe, threshold, importance_coeffs, sampled_metrics, 
+            ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+            flame_conditions=flame_conditions,
+            phase_name=phase_name, previous_model=previous_model, 
             num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
@@ -445,8 +450,10 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     if reduced_model.error > error_limit:
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-            sampled_metrics, phase_name=phase_name, num_threads=num_threads, path=path
+            model_file, species_safe, threshold, importance_coeffs, sampled_metrics,
+            ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+            flame_conditions=flame_conditions,
+            phase_name=phase_name, num_threads=num_threads, path=path
             )
     else:
         reduced_model.write_yaml(os.path.join(path, f'reduced_{reduced_model.model.n_species}.yaml'))
