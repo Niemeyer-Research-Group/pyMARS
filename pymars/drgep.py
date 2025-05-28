@@ -208,7 +208,7 @@ def create_drgep_matrix(state, solution):
     return adjacency_matrix
 
 
-def graph_search_drgep(graph, target_species):
+def graph_search_drgep(graph, target_species, sampled_weights):
     """Searches graph to generate a dictionary of the greatest paths to all species from one of the targets.
 
     Parameters
@@ -217,6 +217,8 @@ def graph_search_drgep(graph, target_species):
         Graph representing model
     target_species : list of str
         List of target species to search from
+    target_weight : list of float
+        List of species weights
 
     Returns
     -------
@@ -225,18 +227,19 @@ def graph_search_drgep(graph, target_species):
 
     """
     overall_coefficients = {}
-    for target in target_species:
+    for idx,target in enumerate(target_species):
         coefficients = ss_dijkstra_path_length_modified(graph, target)
         # ensure target has importance of 1.0
         coefficients[target] = 1.0
 
         for sp in coefficients:
-            overall_coefficients[sp] = max(overall_coefficients.get(sp, 0.0), coefficients[sp])
-    
+            coeff = max(overall_coefficients.get(sp, 0.0), coefficients[sp])
+            overall_coefficients[sp] = coeff * sampled_weights[idx]
+
     return overall_coefficients
 
 
-def get_importance_coeffs(species_names, target_species, matrices):
+def get_importance_coeffs(species_names, target_species, matrices, sampled_weights):
     """Calculate importance coefficients for all species
 
     Parameters
@@ -247,6 +250,8 @@ def get_importance_coeffs(species_names, target_species, matrices):
         List of target species
     matrices : list of numpy.ndarray
         List of adjacency matrices
+    target_weights : list of float
+        List of species weights
 
     Returns
     -------
@@ -256,10 +261,10 @@ def get_importance_coeffs(species_names, target_species, matrices):
     """
     importance_coefficients = {sp:0.0 for sp in species_names}
     name_mapping = {i: sp for i, sp in enumerate(species_names)}
-    for matrix in matrices:
+    for idx,matrix in enumerate(matrices):
         graph = networkx.DiGraph(matrix)
         networkx.relabel_nodes(graph, name_mapping, copy=False)
-        coefficients = graph_search_drgep(graph, target_species)
+        coefficients = graph_search_drgep(graph, target_species, sampled_weights[idx,:])
         
         importance_coefficients = {
             sp:max(coefficients.get(sp, 0.0), importance_coefficients[sp]) 
@@ -384,7 +389,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
-    sampled_metrics, sampled_data = sample(
+    sampled_metrics, sampled_data, sampled_weights = sample(
         model_file, ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, num_threads=num_threads, path=path
         )
     
@@ -395,7 +400,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # For DRGEP, find the overall interaction coefficients for all species 
     # using the maximum over all the sampled states
     importance_coeffs = get_importance_coeffs(
-        solution.species_names, species_targets, matrices
+        solution.species_names, species_targets, matrices, sampled_weights
         )
 
     # begin reduction iterations

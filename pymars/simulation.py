@@ -22,7 +22,7 @@ class Simulation(object):
     ----------
     idx : int
         Identifer index for case
-    properties : InputIgnition or InputLaminarFlame
+    conditions : InputIgnition or InputLaminarFlame
         Object with initial conditions for simulation
     model : str
         Filename for Cantera-format model to be used
@@ -32,9 +32,9 @@ class Simulation(object):
         Path for location of output files
         
     """
-    def __init__(self, sim_type, idx, properties, model, phase_name='', path=''):
+    def __init__(self, sim_type, idx, conditions, model, phase_name='', path=''):
         self.idx = idx
-        self.properties = properties
+        self.conditions = conditions
         self.model = model
         self.phase_name = phase_name
         self.path = path
@@ -48,39 +48,39 @@ class Simulation(object):
         if self.sim_type == 'ignition':
             # Default maximum number of steps
             self.max_steps = 10000
-            if self.properties.max_steps:
-                self.max_steps = self.properties.max_steps
+            if self.conditions.max_steps:
+                self.max_steps = self.conditions.max_steps
 
             # By default, simulations will run to steady state, with the maximum number of steps
             # given by ``self.max_steps``. Alternatively, an end time (in seconds) can be
             # given in cases where something specific is needed (e.g., longer than normal)
             self.time_end = 0.0
-            if self.properties.end_time:
-                self.time_end = self.properties.end_time
+            if self.conditions.end_time:
+                self.time_end = self.conditions.end_time
         
             self.gas.TP = (
-                self.properties.temperature, self.properties.pressure * ct.one_atm
+                self.conditions.temperature, self.conditions.pressure * ct.one_atm
                 )
             # set initial composition using either equivalence ratio or general reactant composition
-            if self.properties.equivalence_ratio:
+            if self.conditions.equivalence_ratio:
                 self.gas.set_equivalence_ratio(
-                    self.properties.equivalence_ratio,
-                    self.properties.fuel,
-                    self.properties.oxidizer
+                    self.conditions.equivalence_ratio,
+                    self.conditions.fuel,
+                    self.conditions.oxidizer
                     )
             else:
-                if self.properties.composition_type == 'mole':
+                if self.conditions.composition_type == 'mole':
                     self.gas.TPX = (
-                        self.properties.temperature, self.properties.pressure * ct.one_atm, 
-                        self.properties.reactants
+                        self.conditions.temperature, self.conditions.pressure * ct.one_atm, 
+                        self.conditions.reactants
                         )
                 else:
                     self.gas.TPY = (
-                        self.properties.temperature, self.properties.pressure * ct.one_atm, 
-                        self.properties.reactants
+                        self.conditions.temperature, self.conditions.pressure * ct.one_atm, 
+                        self.conditions.reactants
                         )
 
-            if self.properties.kind == 'constant pressure':
+            if self.conditions.kind == 'constant pressure':
                 self.reac = ct.IdealGasConstPressureReactor(self.gas)
             else:
                 self.reac = ct.IdealGasReactor(self.gas)
@@ -96,32 +96,32 @@ class Simulation(object):
 
         elif self.sim_type == 'flame':
             self.gas.TP = (
-                self.properties.temperature, self.properties.pressure * ct.one_atm
+                self.conditions.temperature, self.conditions.pressure * ct.one_atm
                 )
             # set initial composition using either equivalence ratio or general reactant composition
-            if self.properties.equivalence_ratio:
+            if self.conditions.equivalence_ratio:
                 self.gas.set_equivalence_ratio(
-                    self.properties.equivalence_ratio,
-                    self.properties.fuel,
-                    self.properties.oxidizer
+                    self.conditions.equivalence_ratio,
+                    self.conditions.fuel,
+                    self.conditions.oxidizer
                     )
             else:
-                if self.properties.composition_type == 'mole':
+                if self.conditions.composition_type == 'mole':
                     self.gas.TPX = (
-                        self.properties.temperature, self.properties.pressure * ct.one_atm, 
-                        self.properties.reactants
+                        self.conditions.temperature, self.conditions.pressure * ct.one_atm, 
+                        self.conditions.reactants
                         )
                 else:
                     self.gas.TPY = (
-                        self.properties.temperature, self.properties.pressure * ct.one_atm, 
-                        self.properties.reactants
+                        self.conditions.temperature, self.conditions.pressure * ct.one_atm, 
+                        self.conditions.reactants
                         )
 
-            if self.properties.kind == 'premixed':
-                self.gas.transport_model = self.properties.transport
-                self.sim = ct.FreeFlame(self.gas, width=self.properties.width)
-                self.sim.set_refine_criteria(ratio=self.properties.refine_ratio,slope=self.properties.refine_slope,
-                                             curve=self.properties.refine_curve,prune=self.properties.refine_prune)
+            if self.conditions.kind == 'premixed':
+                self.gas.transport_model = self.conditions.transport
+                self.sim = ct.FreeFlame(self.gas, width=self.conditions.width)
+                self.sim.set_refine_criteria(ratio=self.conditions.refine_ratio,slope=self.conditions.refine_slope,
+                                             curve=self.conditions.refine_curve,prune=self.conditions.refine_prune)
 
             # Set file for later data file
             self.save_file = os.path.join(self.path, self.sim_type + '_' + str(self.idx) + '.h5')
@@ -201,7 +201,7 @@ class Simulation(object):
                         fluid_parcel['pressure'] = self.reac.thermo.P
                         fluid_parcel['mass_fractions'] = self.reac.Y
 
-                        if self.reac.T >= self.properties.temperature + 400.0 and not ignition_flag:
+                        if self.reac.T >= self.conditions.temperature + 400.0 and not ignition_flag:
                             self.ignition_delay = self.sim.time
                             ignition_flag = True
 
@@ -229,7 +229,7 @@ class Simulation(object):
                         fluid_parcel['pressure'] = self.reac.thermo.P
                         fluid_parcel['mass_fractions'] = self.reac.Y
 
-                        if self.reac.T >= self.properties.temperature + 400.0 and not ignition_flag:
+                        if self.reac.T >= self.conditions.temperature + 400.0 and not ignition_flag:
                             self.ignition_delay = self.sim.time
                             ignition_flag = True
 
@@ -251,7 +251,7 @@ class Simulation(object):
                     if step == self.max_steps - 1:
                         logging.warning(
                             'Warning: Maximum number of steps reached before '
-                            f'convergence for ignition case {self.idx}.'
+                            f'convergence for ignition case {self.idx}. '
                             f'Do NOT use the final mechanism if this warning '
                             f'appears at the end right before generating the final mechanism.'
                             )
@@ -331,7 +331,7 @@ class Simulation(object):
                     self.ignition_delay = time
                     ignition_flag = True
                     if skip_data:
-                        return self.ignition_delay
+                        return self.ignition_delay, None, self.conditions.target_weights
                 
                 if temp >= temperature_initial + (deltas[idx] * temperature_diff):
                     sampled_data[idx, 0:2] = [temp, pres]
@@ -340,7 +340,7 @@ class Simulation(object):
                     idx += 1
                     if idx == 20:
                         self.sampled_data = sampled_data
-                        return self.ignition_delay, sampled_data
+                        return self.ignition_delay, sampled_data, np.tile(self.conditions.target_weights, (idx, 1))
         elif self.sim_type == 'flame':
             with tables.open_file(self.save_file, 'r') as h5file:
                 # Load Table with Group name simulation
@@ -370,7 +370,7 @@ class Simulation(object):
                     idx += 1
                     if idx == 20:
                         self.sampled_data = sampled_data
-                        return flame_speed, sampled_data
+                        return flame_speed, sampled_data, np.tile(self.conditions.target_weights, (idx,1))
 
     def clean(self):
         """Delete HDF5 save file

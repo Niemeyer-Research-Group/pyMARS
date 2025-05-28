@@ -10,9 +10,9 @@ import cantera as ct
 from .simulation import Simulation
 
 data_files = {
-    'data_ignition': 'ignition_data.dat', 'output_ignition': 'ignition_output.txt',
-    'data_psr': 'psr_data.dat', 'output_psr': 'psr_output.txt',
-    'data_flame': 'laminarflame_data.dat', 'output_flame': 'laminarflame_output.txt'
+    'data_ignition': 'ignition_data.dat', 'output_ignition': 'ignition_output.txt', 'weights_ignition': 'ignition_weights.txt',
+    'data_psr': 'psr_data.dat', 'output_psr': 'psr_output.txt', 'weights_psr': 'psr_weights.txt',
+    'data_flame': 'laminarflame_data.dat', 'output_flame': 'laminarflame_output.txt', 'weights_flame': 'laminarflame_weights.txt'
     }
 
 class InputIgnition(NamedTuple):
@@ -30,6 +30,8 @@ class InputIgnition(NamedTuple):
     oxidizer: Dict = {}
     reactants: Dict = {}
     composition_type: str = 'mole'
+
+    target_weights: list = []
 
 
 class InputPSR(NamedTuple):
@@ -58,6 +60,8 @@ class InputLaminarFlame(NamedTuple):
     reactants: Dict = {}
     composition_type: str = 'mole'
 
+    target_weights: list = []
+
 
 def simulation_worker(sim_tuple):
     """Worker for multiprocessing of simulation cases.
@@ -79,7 +83,7 @@ def simulation_worker(sim_tuple):
     sim.setup_case()
     sim.run_case(sim_parameters)
 
-    sim = Simulation(sim.sim_type, sim.idx, sim.properties, sim.model, phase_name=sim.phase_name, path=sim.path)
+    sim = Simulation(sim.sim_type, sim.idx, sim.conditions, sim.model, phase_name=sim.phase_name, path=sim.path)
     return sim
 
 
@@ -177,15 +181,18 @@ def run_simulations(model, sim_type, conditions, phase_name='', num_threads=1,
     """
     sim_metrics = np.zeros(len(conditions))
     sim_data = []
+    sim_weights = []
     
     # check for presence of data and output files; if present, reuse.
     matches_number = False
     matches_shape = False
     exists_data = os.path.isfile(os.path.join(path,data_files['data_' + sim_type]))
     exists_output = os.path.isfile(os.path.join(path,data_files['output_' + sim_type]))
-    if exists_data and exists_output:
+    exists_weights = os.path.isfile(os.path.join(path,data_files['weights_' + sim_type]))
+    if exists_data and exists_output and exists_weights:
         sim_metrics = np.genfromtxt(os.path.join(path,data_files['output_' + sim_type]), delimiter=',')
         sim_data = np.genfromtxt(os.path.join(path,data_files['data_' + sim_type]), delimiter=',')
+        sim_weights = np.genfromtxt(os.path.join(path,data_files['weights_' + sim_type]), delimiter=',')
         # need to check that saved data at least matches the number of cases
         matches_number = (
             sim_metrics.size == len(conditions) and 
@@ -200,6 +207,10 @@ def run_simulations(model, sim_type, conditions, phase_name='', num_threads=1,
     if matches_number and matches_shape:
         logging.info(f"Reusing existing {sim_type} samples for the starting model {model}.")
     else:
+        sim_metrics = np.zeros(len(conditions))
+        sim_data = []
+        sim_weights = []
+
         if sim_type == 'ignition':
             stop_at_ignition = False
             simulations = []
@@ -225,19 +236,20 @@ def run_simulations(model, sim_type, conditions, phase_name='', num_threads=1,
             pool.close()
             pool.join()
 
-        sim_metrics = np.zeros(len(conditions))
-        sim_data = []     
         for idx, sim in enumerate(results):
-            sim_metrics[idx], data = sim.process_results()
+            sim_metrics[idx], data, sim_weight = sim.process_results()
             sim_data += list(data)
+            sim_weights += list(sim_weight)
             sim.clean()
         sim_data = np.array(sim_data)
+        sim_weights = np.array(sim_weights)
 
         if save_data:
             np.savetxt(data_files['data_' + sim_type], sim_data, delimiter=',')
             np.savetxt(data_files['output_' + sim_type], sim_metrics, delimiter=',')
+            np.savetxt(data_files['weights_' +  sim_type], sim_weights, delimiter=',')
 
-    return sim_metrics, sim_data
+    return sim_metrics, sim_data, sim_weights
     
 
 def sample_metrics(model, ignition_conditions=[], psr_conditions=[], flame_conditions=[],
@@ -283,14 +295,14 @@ def sample_metrics(model, ignition_conditions=[], psr_conditions=[], flame_condi
     metrics = []
 
     if ignition_conditions:
-        [ignition_delays, _] = run_simulations(model,'ignition',ignition_conditions,phase_name=phase_name,num_threads=num_threads,path=path)
+        [ignition_delays, _, _] = run_simulations(model,'ignition',ignition_conditions,phase_name=phase_name,num_threads=num_threads,path=path)
         metrics.append(ignition_delays)
         
     if psr_conditions:
         raise NotImplementedError('PSR calculations not currently supported.')
     
     if flame_conditions:
-        [flame_speeds, _] = run_simulations(model,'flame',flame_conditions,phase_name=phase_name,num_threads=num_threads,path=path)
+        [flame_speeds, _, _] = run_simulations(model,'flame',flame_conditions,phase_name=phase_name,num_threads=num_threads,path=path)
         metrics.append(flame_speeds)
 
     metrics = np.concatenate(metrics)
@@ -327,8 +339,12 @@ def sample(model, ignition_conditions=[], psr_conditions=[], flame_conditions=[]
     
     Returns
     -------
-    tuple of numpy.ndarray
-        Metrics, and sampled data
+    metrics: numpy.ndarray
+        Metrics to be used to assess the model
+    sim_data: numpy.ndarray
+        Sampled data to use in reduction algorithm
+    target_weights: list
+        Species weights for reduction algorithm
 
     """
     # If number of threads given as 0, use either max number of available
@@ -338,24 +354,28 @@ def sample(model, ignition_conditions=[], psr_conditions=[], flame_conditions=[]
 
     metrics = []
     sim_data = []
+    sim_weights = []
 
     if ignition_conditions:
-        [ignition_delays, ignition_data] = run_simulations(model,'ignition',ignition_conditions,phase_name,num_threads,path,save_data=True)
+        [ignition_delays, ignition_data, ignition_weights] = run_simulations(model,'ignition',ignition_conditions,phase_name,num_threads,path,save_data=True)
         metrics.append(ignition_delays)
         sim_data.append(ignition_data)
+        sim_weights.append(ignition_weights)
 
     if psr_conditions:
         raise NotImplementedError('PSR calculations not currently supported.')
     
     if flame_conditions:
-        [flame_speeds, flame_data] = run_simulations(model,'flame',flame_conditions,phase_name,num_threads,path,save_data=True)
+        [flame_speeds, flame_data, flame_weights] = run_simulations(model,'flame',flame_conditions,phase_name,num_threads,path,save_data=True)
         metrics.append(flame_speeds)
         sim_data.append(flame_data)
-    
+        sim_weights.append(flame_weights)
+        
     metrics = np.concatenate(metrics)
     sim_data = np.concatenate(sim_data, axis=0)
+    sim_weights = np.concatenate(sim_weights, axis=0)
 
-    return metrics, sim_data
+    return metrics, sim_data, sim_weights
 
 
 def parse_ignition_inputs(model, conditions, phase_name=''):
@@ -402,6 +422,8 @@ def parse_ignition_inputs(model, conditions, phase_name=''):
 
         reactants = case.get('reactants', [])
 
+        target_weights = case.get('target-weights', [])
+
         assert (bool(equiv_ratio or fuel or oxidizer) + bool(reactants)) == 1, (
             pre + 'should specify either equivalence-ratio/fuel/oxidizer or reactants.'
             )
@@ -438,7 +460,7 @@ def parse_ignition_inputs(model, conditions, phase_name=''):
         
         inputs.append(InputIgnition(
             kind, temperature, pressure, end_time, max_steps,
-            equiv_ratio, fuel, oxidizer, reactants, composition_type
+            equiv_ratio, fuel, oxidizer, reactants, composition_type, target_weights
         ))
 
     return inputs
@@ -516,6 +538,8 @@ def parse_flame_inputs(model, conditions, phase_name=''):
 
         reactants = case.get('reactants', [])
 
+        target_weights = case.get('target-weights', [])
+
         assert (bool(equiv_ratio or fuel or oxidizer) + bool(reactants)) == 1, (
             pre + 'should specify either equivalence-ratio/fuel/oxidizer or reactants.'
             )
@@ -553,6 +577,6 @@ def parse_flame_inputs(model, conditions, phase_name=''):
         inputs.append(InputLaminarFlame(
             kind, temperature, pressure, transport, width, 
             refine_ratio, refine_slope, refine_curve, refine_prune,
-            equiv_ratio, fuel, oxidizer, reactants, composition_type
+            equiv_ratio, fuel, oxidizer, reactants, composition_type, target_weights
         ))
     return inputs

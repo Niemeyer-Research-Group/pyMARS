@@ -166,6 +166,7 @@ def main(model_file, error_limit,
 
     original_gas = ct.Solution(model_file)
     logging.info(f'Starting mechanism: {original_gas.n_species} species and {original_gas.n_reactions} reactions.')
+    logging.info(f'Targeting species: {target_species}')
 
     if method in ['DRG', 'DRGEP', 'PFA']:
         assert target_species, (
