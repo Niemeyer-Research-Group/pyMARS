@@ -32,7 +32,8 @@ except ImportError:
                     raise
 
 
-def evaluate_species_errors(starting_model, ignition_conditions, metrics, species_limbo, 
+def evaluate_species_errors(starting_model, metrics, species_limbo, ignition_conditions=[],
+                            psr_conditions=[], flame_conditions=[],
                             phase_name='', num_threads=1
                             ):
     """Calculate error induced by removal of each limbo species
@@ -72,7 +73,9 @@ def evaluate_species_errors(starting_model, ignition_conditions, metrics, specie
             test_model.write_yaml(os.path.join(temp_dir,f'reduced_model_{species}.yaml'))
             try:
                 reduced_model_metrics = sample_metrics(
-                    test_model_file, ignition_conditions, phase_name=phase_name, 
+                    test_model_file, ignition_conditions=ignition_conditions,
+                    psr_conditions=psr_conditions, flame_conditions=flame_conditions, 
+                    phase_name=phase_name, 
                     num_threads=num_threads, path=temp_dir
                     )
                 species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
@@ -145,7 +148,8 @@ def run_sa(model_file, current_model, ignition_conditions, psr_conditions, flame
     # Need to first evaluate all induced errors of species; for the ``initial`` method,
     # this will be the only evaluation.
     species_errors = evaluate_species_errors(
-        current_model, ignition_conditions, initial_metrics, species_limbo, 
+        current_model, initial_metrics, species_limbo, ignition_conditions=ignition_conditions,
+        psr_conditions=psr_conditions, flame_conditions=flame_conditions,
         phase_name=phase_name, num_threads=num_threads
         )
 
@@ -183,7 +187,8 @@ def run_sa(model_file, current_model, ignition_conditions, psr_conditions, flame
             # If using the greedy algorithm, now need to reevaluate all species errors
             if algorithm_type == 'greedy':
                 species_errors = evaluate_species_errors(
-                    current_model, ignition_conditions, initial_metrics, species_limbo, 
+                    current_model, initial_metrics, species_limbo, ignition_conditions=ignition_conditions,
+                    psr_conditions=psr_conditions, flame_conditions=flame_conditions,
                     phase_name=phase_name, num_threads=num_threads
                     )
                 if min(species_errors) > error_limit:
