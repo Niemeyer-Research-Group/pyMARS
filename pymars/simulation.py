@@ -331,7 +331,7 @@ class Simulation(object):
                     self.ignition_delay = time
                     ignition_flag = True
                     if skip_data:
-                        return self.ignition_delay, None, self.conditions.target_weights
+                        return self.ignition_delay, None, np.tile(self.conditions.target_weights, (idx, 1))
                 
                 if temp >= temperature_initial + (deltas[idx] * temperature_diff):
                     sampled_data[idx, 0:2] = [temp, pres]
@@ -351,26 +351,23 @@ class Simulation(object):
                 pressures = table.col('pressure')
                 mass_fractions = table.col('mass_fractions')
 
-            flame_speed = velocities[0]
+            flame_speed        = velocities[0]
             temperature_initial = temperatures[0]
-            temperature_max = temperatures[len(temperatures)-1]
-            temperature_diff = temperature_max - temperature_initial 
+            temperature_max     = temperatures[-1]
 
-            sampled_data = np.zeros((len(deltas), 2 + mass_fractions.shape[1]))
+            N_SAMPLES   = 20
+            targets_T   = np.linspace(temperature_initial, temperature_max, N_SAMPLES)
+            row_idx     = np.searchsorted(temperatures, targets_T, side="left")
 
-            # need to add processing to get the 20 data points here
-            idx = 0
-            for temp, pres, mass in zip(
-                temperatures, pressures, mass_fractions
-            ):
-                if temp >= temperature_initial + (deltas[idx] * temperature_diff):
-                    sampled_data[idx, 0:2] = [temp, pres]
-                    sampled_data[idx, 2:] = mass
+            sampled_data = np.hstack([
+                temperatures[row_idx, None],
+                pressures   [row_idx, None],
+                mass_fractions[row_idx]
+            ])
 
-                    idx += 1
-                    if idx == 20:
-                        self.sampled_data = sampled_data
-                        return flame_speed, sampled_data, np.tile(self.conditions.target_weights, (idx,1))
+            self.sampled_data = sampled_data
+            return flame_speed, sampled_data, np.tile(self.conditions.target_weights,
+                                                    (N_SAMPLES, 1))
 
     def clean(self):
         """Delete HDF5 save file

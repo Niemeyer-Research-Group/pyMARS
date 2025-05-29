@@ -211,14 +211,14 @@ def run_simulations(model, sim_type, conditions, phase_name='', num_threads=1,
         sim_data = []
         sim_weights = []
 
-        if sim_type == 'ignition':
+        if sim_type == 'ignition' and conditions:
             stop_at_ignition = False
             simulations = []
             for idx, case in enumerate(conditions):
                 simulations.append([
                     Simulation(sim_type, idx, case, model, phase_name=phase_name, path=path), stop_at_ignition
                     ])
-        elif sim_type == 'flame':
+        elif sim_type == 'flame' and conditions:
             simulations = []
             for idx, case in enumerate(conditions):
                 simulations.append([

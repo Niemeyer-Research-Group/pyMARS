@@ -133,7 +133,8 @@ def run_sa(model_file, current_model, ignition_conditions, psr_conditions, flame
 
     # The metrics for the starting model need to be determined or read
     initial_metrics = sample_metrics(
-        model_file, ignition_conditions, reuse_saved=True, phase_name=phase_name,
+        model_file, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+        flame_conditions=flame_conditions, reuse_saved=True, phase_name=phase_name,
         num_threads=num_threads, path=path
         )
 
@@ -171,7 +172,8 @@ def run_sa(model_file, current_model, ignition_conditions, psr_conditions, flame
             test_model.write_yaml(os.path.join(temp_dir,f'reduced_model_{species_remove}.yaml'))
 
             reduced_model_metrics = sample_metrics(
-                test_model_file, ignition_conditions, phase_name=phase_name, 
+                test_model_file, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+                flame_conditions=flame_conditions, phase_name=phase_name, 
                 num_threads=num_threads, path=temp_dir
                 )
             error = calculate_error(initial_metrics, reduced_model_metrics)

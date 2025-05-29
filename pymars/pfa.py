@@ -280,7 +280,8 @@ def run_pfa(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
     sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, 
+        model_file, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+        flame_conditions=flame_conditions, phase_name=phase_name, 
         num_threads=num_threads, path=path
         )
 
