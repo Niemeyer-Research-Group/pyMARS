@@ -1,21 +1,71 @@
-CONV
-PRES 1.0
-TEMP 1000
-TIME 10.0
-DELT 1.E-4
-FUEL CH4 1.0
-OXID O2 1.0
-OXID N2 3.76
-EQUI 1.0
-END
+model: gri30.yaml
+targets:
+  - CH4
+  - H2
+  - O2
+retained-species:
+  - N2
+method: DRGEP
+error: 10
+sensitivity-analysis: True
+autoignition-conditions:
+  - kind: constant volume
+    pressure: 1.0
+    temperature: 1000.0
+    fuel:
+      CH4: 1.0
+	  H2: 0.0
+    oxidizer:
+      O2: 1.0
+      N2: 3.76
+    equivalence-ratio: 1.0
+    target-weights: # DRGEP weights for the targets are optional. Removing this option makes the weights unity for all targets by default
+      - 1
+      - 0
+	  - 1
 
-CONV
-PRES 1.0
-TEMP 1200
-TIME 10.0
-DELT 1.E-4
-FUEL CH4 1.0
-OXID O2 1.0
-OXID N2 3.76
-EQUI 1.0
-END
+  - kind: constant volume
+    pressure: 1.0
+    temperature: 1200.0
+    fuel:
+      CH4: 0.0
+	  H2: 1.0
+    oxidizer:
+      O2: 1.0
+      N2: 3.76
+    equivalence-ratio: 0.5
+    target-weights:
+      - 0
+      - 1
+	  - 1
+  
+laminar-flame-conditions:
+  - kind: premixed
+    pressure: 1.0
+    temperature: 300.0
+    fuel:
+      CH4: 1.0
+	  H2: 0.0
+    oxidizer:
+      O2: 1.0
+      N2: 3.76
+    equivalence-ratio: 0.8
+    target-weights:
+      - 1
+      - 0
+	  - 1
+    
+  - kind: premixed
+    pressure: 1.0
+    temperature: 300.0
+    fuel:
+      CH4: 1.0
+	  H2: 0.0
+    oxidizer:
+      O2: 1.0
+      N2: 3.76
+    equivalence-ratio: 1.0
+    target-weights:
+      - 1
+      - 0
+	  - 1
