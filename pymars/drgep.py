@@ -413,7 +413,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
 
     first = True
     error_current = 0.0
-    threshold = 0.07
+    threshold = 0.01
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drgep(

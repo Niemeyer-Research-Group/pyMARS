@@ -433,21 +433,21 @@ def parse_ignition_inputs(model, conditions, phase_name=''):
 
             assert fuel, pre + 'needs "fuel" with at least one entry'
             for entry in fuel:
-                assert fuel[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert sum(fuel.values()) > 0, pre + entry + ' value needs to be a number > 0'
                 assert entry in gas.species_names, (
                     pre + 'fuel species not in model: ' + entry
                     )
             
             assert oxidizer, pre + 'needs "oxidizer" with at least one entry'
             for entry in oxidizer:
-                assert oxidizer[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert sum(oxidizer.values()) > 0, pre + entry + ' value needs to be a number > 0'
                 assert entry in gas.species_names, (
                     pre + 'oxidizer species not in model: ' + entry
                     )
         
         if reactants:
             for entry in reactants:
-                assert reactants[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert sum(reactants.values()) > 0, pre + entry + ' value needs to be a number > 0'
                 assert entry in gas.species_names, (
                     pre + 'reactant not in model: ' + entry
                     )
@@ -549,21 +549,21 @@ def parse_flame_inputs(model, conditions, phase_name=''):
 
             assert fuel, pre + 'needs "fuel" with at least one entry'
             for entry in fuel:
-                assert fuel[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert sum(fuel.values()) > 0, pre + entry + ' value needs to be a number > 0'
                 assert entry in gas.species_names, (
                     pre + 'fuel species not in model: ' + entry
                     )
             
             assert oxidizer, pre + 'needs "oxidizer" with at least one entry'
             for entry in oxidizer:
-                assert oxidizer[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert sum(oxidizer.values()) > 0, pre + entry + ' value needs to be a number > 0'
                 assert entry in gas.species_names, (
                     pre + 'oxidizer species not in model: ' + entry
                     )
         
         if reactants:
             for entry in reactants:
-                assert reactants[entry] > 0, pre + entry + ' value needs to be a number > 0'
+                assert sum(reactants.values()) > 0, pre + entry + ' value needs to be a number > 0'
                 assert entry in gas.species_names, (
                     pre + 'reactant not in model: ' + entry
                     )
