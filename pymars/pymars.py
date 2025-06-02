@@ -5,18 +5,18 @@ import logging
 from argparse import ArgumentParser
 from typing import List, Dict, NamedTuple
 
-import ruamel_yaml as yaml
+from ruamel.yaml import YAML
 import cantera as ct
 
 # local imports
 from .sampling import sample_metrics, parse_ignition_inputs, parse_psr_inputs, parse_flame_inputs
 from .sampling import InputIgnition, InputPSR, InputLaminarFlame
-from . import soln2cti
 from .drgep import run_drgep
 from .drg import run_drg
 from .pfa import run_pfa
 from .sensitivity_analysis import run_sa
 from .tools import convert
+from .reduce_model import ReducedModel
 
 #: Supported reduction methods
 METHODS = ['DRG', 'DRGEP', 'PFA']
@@ -97,14 +97,12 @@ def parse_inputs(input_dict):
         assert sp in gas.species_names, f'Specified retained species {sp} not in model'
     
     ignition_conditions = input_dict.get('autoignition-conditions', {})
-    assert ignition_conditions, 'autoignition-conditions need to be specified'
-
     psr_conditions = input_dict.get('psr-conditions', {})
     flame_conditions = input_dict.get('laminar-flame-conditions', {})
+
+    assert ignition_conditions or flame_conditions, 'autoignition-conditions or laminar-flame-conditions need to be specified'
     if psr_conditions:
         raise NotImplementedError('PSR sampling not implemented yet, sorry!')
-    if flame_conditions:
-        raise NotImplementedError('Laminar flame sampling not implemented yet, sorry!')
 
     # check validity of input file
     ignition_inputs = parse_ignition_inputs(model, ignition_conditions, phase_name)
@@ -132,7 +130,7 @@ def main(model_file, error_limit,
     Parameters
     ----------
     model_file : str
-        Cantera-format model to be reduced (e.g., 'mech.cti').
+        Cantera-format model to be reduced (e.g., 'mech.yaml').
     error_limit : float
         Maximum error percentage for the reduced model.
     ignition_conditions : list of InputIgnition
@@ -166,6 +164,10 @@ def main(model_file, error_limit,
 
     """
 
+    original_gas = ct.Solution(model_file)
+    logging.info(f'Starting mechanism: {original_gas.n_species} species and {original_gas.n_reactions} reactions.')
+    logging.info(f'Targeting species: {target_species}')
+
     if method in ['DRG', 'DRGEP', 'PFA']:
         assert target_species, (
             'Need to specify at least one target species for graph-based reduction methods'
@@ -195,23 +197,27 @@ def main(model_file, error_limit,
             num_threads=num_threads, path=path
             )
     
-    error = 0.0
     limbo_species = []
-    if method in ['DRG', 'DRGEP', 'PFA']:
-        model_file = reduced_model.filename
-        error = reduced_model.error
-        limbo_species = reduced_model.limbo_species
+    if not (method in ['DRG', 'DRGEP', 'PFA']):
+        reduced_model = ReducedModel(model_file, phase_name)
 
     if run_sensitivity_analysis:
         if not sensitivity_type:
             sensitivity_type = 'greedy'
 
         reduced_model = run_sa(
-            model_file, error, ignition_conditions, psr_conditions, flame_conditions, 
+            model_file, reduced_model, ignition_conditions, psr_conditions, flame_conditions, 
             error_limit, target_species + safe_species, phase_name=phase_name,
             algorithm_type=sensitivity_type, species_limbo=limbo_species, 
             num_threads=num_threads, path=path
             )
+    
+    original_species = set(original_gas.species_names)
+    model_species = set(reduced_model.model.species_names)
+    removed_species = original_species - model_species
+
+    logging.info(f"{len(removed_species)} species removed in mechanism reduction:")
+    logging.info(sorted(removed_species))
    
     return reduced_model
 
@@ -302,13 +308,14 @@ def pymars(argv):
         if not args.input:
             parser.error('A YAML input file needs to be specified using -i or --input')
 
+        yaml = YAML()
         with open(args.input, 'r') as the_file:
-            input_dict = yaml.safe_load(the_file)
+            input_dict = yaml.load(the_file)
         
         inputs = parse_inputs(input_dict)
 
         # Check for Chemkin format and convert if needed
-        if os.path.splitext(inputs.model)[1] != '.cti':
+        if os.path.splitext(inputs.model)[1] != '.yaml':
             logging.info('Chemkin file detected; converting before reduction.')
             inputs.model = convert(inputs.model, args.thermo, args.transport, args.path)
 

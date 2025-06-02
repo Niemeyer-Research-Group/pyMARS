@@ -3,8 +3,8 @@ import logging
 
 import numpy as np
 import cantera as ct
+import os
 
-from . import soln2cti
 from .sampling import sample_metrics, calculate_error, read_metrics
 from .reduce_model import trim, ReducedModel
 
@@ -32,7 +32,8 @@ except ImportError:
                     raise
 
 
-def evaluate_species_errors(starting_model, ignition_conditions, metrics, species_limbo, 
+def evaluate_species_errors(starting_model, metrics, species_limbo, ignition_conditions=[],
+                            psr_conditions=[], flame_conditions=[],
                             phase_name='', num_threads=1
                             ):
     """Calculate error induced by removal of each limbo species
@@ -65,22 +66,26 @@ def evaluate_species_errors(starting_model, ignition_conditions, metrics, specie
     with TemporaryDirectory() as temp_dir:
         for idx, species in enumerate(species_limbo):
             test_model = trim(
-                starting_model.filename, [species], f'reduced_model_{species}.cti', 
+                starting_model.filename, [species], f'reduced_model_{species}.yaml', 
                 phase_name=phase_name
                 )
-            test_model_file = soln2cti.write(
-                test_model, f'reduced_model_{species}.cti', path=temp_dir
-                )
-            reduced_model_metrics = sample_metrics(
-                test_model_file, ignition_conditions, phase_name=phase_name, 
-                num_threads=num_threads
-                )
-            species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
+            test_model_file = f'reduced_model_{species}.yaml'
+            test_model.write_yaml(os.path.join(temp_dir,f'reduced_model_{species}.yaml'))
+            try:
+                reduced_model_metrics = sample_metrics(
+                    test_model_file, ignition_conditions=ignition_conditions,
+                    psr_conditions=psr_conditions, flame_conditions=flame_conditions, 
+                    phase_name=phase_name, 
+                    num_threads=num_threads, path=temp_dir
+                    )
+                species_errors[idx] = calculate_error(metrics, reduced_model_metrics)
+            except:
+                species_errors[idx] = 100
     
     return species_errors
 
 
-def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flame_conditions,
+def run_sa(model_file, current_model, ignition_conditions, psr_conditions, flame_conditions,
            error_limit, species_safe, phase_name='', algorithm_type='greedy', species_limbo=[],
            num_threads=1, path=''
            ):
@@ -123,15 +128,13 @@ def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flam
         Return reduced model and associated metadata
 
     """
-    current_model = ReducedModel(
-        model=ct.Solution(model_file, phase_name), error=starting_error, filename=model_file
-        )
     
     logging.info(f'Beginning sensitivity analysis stage, using {algorithm_type} approach.')
 
     # The metrics for the starting model need to be determined or read
     initial_metrics = sample_metrics(
-        model_file, ignition_conditions, reuse_saved=True, phase_name=phase_name,
+        model_file, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+        flame_conditions=flame_conditions, reuse_saved=True, phase_name=phase_name,
         num_threads=num_threads, path=path
         )
 
@@ -146,30 +149,32 @@ def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flam
     # Need to first evaluate all induced errors of species; for the ``initial`` method,
     # this will be the only evaluation.
     species_errors = evaluate_species_errors(
-        current_model, ignition_conditions, initial_metrics, species_limbo, 
+        current_model, initial_metrics, species_limbo, ignition_conditions=ignition_conditions,
+        psr_conditions=psr_conditions, flame_conditions=flame_conditions,
         phase_name=phase_name, num_threads=num_threads
         )
 
     # Use a temporary directory to avoid cluttering the working directory with
     # all the temporary model files
+    logging.info(f'Species to evaluate: {species_limbo}')
     with TemporaryDirectory() as temp_dir:
         while species_limbo:
-            # use difference between error and current error to find species to remove
-            idx = np.argmin(np.abs(species_errors - current_model.error))
+            # use species errors to the original mechanism
+            idx = np.argmin(np.abs(species_errors))
             species_errors = np.delete(species_errors, idx)
             species_remove = species_limbo.pop(idx)
 
             test_model = trim(
-                current_model.filename, [species_remove], f'reduced_model_{species_remove}.cti', 
-                phase_name=phase_name
+                current_model.filename, [species_remove], f'reduced_model_{species_remove}.yaml', 
+                phase_name=phase_name, path=current_model.path
                 )
-            test_model_file = soln2cti.write(
-                test_model, output_filename=f'reduced_model_{species_remove}.cti', path=temp_dir
-                )
+            test_model_file = f'reduced_model_{species_remove}.yaml'
+            test_model.write_yaml(os.path.join(temp_dir,f'reduced_model_{species_remove}.yaml'))
 
             reduced_model_metrics = sample_metrics(
-                test_model_file, ignition_conditions, phase_name=phase_name, 
-                num_threads=num_threads, path=path
+                test_model_file, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+                flame_conditions=flame_conditions, phase_name=phase_name, 
+                num_threads=num_threads, path=temp_dir
                 )
             error = calculate_error(initial_metrics, reduced_model_metrics)
 
@@ -179,12 +184,13 @@ def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flam
             if error > error_limit:
                 break
             else:
-                current_model = ReducedModel(model=test_model, filename=test_model_file, error=error)
+                current_model = ReducedModel(model=test_model, filename=test_model_file, error=error, path=temp_dir)
 
             # If using the greedy algorithm, now need to reevaluate all species errors
             if algorithm_type == 'greedy':
                 species_errors = evaluate_species_errors(
-                    current_model, ignition_conditions, initial_metrics, species_limbo, 
+                    current_model, initial_metrics, species_limbo, ignition_conditions=ignition_conditions,
+                    psr_conditions=psr_conditions, flame_conditions=flame_conditions,
                     phase_name=phase_name, num_threads=num_threads
                     )
                 if min(species_errors) > error_limit:
@@ -192,10 +198,10 @@ def run_sa(model_file, starting_error, ignition_conditions, psr_conditions, flam
     
     # Final model; may need to rewrite
     reduced_model = ReducedModel(
-        model=current_model.model, filename=f'reduced_{current_model.model.n_species}.cti', 
+        model=current_model.model, filename=f'reduced_{current_model.model.n_species}.yaml', 
         error=current_model.error
         )
-    soln2cti.write(reduced_model.model, reduced_model.filename, path=path)
+    reduced_model.model.write_yaml(os.path.join(path,reduced_model.filename))
 
     logging.info(53 * '-')
     logging.info('Sensitivity analysis stage complete.')

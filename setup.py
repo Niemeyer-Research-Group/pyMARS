@@ -30,7 +30,7 @@ install_requires = [
     'cantera>=2.3.0',
     'networkx',
     'tables',
-    'pyyaml>=4.2b1'
+    'ruamel.yaml>=0.17.0'
 ]
 
 tests_require = [

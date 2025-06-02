@@ -25,7 +25,7 @@ def build_arrhenius(rate, reaction_order, reaction_type):
         Arrhenius-form reaction rate coefficient
     reaction_order : int or float
         Order of reaction (sum of reactant stoichiometric coefficients)
-    reaction_type : {cantera.ElementaryReaction, cantera.ThreeBodyReaction, cantera.PlogReaction}
+    reaction_type : {cantera.reaction.ElementaryReaction, cantera.reaction.ThreeBodyReaction, cantera.reaction.PlogReaction}
         Type of reaction
 
     Returns
@@ -34,13 +34,13 @@ def build_arrhenius(rate, reaction_order, reaction_type):
         String with Arrhenius coefficients
 
     """
-    if reaction_type in [ct.ElementaryReaction, ct.PlogReaction]:
+    if reaction_type in [ct.reaction.ElementaryReaction, ct.reaction.PlogReaction]:
         pre_exponential_factor = rate.pre_exponential_factor * 1e3**(reaction_order - 1)
 
-    elif reaction_type == ct.ThreeBodyReaction:
+    elif reaction_type == ct.reaction.ThreeBodyReaction:
         pre_exponential_factor = rate.pre_exponential_factor * 1e3**reaction_order
 
-    elif reaction_type in [ct.FalloffReaction, ct.ChemicallyActivatedReaction]:
+    elif reaction_type in [ct.reaction.FalloffReaction, ct.reaction.ChemicallyActivatedReaction]:
         raise ValueError('Function does not support falloff or chemically activated reactions')
     else:
         raise NotImplementedError('Reaction type not supported: ', reaction_type)

@@ -10,7 +10,6 @@ import numpy as np
 import networkx
 import cantera as ct
 
-from . import soln2cti
 from .sampling import sample, sample_metrics, calculate_error
 from .reduce_model import trim, ReducedModel
 
@@ -171,9 +170,9 @@ def create_drgep_matrix(state, solution):
     temp, pressure, mass_fractions = state
     solution.TPY = temp, pressure, mass_fractions
 
-    net_stoich = solution.product_stoich_coeffs() - solution.reactant_stoich_coeffs()
-    flags = np.where(((solution.product_stoich_coeffs() != 0) |
-                        (solution.reactant_stoich_coeffs() !=0 )
+    net_stoich = solution.product_stoich_coeffs - solution.reactant_stoich_coeffs
+    flags = np.where(((solution.product_stoich_coeffs != 0) |
+                        (solution.reactant_stoich_coeffs !=0 )
                         ), 1, 0)
 
     # only consider contributions from reactions with nonzero net rates of progress
@@ -209,7 +208,7 @@ def create_drgep_matrix(state, solution):
     return adjacency_matrix
 
 
-def graph_search_drgep(graph, target_species):
+def graph_search_drgep(graph, target_species, sampled_weights):
     """Searches graph to generate a dictionary of the greatest paths to all species from one of the targets.
 
     Parameters
@@ -218,6 +217,8 @@ def graph_search_drgep(graph, target_species):
         Graph representing model
     target_species : list of str
         List of target species to search from
+    target_weight : list of float
+        List of species weights
 
     Returns
     -------
@@ -226,18 +227,19 @@ def graph_search_drgep(graph, target_species):
 
     """
     overall_coefficients = {}
-    for target in target_species:
+    for idx,target in enumerate(target_species):
         coefficients = ss_dijkstra_path_length_modified(graph, target)
         # ensure target has importance of 1.0
         coefficients[target] = 1.0
 
         for sp in coefficients:
-            overall_coefficients[sp] = max(overall_coefficients.get(sp, 0.0), coefficients[sp])
-    
+            coeff = max(overall_coefficients.get(sp, 0.0), coefficients[sp])
+            overall_coefficients[sp] = coeff * sampled_weights[idx]
+
     return overall_coefficients
 
 
-def get_importance_coeffs(species_names, target_species, matrices):
+def get_importance_coeffs(species_names, target_species, matrices, sampled_weights):
     """Calculate importance coefficients for all species
 
     Parameters
@@ -248,6 +250,8 @@ def get_importance_coeffs(species_names, target_species, matrices):
         List of target species
     matrices : list of numpy.ndarray
         List of adjacency matrices
+    target_weights : list of float
+        List of species weights
 
     Returns
     -------
@@ -257,10 +261,10 @@ def get_importance_coeffs(species_names, target_species, matrices):
     """
     importance_coefficients = {sp:0.0 for sp in species_names}
     name_mapping = {i: sp for i, sp in enumerate(species_names)}
-    for matrix in matrices:
+    for idx,matrix in enumerate(matrices):
         graph = networkx.DiGraph(matrix)
         networkx.relabel_nodes(graph, name_mapping, copy=False)
-        coefficients = graph_search_drgep(graph, target_species)
+        coefficients = graph_search_drgep(graph, target_species, sampled_weights[idx,:])
         
         importance_coefficients = {
             sp:max(coefficients.get(sp, 0.0), importance_coefficients[sp]) 
@@ -270,8 +274,9 @@ def get_importance_coeffs(species_names, target_species, matrices):
     return importance_coefficients
 
 
-def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-                 sampled_metrics, phase_name='', previous_model=None, num_threads=1, path=''
+def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, sampled_metrics,
+                 ignition_conditions=[], psr_conditions=[], flame_conditions=[], 
+                 phase_name='', previous_model=None, num_threads=1, path=''
                  ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -308,6 +313,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
 
     """
     solution = ct.Solution(model_file, phase_name)
+
     species_removed = [sp for sp in solution.species_names
                        if importance_coeffs[sp] < threshold 
                        and sp not in species_safe
@@ -322,13 +328,13 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
     reduced_model = trim(
         model_file, species_removed, f'reduced_{model_file}', phase_name=phase_name
         )
-    reduced_model_filename = soln2cti.write(
-        reduced_model, f'reduced_{reduced_model.n_species}.cti', path=path
-        )
+    reduced_model_filename = f'reduced_{reduced_model.n_species}.yaml'
+    reduced_model.write_yaml(os.path.join(path,f'reduced_{reduced_model.n_species}.yaml'))
 
     reduced_model_metrics = sample_metrics(
-        reduced_model_filename, ignition_conditions, phase_name=phase_name, 
-        num_threads=num_threads, path=path
+        reduced_model_filename, ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+        flame_conditions=flame_conditions,
+        phase_name=phase_name, num_threads=num_threads, path=path
         )
     error = calculate_error(sampled_metrics, reduced_model_metrics)
 
@@ -383,8 +389,8 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
     # will be used to produce graphs for any threshold value.
-    sampled_metrics, sampled_data = sample(
-        model_file, ignition_conditions, phase_name=phase_name, num_threads=num_threads, path=path
+    sampled_metrics, sampled_data, sampled_weights = sample(
+        model_file, ignition_conditions, flame_conditions=flame_conditions, phase_name=phase_name, num_threads=num_threads, path=path
         )
     
     matrices = []
@@ -394,7 +400,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     # For DRGEP, find the overall interaction coefficients for all species 
     # using the maximum over all the sampled states
     importance_coeffs = get_importance_coeffs(
-        solution.species_names, species_targets, matrices
+        solution.species_names, species_targets, matrices, sampled_weights
         )
 
     # begin reduction iterations
@@ -411,8 +417,10 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     threshold_increment = 0.01
     while error_current <= error_limit:
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-            sampled_metrics, phase_name=phase_name, previous_model=previous_model, 
+            model_file, species_safe, threshold, importance_coeffs, sampled_metrics, 
+            ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+            flame_conditions=flame_conditions,
+            phase_name=phase_name, previous_model=previous_model, 
             num_threads=num_threads, path=path
             )
         error_current = reduced_model.error
@@ -447,11 +455,13 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, flame_conditions,
     if reduced_model.error > error_limit:
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drgep(
-            model_file, species_safe, threshold, importance_coeffs, ignition_conditions, 
-            sampled_metrics, phase_name=phase_name, num_threads=num_threads, path=path
+            model_file, species_safe, threshold, importance_coeffs, sampled_metrics,
+            ignition_conditions=ignition_conditions, psr_conditions=psr_conditions,
+            flame_conditions=flame_conditions,
+            phase_name=phase_name, num_threads=num_threads, path=path
             )
     else:
-        soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
+        reduced_model.write_yaml(os.path.join(path, f'reduced_{reduced_model.model.n_species}.yaml'))
 
     if threshold_upper:
         for sp in reduced_model.model.species_names:
