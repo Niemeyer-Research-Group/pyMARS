@@ -35,7 +35,7 @@ computational fluid dynamics simulations is practically impossible, due to the a
 pyMARS, which stands for "Python-based Model Automatic Reduction Software", is a software package
 that implements and applies literature methods for reducing chemical kinetic models, particularly
 targeted at combustion applications. pyMARS currently implements four "skeletal" reduction methods
-that identify and remove unimportant species and reactions: directed relation graph (DRG) [@lu:2005; @lu:2006a; @lu:2006b], 
+that identify and remove unimportant species and reactions: directed relation graph (DRG) [@lu:2005; @lu:2006a; @lu:2006b],
 directed relation graph with error propagation (DRGEP) [@pepiotdesjardins:2008; @niemeyer:2011],
 path flux analysis (PFA) [@sun:2010], and
 sensitivity analysis [@sankaran:2007; @zheng:2007; @niemeyer:2010; @niemeyer:2015].
@@ -69,7 +69,7 @@ to constrain the reduced model) and a list of initial conditions for homogeneous
 These simulations are used both to obtain
 ignition delay values for gauging the error of a candidate model, and also to sample thermochemical
 state data for the reduction methods (where 20 points are sampled during the ignition temperature rise).
-A graph-based reduction method can be specified using the ``method`` key, 
+A graph-based reduction method can be specified using the ``method`` key,
 the ``sensitivity-analysis`` key can be specified as ``True``
 to perform standalone sensitivity analysis, or both can be given to perform DRG/DRGEP/PFA-informed
 sensitivity analysis. Additional input keys include target species for DRG/DRGEP/PFA and optionally
@@ -78,7 +78,7 @@ specifying a list of species to always retain.
 Additional features include:
 
 - Simulations can be parallelized via the ``multiprocessing`` module by adding the ``--num_threads``
-command-line option and specifying a value greater than one. (Including the option alone will lead to 
+command-line option and specifying a value greater than one. (Including the option alone will lead to
 pyMARS using the available number of threads minus one.)
 - To save (potentially significant) time when performing multiple reductions for the same model,
 pyMARS saves and automatically reuses sampled autoignition data when possible.

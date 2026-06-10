@@ -1,6 +1,6 @@
-model: gri30.cti
+model: gri30.yaml
 # List of target species
-targets: 
+targets:
   - CH4
   - O2
 # List of species to be always retained
@@ -26,17 +26,17 @@ autoignition-conditions:
     # units: K
     temperature: 1000.0
     # species given in mole fractions
-    fuel: 
+    fuel:
       CH4: 1.0
     oxidizer:
       O2: 1.0
       N2: 3.76
     equivalence-ratio: 1.0
 
-  - kind: constant volume 
+  - kind: constant volume
     pressure: 1.0
     temperature: 1200.0
-    fuel: 
+    fuel:
       CH4: 1.0
     oxidizer:
       O2: 1.0

@@ -4,56 +4,46 @@
 Installation Guide
 ==================
 
-pyMARS is available for Python 3.6+ on Linux, macOS, and Windows via
-``conda`` and ``pip``. pyMARS depends on ``cantera``, so you should
-first install that via the ``cantera`` channel, then install
-pyMARS via the ``niemeyer-research-group`` channel::
+pyMARS requires Python 3.10+ and is available on Linux, macOS, and Windows.
 
-    conda install -c cantera cantera
-    conda install -c niemeyer-research-group pymars
+Via conda (recommended)
+-----------------------
 
-Note that you might need to include the ``conda-forge`` channel
-by editing your conda configuration::
+Install pyMARS from the ``niemeyer-research-group`` channel, with
+``conda-forge`` providing the remaining dependencies (including Cantera)::
 
-    conda config --append channels conda-forge
-    conda install -c niemeyer-research-group pymars
+    conda install -c niemeyer-research-group -c conda-forge pymars
 
-You can also install using ``pip`` by downloading the source code and changing
-into that directory::
+Via pip
+-------
+
+Install directly from GitHub::
+
+    pip install git+https://github.com/Niemeyer-Research-Group/pyMARS.git
+
+Or clone the repository and install from the local copy::
 
     git clone https://github.com/Niemeyer-Research-Group/pyMARS/
     cd pyMARS
-    pip install pymars
+    pip install .
 
-Unfortunately, it is not currently possible to install using ``pip``
-from PyPI, because (1) there is no Cantera package on PyPI and
-(2) someone else claimed the ``pymars`` name.
+.. note::
+
+   The ``pymars`` name on PyPI is currently held by an unrelated project.
+   A name reclaim request is in progress per
+   `PEP 541 <https://peps.python.org/pep-0541/>`_.
+   We will publish to PyPI once the name is recovered.
 
 Development
 -----------
 
-pyMARS can be installed from source by cloning the git repository
-and changing into that directory::
+To install an editable (development) copy, clone the repository and use
+``pip``::
 
     git clone https://github.com/Niemeyer-Research-Group/pyMARS/
     cd pyMARS
-
-Then run::
-
-    conda develop .
-
-if you're using ``conda`` (you may need to install ``conda-build`` first).
-To uninstall, run::
-
-    conda develop . --uninstall
-
-Note that this doesn't install the standalone converter scripts. With
-``pip``, installing is done by::
-
     pip install -e .
 
-To uninstall with ``pip``::
+To uninstall::
 
     pip uninstall pymars
-
-``pip`` does install the standalone scripts.

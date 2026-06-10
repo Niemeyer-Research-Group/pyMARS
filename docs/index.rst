@@ -62,7 +62,7 @@ Code API
    sensitivity_analysis
    simulation
    soln2ck
-   soln2cti
+   soln2yaml
    tools
 
 

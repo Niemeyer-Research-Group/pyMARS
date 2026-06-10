@@ -27,7 +27,7 @@ The following options are available, and can also be seen by using the
         Number of CPU cores to use for running simulations in parallel.
         If no number, then use available number of cores minus 1.
      --convert:
-        Convert files between Cantera and Chemkin formats (.cti <=> .inp)
+        Convert files between Cantera and Chemkin formats (.yaml <=> .inp)
      --thermo:
         thermodynamic data filename (only necessary for Chemkin files)
      --transport:
@@ -44,7 +44,7 @@ first create a YAML file (let's call it ``reduction_input.yaml``:
 
 .. code-block:: yaml
 
-    model: gri30.cti
+    model: gri30.yaml
     targets:
       - CH4
       - O2
@@ -108,7 +108,7 @@ Your new input file (called ``drgepsa_input.yaml``) would then look like:
 
 .. code-block:: yaml
 
-    model: gri30.cti
+    model: gri30.yaml
     targets:
       - CH4
       - O2
@@ -141,7 +141,7 @@ Your new input file (called ``drgepsa_input.yaml``) would then look like:
         equivalence-ratio: 0.5
 
 Then, the command for performing a reduction using DRGEPSA with
-parallelized simalations would be:
+parallelized simulations would be:
 
 .. code-block:: bash
 
@@ -157,7 +157,7 @@ You control the model reduction process in pyMARS through a YAML input file,
 indicated with the ``--input`` or ``-i`` command-line argument. Keys include:
 
 - ``model:`` filename of kinetic model being reduced (Chemkin or Cantera)
-- ``phase-name:`` Optional name of phase in Cantera CTI file to be reduced
+- ``phase-name:`` Optional name of phase in Cantera YAML file to be reduced
 - ``targets:`` List of one or more target species; required for DRG, DRGEP,
   and PFA methods
 - ``retained-species:`` Optional list of one or more species to never remove.
@@ -258,7 +258,7 @@ To convert a Cantera model into a Chemkin model, do
 
 .. code-block:: bash
 
-    pymars --convert -m model.cti
+    pymars --convert -m model.yaml
 
 pyMARS also provides conversion from Chemkin to Cantera for convenience:
 
