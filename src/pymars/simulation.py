@@ -75,12 +75,15 @@ class Simulation(object):
                 )
 
         if self.properties.kind == "constant pressure":
-            self.reac = ct.IdealGasConstPressureReactor(self.gas, clone=False)
+            self.reac = ct.IdealGasConstPressureMoleReactor(self.gas, clone=False)
         else:
-            self.reac = ct.IdealGasReactor(self.gas, clone=False)
+            self.reac = ct.IdealGasMoleReactor(self.gas, clone=False)
 
-        # Create ``ReactorNet`` newtork
+        # Create ``ReactorNet`` network. Use an adaptive preconditioner with the
+        # mole-based reactors so the integrator runs with a sparse preconditioned
+        # GMRES solver, which accelerates integration of large kinetic models.
         self.sim = ct.ReactorNet([self.reac])
+        self.sim.preconditioner = ct.AdaptivePreconditioner()
 
         # Set file for later data file
         self.save_file = os.path.join(self.path, str(self.idx) + ".h5")

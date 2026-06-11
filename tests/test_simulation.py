@@ -31,7 +31,7 @@ class TestSimulation:
         sim = Simulation(0, case, "gri30.yaml")
         sim.setup_case()
 
-        assert isinstance(sim.reac, ct.IdealGasReactor)
+        assert isinstance(sim.reac, ct.IdealGasMoleReactor)
         assert np.allclose(sim.gas.T, 1000.0)
         assert np.allclose(sim.gas.P, ct.one_atm)
 
@@ -56,7 +56,7 @@ class TestSimulation:
         sim = Simulation(0, case, "gri30.yaml")
         sim.setup_case()
 
-        assert isinstance(sim.reac, ct.IdealGasReactor)
+        assert isinstance(sim.reac, ct.IdealGasMoleReactor)
         assert np.allclose(sim.gas.T, 1000.0)
         assert np.allclose(sim.gas.P, ct.one_atm)
 
@@ -82,7 +82,7 @@ class TestSimulation:
         sim = Simulation(0, case, "gri30.yaml")
         sim.setup_case()
 
-        assert isinstance(sim.reac, ct.IdealGasReactor)
+        assert isinstance(sim.reac, ct.IdealGasMoleReactor)
         assert np.allclose(sim.gas.T, 1000.0)
         assert np.allclose(sim.gas.P, ct.one_atm)
 
