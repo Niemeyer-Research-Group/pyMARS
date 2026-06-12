@@ -20,7 +20,9 @@ It uses provided conditions to sample thermochemical data for the reduction
 analysis and calculate global combustion metrics for determining the error.
 For example, typically most reductions will use autoignition simulations
 to sample state data and determine autoignition delay over the condition
-range desired for the reduced model.
+range desired for the reduced model. Freely-propagating laminar flame
+simulations are also supported, using the laminar flame speed as an error
+metric; autoignition and flame conditions may be used separately or together.
 
 pyMARS currently supports four methods for skeletal model reduction:
 

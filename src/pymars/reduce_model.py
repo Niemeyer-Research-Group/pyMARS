@@ -66,12 +66,15 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=""):
                 }
             final_reactions.append(reaction)
 
-    # Create new solution based on remaining species and reactions
+    # Create new solution based on remaining species and reactions. Preserve the
+    # original transport model so reduced models remain usable for transport-based
+    # simulations such as laminar flames.
     new_solution = ct.Solution(
         species=final_species,
         reactions=final_reactions,
         thermo="ideal-gas",
         kinetics="bulk",
+        transport_model=solution.transport_model,
     )
     new_solution.TP = solution.TP
     if phase_name:

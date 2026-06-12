@@ -173,15 +173,21 @@ indicated with the ``--input`` or ``-i`` command-line argument. Keys include:
   reduction methods
 - ``autoignition-conditions``: List of initial conditions for autoignition
   simulations, described in more detail next
+- ``laminar-flame-conditions``: List of initial conditions for freely-propagating
+  laminar flame simulations, described in more detail below
+
+At least one of ``autoignition-conditions`` or ``laminar-flame-conditions`` must
+be provided; you may also supply both, in which case the sampled states and the
+error metrics (ignition delays and flame speeds) from all cases are combined.
 
 Species given in ``targets``, ``retained-species``, or
 ``fuel``/``oxidizer``/``reactants`` must be present in the model specified in
 ``model``, spelling must match exactly (including case).
 
-**Autoignition parameters:** pyMARS currently uses autoignition simulations to
+**Autoignition parameters:** pyMARS can use autoignition simulations to
 sample thermochemical data for the reduction and to calculate ignition delays
-for measuring error of candidate reduced models. Initial conditions need to be
-provided for performing these simulations, in the ``autoignition-conditions``
+for measuring error of candidate reduced models. Initial conditions are
+provided for performing these simulations in the ``autoignition-conditions``
 field of the input file.
 
 These initial conditions are given as a list, with these required keys:
@@ -242,6 +248,41 @@ model with different parameters, pyMARS will automatically
 reuse saved ignition data from a prior run. It semi-intelligently checks
 if the number of cases matches that in the input file, but to be safe
 output files should be cleaned between applications.
+
+**Laminar flame parameters:** pyMARS can additionally (or instead) use
+one-dimensional freely-propagating laminar flame simulations to sample
+thermochemical data and to use the laminar flame speed as an error metric.
+Initial conditions are given in the ``laminar-flame-conditions`` field as a
+list, using the same mixture keys as autoignition cases (``pressure`` in atm,
+``temperature`` in K, and either ``equivalence-ratio`` with
+``fuel``/``oxidizer`` or a list of ``reactants``). Unlike autoignition cases,
+no ``kind`` is given, since freely-propagating flames are always constant
+pressure. The temperature should be the unburned-mixture temperature
+(e.g., 300 K).
+
+Each flame case also accepts an optional ``width`` key giving the width of the
+computational domain in meters (default ``0.1``); this is the initial estimate
+of the domain size, which Cantera refines automatically during the solve:
+
+.. code-block:: yaml
+
+    laminar-flame-conditions:
+      - pressure: 1.0
+        temperature: 300.0
+        width: 0.03
+        fuel:
+          H2: 1.0
+        oxidizer:
+          O2: 1.0
+          N2: 3.76
+        equivalence-ratio: 1.0
+
+Note that the kinetic model must include transport data to run laminar flame
+simulations. Flame simulations are considerably more expensive than autoignition
+simulations, so reductions that rely on them will take longer.
+
+As with autoignition data, pyMARS reuses saved laminar flame samples from a
+prior run when the number and shape of the saved cases match the input file.
 
 
 .. _conversion:

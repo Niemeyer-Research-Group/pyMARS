@@ -38,6 +38,7 @@ def evaluate_species_errors(
     ignition_conditions,
     metrics,
     species_limbo,
+    flame_conditions=[],
     phase_name="",
     num_threads=1,
 ):
@@ -53,8 +54,10 @@ def evaluate_species_errors(
         Calculated metrics for starting model, used for evaluating error
     species_limbo : list of str
         List of species to consider removal
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas').
+        Optional name for phase to load from YAML file (e.g., 'gas').
     num_threads : int, optional
         Number of CPU threads to use for performing simulations in parallel.
         Optional; default = 1, in which the multiprocessing module is not used.
@@ -82,6 +85,7 @@ def evaluate_species_errors(
             reduced_model_metrics = sample_metrics(
                 test_model_file,
                 ignition_conditions,
+                flame_conditions=flame_conditions,
                 phase_name=phase_name,
                 num_threads=num_threads,
             )
@@ -157,6 +161,7 @@ def run_sa(
     initial_metrics = sample_metrics(
         model_file,
         ignition_conditions,
+        flame_conditions=flame_conditions,
         reuse_saved=True,
         phase_name=phase_name,
         num_threads=num_threads,
@@ -178,6 +183,7 @@ def run_sa(
         ignition_conditions,
         initial_metrics,
         species_limbo,
+        flame_conditions=flame_conditions,
         phase_name=phase_name,
         num_threads=num_threads,
     )
@@ -206,6 +212,7 @@ def run_sa(
             reduced_model_metrics = sample_metrics(
                 test_model_file,
                 ignition_conditions,
+                flame_conditions=flame_conditions,
                 phase_name=phase_name,
                 num_threads=num_threads,
                 path=path,
@@ -231,6 +238,7 @@ def run_sa(
                     ignition_conditions,
                     initial_metrics,
                     species_limbo,
+                    flame_conditions=flame_conditions,
                     phase_name=phase_name,
                     num_threads=num_threads,
                 )

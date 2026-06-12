@@ -130,6 +130,7 @@ def reduce_drg(
     matrices,
     ignition_conditions,
     sampled_metrics,
+    flame_conditions=[],
     phase_name="",
     previous_model=None,
     threshold_upper=None,
@@ -154,8 +155,10 @@ def reduce_drg(
         List of autoignition initial conditions.
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas').
+        Optional name for phase to load from YAML file (e.g., 'gas').
     previous_model : ReducedModel, optional
         Model produced at previous threshold level; used to avoid repeated work.
     threshold_upper : float, optional
@@ -206,6 +209,7 @@ def reduce_drg(
     reduced_model_metrics = sample_metrics(
         reduced_model_filename,
         ignition_conditions,
+        flame_conditions=flame_conditions,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -289,6 +293,7 @@ def run_drg(
     sampled_metrics, sampled_data = sample(
         model_file,
         ignition_conditions,
+        flame_conditions=flame_conditions,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -319,6 +324,7 @@ def run_drg(
             matrices,
             ignition_conditions,
             sampled_metrics,
+            flame_conditions=flame_conditions,
             phase_name=phase_name,
             previous_model=previous_model,
             threshold_upper=threshold_upper,
@@ -366,6 +372,7 @@ def run_drg(
             matrices,
             ignition_conditions,
             sampled_metrics,
+            flame_conditions=flame_conditions,
             phase_name=phase_name,
             threshold_upper=threshold_upper,
             num_threads=num_threads,

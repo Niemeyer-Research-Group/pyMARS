@@ -7,7 +7,7 @@ import numpy as np
 import cantera as ct
 import networkx as nx
 
-from pymars.sampling import data_files, InputIgnition
+from pymars.sampling import data_files, InputIgnition, InputLaminarFlame
 from pymars.drgep import graph_search_drgep, get_importance_coeffs
 from pymars.drgep import run_drgep
 
@@ -493,3 +493,49 @@ class TestRunDRGEP:
         )
         assert reduced_model.model.n_reactions == expected_model.n_reactions
         assert round(reduced_model.error, 2) == 3.22
+
+    def test_flame_reduction(self, monkeypatch):
+        """Tests a DRGEP reduction driven by laminar flame speed (no ignition)."""
+        model_file = "h2o2.yaml"
+
+        flame_conditions = [
+            InputLaminarFlame(
+                pressure=1.0,
+                temperature=300.0,
+                equivalence_ratio=1.0,
+                fuel={"H2": 1.0},
+                oxidizer={"O2": 1.0, "N2": 3.76},
+                width=0.03,
+            )
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            # keep the sampled flame data/output files out of the repo
+            monkeypatch.setitem(
+                data_files,
+                "data_flame",
+                os.path.join(temp_dir, "laminarflame_data.dat"),
+            )
+            monkeypatch.setitem(
+                data_files,
+                "output_flame",
+                os.path.join(temp_dir, "laminarflame_output.txt"),
+            )
+            reduced_model = run_drgep(
+                model_file,
+                [],  # no ignition conditions: flame-speed-only reduction
+                [],  # psr
+                flame_conditions,
+                error_limit=30.0,
+                species_targets=["H2", "O2"],
+                species_safe=["N2"],
+                num_threads=1,
+                path=temp_dir,
+            )
+
+        # The reduced model should be valid, smaller than the original, and the
+        # reduced transport model should be preserved for the flame simulations.
+        full_model = ct.Solution(model_file)
+        assert 0 < reduced_model.model.n_species <= full_model.n_species
+        assert reduced_model.model.transport_model == full_model.transport_model
+        assert reduced_model.error <= 30.0

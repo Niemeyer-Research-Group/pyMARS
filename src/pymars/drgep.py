@@ -290,6 +290,7 @@ def reduce_drgep(
     importance_coeffs,
     ignition_conditions,
     sampled_metrics,
+    flame_conditions=[],
     phase_name="",
     previous_model=None,
     num_threads=1,
@@ -311,8 +312,10 @@ def reduce_drgep(
         List of autoignition initial conditions.
     sampled_metrics: numpy.ndarray
         Global metrics from original model used to evaluate error
+    flame_conditions : list of InputLaminarFlame, optional
+        List of laminar flame simulation conditions.
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas').
+        Optional name for phase to load from YAML file (e.g., 'gas').
     previous_model : ReducedModel, optional
         Model produced at previous threshold level; used to avoid repeated work.
     num_threads : int, optional
@@ -353,6 +356,7 @@ def reduce_drgep(
     reduced_model_metrics = sample_metrics(
         reduced_model_filename,
         ignition_conditions,
+        flame_conditions=flame_conditions,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -422,6 +426,7 @@ def run_drgep(
     sampled_metrics, sampled_data = sample(
         model_file,
         ignition_conditions,
+        flame_conditions=flame_conditions,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -457,6 +462,7 @@ def run_drgep(
             importance_coeffs,
             ignition_conditions,
             sampled_metrics,
+            flame_conditions=flame_conditions,
             phase_name=phase_name,
             previous_model=previous_model,
             num_threads=num_threads,
@@ -502,6 +508,7 @@ def run_drgep(
             importance_coeffs,
             ignition_conditions,
             sampled_metrics,
+            flame_conditions=flame_conditions,
             phase_name=phase_name,
             num_threads=num_threads,
             path=path,

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added laminar flame speed support: freely-propagating `FlameSimulation`, the `laminar-flame-conditions` input block, and laminar flame speed as an error metric, enabling reductions driven by flame data alone or combined with autoignition (based on work by Cailin Moore, #82)
+- Added `BaseSimulation` abstract base class with shared gas setup and thermochemical-profile sampling, giving `IgnitionSimulation` and `FlameSimulation` a common interface
+- Added automatic retention of fuel, oxidizer, and reactant species from the initial conditions so they are never removed during reduction (fixes #12; based on work by Katherine Bronstein, #80)
 - Added `soln2yaml` module for writing Cantera `Solution` objects to YAML files, delegating to Cantera's built-in `write_yaml()` method
 - Added YAML equivalents of all test asset models (`artificial-mechanism.yaml`, `model-third-bodies.yaml`, reduced GRI 3.0 models)
 - Added conda recipe (`conda.recipe/meta.yaml`) updated for Python 3.10+ and Cantera 3.x
@@ -18,6 +21,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Autoignition simulations now use Cantera mole reactors (`IdealGasMoleReactor` / `IdealGasConstPressureMoleReactor`) with an adaptive preconditioner, accelerating integration of large models (based on work by Anthony Walker, #84)
+- Reduction drivers (`run_drg`, `run_drgep`, `run_pfa`, and sensitivity analysis) now accept laminar flame conditions and combine ignition and flame error metrics and sampled state data uniformly, regardless of simulation type
+- Input files now require at least one of `autoignition-conditions` or `laminar-flame-conditions` (previously autoignition was mandatory)
+- Renamed the `Simulation` class to `IgnitionSimulation` and consolidated the base, ignition, and flame simulation classes into a single `simulation.py`
+- `trim()` now preserves the original model's transport model so reduced models remain usable for laminar flame simulations
 - Minimum Python version raised from 3.6 to 3.10
 - Updated Cantera dependency to 3.x; updated all API calls for Cantera 3.x (reaction type strings, stoichiometric coefficient property names, reactor constructor, phase/kinetics identifiers)
 - Replaced `.cti` format throughout with Cantera's YAML format; `soln2cti.py` removed and replaced by `soln2yaml.py`

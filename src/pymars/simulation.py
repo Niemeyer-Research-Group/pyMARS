@@ -1,30 +1,42 @@
-"""Autoignition simulation module"""
+"""Simulation classes used by pyMARS.
+
+Provides an abstract :class:`BaseSimulation` along with concrete simulation
+types: :class:`IgnitionSimulation` (autoignition) and :class:`FlameSimulation`
+(one-dimensional laminar flame). Additional types can be added by subclassing
+:class:`BaseSimulation`.
+
+.. moduleauthor:: Kyle Niemeyer, Cailin Moore (laminar flame functionality)
+"""
 
 import os
 import logging
+from abc import ABC, abstractmethod
 
 import numpy as np
 import h5py
 import cantera as ct
 
 
-class Simulation(object):
-    """Class for ignition delay simulations
+class BaseSimulation(ABC):
+    """Common interface and shared behavior for a single simulation case.
 
     Parameters
     ----------
     idx : int
-        Identifer index for case
-    properties : InputIgnition
-        Object with initial conditions for simulation
+        Identifier index for case
+    properties : InputIgnition or InputLaminarFlame
+        Object with initial conditions for the simulation
     model : str
         Filename for Cantera-format model to be used
     phase_name : str, optional
-        Optional name for phase to load from CTI file (e.g., 'gas').
+        Optional name for phase to load from YAML file (e.g., 'gas').
     path : str, optional
         Path for location of output files
 
     """
+
+    #: Number of points sampled along each simulation's thermochemical profile.
+    num_sample_points = 20
 
     def __init__(self, idx, properties, model, phase_name="", path=""):
         self.idx = idx
@@ -33,26 +45,27 @@ class Simulation(object):
         self.phase_name = phase_name
         self.path = path
 
-    def setup_case(self):
-        """Initialize simulation case."""
+        #: Path to any intermediate data file written during the run. Simulation
+        #: types that write one (e.g., autoignition) set this in ``setup_case``;
+        #: those that don't (e.g., laminar flame) leave it ``None``.
+        self.save_file = None
+
+    def _setup_gas(self):
+        """Create the gas object and set its initial temperature, pressure, and composition.
+
+        Returns
+        -------
+        cantera.Solution
+            The initialized gas object (also stored as ``self.gas``).
+
+        """
         self.gas = ct.Solution(self.model, self.phase_name)
-
-        # Default maximum number of steps
-        self.max_steps = 10000
-        if self.properties.max_steps:
-            self.max_steps = self.properties.max_steps
-
-        # By default, simulations will run to steady state, with the maximum number of steps
-        # given by ``self.max_steps``. Alternatively, an end time (in seconds) can be
-        # given in cases where something specific is needed (e.g., longer than normal)
-        self.time_end = 0.0
-        if self.properties.end_time:
-            self.time_end = self.properties.end_time
 
         self.gas.TP = (
             self.properties.temperature,
             self.properties.pressure * ct.one_atm,
         )
+
         # set initial composition using either equivalence ratio or general reactant composition
         if self.properties.equivalence_ratio:
             self.gas.set_equivalence_ratio(
@@ -73,6 +86,116 @@ class Simulation(object):
                     self.properties.pressure * ct.one_atm,
                     self.properties.reactants,
                 )
+
+        return self.gas
+
+    @classmethod
+    def _sample_profile(cls, temperatures, pressures, mass_fractions):
+        """Sample state at evenly-spaced fractions of the total temperature rise.
+
+        Samples ``num_sample_points`` rows of ``[temperature, pressure, *mass_fractions]``
+        at the points where the temperature first crosses each evenly-spaced fraction
+        of the total rise from the initial to the maximum (final) temperature.
+
+        Parameters
+        ----------
+        temperatures : numpy.ndarray
+            Temperature at each point along the profile (time or space).
+        pressures : numpy.ndarray
+            Pressure at each profile point.
+        mass_fractions : numpy.ndarray
+            Mass fractions indexed as ``[profile_point, species]``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape ``(num_sample_points, 2 + n_species)``.
+
+        """
+        delta = 1.0 / cls.num_sample_points
+        deltas = np.arange(delta, 1 + delta, delta)
+
+        n_species = mass_fractions.shape[1]
+        temperature_initial = temperatures[0]
+        temperature_diff = temperatures[-1] - temperature_initial
+
+        sampled_data = np.zeros((len(deltas), 2 + n_species))
+
+        idx = 0
+        for point in range(len(temperatures)):
+            if idx >= len(deltas):
+                break
+            if temperatures[point] >= temperature_initial + (
+                deltas[idx] * temperature_diff
+            ):
+                sampled_data[idx, 0:2] = [temperatures[point], pressures[point]]
+                sampled_data[idx, 2:] = mass_fractions[point]
+                idx += 1
+
+        return sampled_data
+
+    @abstractmethod
+    def setup_case(self):
+        """Initialize the simulation case."""
+
+    @abstractmethod
+    def run_case(self, restart=False):
+        """Run the simulation and return its global metric."""
+
+    @abstractmethod
+    def calculate(self):
+        """Run the case and return only its global metric, without sampling data."""
+
+    @abstractmethod
+    def process_results(self, skip_data=False):
+        """Process results, returning the metric and (optionally) sampled data."""
+
+    def clean(self):
+        """Remove the intermediate data file written during the run, if any.
+
+        Simulation types that write no data file leave ``save_file`` as ``None``,
+        so this is a no-op for them and the same call works regardless of type.
+        """
+        if self.save_file is not None:
+            try:
+                os.remove(self.save_file)
+            except OSError:
+                pass
+
+
+class IgnitionSimulation(BaseSimulation):
+    """Class for ignition delay simulations
+
+    Parameters
+    ----------
+    idx : int
+        Identifer index for case
+    properties : InputIgnition
+        Object with initial conditions for simulation
+    model : str
+        Filename for Cantera-format model to be used
+    phase_name : str, optional
+        Optional name for phase to load from YAML file (e.g., 'gas').
+    path : str, optional
+        Path for location of output files
+
+    """
+
+    def setup_case(self):
+        """Initialize simulation case."""
+        self._setup_gas()
+
+        # Default maximum number of steps
+        self.max_steps = 10000
+        if self.properties.max_steps:
+            self.max_steps = self.properties.max_steps
+
+        # By default, simulations will run to steady state, with the maximum number of steps
+        # given by ``self.max_steps``. Alternatively, an end time (in seconds) can be
+        # given in cases where something specific is needed (e.g., longer than normal)
+        self.time_end = 0.0
+        if self.properties.end_time:
+            self.time_end = self.properties.end_time
 
         if self.properties.kind == "constant pressure":
             self.reac = ct.IdealGasConstPressureMoleReactor(self.gas, clone=False)
@@ -208,8 +331,8 @@ class Simulation(object):
 
         return self.ignition_delay
 
-    def calculate_ignition(self):
-        """Run simulation case set up ``setup_case``, just for ignition delay."""
+    def calculate(self):
+        """Run simulation case, just for ignition delay."""
         # Main time integration loop
         if self.time_end:
             # if end time specified, continue integration until reaching that time
@@ -251,9 +374,6 @@ class Simulation(object):
             Ignition delay, or ignition delay and sampled data
 
         """
-        delta = 0.05
-        deltas = np.arange(delta, 1 + delta, delta)
-
         # Load saved integration results
         self.save_file = os.path.join(self.path, str(self.idx) + ".h5")
         with h5py.File(self.save_file, "r") as h5file:
@@ -264,36 +384,105 @@ class Simulation(object):
             mass_fractions = grp["mass_fractions"][:]
 
         temperature_initial = temperatures[0]
-        temperature_max = temperatures[-1]
-        temperature_diff = temperature_max - temperature_initial
 
-        sampled_data = np.zeros((len(deltas), 2 + mass_fractions.shape[1]))
-
-        # need to add processing to get the 20 data points here
+        # ignition delay: first time the temperature rises 400 K above its initial value
         self.ignition_delay = 0.0
-        ignition_flag = False
-        idx = 0
-        for time, temp, pres, mass in zip(
-            times, temperatures, pressures, mass_fractions
-        ):
-            if temp >= temperature_initial + 400.0 and not ignition_flag:
+        for time, temp in zip(times, temperatures):
+            if temp >= temperature_initial + 400.0:
                 self.ignition_delay = time
-                ignition_flag = True
-                if skip_data:
-                    return self.ignition_delay
+                break
 
-            if temp >= temperature_initial + (deltas[idx] * temperature_diff):
-                sampled_data[idx, 0:2] = [temp, pres]
-                sampled_data[idx, 2:] = mass
+        if skip_data:
+            return self.ignition_delay
 
-                idx += 1
-                if idx == 20:
-                    self.sampled_data = sampled_data
-                    return self.ignition_delay, sampled_data
+        sampled_data = self._sample_profile(temperatures, pressures, mass_fractions)
+        self.sampled_data = sampled_data
+        return self.ignition_delay, sampled_data
 
-    def clean(self):
-        """Delete HDF5 file with full integration data."""
+
+class FlameSimulation(BaseSimulation):
+    """Class for one-dimensional freely-propagating laminar flame simulations.
+
+    .. moduleauthor:: Cailin Moore
+
+    Parameters
+    ----------
+    idx : int
+        Identifier index for case
+    properties : InputLaminarFlame
+        Object with initial conditions for simulation
+    model : str
+        Filename for Cantera-format model to be used
+    phase_name : str, optional
+        Optional name for phase to load from YAML file (e.g., 'gas').
+    path : str, optional
+        Path for location of output files
+
+    """
+
+    def setup_case(self):
+        """Initialize simulation case."""
+        self._setup_gas()
+
+        self.flame_speed = 0.0
+
+        # Create the freely-propagating flame object
+        self.flame = ct.FreeFlame(self.gas, width=self.properties.width)
+        self.flame.set_refine_criteria(ratio=3, slope=0.1, curve=0.1)
+
+    def run_case(self, restart=False):
+        """Solve the laminar flame and return the unburned flame speed.
+
+        Parameters
+        ----------
+        restart : bool
+            Unused; retained for interface symmetry with ``IgnitionSimulation``.
+
+        Returns
+        -------
+        float
+            Computed laminar flame speed in m/s
+
+        """
         try:
-            os.remove(self.save_file)
-        except OSError:
-            pass
+            self.flame.solve(loglevel=0, refine_grid=True, auto=True)
+        except ct.CanteraError as err:
+            logging.error(f"No flame detected for laminar flame case {self.idx}")
+            raise RuntimeError(
+                f"No flame detected for laminar flame case {self.idx}"
+            ) from err
+
+        self.flame_speed = self.flame.velocity[0]
+        return self.flame_speed
+
+    def calculate(self):
+        """Solve the flame and return only the flame speed."""
+        self.flame_speed = self.run_case()
+        return self.flame_speed
+
+    def process_results(self, skip_data=False):
+        """Solve the flame and sample data along the flame profile.
+
+        Parameters
+        ----------
+        skip_data : bool
+            Flag to skip sampling thermochemical data
+
+        Returns
+        -------
+        float, or tuple of float and numpy.ndarray
+            Flame speed, or flame speed and sampled data
+
+        """
+        self.flame_speed = self.calculate()
+        if skip_data:
+            return self.flame_speed
+
+        temperatures = self.flame.T
+        pressures = np.full(len(temperatures), self.flame.P)
+        # flame.Y is indexed [species, grid point]; the sampler expects [point, species]
+        mass_fractions = self.flame.Y.T
+
+        sampled_data = self._sample_profile(temperatures, pressures, mass_fractions)
+        self.sampled_data = sampled_data
+        return self.flame_speed, sampled_data
