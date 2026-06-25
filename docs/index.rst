@@ -7,7 +7,7 @@ pyMARS |release|
 ================
 
 pyMARS is a Python package for reducing the size of chemical kinetic models;
-the name stands for Python-based Model Automatic Reduction. pyMARS is licensed
+the name stands for Python-based Model Automatic Reduction Software. pyMARS is licensed
 under the permissive, open-source MIT license. The source code is publicly
 available on GitHub at https://github.com/Niemeyer-Research-Group/pyMARS.
 
