@@ -1,26 +1,26 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <title>pyMARS 1.1.0 &#8212; pyMARS 1.1.0 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyMARS 1.1.1a0 &#8212; pyMARS 1.1.1a0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8c5d1136"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation Guide" href="installation.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -32,10 +32,10 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="pymars-release">
-<h1>pyMARS 1.1.0<a class="headerlink" href="#pymars-release" title="Permalink to this headline">¶</a></h1>
+  <section id="pymars-release">
+<h1>pyMARS 1.1.1a0<a class="headerlink" href="#pymars-release" title="Link to this heading">¶</a></h1>
 <p>pyMARS is a Python package for reducing the size of chemical kinetic models;
-the name stands for Python-based Model Automatic Reduction. pyMARS is licensed
+the name stands for Python-based Model Automatic Reduction Software. pyMARS is licensed
 under the permissive, open-source MIT license. The source code is publicly
 available on GitHub at <a class="reference external" href="https://github.com/Niemeyer-Research-Group/pyMARS">https://github.com/Niemeyer-Research-Group/pyMARS</a>.</p>
 <p>pyMARS takes models given in the standard Cantera or Chemkin file formats
@@ -46,7 +46,9 @@ many species and reactions as possible using a specified method.</p>
 analysis and calculate global combustion metrics for determining the error.
 For example, typically most reductions will use autoignition simulations
 to sample state data and determine autoignition delay over the condition
-range desired for the reduced model.</p>
+range desired for the reduced model. Freely-propagating laminar flame
+simulations are also supported, using the laminar flame speed as an error
+metric; autoignition and flame conditions may be used separately or together.</p>
 <p>pyMARS currently supports four methods for skeletal model reduction:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -56,11 +58,17 @@ range desired for the reduced model.</p>
 <li><p>Sensitivity analysis (SA)</p></li>
 </ol>
 </div></blockquote>
-<div class="section" id="user-s-guide">
-<h2>User’s Guide<a class="headerlink" href="#user-s-guide" title="Permalink to this headline">¶</a></h2>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading">¶</a></h2>
+<p>If you use pyMARS, please cite it in any resulting publications. Thank you!</p>
+</section>
+<section id="user-s-guide">
+<h2>User’s Guide<a class="headerlink" href="#user-s-guide" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#via-pip-recommended">Via pip (recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#via-conda">Via conda</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#development">Development</a></li>
 </ul>
 </li>
@@ -81,46 +89,119 @@ range desired for the reduced model.</p>
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="code-api">
-<h2>Code API<a class="headerlink" href="#code-api" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="code-api">
+<h2>Code API<a class="headerlink" href="#code-api" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Modules:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
-<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
-<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="drg.html#pymars.drg.create_drg_matrix"><code class="docutils literal notranslate"><span class="pre">create_drg_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drg.html#pymars.drg.graph_search"><code class="docutils literal notranslate"><span class="pre">graph_search()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drg.html#pymars.drg.reduce_drg"><code class="docutils literal notranslate"><span class="pre">reduce_drg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drg.html#pymars.drg.run_drg"><code class="docutils literal notranslate"><span class="pre">run_drg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drg.html#pymars.drg.trim_drg"><code class="docutils literal notranslate"><span class="pre">trim_drg()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.create_drgep_matrix"><code class="docutils literal notranslate"><span class="pre">create_drgep_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.get_importance_coeffs"><code class="docutils literal notranslate"><span class="pre">get_importance_coeffs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.graph_search_drgep"><code class="docutils literal notranslate"><span class="pre">graph_search_drgep()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.mod_dijkstra"><code class="docutils literal notranslate"><span class="pre">mod_dijkstra()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.reduce_drgep"><code class="docutils literal notranslate"><span class="pre">reduce_drgep()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.run_drgep"><code class="docutils literal notranslate"><span class="pre">run_drgep()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="drgep.html#pymars.drgep.ss_dijkstra_path_length_modified"><code class="docutils literal notranslate"><span class="pre">ss_dijkstra_path_length_modified()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pfa.html#pymars.pfa.create_pfa_matrix"><code class="docutils literal notranslate"><span class="pre">create_pfa_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pfa.html#pymars.pfa.graph_search"><code class="docutils literal notranslate"><span class="pre">graph_search()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pfa.html#pymars.pfa.reduce_pfa"><code class="docutils literal notranslate"><span class="pre">reduce_pfa()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pfa.html#pymars.pfa.run_pfa"><code class="docutils literal notranslate"><span class="pre">run_pfa()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pfa.html#pymars.pfa.trim_pfa"><code class="docutils literal notranslate"><span class="pre">trim_pfa()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pymars.html#pymars.pymars.METHODS"><code class="docutils literal notranslate"><span class="pre">METHODS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymars.html#pymars.pymars.ReductionInputs"><code class="docutils literal notranslate"><span class="pre">ReductionInputs</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymars.html#pymars.pymars.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymars.html#pymars.pymars.parse_inputs"><code class="docutils literal notranslate"><span class="pre">parse_inputs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel"><code class="docutils literal notranslate"><span class="pre">ReducedModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reduce_model.html#pymars.reduce_model.trim"><code class="docutils literal notranslate"><span class="pre">trim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition"><code class="docutils literal notranslate"><span class="pre">InputIgnition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.InputLaminarFlame"><code class="docutils literal notranslate"><span class="pre">InputLaminarFlame</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.InputPSR"><code class="docutils literal notranslate"><span class="pre">InputPSR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.calculate_error"><code class="docutils literal notranslate"><span class="pre">calculate_error()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.flame_sample_worker"><code class="docutils literal notranslate"><span class="pre">flame_sample_worker()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.flame_worker"><code class="docutils literal notranslate"><span class="pre">flame_worker()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.ignition_sample_worker"><code class="docutils literal notranslate"><span class="pre">ignition_sample_worker()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.ignition_worker"><code class="docutils literal notranslate"><span class="pre">ignition_worker()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.parse_flame_inputs"><code class="docutils literal notranslate"><span class="pre">parse_flame_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.parse_ignition_inputs"><code class="docutils literal notranslate"><span class="pre">parse_ignition_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.parse_psr_inputs"><code class="docutils literal notranslate"><span class="pre">parse_psr_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.read_metrics"><code class="docutils literal notranslate"><span class="pre">read_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.sample"><code class="docutils literal notranslate"><span class="pre">sample()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.sample_metrics"><code class="docutils literal notranslate"><span class="pre">sample_metrics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sensitivity_analysis.html#pymars.sensitivity_analysis.evaluate_species_errors"><code class="docutils literal notranslate"><span class="pre">evaluate_species_errors()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensitivity_analysis.html#pymars.sensitivity_analysis.run_sa"><code class="docutils literal notranslate"><span class="pre">run_sa()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.BaseSimulation"><code class="docutils literal notranslate"><span class="pre">BaseSimulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.FlameSimulation"><code class="docutils literal notranslate"><span class="pre">FlameSimulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.IgnitionSimulation"><code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="soln2ck.html#pymars.soln2ck.build_arrhenius"><code class="docutils literal notranslate"><span class="pre">build_arrhenius()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="soln2ck.html#pymars.soln2ck.build_falloff"><code class="docutils literal notranslate"><span class="pre">build_falloff()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="soln2ck.html#pymars.soln2ck.build_falloff_arrhenius"><code class="docutils literal notranslate"><span class="pre">build_falloff_arrhenius()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="soln2ck.html#pymars.soln2ck.write"><code class="docutils literal notranslate"><span class="pre">write()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="soln2ck.html#pymars.soln2ck.write_thermo_data"><code class="docutils literal notranslate"><span class="pre">write_thermo_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="soln2ck.html#pymars.soln2ck.write_transport_data"><code class="docutils literal notranslate"><span class="pre">write_transport_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="soln2yaml.html">soln2yaml</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="soln2yaml.html#pymars.soln2yaml.write"><code class="docutils literal notranslate"><span class="pre">write()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools.html#pymars.tools.compare_models"><code class="docutils literal notranslate"><span class="pre">compare_models()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools.html#pymars.tools.convert"><code class="docutils literal notranslate"><span class="pre">convert()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
-</div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</div>
+</section>
 
 
           </div>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="#">
-    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo" />
     
   </a>
 </p>
@@ -139,25 +220,22 @@ range desired for the reduced model.</p>
 
 
 
-    
 
-<p>
-<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
-    <img
-        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-    />
-</a>
-</p>
-
-
-<h3>Navigation</h3>
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
@@ -168,7 +246,7 @@ range desired for the reduced model.</p>
 <li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
-<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2yaml.html">soln2yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
 </ul>
 
@@ -180,16 +258,6 @@ range desired for the reduced model.</p>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -203,11 +271,11 @@ range desired for the reduced model.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &#169;2026, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
       <a href="_sources/index.rst.txt"
@@ -216,7 +284,7 @@ range desired for the reduced model.</p>
 
     
     <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+        <img src="_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
     </a>
     
 

@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <title>simulation &#8212; pyMARS 1.1.0 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>simulation &#8212; pyMARS 1.1.1a0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8c5d1136"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="soln2ck" href="soln2ck.html" />
@@ -20,8 +19,9 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -33,98 +33,222 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-pymars.simulation">
-<span id="simulation"></span><h1>simulation<a class="headerlink" href="#module-pymars.simulation" title="Permalink to this headline">¶</a></h1>
-<p>Autoignition simulation module</p>
-<dl class="class">
-<dt id="pymars.simulation.Simulation">
-<em class="property">class </em><code class="sig-prename descclassname">pymars.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param">idx</em>, <em class="sig-param">properties</em>, <em class="sig-param">model</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class for ignition delay simulations</p>
+  <section id="module-pymars.simulation">
+<span id="simulation"></span><h1>simulation<a class="headerlink" href="#module-pymars.simulation" title="Link to this heading">¶</a></h1>
+<p>Simulation classes used by pyMARS.</p>
+<p>Provides an abstract <a class="reference internal" href="#pymars.simulation.BaseSimulation" title="pymars.simulation.BaseSimulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSimulation</span></code></a> along with concrete simulation
+types: <a class="reference internal" href="#pymars.simulation.IgnitionSimulation" title="pymars.simulation.IgnitionSimulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code></a> (autoignition) and <a class="reference internal" href="#pymars.simulation.FlameSimulation" title="pymars.simulation.FlameSimulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlameSimulation</span></code></a>
+(one-dimensional laminar flame). Additional types can be added by subclassing
+<a class="reference internal" href="#pymars.simulation.BaseSimulation" title="pymars.simulation.BaseSimulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSimulation</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.simulation.</span></span><span class="sig-name descname"><span class="pre">BaseSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.BaseSimulation" title="Link to this definition">¶</a></dt>
+<dd><p>Common interface and shared behavior for a single simulation case.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Identifer index for case</p></li>
-<li><p><strong>properties</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition" title="pymars.sampling.InputIgnition"><em>InputIgnition</em></a>) – Object with initial conditions for simulation</p></li>
-<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Filename for Cantera-format model to be used</p></li>
-<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Path for location of output files</p></li>
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Identifier index for case</p></li>
+<li><p><strong>properties</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition" title="pymars.sampling.InputIgnition"><em>InputIgnition</em></a><em> or </em><a class="reference internal" href="sampling.html#pymars.sampling.InputLaminarFlame" title="pymars.sampling.InputLaminarFlame"><em>InputLaminarFlame</em></a>) – Object with initial conditions for the simulation</p></li>
+<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for Cantera-format model to be used</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from YAML file (e.g., ‘gas’).</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Path for location of output files</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="method">
-<dt id="pymars.simulation.Simulation.calculate_ignition">
-<code class="sig-name descname">calculate_ignition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.calculate_ignition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run simulation case set up <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>, just for ignition delay.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.calculate">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.BaseSimulation.calculate" title="Link to this definition">¶</a></dt>
+<dd><p>Run the case and return only its global metric, without sampling data.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="pymars.simulation.Simulation.clean">
-<code class="sig-name descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.clean" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete HDF5 file with full integration data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.BaseSimulation.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the intermediate data file written during the run, if any.</p>
+<p>Simulation types that write no data file leave <code class="docutils literal notranslate"><span class="pre">save_file</span></code> as <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+so this is a no-op for them and the same call works regardless of type.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="pymars.simulation.Simulation.process_results">
-<code class="sig-name descname">process_results</code><span class="sig-paren">(</span><em class="sig-param">skip_data=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.process_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process integration results to sample data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.num_sample_points">
+<span class="sig-name descname"><span class="pre">num_sample_points</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#pymars.simulation.BaseSimulation.num_sample_points" title="Link to this definition">¶</a></dt>
+<dd><p>Number of points sampled along each simulation’s thermochemical profile.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.process_results">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.BaseSimulation.process_results" title="Link to this definition">¶</a></dt>
+<dd><p>Process results, returning the metric and (optionally) sampled data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.run_case">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">run_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.BaseSimulation.run_case" title="Link to this definition">¶</a></dt>
+<dd><p>Run the simulation and return its global metric.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.save_file">
+<span class="sig-name descname"><span class="pre">save_file</span></span><a class="headerlink" href="#pymars.simulation.BaseSimulation.save_file" title="Link to this definition">¶</a></dt>
+<dd><p>Path to any intermediate data file written during the run. Simulation
+types that write one (e.g., autoignition) set this in <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>;
+those that don’t (e.g., laminar flame) leave it <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.BaseSimulation.setup_case">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">setup_case</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.BaseSimulation.setup_case" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the simulation case.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymars.simulation.FlameSimulation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.simulation.</span></span><span class="sig-name descname"><span class="pre">FlameSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation" title="Link to this definition">¶</a></dt>
+<dd><p>Class for one-dimensional freely-propagating laminar flame simulations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>skip_data</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Flag to skip sampling thermochemical data</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Ignition delay, or ignition delay and sampled data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple of float, <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="pymars.simulation.Simulation.run_case">
-<code class="sig-name descname">run_case</code><span class="sig-paren">(</span><em class="sig-param">stop_at_ignition=False</em>, <em class="sig-param">restart=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.run_case" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run simulation case set up <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>.</p>
-<p>If no end time is specified for the integration, the function integrates
-to steady state (or a maximum of 10,000 steps, by default). This is done
-by checking whether the system state changes below a certain threshold,
-with the residual computed using feature checking. This is blatantly stolen
-from Cantera’s <a class="reference external" href="https://cantera.org/documentation/docs-2.4/sphinx/html/cython/zerodim.html#cantera.ReactorNet.advance_to_steady_state" title="(in Cantera v2.4)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cantera.ReactorNet.advance_to_steady_state()</span></code></a> method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stop_at_ignition</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, stop integration at ignition point, don’t save data.</p></li>
-<li><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, skip if results file exists.</p></li>
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Identifier index for case</p></li>
+<li><p><strong>properties</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.InputLaminarFlame" title="pymars.sampling.InputLaminarFlame"><em>InputLaminarFlame</em></a>) – Object with initial conditions for simulation</p></li>
+<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for Cantera-format model to be used</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from YAML file (e.g., ‘gas’).</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Path for location of output files</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>self.ignition_delay</strong> – Computed ignition delay in seconds</p>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.calculate" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the flame and return only the flame speed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.process_results">
+<span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.process_results" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the flame and sample data along the flame profile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_data</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Flag to skip sampling thermochemical data</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flame speed, or flame speed and sampled data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a>, or <a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of float and numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="pymars.simulation.Simulation.setup_case">
-<code class="sig-name descname">setup_case</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.Simulation.setup_case" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.run_case">
+<span class="sig-name descname"><span class="pre">run_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.run_case" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the laminar flame and return the unburned flame speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Unused; retained for interface symmetry with <code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Computed laminar flame speed in m/s</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.setup_case">
+<span class="sig-name descname"><span class="pre">setup_case</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.setup_case" title="Link to this definition">¶</a></dt>
 <dd><p>Initialize simulation case.</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.simulation.</span></span><span class="sig-name descname"><span class="pre">IgnitionSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation" title="Link to this definition">¶</a></dt>
+<dd><p>Class for ignition delay simulations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Identifer index for case</p></li>
+<li><p><strong>properties</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition" title="pymars.sampling.InputIgnition"><em>InputIgnition</em></a>) – Object with initial conditions for simulation</p></li>
+<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for Cantera-format model to be used</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from YAML file (e.g., ‘gas’).</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Path for location of output files</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation.calculate" title="Link to this definition">¶</a></dt>
+<dd><p>Run simulation case, just for ignition delay.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation.process_results">
+<span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation.process_results" title="Link to this definition">¶</a></dt>
+<dd><p>Process integration results to sample data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_data</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Flag to skip sampling thermochemical data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ignition delay, or ignition delay and sampled data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation.run_case">
+<span class="sig-name descname"><span class="pre">run_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_at_ignition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation.run_case" title="Link to this definition">¶</a></dt>
+<dd><p>Run simulation case set up <code class="docutils literal notranslate"><span class="pre">setup_case</span></code>.</p>
+<p>If no end time is specified for the integration, the function integrates
+to steady state (or a maximum of 10,000 steps, by default). This is done
+by checking whether the system state changes below a certain threshold,
+with the residual computed using feature checking. This is blatantly stolen
+from Cantera’s <a class="reference external" href="https://cantera.org/3.0/sphinx/html/cython/zerodim.html#cantera.ReactorNet.advance_to_steady_state" title="(in Cantera v3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cantera.ReactorNet.advance_to_steady_state()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_at_ignition</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, stop integration at ignition point, don’t save data.</p></li>
+<li><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, skip if results file exists.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self.ignition_delay</strong> – Computed ignition delay in seconds</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation.setup_case">
+<span class="sig-name descname"><span class="pre">setup_case</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation.setup_case" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize simulation case.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 
 
           </div>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="index.html">
-    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo" />
     
   </a>
 </p>
@@ -143,25 +267,22 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
 
 
 
-    
 
-<p>
-<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
-    <img
-        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-    />
-</a>
-</p>
-
-
-<h3>Navigation</h3>
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
@@ -170,9 +291,14 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">simulation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.BaseSimulation"><code class="docutils literal notranslate"><span class="pre">BaseSimulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.FlameSimulation"><code class="docutils literal notranslate"><span class="pre">FlameSimulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.IgnitionSimulation"><code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
-<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2yaml.html">soln2yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
 </ul>
 
@@ -185,16 +311,6 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -208,11 +324,11 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &#169;2026, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
       <a href="_sources/simulation.rst.txt"
@@ -221,7 +337,7 @@ from Cantera’s <a class="reference external" href="https://cantera.org/documen
 
     
     <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+        <img src="_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
     </a>
     
 

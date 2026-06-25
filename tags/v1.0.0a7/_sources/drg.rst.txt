@@ -1,5 +1,0 @@
-===
-drg
-===
-
-.. automodule:: pymars.drg

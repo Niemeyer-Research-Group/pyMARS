@@ -1,18 +1,18 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <title>Usage &#8212; pyMARS 1.1.0 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Usage &#8212; pyMARS 1.1.1a0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8c5d1136"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Theory" href="theory.html" />
@@ -20,8 +20,9 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -33,8 +34,8 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="usage">
-<span id="sec-usage"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+  <section id="usage">
+<span id="sec-usage"></span><h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <p>Once installed, pyMARS can be run as an executable. Change to the directory
@@ -54,62 +55,62 @@ where your input files are located, then run:</p>
    Number of CPU cores to use for running simulations in parallel.
    If no number, then use available number of cores minus 1.
 --convert:
-   Convert files between Cantera and Chemkin formats (.cti &lt;=&gt; .inp)
+   Convert files between Cantera and Chemkin formats (.yaml &lt;=&gt; .inp)
 --thermo:
    thermodynamic data filename (only necessary for Chemkin files)
 --transport:
    transport data filename (only necessary for Chemkin files)
 </pre></div>
 </div>
-<div class="section" id="example-reduction">
-<h2>Example reduction<a class="headerlink" href="#example-reduction" title="Permalink to this headline">¶</a></h2>
+<section id="example-reduction">
+<h2>Example reduction<a class="headerlink" href="#example-reduction" title="Link to this heading">¶</a></h2>
 <p>To apply the DRGEP method for reducing the GRI Mech 3.0 model (included with
 Cantera), with a maximum error of 10%, using the main reactants as targets
 (CH<sub>4</sub> and O<sub>2</sub>) and always retaining N<sub>2</sub>,
 first create a YAML file (let’s call it <code class="docutils literal notranslate"><span class="pre">reduction_input.yaml</span></code>:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">gri30.cti</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gri30.yaml</span>
 <span class="nt">targets</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">CH4</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">O2</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CH4</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">O2</span>
 <span class="nt">retained-species</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">N2</span>
-<span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DRGEP</span>
-<span class="nt">error</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
-<span class="nt">sensitivity-analysis</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">N2</span>
+<span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DRGEP</span>
+<span class="nt">error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0</span>
+<span class="nt">sensitivity-analysis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="nt">autoignition-conditions</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant volume</span>
-    <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.0</span>
-    <span class="nt">fuel</span><span class="p">:</span>
-      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">oxidizer</span><span class="p">:</span>
-      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
-    <span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant volume</span>
+<span class="w">    </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.0</span>
+<span class="w">    </span><span class="nt">fuel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">oxidizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="w">    </span><span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 
-  <span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant volume</span>
-    <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1200.0</span>
-    <span class="nt">fuel</span><span class="p">:</span>
-      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">oxidizer</span><span class="p">:</span>
-      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
-    <span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant volume</span>
+<span class="w">    </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1200.0</span>
+<span class="w">    </span><span class="nt">fuel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">oxidizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="w">    </span><span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
 </pre></div>
 </div>
 <p>Then, execute this command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars --input reduction_input.yaml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars<span class="w"> </span>--input<span class="w"> </span>reduction_input.yaml
 </pre></div>
 </div>
 <p>You can also download an annotated version of the
-<a class="reference download internal" download="" href="_downloads/c261ccca8573dfccc05fa51a1558750d/example_input_file.yaml"><code class="xref download docutils literal notranslate"><span class="pre">example</span> <span class="pre">input</span> <span class="pre">file</span></code></a>; refer to the
+<a class="reference download internal" download="" href="_downloads/5da2cca5d7a29b087a6ccde468f405d7/example_input_file.yaml"><code class="xref download docutils literal notranslate"><span class="pre">example</span> <span class="pre">input</span> <span class="pre">file</span></code></a>; refer to the
 <a class="reference internal" href="#inputfile"><span class="std std-ref">Reduction input file</span></a> section for a detailed explanation.</p>
 <p><strong>Parallelization:</strong> If you have a large number of initial conditions, the
 reduction may be sped up by parallelizing the associated simulations over
 multiple CPU cores. You can do this by adding <code class="docutils literal notranslate"><span class="pre">--num_threads</span> <span class="pre">N</span></code>, where <code class="docutils literal notranslate"><span class="pre">N</span></code>
 is the desired number of cores. If you just specify <code class="docutils literal notranslate"><span class="pre">--num_threads</span></code>, then
-pyMARS will use the available numbera of cores minus one.</p>
+pyMARS will use the available number of cores minus one.</p>
 <p>(pyMARS does not currently support distributed memory parallelization, meaning
 across multiple nodes that do not share the same memory.)</p>
 <p><strong>Sensitivity analysis:</strong> To perform sensitivity analysis following DRGEP,
@@ -122,52 +123,52 @@ threshold value of 0.2 to ensure important species are not evaluated; do this
 by adding the line <code class="docutils literal notranslate"><span class="pre">upper-threshold:</span> <span class="pre">0.2</span></code>. (In the <a class="reference internal" href="theory.html#sec-theory"><span class="std std-ref">Theory</span></a>
 guide, this variable is referred to as <span class="math notranslate nohighlight">\(\epsilon^*\)</span>.)</p>
 <p>Your new input file (called <code class="docutils literal notranslate"><span class="pre">drgepsa_input.yaml</span></code>) would then look like:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">gri30.cti</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gri30.yaml</span>
 <span class="nt">targets</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">CH4</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">O2</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CH4</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">O2</span>
 <span class="nt">retained-species</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">N2</span>
-<span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DRGEP</span>
-<span class="nt">error</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
-<span class="nt">sensitivity-analysis</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="nt">sensitivity-type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">initial</span>
-<span class="nt">upper-threshold</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">N2</span>
+<span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DRGEP</span>
+<span class="nt">error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0</span>
+<span class="nt">sensitivity-analysis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="nt">sensitivity-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">initial</span>
+<span class="nt">upper-threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="nt">autoignition-conditions</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant volume</span>
-    <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.0</span>
-    <span class="nt">fuel</span><span class="p">:</span>
-      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">oxidizer</span><span class="p">:</span>
-      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
-    <span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant volume</span>
+<span class="w">    </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.0</span>
+<span class="w">    </span><span class="nt">fuel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">oxidizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="w">    </span><span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 
-  <span class="p p-Indicator">-</span> <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">constant volume</span>
-    <span class="nt">pressure</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">temperature</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1200.0</span>
-    <span class="nt">fuel</span><span class="p">:</span>
-      <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-    <span class="nt">oxidizer</span><span class="p">:</span>
-      <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-      <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
-    <span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant volume</span>
+<span class="w">    </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1200.0</span>
+<span class="w">    </span><span class="nt">fuel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">oxidizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="w">    </span><span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
 </pre></div>
 </div>
 <p>Then, the command for performing a reduction using DRGEPSA with
-parallelized simalations would be:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars --input drgepsa_input.yaml --num_threads
+parallelized simulations would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars<span class="w"> </span>--input<span class="w"> </span>drgepsa_input.yaml<span class="w"> </span>--num_threads
 </pre></div>
 </div>
-</div>
-<div class="section" id="reduction-input-file">
-<span id="inputfile"></span><h2>Reduction input file<a class="headerlink" href="#reduction-input-file" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="reduction-input-file">
+<span id="inputfile"></span><h2>Reduction input file<a class="headerlink" href="#reduction-input-file" title="Link to this heading">¶</a></h2>
 <p>You control the model reduction process in pyMARS through a YAML input file,
 indicated with the <code class="docutils literal notranslate"><span class="pre">--input</span></code> or <code class="docutils literal notranslate"><span class="pre">-i</span></code> command-line argument. Keys include:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">model:</span></code> filename of kinetic model being reduced (Chemkin or Cantera)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">phase-name:</span></code> Optional name of phase in Cantera CTI file to be reduced</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">phase-name:</span></code> Optional name of phase in Cantera YAML file to be reduced</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">targets:</span></code> List of one or more target species; required for DRG, DRGEP,
 and PFA methods</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">retained-species:</span></code> Optional list of one or more species to never remove.</p></li>
@@ -183,14 +184,19 @@ sensitivity analysis; only used when following one of the graph-based
 reduction methods</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code>: List of initial conditions for autoignition
 simulations, described in more detail next</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code>: List of initial conditions for freely-propagating
+laminar flame simulations, described in more detail below</p></li>
 </ul>
+<p>At least one of <code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code> or <code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code> must
+be provided; you may also supply both, in which case the sampled states and the
+error metrics (ignition delays and flame speeds) from all cases are combined.</p>
 <p>Species given in <code class="docutils literal notranslate"><span class="pre">targets</span></code>, <code class="docutils literal notranslate"><span class="pre">retained-species</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">fuel</span></code>/<code class="docutils literal notranslate"><span class="pre">oxidizer</span></code>/<code class="docutils literal notranslate"><span class="pre">reactants</span></code> must be present in the model specified in
 <code class="docutils literal notranslate"><span class="pre">model</span></code>, spelling must match exactly (including case).</p>
-<p><strong>Autoignition parameters:</strong> pyMARS currently uses autoignition simulations to
+<p><strong>Autoignition parameters:</strong> pyMARS can use autoignition simulations to
 sample thermochemical data for the reduction and to calculate ignition delays
-for measuring error of candidate reduced models. Initial conditions need to be
-provided for performing these simulations, in the <code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code>
+for measuring error of candidate reduced models. Initial conditions are
+provided for performing these simulations in the <code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code>
 field of the input file.</p>
 <p>These initial conditions are given as a list, with these required keys:</p>
 <ul class="simple">
@@ -206,28 +212,28 @@ reactants.</p>
 of species in the fuel and oxidizer, with the mole fraction/number of
 the species in each (these will be automatically normalized):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">fuel</span><span class="p">:</span>
-  <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="nt">oxidizer</span><span class="p">:</span>
-  <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-  <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3.76</span>
-<span class="nt">equivalence-ratio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 </pre></div>
 </div>
 <p>To specify the mixture using a list of reactants, just give the number of
 moles of each species in the initial mixture:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reactants</span><span class="p">:</span>
-  <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
-  <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.0</span>
-  <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7.52</span>
+<span class="w">  </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">  </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7.52</span>
 </pre></div>
 </div>
 <p>When giving the composition as a list of reactants, you can also specify the
 mass fraction of the mixture using <code class="docutils literal notranslate"><span class="pre">composition-type:</span> <span class="pre">mass</span></code>:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reactants</span><span class="p">:</span>
-  <span class="nt">CH4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.05518632</span>
-  <span class="nt">O2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.22014867</span>
-  <span class="nt">N2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.724665</span>
-<span class="nt">composition-type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mass</span>
+<span class="w">  </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05518632</span>
+<span class="w">  </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.22014867</span>
+<span class="w">  </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.724665</span>
+<span class="nt">composition-type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mass</span>
 </pre></div>
 </div>
 <p><strong>Note:</strong> By default, pyMARS automatically integrates each autoignition case
@@ -242,38 +248,68 @@ model with different parameters, pyMARS will automatically
 reuse saved ignition data from a prior run. It semi-intelligently checks
 if the number of cases matches that in the input file, but to be safe
 output files should be cleaned between applications.</p>
+<p><strong>Laminar flame parameters:</strong> pyMARS can additionally (or instead) use
+one-dimensional freely-propagating laminar flame simulations to sample
+thermochemical data and to use the laminar flame speed as an error metric.
+Initial conditions are given in the <code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code> field as a
+list, using the same mixture keys as autoignition cases (<code class="docutils literal notranslate"><span class="pre">pressure</span></code> in atm,
+<code class="docutils literal notranslate"><span class="pre">temperature</span></code> in K, and either <code class="docutils literal notranslate"><span class="pre">equivalence-ratio</span></code> with
+<code class="docutils literal notranslate"><span class="pre">fuel</span></code>/<code class="docutils literal notranslate"><span class="pre">oxidizer</span></code> or a list of <code class="docutils literal notranslate"><span class="pre">reactants</span></code>). Unlike autoignition cases,
+no <code class="docutils literal notranslate"><span class="pre">kind</span></code> is given, since freely-propagating flames are always constant
+pressure. The temperature should be the unburned-mixture temperature
+(e.g., 300 K).</p>
+<p>Each flame case also accepts an optional <code class="docutils literal notranslate"><span class="pre">width</span></code> key giving the width of the
+computational domain in meters (default <code class="docutils literal notranslate"><span class="pre">0.1</span></code>); this is the initial estimate
+of the domain size, which Cantera refines automatically during the solve:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">laminar-flame-conditions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300.0</span>
+<span class="w">    </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.03</span>
+<span class="w">    </span><span class="nt">fuel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">H2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">oxidizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="w">    </span><span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+</pre></div>
 </div>
-<div class="section" id="conversion">
-<span id="id1"></span><h2>Conversion<a class="headerlink" href="#conversion" title="Permalink to this headline">¶</a></h2>
+<p>Note that the kinetic model must include transport data to run laminar flame
+simulations. Flame simulations are considerably more expensive than autoignition
+simulations, so reductions that rely on them will take longer.</p>
+<p>As with autoignition data, pyMARS reuses saved laminar flame samples from a
+prior run when the number and shape of the saved cases match the input file.</p>
+</section>
+<section id="conversion">
+<span id="id1"></span><h2>Conversion<a class="headerlink" href="#conversion" title="Link to this heading">¶</a></h2>
 <p>pyMARS provides a tool for converting between Chemkin and Cantera model
 formats. (This is used implicity if a Chemkin model is given when running
 pyMARS.) Generally this will be used to convert a Cantera reduced model
 generated by pyMARS into a Chemkin-format model.</p>
 <p>To convert a Cantera model into a Chemkin model, do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars --convert -m model.cti
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars<span class="w"> </span>--convert<span class="w"> </span>-m<span class="w"> </span>model.yaml
 </pre></div>
 </div>
 <p>pyMARS also provides conversion from Chemkin to Cantera for convenience:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars --convert -m model.inp --thermo thermo.dat
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pymars<span class="w"> </span>--convert<span class="w"> </span>-m<span class="w"> </span>model.inp<span class="w"> </span>--thermo<span class="w"> </span>thermo.dat
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">_thermo</span></code> option is not required if the thermodynamic data is contained
 within the model file (i.e., with the <code class="docutils literal notranslate"><span class="pre">THERMO</span> <span class="pre">ALL</span></code> keyword). The transport
 data can also be included in the resulting Cantera file with the
 <code class="docutils literal notranslate"><span class="pre">--transport</span></code> option.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="index.html">
-    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo" />
     
   </a>
 </p>
@@ -292,19 +328,16 @@ data can also be included in the resulting Cantera file with the
 
 
 
-    
 
-<p>
-<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
-    <img
-        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-    />
-</a>
-</p>
-
-
-<h3>Navigation</h3>
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
@@ -315,7 +348,7 @@ data can also be included in the resulting Cantera file with the
 </li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
@@ -326,7 +359,7 @@ data can also be included in the resulting Cantera file with the
 <li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
-<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2yaml.html">soln2yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
 </ul>
 
@@ -339,16 +372,6 @@ data can also be included in the resulting Cantera file with the
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -362,11 +385,11 @@ data can also be included in the resulting Cantera file with the
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &#169;2026, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
       <a href="_sources/usage.rst.txt"
@@ -375,7 +398,7 @@ data can also be included in the resulting Cantera file with the
 
     
     <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+        <img src="_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
     </a>
     
 

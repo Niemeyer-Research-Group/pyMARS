@@ -1,5 +1,0 @@
-===
-pfa
-===
-
-.. automodule:: pymars.pfa

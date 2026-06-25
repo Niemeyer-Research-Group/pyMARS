@@ -7,7 +7,7 @@ pyMARS |release|
 ================
 
 pyMARS is a Python package for reducing the size of chemical kinetic models;
-the name stands for Python-based Model Automatic Reduction. pyMARS is licensed
+the name stands for Python-based Model Automatic Reduction Software. pyMARS is licensed
 under the permissive, open-source MIT license. The source code is publicly
 available on GitHub at https://github.com/Niemeyer-Research-Group/pyMARS.
 
@@ -20,7 +20,9 @@ It uses provided conditions to sample thermochemical data for the reduction
 analysis and calculate global combustion metrics for determining the error.
 For example, typically most reductions will use autoignition simulations
 to sample state data and determine autoignition delay over the condition
-range desired for the reduced model.
+range desired for the reduced model. Freely-propagating laminar flame
+simulations are also supported, using the laminar flame speed as an error
+metric; autoignition and flame conditions may be used separately or together.
 
 pyMARS currently supports four methods for skeletal model reduction:
 
@@ -28,6 +30,11 @@ pyMARS currently supports four methods for skeletal model reduction:
  2. Directed relation graph with error propagation (DRGEP)
  3. Path flux analysis (PFA)
  4. Sensitivity analysis (SA)
+
+Citation
+--------
+
+If you use pyMARS, please cite it in any resulting publications. Thank you!
 
 
 User's Guide
@@ -57,7 +64,7 @@ Code API
    sensitivity_analysis
    simulation
    soln2ck
-   soln2cti
+   soln2yaml
    tools
 
 

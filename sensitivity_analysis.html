@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <title>sensitivity_analysis &#8212; pyMARS 1.1.0 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sensitivity_analysis &#8212; pyMARS 1.1.1a0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8c5d1136"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="simulation" href="simulation.html" />
@@ -20,8 +19,9 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -33,82 +33,83 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-pymars.sensitivity_analysis">
-<span id="sensitivity-analysis"></span><h1>sensitivity_analysis<a class="headerlink" href="#module-pymars.sensitivity_analysis" title="Permalink to this headline">¶</a></h1>
+  <section id="module-pymars.sensitivity_analysis">
+<span id="sensitivity-analysis"></span><h1>sensitivity_analysis<a class="headerlink" href="#module-pymars.sensitivity_analysis" title="Link to this heading">¶</a></h1>
 <p>Module containing sensitivity analysis reduction stage.</p>
-<dl class="function">
-<dt id="pymars.sensitivity_analysis.evaluate_species_errors">
-<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">evaluate_species_errors</code><span class="sig-paren">(</span><em class="sig-param">starting_model</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">metrics</em>, <em class="sig-param">species_limbo</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">num_threads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymars.sensitivity_analysis.evaluate_species_errors">
+<span class="sig-prename descclassname"><span class="pre">pymars.sensitivity_analysis.</span></span><span class="sig-name descname"><span class="pre">evaluate_species_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starting_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_limbo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.evaluate_species_errors" title="Link to this definition">¶</a></dt>
 <dd><p>Calculate error induced by removal of each limbo species</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>starting_model</strong> (<a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel"><em>ReducedModel</em></a>) – Container with model and file information</p></li>
-<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
-<li><p><strong>metrics</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Calculated metrics for starting model, used for evaluating error</p></li>
-<li><p><strong>species_limbo</strong> (<em>list of str</em>) – List of species to consider removal</p></li>
-<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
-<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
+<li><p><strong>ignition_conditions</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition" title="pymars.sampling.InputIgnition"><em>InputIgnition</em></a>) – List of autoignition initial conditions.</p></li>
+<li><p><strong>metrics</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – Calculated metrics for starting model, used for evaluating error</p></li>
+<li><p><strong>species_limbo</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – List of species to consider removal</p></li>
+<li><p><strong>flame_conditions</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference internal" href="sampling.html#pymars.sampling.InputLaminarFlame" title="pymars.sampling.InputLaminarFlame"><em>InputLaminarFlame</em></a><em>, </em><em>optional</em>) – List of laminar flame simulation conditions.</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from YAML file (e.g., ‘gas’).</p></li>
+<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
 Optional; default = 1, in which the multiprocessing module is not used.
 If 0, then use the available number of cores minus one. Otherwise,
 use the specified number of threads.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>species_errors</strong> – Maximum errors induced by removal of each limbo species</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymars.sensitivity_analysis.run_sa">
-<code class="sig-prename descclassname">pymars.sensitivity_analysis.</code><code class="sig-name descname">run_sa</code><span class="sig-paren">(</span><em class="sig-param">model_file</em>, <em class="sig-param">starting_error</em>, <em class="sig-param">ignition_conditions</em>, <em class="sig-param">psr_conditions</em>, <em class="sig-param">flame_conditions</em>, <em class="sig-param">error_limit</em>, <em class="sig-param">species_safe</em>, <em class="sig-param">phase_name=''</em>, <em class="sig-param">algorithm_type='greedy'</em>, <em class="sig-param">species_limbo=[]</em>, <em class="sig-param">num_threads=1</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.run_sa" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymars.sensitivity_analysis.run_sa">
+<span class="sig-prename descclassname"><span class="pre">pymars.sensitivity_analysis.</span></span><span class="sig-name descname"><span class="pre">run_sa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_safe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'greedy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_limbo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sensitivity_analysis.run_sa" title="Link to this definition">¶</a></dt>
 <dd><p>Runs a sensitivity analysis to remove species on a given model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>model_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Model being analyzed</p></li>
-<li><p><strong>starting_error</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Error percentage between the reduced and original models</p></li>
-<li><p><strong>ignition_conditions</strong> (<em>list of InputIgnition</em>) – List of autoignition initial conditions.</p></li>
-<li><p><strong>psr_conditions</strong> (<em>list of InputPSR</em><em>, </em><em>optional</em>) – List of PSR simulation conditions.</p></li>
-<li><p><strong>flame_conditions</strong> (<em>list of InputLaminarFlame</em><em>, </em><em>optional</em>) – List of laminar flame simulation conditions.</p></li>
-<li><p><strong>error_limit</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Maximum allowable error level for reduced model</p></li>
-<li><p><strong>species_safe</strong> (<em>list of str</em>) – List of species names to always be retained</p></li>
-<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
+<li><p><strong>model_file</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Model being analyzed</p></li>
+<li><p><strong>starting_error</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Error percentage between the reduced and original models</p></li>
+<li><p><strong>ignition_conditions</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference internal" href="sampling.html#pymars.sampling.InputIgnition" title="pymars.sampling.InputIgnition"><em>InputIgnition</em></a>) – List of autoignition initial conditions.</p></li>
+<li><p><strong>psr_conditions</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference internal" href="sampling.html#pymars.sampling.InputPSR" title="pymars.sampling.InputPSR"><em>InputPSR</em></a><em>, </em><em>optional</em>) – List of PSR simulation conditions.</p></li>
+<li><p><strong>flame_conditions</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference internal" href="sampling.html#pymars.sampling.InputLaminarFlame" title="pymars.sampling.InputLaminarFlame"><em>InputLaminarFlame</em></a><em>, </em><em>optional</em>) – List of laminar flame simulation conditions.</p></li>
+<li><p><strong>error_limit</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Maximum allowable error level for reduced model</p></li>
+<li><p><strong>species_safe</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – List of species names to always be retained</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from CTI file (e.g., ‘gas’).</p></li>
 <li><p><strong>algorithm_type</strong> (<em>{'initial'</em><em>, </em><em>'greedy'}</em>) – Type of sensitivity analysis: initial (order based on initial error), or
 greedy (all species error re-evaluated after each removal)</p></li>
-<li><p><strong>species_limbo</strong> (<em>list of str</em><em>, </em><em>optional</em>) – List of species to consider; if empty, consider all not in <code class="docutils literal notranslate"><span class="pre">species_safe</span></code></p></li>
-<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
+<li><p><strong>species_limbo</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – List of species to consider; if empty, consider all not in <code class="docutils literal notranslate"><span class="pre">species_safe</span></code></p></li>
+<li><p><strong>num_threads</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of CPU threads to use for performing simulations in parallel.
 Optional; default = 1, in which the multiprocessing module is not used.
 If 0, then use the available number of cores minus one. Otherwise,
 use the specified number of threads.</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path for writing files</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path for writing files</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Return reduced model and associated metadata</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="reduce_model.html#pymars.reduce_model.ReducedModel" title="pymars.reduce_model.ReducedModel">ReducedModel</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
           </div>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="index.html">
-    <img class="logo" src="_static/pymars-logo.png" alt="Logo"/>
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo" />
     
   </a>
 </p>
@@ -127,25 +128,22 @@ use the specified number of threads.</p></li>
 
 
 
-    
 
-<p>
-<a class="badge" href="https://travis-ci.org/Niemeyer-Research-Group/pyMARS">
-    <img
-        alt="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-        src="https://secure.travis-ci.org/Niemeyer-Research-Group/pyMARS.svg?branch=master"
-    />
-</a>
-</p>
-
-
-<h3>Navigation</h3>
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
@@ -153,10 +151,14 @@ use the specified number of threads.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">sensitivity_analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">sensitivity_analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.sensitivity_analysis.evaluate_species_errors"><code class="docutils literal notranslate"><span class="pre">evaluate_species_errors()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.sensitivity_analysis.run_sa"><code class="docutils literal notranslate"><span class="pre">run_sa()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
-<li class="toctree-l1"><a class="reference internal" href="soln2cti.html">soln2cti</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2yaml.html">soln2yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
 </ul>
 
@@ -169,16 +171,6 @@ use the specified number of threads.</p></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -192,11 +184,11 @@ use the specified number of threads.</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      &#169;2026, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
       <a href="_sources/sensitivity_analysis.rst.txt"
@@ -205,7 +197,7 @@ use the specified number of threads.</p></li>
 
     
     <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+        <img src="_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
     </a>
     
 

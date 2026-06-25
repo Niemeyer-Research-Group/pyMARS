@@ -1,5 +1,0 @@
-==========
-simulation
-==========
-
-.. automodule:: pymars.simulation

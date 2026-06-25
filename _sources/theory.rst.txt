@@ -193,5 +193,4 @@ due to the high computational cost this approach is not recommended.
 References
 ==========
 
-.. bibliography:: refs.bib
-   :style: unsrt
+.. bibliography::

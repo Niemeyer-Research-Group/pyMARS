@@ -1,5 +1,0 @@
-========
-sampling
-========
-
-.. automodule:: pymars.sampling
