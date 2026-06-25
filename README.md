@@ -5,7 +5,7 @@
 [![JOSS DOI](https://joss.theoj.org/papers/10.21105/joss.01543/status.svg)](https://doi.org/10.21105/joss.01543)
 ![CI](https://github.com/Niemeyer-Research-Group/pyMARS/actions/workflows/ci.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/Niemeyer-Research-Group/pyMARS/badge.svg?branch=main)](https://coveralls.io/github/Niemeyer-Research-Group/pyMARS)
-[![Anaconda-Server Badge](https://anaconda.org/niemeyer-research-group/pymars/badges/version.svg)](https://anaconda.org/niemeyer-research-group/pymars)
+[![GitHub Release](https://img.shields.io/github/release/Niemeyer-Research-Group/pyMARS.svg)](https://github.com/Niemeyer-Research-Group/pyMARS/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-green.svg)](http://contributor-covenant.org/version/1/4/)
 
@@ -24,6 +24,9 @@ Sensitivity analysis may be run following one of the first three methods, or dir
 model; however, its computational expense is high, and applying this method alone is not recommended.
 
 ## Installation
+
+[![PyPI](https://img.shields.io/pypi/v/nrg-pymars)](https://pypi.org/project/nrg-pymars/)
+[![Anaconda-Server Badge](https://anaconda.org/niemeyer-research-group/pymars/badges/version.svg)](https://anaconda.org/niemeyer-research-group/pymars)
 
 pyMARS requires Python 3.10+ and [Cantera](https://cantera.org) 3.x.
 
