@@ -22,7 +22,8 @@ and command-line tool are named `pymars`.
    `## [X.Y.Z] - YYYY-MM-DD` section, and add the matching compare link at the
    bottom of the file.
 
-4. Update `CITATION.cff`: set `version` and `date-released`.
+4. Update `CITATION.cff`: set `version` and `date-released`. Also update the
+   version in `CITATION.md`.
 
 5. Open a pull request with the above changes, wait for CI to pass, and merge it
    (branch protection requires a PR to land on `main`).
@@ -46,16 +47,20 @@ and command-line tool are named `pymars`.
    channel. You only need to edit the recipe yourself if the dependencies or the
    minimum Python version changed.
 
-8. (Optional) Create a GitHub Release for the tag, using the new `CHANGELOG.md`
-   section as the release notes.
-
-9. Verify the release:
+8. Verify the release:
 
    ```bash
    pip install nrg-pymars==X.Y.Z
    # once the conda-forge build completes:
    conda install -c conda-forge nrg-pymars
    ```
+
+9. Create a GitHub Release for the tag, using the new `CHANGELOG.md`
+   section as the release notes.
+
+10. A few minutes after the GitHub Release is published, Zenodo should archive it
+   and mint a new DOI. <https://zenodo.org/badge/latestdoi/51664233> should point
+   to the latest DOI; grab that, and update in `CITATION.cff` and `CITATION.md`.
 
 ## TODO: clean up once the conda-forge package is live
 
