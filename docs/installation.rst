@@ -6,18 +6,21 @@ Installation Guide
 
 pyMARS requires Python 3.10+ and is available on Linux, macOS, and Windows.
 
-Via conda (recommended)
------------------------
+Via pip (recommended)
+---------------------
 
-Install pyMARS from the ``niemeyer-research-group`` channel, with
-``conda-forge`` providing the remaining dependencies (including Cantera)::
+Install from PyPI::
 
-    conda install -c niemeyer-research-group -c conda-forge pymars
+    pip install nrg-pymars
 
-Via pip
--------
+.. note::
 
-Install directly from GitHub::
+   On PyPI, pyMARS is distributed under the name ``nrg-pymars``, because the
+   ``pymars`` name belongs to an unrelated, active project. The import package
+   and command-line tool remain ``pymars`` (i.e., ``pip install nrg-pymars``,
+   then ``import pymars`` or run ``pymars``).
+
+To install the latest development version directly from GitHub::
 
     pip install git+https://github.com/Niemeyer-Research-Group/pyMARS.git
 
@@ -27,12 +30,13 @@ Or clone the repository and install from the local copy::
     cd pyMARS
     pip install .
 
-.. note::
+Via conda
+---------
 
-   The ``pymars`` name on PyPI is currently held by an unrelated project.
-   A name reclaim request is in progress per
-   `PEP 541 <https://peps.python.org/pep-0541/>`_.
-   We will publish to PyPI once the name is recovered.
+Install pyMARS from the ``niemeyer-research-group`` channel, with
+``conda-forge`` providing the remaining dependencies (including Cantera)::
+
+    conda install -c niemeyer-research-group -c conda-forge pymars
 
 Development
 -----------

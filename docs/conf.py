@@ -32,9 +32,10 @@ copyright = "{}, {}".format(this_year, author)
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The full version, including alpha/beta/rc tags.
+# The full version, including alpha/beta/rc tags. Looked up by the PyPI
+# distribution name ("nrg-pymars"); the import package is still "pymars".
 try:
-    release = get_version(project.lower())
+    release = get_version("nrg-pymars")
 except PackageNotFoundError:
     release = "unknown"
 # The short X.Y version.

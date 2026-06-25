@@ -1,23 +1,24 @@
 name: Publish
 
-# PyPI publishing is disabled pending resolution of the PyPI name conflict.
-# The 'pymars' name on PyPI is held by an unrelated project (mars-project/mars)
-# that has been inactive since January 2023. A PEP 541 name reclaim request is
-# in progress. Re-enable by removing the event_name condition on the build/publish
-# jobs once the name is recovered.
+# pyMARS is distributed on PyPI as 'nrg-pymars' (the 'pymars' name belongs to an
+# unrelated, active project). The import package and CLI remain 'pymars'.
 #
-# Conda publishing triggers automatically after CI passes on a v* tag.
-# PyPI publishing is manual (workflow_dispatch) only for now.
+# Publishing to PyPI and Anaconda.org runs only on pushes of version tags (v*).
+# The CI test suite runs first (as a reusable workflow) and must pass before any
+# build or publish job runs.
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/ci.yml
+
   build:
     name: Build distribution
-    if: github.event_name == 'workflow_dispatch'
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -44,12 +45,11 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/pymars
+      url: https://pypi.org/p/nrg-pymars
     permissions:
       id-token: write
 
@@ -65,10 +65,7 @@ jobs:
 
   conda:
     name: Build and publish to Anaconda.org
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       startsWith(github.event.workflow_run.head_branch, 'v'))
+    needs: test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -76,8 +73,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     - name: Set up conda
       uses: conda-incubator/setup-miniconda@v3

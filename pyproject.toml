@@ -3,7 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pymars"
+# Distributed on PyPI as "nrg-pymars" (the "pymars" name belongs to an
+# unrelated, active project). The import package and CLI remain "pymars".
+name = "nrg-pymars"
 dynamic = ["version"]
 description = "Python-based chemical kinetic Model Automatic Reduction Software (pyMARS)"
 readme = "README.md"

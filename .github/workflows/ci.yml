@@ -8,11 +8,11 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
   pull_request:
     branches:
       - main
+  # Allow the publish workflow to run this test suite as a gate before releasing.
+  workflow_call:
 
 jobs:
   test:
