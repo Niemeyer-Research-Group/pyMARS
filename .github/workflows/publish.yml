@@ -14,10 +14,13 @@ on:
 jobs:
   test:
     name: Test
+    # Only run on the official repository, never on forks.
+    if: github.repository == 'Niemeyer-Research-Group/pyMARS'
     uses: ./.github/workflows/ci.yml
 
   build:
     name: Build distribution
+    if: github.repository == 'Niemeyer-Research-Group/pyMARS'
     needs: test
     runs-on: ubuntu-latest
 
@@ -45,6 +48,7 @@ jobs:
 
   publish:
     name: Publish to PyPI
+    if: github.repository == 'Niemeyer-Research-Group/pyMARS'
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -65,6 +69,7 @@ jobs:
 
   conda:
     name: Build and publish to Anaconda.org
+    if: github.repository == 'Niemeyer-Research-Group/pyMARS'
     needs: test
     runs-on: ubuntu-latest
     defaults:
