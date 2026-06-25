@@ -8,7 +8,10 @@ on:
 
 jobs:
   deploy:
-    if: github.event.workflow_run.conclusion == 'success'
+    # Only deploy from the official repository, never from forks, and only when CI passed.
+    if: |
+      github.repository == 'Niemeyer-Research-Group/pyMARS' &&
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
