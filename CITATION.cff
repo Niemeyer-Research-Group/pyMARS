@@ -1,5 +1,8 @@
 cff-version: 1.1.0
 message: "If you use this software, please cite it as below."
+title: "pyMARS"
+version: 1.2.0
+date-released: 2026-06-24
 authors:
   - family-names: Mestas
     given-names: Phillip O.
@@ -9,7 +12,12 @@ authors:
   - family-names: Niemeyer
     given-names: Kyle E.
     orcid: https://orcid.org/0000-0003-4425-7097
-title: "pyMARS"
-version: 1.2.0
-doi: 10.5281/zenodo.3401549
-date-released: 2026-06-24
+identifiers:
+  - description: This is the archived snapshot of version 1.2.0 of pyMARS
+    type: doi
+    value: 10.5281/zenodo.20855575
+  - description: This is the published JOSS paper for pyMARS version v1.1.0
+    type: doi
+    value: 10.21105/joss.01543
+license: MIT
+repository-code: "https://github.com/Niemeyer-Research-Group/pyMARS"

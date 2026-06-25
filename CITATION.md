@@ -6,7 +6,7 @@
 If you use pyMARS in a scholarly article, please cite the specific version you use;
 the reference fo for the latest version is
 
-> P. O. Mestas, P. Clayton, and K. E. Niemeyer. (2026) pyMARS v1.2.0 [software]. Zenodo. https://doi.org/10.5281/zenodo.3401549
+> P. O. Mestas, P. Clayton, and K. E. Niemeyer. (2026) pyMARS v1.2.0 [software]. Zenodo. https://doi.org/10.5281/zenodo.20855575
 
 A BibTeX entry for LaTeX users is
 
@@ -15,7 +15,7 @@ A BibTeX entry for LaTeX users is
     author = {Phillip O Mestas and Parker Clayton and Kyle E Niemeyer},
     year = 2026,
     title = {{pyMARS} v1.2.0},
-    doi = {10.5281/zenodo.1245157},
+    doi = {10.5281/zenodo.20855575},
     url = {https://github.com/Niemeyer-Research-Group/pyMARS},
 }
 ```
@@ -44,5 +44,6 @@ alternately <https://doi.org/10.5281/zenodo.1245156> will
 take you to the latest version (and generally represents all versions).
 If you would like to cite a specific, older version, the DOIs for each release are:
 
+ * v1.2.0: [10.5281/zenodo.20855575](https://doi.org/10.5281/zenodo.20855575)
  * v1.1.0: [10.5281/zenodo.3401549](https://doi.org/10.5281/zenodo.3401549)
  * v0.0.9: [10.5281/zenodo.1245157](https://doi.org/10.5281/zenodo.1245157)
