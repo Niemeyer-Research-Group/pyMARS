@@ -38,8 +38,8 @@ Please also cite our JOSS article to reference pyMARS more generally:
 }
 ```
 
-In either case, please update the entry with the version used. 
-The DOI for the latest version is given in the badge at the top, or 
+In either case, please update the entry with the version used.
+The DOI for the latest version is given in the badge at the top, or
 alternately <https://doi.org/10.5281/zenodo.1245156> will
 take you to the latest version (and generally represents all versions).
 If you would like to cite a specific, older version, the DOIs for each release are:

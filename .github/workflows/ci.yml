@@ -1,0 +1,53 @@
+name: CI
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  # Allow the publish workflow to run this test suite as a gate before releasing.
+  workflow_call:
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python-version: "3.14"
+          - os: windows-latest
+            python-version: "3.14"
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+
+    - name: Install package and dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[dev]
+
+    - name: Run tests
+      run: pytest --cov=pymars --cov-report=xml
+
+    - name: Upload coverage
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+      uses: coverallsapp/github-action@v2
+      with:
+        file: ./coverage.xml

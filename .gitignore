@@ -67,3 +67,6 @@ target/
 # output files
 *.h5
 *.cti
+
+# Claude Code memory
+.claude/

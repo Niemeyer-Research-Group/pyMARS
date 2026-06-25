@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+# Distributed on PyPI as "nrg-pymars" (the "pymars" name belongs to an
+# unrelated, active project). The import package and CLI remain "pymars".
+name = "nrg-pymars"
+dynamic = ["version"]
+description = "Python-based chemical kinetic Model Automatic Reduction Software (pyMARS)"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Phillip Mestas"},
+    {name = "Parker Clayton"},
+    {name = "Kyle Niemeyer", email = "kyle.niemeyer@oregonstate.edu"},
+]
+keywords = ["chemical kinetics"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "cantera>=3.0",
+    "networkx",
+    "h5py",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[project.scripts]
+pymars = "pymars.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/Niemeyer-Research-Group/pyMARS"
+
+[tool.hatch.version]
+path = "src/pymars/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pymars"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/pymars/",
+    "README.md",
+    "LICENSE",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

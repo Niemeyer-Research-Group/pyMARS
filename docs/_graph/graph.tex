@@ -24,7 +24,7 @@
         \node[state] (B) [below right of=A] {B};
         \node[state] (C) [below of=B] {C};
         \node[state] (D) [below left of=A] {D};
-        
+
         \node[state] (E) [left of=D] {E};
         \node[state] (F) [below right of=E] {F};
 
@@ -33,7 +33,7 @@
         \path[<->] (B) edge node {} (D);
         \path[->] (B) edge node {} (C);
         \path[<->, ultra thick] (E) edge node {} (F);
-        
+
     \end{tikzpicture}
 
 \end{document}

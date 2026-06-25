@@ -1,49 +1,60 @@
-{% set data = load_setup_py_data() %}
+{% set version = load_file_regex(
+    load_file="../src/pymars/_version.py",
+    regex_pattern='__version__ = "([^"]+)"',
+    from_recipe_dir=True
+).group(1) %}
 
 package:
   name: pymars
-  version: {{ data['version'] }}
+  version: {{ version }}
 
 source:
   path: ..
 
 build:
   number: 0
-  script: python -m pip install --no-deps --ignore-installed .
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
   noarch: python
 
 requirements:
-  build:
-    - python >=3.6
-    - setuptools
+  host:
+    - python >=3.10
     - pip
+    - hatchling
 
   run:
-    - python
-    - numpy >=1.13.1
-    - pytables
-    - cantera >=2.3.0
+    - python >=3.10
+    - numpy
+    - cantera >=3.0
     - networkx
-    - pyyaml >=4.2b1
+    - h5py
+    - pyyaml >=6.0
 
 test:
   imports:
     - pymars
 
   requires:
-    - pytest >=3.0.1
-    - pytest-cov >=2.3.1
+    - pytest
+    - pytest-cov
 
   commands:
-    - pytest -vv --pyargs pymars
+    - pytest --pyargs pymars
 
 about:
-  home: data['url']
+  home: https://github.com/Niemeyer-Research-Group/pyMARS
   license: MIT
   license_file: LICENSE
   license_family: MIT
+  summary: Python-based chemical kinetic Model Automatic Reduction Software
+  description: |
+    pyMARS implements multiple methods for automatically reducing the size and
+    complexity of detailed chemical kinetic models, including directed relation
+    graph (DRG), DRG with error propagation (DRGEP), path flux analysis (PFA),
+    and sensitivity analysis (SA).
+  doc_url: https://Niemeyer-Research-Group.github.io/pyMARS/
+  dev_url: https://github.com/Niemeyer-Research-Group/pyMARS
 
-  summary: data['description']
-  description: data['long_description']
-  doc_url: https://github.com/Niemeyer-Research-Group/pyMARS
-  dev_url: data['url']
+extra:
+  recipe-maintainers:
+    - kyleniemeyer
