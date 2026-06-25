@@ -160,6 +160,7 @@ def reduce_pfa(
     threshold_upper=None,
     num_threads=1,
     path="",
+    min_flame_speed=None,
 ):
     """Given a threshold and PFA matrix, reduce the model and determine the error.
 
@@ -234,6 +235,7 @@ def reduce_pfa(
         reduced_model_filename,
         ignition_conditions,
         flame_conditions=flame_conditions,
+        min_flame_speed=min_flame_speed,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -272,6 +274,7 @@ def run_pfa(
     threshold_upper=None,
     num_threads=1,
     path="",
+    min_flame_speed=None,
 ):
     """Main function for running PFA reduction.
 
@@ -320,6 +323,7 @@ def run_pfa(
         model_file,
         ignition_conditions,
         flame_conditions=flame_conditions,
+        min_flame_speed=min_flame_speed,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -351,6 +355,7 @@ def run_pfa(
             ignition_conditions,
             sampled_metrics,
             flame_conditions=flame_conditions,
+            min_flame_speed=min_flame_speed,
             phase_name=phase_name,
             previous_model=previous_model,
             threshold_upper=threshold_upper,
@@ -399,6 +404,7 @@ def run_pfa(
             ignition_conditions,
             sampled_metrics,
             flame_conditions=flame_conditions,
+            min_flame_speed=min_flame_speed,
             phase_name=phase_name,
             threshold_upper=threshold_upper,
             num_threads=num_threads,

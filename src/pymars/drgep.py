@@ -295,6 +295,7 @@ def reduce_drgep(
     previous_model=None,
     num_threads=1,
     path="",
+    min_flame_speed=None,
 ):
     """Given a threshold and DRGEP coefficients, reduce the model and determine the error.
 
@@ -357,6 +358,7 @@ def reduce_drgep(
         reduced_model_filename,
         ignition_conditions,
         flame_conditions=flame_conditions,
+        min_flame_speed=min_flame_speed,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -380,6 +382,7 @@ def run_drgep(
     threshold_upper=None,
     num_threads=1,
     path="",
+    min_flame_speed=None,
 ):
     """Main function for running DRGEP reduction.
 
@@ -427,6 +430,7 @@ def run_drgep(
         model_file,
         ignition_conditions,
         flame_conditions=flame_conditions,
+        min_flame_speed=min_flame_speed,
         phase_name=phase_name,
         num_threads=num_threads,
         path=path,
@@ -463,6 +467,7 @@ def run_drgep(
             ignition_conditions,
             sampled_metrics,
             flame_conditions=flame_conditions,
+            min_flame_speed=min_flame_speed,
             phase_name=phase_name,
             previous_model=previous_model,
             num_threads=num_threads,
@@ -509,6 +514,7 @@ def run_drgep(
             ignition_conditions,
             sampled_metrics,
             flame_conditions=flame_conditions,
+            min_flame_speed=min_flame_speed,
             phase_name=phase_name,
             num_threads=num_threads,
             path=path,

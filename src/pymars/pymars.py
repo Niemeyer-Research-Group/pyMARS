@@ -41,6 +41,9 @@ class ReductionInputs(NamedTuple):
     upper_threshold: float = 0.4
     sensitivity_type: str = "greedy"
     phase_name: str = ""
+    #: Minimum laminar flame speed (m/s) treated as a real flame; ``None`` uses
+    #: the FlameSimulation default. See ``laminar-flame-conditions`` docs.
+    min_flame_speed: float = None
 
 
 def parse_inputs(input_dict):
@@ -89,6 +92,9 @@ def parse_inputs(input_dict):
     safe_species = input_dict.get("retained-species", [])
 
     phase_name = input_dict.get("phase-name", "")
+
+    # Minimum laminar flame speed treated as a real flame; None uses the default.
+    min_flame_speed = input_dict.get("min-flame-speed", None)
 
     # check that the specified model actually contains the specified phase
     try:
@@ -141,6 +147,7 @@ def parse_inputs(input_dict):
         upper_threshold=upper_threshold,
         sensitivity_type=sensitivity_type,
         phase_name=phase_name,
+        min_flame_speed=min_flame_speed,
     )
 
 
@@ -159,6 +166,7 @@ def main(
     sensitivity_type="greedy",
     path="",
     num_threads=1,
+    min_flame_speed=None,
 ):
     """Driver function for reducing a chemical kinetic model.
 
@@ -222,6 +230,7 @@ def main(
             threshold_upper=upper_threshold,
             num_threads=num_threads,
             path=path,
+            min_flame_speed=min_flame_speed,
         )
     elif method == "DRGEP":
         reduced_model = run_drgep(
@@ -236,6 +245,7 @@ def main(
             threshold_upper=upper_threshold,
             num_threads=num_threads,
             path=path,
+            min_flame_speed=min_flame_speed,
         )
     elif method == "PFA":
         reduced_model = run_pfa(
@@ -249,6 +259,7 @@ def main(
             phase_name=phase_name,
             num_threads=num_threads,
             path=path,
+            min_flame_speed=min_flame_speed,
         )
 
     error = 0.0
@@ -275,6 +286,7 @@ def main(
             species_limbo=limbo_species,
             num_threads=num_threads,
             path=path,
+            min_flame_speed=min_flame_speed,
         )
 
     return reduced_model
@@ -391,6 +403,7 @@ def pymars(argv):
             sensitivity_type=inputs.sensitivity_type,
             path=args.path,
             num_threads=args.num_threads,
+            min_flame_speed=inputs.min_flame_speed,
         )
 
     logging.shutdown()

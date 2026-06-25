@@ -420,6 +420,23 @@ class FlameSimulation(BaseSimulation):
 
     """
 
+    #: Default minimum physically-meaningful laminar flame speed, in m/s. A solved
+    #: flame speed at or below the active floor (negative or near-zero) is treated
+    #: as "no flame detected" -- a degenerate, non-physical result -- and handled
+    #: the same as a solver failure (a non-flammable mixture tends to "solve" to
+    #: such a speed rather than raising). The floor can be raised or lowered per
+    #: run via the ``min_flame_speed`` constructor argument (e.g., for a fuel with
+    #: genuinely low flame speeds).
+    min_flame_speed = 0.05
+
+    def __init__(
+        self, idx, properties, model, phase_name="", path="", min_flame_speed=None
+    ):
+        super().__init__(idx, properties, model, phase_name=phase_name, path=path)
+        # ``None`` keeps the class-level default; otherwise override the floor.
+        if min_flame_speed is not None:
+            self.min_flame_speed = min_flame_speed
+
     def setup_case(self):
         """Initialize simulation case."""
         self._setup_gas()
@@ -430,8 +447,53 @@ class FlameSimulation(BaseSimulation):
         self.flame = ct.FreeFlame(self.gas, width=self.properties.width)
         self.flame.set_refine_criteria(ratio=3, slope=0.1, curve=0.1)
 
+    def _solve_flame(self):
+        """Solve the freely-propagating flame and store the unburned flame speed.
+
+        Returns
+        -------
+        float
+            Computed laminar flame speed in m/s.
+
+        Raises
+        ------
+        cantera.CanteraError
+            If the flame fails to solve (i.e., no flame is detected).
+
+        """
+        self.flame.solve(loglevel=0, refine_grid=True, auto=True)
+        self.flame_speed = self.flame.velocity[0]
+        return self.flame_speed
+
+    def _flame_detected(self):
+        """Solve the flame and return its speed, or ``None`` if no physical flame.
+
+        "No flame" means either the solver raised a ``CanteraError`` or the
+        resulting flame speed is non-physical -- negative or at/below
+        ``min_flame_speed`` (a degenerate solution, as a non-flammable mixture
+        tends to converge to a near-zero speed rather than raising).
+
+        Returns
+        -------
+        float or None
+            The laminar flame speed in m/s, or ``None`` if no flame is detected.
+
+        """
+        try:
+            speed = self._solve_flame()
+        except ct.CanteraError:
+            return None
+        if speed <= self.min_flame_speed:
+            return None
+        return speed
+
     def run_case(self, restart=False):
         """Solve the laminar flame and return the unburned flame speed.
+
+        Raises ``RuntimeError`` if no flame is detected (solver failure or a
+        degenerate, non-physical flame speed). This is the path used for the
+        original (baseline) model, where an undetectable flame should halt the
+        reduction rather than be silently ignored.
 
         Parameters
         ----------
@@ -444,24 +506,44 @@ class FlameSimulation(BaseSimulation):
             Computed laminar flame speed in m/s
 
         """
-        try:
-            self.flame.solve(loglevel=0, refine_grid=True, auto=True)
-        except ct.CanteraError as err:
+        speed = self._flame_detected()
+        if speed is None:
             logging.error(f"No flame detected for laminar flame case {self.idx}")
-            raise RuntimeError(
-                f"No flame detected for laminar flame case {self.idx}"
-            ) from err
-
-        self.flame_speed = self.flame.velocity[0]
-        return self.flame_speed
+            raise RuntimeError(f"No flame detected for laminar flame case {self.idx}")
+        self.flame_speed = speed
+        return speed
 
     def calculate(self):
-        """Solve the flame and return only the flame speed."""
-        self.flame_speed = self.run_case()
-        return self.flame_speed
+        """Solve the flame and return only the flame speed.
+
+        Returns a flame speed of ``0.0`` (rather than raising) when no flame is
+        detected -- a solver failure or a degenerate, non-physical flame speed --
+        so that a reduced model that can no longer sustain a flame is rejected
+        through the error metric instead of aborting the reduction, mirroring how
+        ``IgnitionSimulation.calculate`` treats a non-igniting model.
+
+        Returns
+        -------
+        float
+            Computed laminar flame speed in m/s, or ``0.0`` if no flame is detected.
+
+        """
+        speed = self._flame_detected()
+        if speed is None:
+            logging.warning(
+                f"No flame detected for laminar flame case {self.idx}; "
+                "treating the flame speed as zero"
+            )
+            speed = 0.0
+        self.flame_speed = speed
+        return speed
 
     def process_results(self, skip_data=False):
         """Solve the flame and sample data along the flame profile.
+
+        Uses ``run_case``, so an undetectable flame raises ``RuntimeError``; this
+        path samples data for the original model, where a missing flame should
+        halt the reduction.
 
         Parameters
         ----------
@@ -474,7 +556,7 @@ class FlameSimulation(BaseSimulation):
             Flame speed, or flame speed and sampled data
 
         """
-        self.flame_speed = self.calculate()
+        self.flame_speed = self.run_case()
         if skip_data:
             return self.flame_speed
 
