@@ -67,7 +67,7 @@ bibtex_bibfiles = ["refs.bib"]
 bibtex_default_style = "unsrt"
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3.10", None),
+    "python": ("https://docs.python.org/3.14", None),
     "numpy": ("https://docs.scipy.org/doc/numpy/", None),
     "networkx": ("https://networkx.github.io/documentation/stable/", None),
     "cantera": ("https://cantera.org/documentation/docs-3.0/sphinx/html/", None),
