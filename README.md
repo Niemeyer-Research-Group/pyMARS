@@ -30,6 +30,11 @@ model; however, its computational expense is high, and applying this method alon
 
 pyMARS requires Python 3.10+ and [Cantera](https://cantera.org) 3.x.
 
+We recommend installing pyMARS into an isolated environment (e.g., a `venv` or a
+conda environment) rather than your system or base Python. See the
+[installation guide](https://Niemeyer-Research-Group.github.io/pyMARS/installation.html)
+for details.
+
 **Via pip (PyPI, recommended):**
 
     pip install nrg-pymars

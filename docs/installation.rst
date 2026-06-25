@@ -6,6 +6,20 @@ Installation Guide
 
 pyMARS requires Python 3.10+ and is available on Linux, macOS, and Windows.
 
+We recommend installing pyMARS into an isolated environment rather than your
+system or base Python, to avoid conflicts with other packages. For a pip-based
+install, create one with the standard-library :mod:`venv` module::
+
+    python -m venv .venv
+    source .venv/bin/activate    # on Windows: .venv\Scripts\activate
+
+For a conda-based install, create and activate a conda environment instead::
+
+    conda create -n pymars-env python
+    conda activate pymars-env
+
+Then install pyMARS into the active environment using one of the methods below.
+
 Via pip (recommended)
 ---------------------
 
