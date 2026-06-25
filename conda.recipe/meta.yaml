@@ -31,15 +31,14 @@ requirements:
     - pyyaml >=6.0
 
 test:
+  # The test suite lives outside the installed package (top-level tests/), and
+  # the full suite already runs in CI before publishing, so the recipe only does
+  # a lightweight smoke test that the package imports and the CLI is available.
   imports:
     - pymars
 
-  requires:
-    - pytest
-    - pytest-cov
-
   commands:
-    - pytest --pyargs pymars
+    - pymars --help
 
 about:
   home: https://github.com/Niemeyer-Research-Group/pyMARS
