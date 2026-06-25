@@ -36,6 +36,19 @@
   <section id="installation-guide">
 <span id="sec-installation"></span><h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Link to this heading">¶</a></h1>
 <p>pyMARS requires Python 3.10+ and is available on Linux, macOS, and Windows.</p>
+<p>We recommend installing pyMARS into an isolated environment rather than your
+system or base Python, to avoid conflicts with other packages. For a pip-based
+install, create one with the standard-library <a class="reference external" href="https://docs.python.org/3.14/library/venv.html#module-venv" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">venv</span></code></a> module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="o">.</span><span class="n">venv</span>
+<span class="n">source</span> <span class="o">.</span><span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>    <span class="c1"># on Windows: .venv\Scripts\activate</span>
+</pre></div>
+</div>
+<p>For a conda-based install, create and activate a conda environment instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pymars</span><span class="o">-</span><span class="n">env</span> <span class="n">python</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">pymars</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+<p>Then install pyMARS into the active environment using one of the methods below.</p>
 <section id="via-pip-recommended">
 <h2>Via pip (recommended)<a class="headerlink" href="#via-pip-recommended" title="Link to this heading">¶</a></h2>
 <p>Install from PyPI:</p>
