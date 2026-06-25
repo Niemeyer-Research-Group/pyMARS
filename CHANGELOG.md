@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-24
+
 ### Added
 
 - Added laminar flame speed support: freely-propagating `FlameSimulation`, the `laminar-flame-conditions` input block, and laminar flame speed as an error metric, enabling reductions driven by flame data alone or combined with autoignition (based on work by Cailin Moore, #82)
@@ -92,7 +94,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added preliminary project files (README, CODE_OF_CONDUCT, etc.) without any actual source code
 
 
-[Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Niemeyer-Research-Group/pyMARS/compare/v0.1.0...v1.0.0
