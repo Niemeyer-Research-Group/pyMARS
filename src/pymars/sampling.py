@@ -224,6 +224,7 @@ def sample_metrics(
     num_threads=1,
     path="",
     reuse_saved=False,
+    min_flame_speed=None,
 ):
     """Evaluates metrics used for determining error of reduced model
 
@@ -328,7 +329,12 @@ def sample_metrics(
                 simulations.append(
                     [
                         FlameSimulation(
-                            idx, case, model, phase_name=phase_name, path=path
+                            idx,
+                            case,
+                            model,
+                            phase_name=phase_name,
+                            path=path,
+                            min_flame_speed=min_flame_speed,
                         ),
                         idx,
                     ]
@@ -364,6 +370,7 @@ def sample(
     phase_name="",
     num_threads=1,
     path="",
+    min_flame_speed=None,
 ):
     """Samples thermochemical data and generates metrics for various phenomena.
 
@@ -506,7 +513,12 @@ def sample(
                 simulations.append(
                     [
                         FlameSimulation(
-                            idx, case, model, phase_name=phase_name, path=path
+                            idx,
+                            case,
+                            model,
+                            phase_name=phase_name,
+                            path=path,
+                            min_flame_speed=min_flame_speed,
                         ),
                         idx,
                     ]

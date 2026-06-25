@@ -411,6 +411,102 @@ class TestFlameRun:
         assert 0.5 < sim.run_case() < 5.0
 
 
+class TestFlameFailure:
+    """A flame that fails to solve, or solves to a degenerate (non-physical)
+    result, should be handled gracefully rather than crashing the reduction.
+
+    Two failure modes are covered: a solver error (forced deterministically by
+    monkeypatching the solve to raise ``ct.CanteraError``), and a real solve of a
+    non-flammable mixture, which converges to a near-zero "flame speed" below
+    ``min_flame_speed`` rather than raising.
+    """
+
+    def _case(self):
+        return InputLaminarFlame(
+            pressure=1.0,
+            temperature=300.0,
+            equivalence_ratio=1.0,
+            fuel={"H2": 1.0},
+            oxidizer={"O2": 1.0, "N2": 3.76},
+            width=0.03,
+        )
+
+    def _inert_case(self):
+        # pure N2: a real flame solve converges to a degenerate ~0.024 m/s speed,
+        # which is below the min_flame_speed floor and so counts as "no flame".
+        return InputLaminarFlame(
+            pressure=1.0,
+            temperature=300.0,
+            reactants={"N2": 1.0},
+            width=0.03,
+        )
+
+    @staticmethod
+    def _force_no_flame(_self):
+        raise ct.CanteraError("forced failure: no flame detected")
+
+    def test_calculate_returns_zero_on_no_flame(self, monkeypatch):
+        """The metric-only path degrades to 0.0 (so the model is later rejected)."""
+        monkeypatch.setattr(FlameSimulation, "_solve_flame", self._force_no_flame)
+        sim = FlameSimulation(0, self._case(), "h2o2.yaml")
+        sim.setup_case()
+        # must not raise; returns 0.0
+        assert sim.calculate() == 0.0
+        assert sim.flame_speed == 0.0
+
+    def test_run_case_raises_on_no_flame(self, monkeypatch):
+        """The original-model data path raises, so a missing baseline is caught."""
+        monkeypatch.setattr(FlameSimulation, "_solve_flame", self._force_no_flame)
+        sim = FlameSimulation(0, self._case(), "h2o2.yaml")
+        sim.setup_case()
+        with pytest.raises(RuntimeError, match="No flame detected"):
+            sim.run_case()
+
+    def test_process_results_raises_on_no_flame(self, monkeypatch):
+        """process_results follows run_case, so it also raises on a missing flame."""
+        monkeypatch.setattr(FlameSimulation, "_solve_flame", self._force_no_flame)
+        sim = FlameSimulation(0, self._case(), "h2o2.yaml")
+        sim.setup_case()
+        with pytest.raises(RuntimeError, match="No flame detected"):
+            sim.process_results()
+
+    def test_calculate_returns_zero_on_degenerate_flame(self):
+        """A real solve of a non-flammable (pure inert) mixture yields a degenerate
+        near-zero speed, treated as no flame -> 0.0 from the metric-only path."""
+        sim = FlameSimulation(0, self._inert_case(), "h2o2.yaml")
+        sim.setup_case()
+        # sanity-check the premise: the raw solve gives a degenerate speed below
+        # the floor (so this exercises the degenerate path, not a solver error)
+        raw_speed = sim._solve_flame()
+        assert 0.0 < raw_speed < sim.min_flame_speed
+
+        assert sim.calculate() == 0.0
+        assert sim.flame_speed == 0.0
+
+    def test_run_case_raises_on_degenerate_flame(self):
+        """The original-model path raises on the same degenerate (no-flame) result."""
+        sim = FlameSimulation(0, self._inert_case(), "h2o2.yaml")
+        sim.setup_case()
+        with pytest.raises(RuntimeError, match="No flame detected"):
+            sim.run_case()
+
+    def test_min_flame_speed_override_accepts_low_speed(self):
+        """Lowering the floor lets an otherwise-degenerate speed count as a flame.
+
+        The default floor (0.05) would reject the inert ~0.024 m/s result; a floor
+        of 0.0 accepts any positive speed. Fresh simulations are used for each call
+        because re-solving an already-solved degenerate flame drifts to <= 0.
+        """
+        sim = FlameSimulation(0, self._inert_case(), "h2o2.yaml", min_flame_speed=0.0)
+        sim.setup_case()
+        assert sim.min_flame_speed == 0.0
+        assert sim.run_case() > 0.0  # must not raise; positive speed accepted
+
+        sim2 = FlameSimulation(1, self._inert_case(), "h2o2.yaml", min_flame_speed=0.0)
+        sim2.setup_case()
+        assert sim2.calculate() > 0.0
+
+
 class TestSampleProfile:
     """Exercises the shared profile sampler used by every simulation type."""
 

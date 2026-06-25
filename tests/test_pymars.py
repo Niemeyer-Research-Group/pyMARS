@@ -99,3 +99,29 @@ class TestAutoRetainInputSpecies:
 
         for sp in ("O2", "N2", "H2", "AR"):
             assert sp in inputs.safe_species
+
+
+class TestMinFlameSpeedInput:
+    """The global ``min-flame-speed`` input is parsed into ReductionInputs."""
+
+    def _ignition(self):
+        return [
+            {
+                "kind": "constant volume",
+                "pressure": 1.0,
+                "temperature": 1000.0,
+                "equivalence-ratio": 1.0,
+                "fuel": {"CH4": 1.0},
+                "oxidizer": {"O2": 1.0, "N2": 3.76},
+            }
+        ]
+
+    def test_default_is_none(self):
+        inputs = parse_inputs(_base_inputs(self._ignition()))
+        assert inputs.min_flame_speed is None
+
+    def test_override_from_input_file(self):
+        input_dict = _base_inputs(self._ignition())
+        input_dict["min-flame-speed"] = 0.2
+        inputs = parse_inputs(input_dict)
+        assert inputs.min_flame_speed == 0.2

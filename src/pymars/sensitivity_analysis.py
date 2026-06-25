@@ -41,6 +41,7 @@ def evaluate_species_errors(
     flame_conditions=[],
     phase_name="",
     num_threads=1,
+    min_flame_speed=None,
 ):
     """Calculate error induced by removal of each limbo species
 
@@ -86,6 +87,7 @@ def evaluate_species_errors(
                 test_model_file,
                 ignition_conditions,
                 flame_conditions=flame_conditions,
+                min_flame_speed=min_flame_speed,
                 phase_name=phase_name,
                 num_threads=num_threads,
             )
@@ -107,6 +109,7 @@ def run_sa(
     species_limbo=[],
     num_threads=1,
     path="",
+    min_flame_speed=None,
 ):
     """Runs a sensitivity analysis to remove species on a given model.
 
@@ -162,6 +165,7 @@ def run_sa(
         model_file,
         ignition_conditions,
         flame_conditions=flame_conditions,
+        min_flame_speed=min_flame_speed,
         reuse_saved=True,
         phase_name=phase_name,
         num_threads=num_threads,
@@ -184,6 +188,7 @@ def run_sa(
         initial_metrics,
         species_limbo,
         flame_conditions=flame_conditions,
+        min_flame_speed=min_flame_speed,
         phase_name=phase_name,
         num_threads=num_threads,
     )
@@ -213,6 +218,7 @@ def run_sa(
                 test_model_file,
                 ignition_conditions,
                 flame_conditions=flame_conditions,
+                min_flame_speed=min_flame_speed,
                 phase_name=phase_name,
                 num_threads=num_threads,
                 path=path,
@@ -239,6 +245,7 @@ def run_sa(
                     initial_metrics,
                     species_limbo,
                     flame_conditions=flame_conditions,
+                    min_flame_speed=min_flame_speed,
                     phase_name=phase_name,
                     num_threads=num_threads,
                 )

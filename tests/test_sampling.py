@@ -354,3 +354,24 @@ class TestFlameSampling:
 
         # sampled data is the ignition states stacked on top of the flame states
         assert data.shape == (2 * n_points, 2 + gas.n_species)
+
+    def test_sample_metrics_no_flame_is_zero(self, monkeypatch):
+        """A reduced model whose flame fails to solve yields a 0.0 metric.
+
+        ``sample_metrics`` (the reduced-model path) must not crash on an
+        undetectable flame; the 0.0 metric then drives a 100% error in
+        ``calculate_error``, so the model is rejected during reduction.
+        """
+        from pymars.simulation import FlameSimulation
+
+        def force_no_flame(_self):
+            raise ct.CanteraError("forced failure: no flame detected")
+
+        # num_threads=1 so the monkeypatch applies (it would not reach subprocesses)
+        monkeypatch.setattr(FlameSimulation, "_solve_flame", force_no_flame)
+        metrics = sample_metrics(
+            "h2o2.yaml", [], flame_conditions=[self._hydrogen_flame()], num_threads=1
+        )
+
+        assert metrics.shape == (1,)
+        assert metrics[0] == 0.0

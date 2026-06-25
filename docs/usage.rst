@@ -175,6 +175,8 @@ indicated with the ``--input`` or ``-i`` command-line argument. Keys include:
   simulations, described in more detail next
 - ``laminar-flame-conditions``: List of initial conditions for freely-propagating
   laminar flame simulations, described in more detail below
+- ``min-flame-speed``: Optional minimum laminar flame speed, in m/s, that counts
+  as a real flame (default ``0.05``); see the laminar flame parameters below
 
 At least one of ``autoignition-conditions`` or ``laminar-flame-conditions`` must
 be provided; you may also supply both, in which case the sampled states and the
@@ -280,6 +282,19 @@ of the domain size, which Cantera refines automatically during the solve:
 Note that the kinetic model must include transport data to run laminar flame
 simulations. Flame simulations are considerably more expensive than autoignition
 simulations, so reductions that rely on them will take longer.
+
+**No-flame detection.** A non-flammable mixture does not raise an error when
+solved; it instead converges to a degenerate, near-zero (or negative) "flame
+speed". pyMARS treats any solved flame speed at or below ``min-flame-speed``
+(default ``0.05`` m/s) as no flame: during a reduction, a candidate reduced model
+that produces such a result is rejected (assigned 100% error) rather than
+aborting the run. ``min-flame-speed`` is a single global setting (not per-case);
+lower it if you are studying a fuel with actual low flame speeds that could
+fall below the default floor:
+
+.. code-block:: yaml
+
+    min-flame-speed: 0.01
 
 As with autoignition data, pyMARS reuses saved laminar flame samples from a
 prior run when the number and shape of the saved cases match the input file.
