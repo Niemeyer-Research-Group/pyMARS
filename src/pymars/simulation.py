@@ -214,6 +214,27 @@ class IgnitionSimulation(BaseSimulation):
 
         self.ignition_delay = 0.0
 
+    def _step(self):
+        """Advance the reactor network a single time step.
+
+        Thin wrapper around :meth:`cantera.ReactorNet.step`, factored out so the
+        integrator failure path can be exercised in tests (the underlying
+        Cantera method is read-only and cannot be patched directly).
+
+        Returns
+        -------
+        float
+            The new simulation time, in seconds.
+
+        Raises
+        ------
+        cantera.CanteraError
+            If the integrator fails (e.g. CVODES error from non-finite
+            derivatives, as can happen for a degenerate reduced model).
+
+        """
+        return self.sim.step()
+
     def run_case(self, stop_at_ignition=False, restart=False):
         """Run simulation case set up ``setup_case``.
 
@@ -258,64 +279,75 @@ class IgnitionSimulation(BaseSimulation):
 
         ignition_flag = False
 
-        # Main time integration loop
-        if self.time_end:
-            # if end time specified, continue integration until reaching that time
-            while self.sim.time < self.time_end:
-                self.sim.step()
-                record()
+        # Main time integration loop. A CanteraError here means the integrator
+        # failed (e.g. CVODES non-finite derivatives). This path runs the
+        # original/baseline model during a sampling run, where a failure to
+        # simulate should halt the reduction, so it is re-raised as a
+        # RuntimeError.
+        try:
+            if self.time_end:
+                # if end time specified, continue integration until reaching that time
+                while self.sim.time < self.time_end:
+                    self._step()
+                    record()
 
-                if (
-                    self.reac.T >= self.properties.temperature + 400.0
-                    and not ignition_flag
-                ):
-                    self.ignition_delay = self.sim.time
-                    ignition_flag = True
+                    if (
+                        self.reac.T >= self.properties.temperature + 400.0
+                        and not ignition_flag
+                    ):
+                        self.ignition_delay = self.sim.time
+                        ignition_flag = True
 
-                    if stop_at_ignition:
+                        if stop_at_ignition:
+                            break
+
+            else:
+                # otherwise, integrate until steady state, or maximum number of steps reached
+                self.sim.reinitialize()
+                max_state_values = self.sim.get_state()
+                residual_threshold = 10.0 * self.sim.rtol
+                absolute_tolerance = self.sim.atol
+
+                for step in range(self.max_steps):
+                    previous_state = self.sim.get_state()
+
+                    self._step()
+                    record()
+
+                    if (
+                        self.reac.T >= self.properties.temperature + 400.0
+                        and not ignition_flag
+                    ):
+                        self.ignition_delay = self.sim.time
+                        ignition_flag = True
+
+                        if stop_at_ignition:
+                            break
+
+                    state = self.sim.get_state()
+                    max_state_values = np.maximum(max_state_values, state)
+                    residual = np.linalg.norm(
+                        (state - previous_state)
+                        / (max_state_values + absolute_tolerance)
+                    ) / np.sqrt(self.sim.n_vars)
+
+                    if residual < residual_threshold:
                         break
 
-        else:
-            # otherwise, integrate until steady state, or maximum number of steps reached
-            self.sim.reinitialize()
-            max_state_values = self.sim.get_state()
-            residual_threshold = 10.0 * self.sim.rtol
-            absolute_tolerance = self.sim.atol
-
-            for step in range(self.max_steps):
-                previous_state = self.sim.get_state()
-
-                self.sim.step()
-                record()
-
-                if (
-                    self.reac.T >= self.properties.temperature + 400.0
-                    and not ignition_flag
-                ):
-                    self.ignition_delay = self.sim.time
-                    ignition_flag = True
-
-                    if stop_at_ignition:
-                        break
-
-                state = self.sim.get_state()
-                max_state_values = np.maximum(max_state_values, state)
-                residual = np.linalg.norm(
-                    (state - previous_state) / (max_state_values + absolute_tolerance)
-                ) / np.sqrt(self.sim.n_vars)
-
-                if residual < residual_threshold:
-                    break
-
-            if step == self.max_steps - 1:
-                logging.error(
-                    "Maximum number of steps reached before "
-                    f"convergence for ignition case {self.idx}"
-                )
-                raise RuntimeError(
-                    "Maximum number of steps reached before "
-                    f"convergence for ignition case {self.idx}"
-                )
+                if step == self.max_steps - 1:
+                    logging.error(
+                        "Maximum number of steps reached before "
+                        f"convergence for ignition case {self.idx}"
+                    )
+                    raise RuntimeError(
+                        "Maximum number of steps reached before "
+                        f"convergence for ignition case {self.idx}"
+                    )
+        except ct.CanteraError as error:
+            logging.error(f"Integration failed for ignition case {self.idx}: {error}")
+            raise RuntimeError(
+                f"Integration failed for ignition case {self.idx}"
+            ) from error
 
         # Write collected data to HDF5 file
         with h5py.File(self.save_file, "w") as h5file:
@@ -332,31 +364,54 @@ class IgnitionSimulation(BaseSimulation):
         return self.ignition_delay
 
     def calculate(self):
-        """Run simulation case, just for ignition delay."""
-        # Main time integration loop
-        if self.time_end:
-            # if end time specified, continue integration until reaching that time
-            while self.sim.time < self.time_end:
-                self.sim.step()
-                if self.reac.T >= self.properties.temperature + 400.0:
-                    self.ignition_delay = self.sim.time
-                    break
-            if not self.ignition_delay:
-                logging.warning(
-                    f"No ignition detected before end time for ignition case {self.idx}"
-                )
-        else:
-            # otherwise, integrate until steady state, or maximum number of steps reached
-            for step in range(self.max_steps):
-                self.sim.step()
-                if self.reac.T >= self.properties.temperature + 400.0:
-                    self.ignition_delay = self.sim.time
-                    break
-            if step == self.max_steps - 1:
-                logging.warning(
-                    "Maximum number of steps reached before "
-                    f"convergence for ignition case {self.idx}"
-                )
+        """Run simulation case, just for ignition delay.
+
+        Returns an ignition delay of ``0.0`` (rather than raising) when the
+        model does not ignite or the integrator fails (e.g., a CVODES error),
+        so a reduced candidate that can no longer be integrated is rejected
+        through the error metric instead of aborting the reduction. This mirrors
+        ``FlameSimulation.calculate`` and the no-flame handling (see issue #69).
+
+        Returns
+        -------
+        float
+            Computed ignition delay in seconds, or ``0.0`` if the model does not
+            ignite or the integration fails.
+
+        """
+        # Main time integration loop. A CanteraError here means the integrator
+        # failed; for a candidate reduced model this must not halt the reduction,
+        # so it is treated as a non-igniting (zero ignition delay) case.
+        try:
+            if self.time_end:
+                # if end time specified, continue integration until reaching that time
+                while self.sim.time < self.time_end:
+                    self._step()
+                    if self.reac.T >= self.properties.temperature + 400.0:
+                        self.ignition_delay = self.sim.time
+                        break
+                if not self.ignition_delay:
+                    logging.warning(
+                        f"No ignition detected before end time for ignition case {self.idx}"
+                    )
+            else:
+                # otherwise, integrate until steady state, or maximum number of steps reached
+                for step in range(self.max_steps):
+                    self._step()
+                    if self.reac.T >= self.properties.temperature + 400.0:
+                        self.ignition_delay = self.sim.time
+                        break
+                if step == self.max_steps - 1:
+                    logging.warning(
+                        "Maximum number of steps reached before "
+                        f"convergence for ignition case {self.idx}"
+                    )
+        except ct.CanteraError as error:
+            logging.warning(
+                f"Integration failed for ignition case {self.idx}; "
+                f"treating the ignition delay as zero ({error})"
+            )
+            self.ignition_delay = 0.0
 
         return self.ignition_delay
 

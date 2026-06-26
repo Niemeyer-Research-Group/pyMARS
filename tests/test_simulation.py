@@ -296,6 +296,77 @@ class TestIgnitionSimulation:
             assert not os.path.isfile(sim.save_file)
 
 
+class TestIgnitionFailure:
+    """An ignition integration that fails should be handled gracefully rather
+    than crashing the reduction (see issue #69).
+
+    Two paths are covered: the metric-only ``calculate`` path (used for candidate
+    reduced models) must degrade to a 0.0 ignition delay so the candidate is
+    rejected through the error metric, while the ``run_case`` path (used for the
+    original/baseline model during a sampling run) should raise so a broken
+    baseline is caught. The integrator failure is forced deterministically by
+    monkeypatching ``_step`` to raise ``ct.CanteraError`` (as CVODES does for
+    non-finite derivatives); a real non-igniting (inert) mixture covers the
+    no-ignition case.
+    """
+
+    def _case(self):
+        return InputIgnition(
+            kind="constant volume",
+            pressure=1.0,
+            temperature=1000.0,
+            equivalence_ratio=1.0,
+            fuel={"H2": 1.0},
+            oxidizer={"O2": 1.0, "N2": 3.76},
+        )
+
+    def _inert_case(self):
+        # pure N2 never ignites; small max_steps keeps the steady-state loop short
+        return InputIgnition(
+            kind="constant volume",
+            pressure=1.0,
+            temperature=1000.0,
+            reactants={"N2": 1.0},
+            max_steps=10,
+        )
+
+    @staticmethod
+    def _force_integration_failure(_self):
+        raise ct.CanteraError("forced failure: CVODES error encountered")
+
+    def test_calculate_returns_zero_on_integration_failure(self, monkeypatch):
+        """The metric-only path degrades to 0.0 (so the candidate is rejected)."""
+        monkeypatch.setattr(
+            IgnitionSimulation, "_step", self._force_integration_failure
+        )
+        with TemporaryDirectory() as temp_dir:
+            sim = IgnitionSimulation(0, self._case(), "h2o2.yaml", path=temp_dir)
+            sim.setup_case()
+            # must not raise; returns 0.0
+            assert sim.calculate() == 0.0
+            assert sim.ignition_delay == 0.0
+
+    def test_run_case_raises_on_integration_failure(self, monkeypatch):
+        """The original-model sampling path raises, so a broken baseline is caught."""
+        monkeypatch.setattr(
+            IgnitionSimulation, "_step", self._force_integration_failure
+        )
+        with TemporaryDirectory() as temp_dir:
+            sim = IgnitionSimulation(0, self._case(), "h2o2.yaml", path=temp_dir)
+            sim.setup_case()
+            with pytest.raises(RuntimeError, match="Integration failed"):
+                sim.run_case()
+
+    def test_calculate_returns_zero_on_no_ignition(self):
+        """A real non-igniting (inert) mixture yields 0.0 from the metric path."""
+        with TemporaryDirectory() as temp_dir:
+            sim = IgnitionSimulation(0, self._inert_case(), "h2o2.yaml", path=temp_dir)
+            sim.setup_case()
+            # must not raise; returns 0.0
+            assert sim.calculate() == 0.0
+            assert sim.ignition_delay == 0.0
+
+
 class TestFlameSetupCase:
     """The gas state and composition should be initialized correctly."""
 

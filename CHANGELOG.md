@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Laminar flame reductions no longer abort when a candidate reduced model cannot sustain a flame. A failed or degenerate (negative/near-zero) flame solve is now treated as "no flame," so the reduced model is rejected via the error metric (mirroring how a non-igniting model is handled) instead of raising. A flame failure for the original/baseline model still raises so a missing baseline is caught.
+- Autoignition reductions no longer abort when a candidate reduced model fails to integrate. An integrator failure (e.g. a CVODES error from non-finite derivatives) during the metric-only path is now treated as a non-igniting result (zero ignition delay), so the reduced model is rejected via the error metric instead of crashing the reduction (fixes #69). An integration failure for the original/baseline model still raises so a broken baseline is caught.
 
 ## [1.2.0] - 2026-06-24
 
