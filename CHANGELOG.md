@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added a global `min-flame-speed` input option (default 0.05 m/s): a solved laminar flame speed at or below this floor is treated as a degenerate, non-physical result ("no flame"). Lower it when studying fuels with genuinely low flame speeds.
 
+### Changed
+
+- Sampling workers now have the same behavior; the ignition sampling worker processes and removes the `.h5` files.
+
 ### Fixed
 
 - Laminar flame reductions no longer abort when a candidate reduced model cannot sustain a flame. A failed or degenerate (negative/near-zero) flame solve is now treated as "no flame," so the reduced model is rejected via the error metric (mirroring how a non-igniting model is handled) instead of raising. A flame failure for the original/baseline model still raises so a missing baseline is caught.
