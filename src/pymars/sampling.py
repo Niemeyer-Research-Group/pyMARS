@@ -63,27 +63,31 @@ class InputLaminarFlame(NamedTuple):
 def ignition_sample_worker(sim_tuple):
     """Worker for multiprocessing of autoignition cases with data sampling.
 
+    Runs, processes, and cleans up the case entirely within the worker, returning
+    only the (picklable) metric and sampled data -- mirroring
+    ``flame_sample_worker``. The intermediate HDF5 file written by ``run_case`` is
+    read by ``process_results`` and removed by ``clean`` here, so the live
+    (unpicklable) reactor never needs to cross the process boundary.
+
     Parameters
     ----------
     sim_tuple : tuple
-        Contains IgnitionSimulation object and other parameters needed to setup
-        and run case.
+        Tuple of IgnitionSimulation object to be run and identifier
 
     Returns
     -------
-    sim : IgnitionSimulation
-        Object with simulation metadata
+    dict
+        Case identifier mapped to a tuple of the ignition delay and sampled data
 
     """
-    sim, stop_at_ignition = sim_tuple
+    sim, idx = sim_tuple
 
     sim.setup_case()
-    sim.run_case(stop_at_ignition)
+    sim.run_case()
+    ignition_delay, data = sim.process_results()
+    sim.clean()
 
-    sim = IgnitionSimulation(
-        sim.idx, sim.properties, sim.model, phase_name=sim.phase_name, path=sim.path
-    )
-    return sim
+    return {idx: (ignition_delay, data)}
 
 
 def ignition_worker(sim_tuple):
@@ -439,7 +443,6 @@ def sample(
             )
         else:
             logging.info("Running autoignition simulations for starting model.")
-            stop_at_ignition = False
             simulations = []
             for idx, case in enumerate(ignition_conditions):
                 simulations.append(
@@ -447,7 +450,7 @@ def sample(
                         IgnitionSimulation(
                             idx, case, model, phase_name=phase_name, path=path
                         ),
-                        stop_at_ignition,
+                        idx,
                     ]
                 )
 
@@ -462,12 +465,13 @@ def sample(
                 pool.close()
                 pool.join()
 
-            ignition_delays = np.zeros(len(ignition_conditions))
+            results = {key: val for k in results for key, val in k.items()}
+            ignition_delays = np.zeros(len(results))
             ignition_data = []
-            for idx, sim in enumerate(results):
-                ignition_delays[idx], data = sim.process_results()
+            for idx in range(len(results)):
+                ignition_delay, data = results[idx]
+                ignition_delays[idx] = ignition_delay
                 ignition_data += list(data)
-                sim.clean()
             ignition_data = np.array(ignition_data)
 
             np.savetxt(data_files["data_ignition"], ignition_data, delimiter=",")
