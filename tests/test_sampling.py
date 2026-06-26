@@ -375,3 +375,37 @@ class TestFlameSampling:
 
         assert metrics.shape == (1,)
         assert metrics[0] == 0.0
+
+    @pytest.mark.slow
+    def test_parallel_matches_serial(self):
+        """The multiprocessing path (num_threads > 1) matches serial results.
+
+        Exercises the ``multiprocessing.Pool`` dispatch end to end, including
+        pickling the simulation objects and results across the process boundary.
+        """
+        flame_conditions = [self._hydrogen_flame(), self._hydrogen_flame()]
+        serial = sample_metrics(
+            "h2o2.yaml", [], flame_conditions=flame_conditions, num_threads=1
+        )
+        parallel = sample_metrics(
+            "h2o2.yaml", [], flame_conditions=flame_conditions, num_threads=2
+        )
+        assert serial.shape == (2,)
+        assert parallel.shape == (2,)
+        assert np.allclose(serial, parallel)
+
+
+def _double_worker(job):
+    """Trivial picklable worker for testing the parallel dispatch in isolation."""
+    _sim, idx = job
+    return {idx: idx * 2}
+
+
+class TestRunWorkers:
+    """The shared dispatch helper merges results identically, serial or parallel."""
+
+    def test_parallel_matches_serial(self):
+        simulations = [[None, idx] for idx in range(4)]
+        serial = sampling._run_workers(simulations, _double_worker, num_threads=1)
+        parallel = sampling._run_workers(simulations, _double_worker, num_threads=2)
+        assert serial == parallel == {0: 0, 1: 2, 2: 4, 3: 6}

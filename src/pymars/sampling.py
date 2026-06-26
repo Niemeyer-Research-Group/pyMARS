@@ -150,6 +150,77 @@ def flame_worker(flamesim_tuple):
     return {idx: flame_speed}
 
 
+def _run_workers(simulations, worker, num_threads):
+    """Run ``worker`` over a list of job tuples and merge the per-case results.
+
+    Parameters
+    ----------
+    simulations : list
+        List of ``[sim, idx]`` job tuples to pass to ``worker``.
+    worker : callable
+        Worker returning a ``{idx: result}`` dict for one job.
+    num_threads : int
+        Number of processes to use; 1 runs serially.
+
+    Returns
+    -------
+    dict
+        Merged ``{idx: result}`` mapping over all cases.
+
+    """
+    jobs = tuple(simulations)
+    if num_threads == 1:
+        results = [worker(job) for job in jobs]
+    else:
+        pool = multiprocessing.Pool(processes=num_threads)
+        results = pool.map(worker, jobs)
+        pool.close()
+        pool.join()
+    return {key: val for k in results for key, val in k.items()}
+
+
+def _run_sampling_jobs(simulations, worker, num_threads):
+    """Run data-sampling workers and collect their metrics and sampled data.
+
+    For ``ignition_sample_worker`` / ``flame_sample_worker``, whose results are
+    ``{idx: (metric, sampled_data)}``.
+
+    Returns
+    -------
+    metrics : numpy.ndarray
+        1-D array of the per-case global metric (ignition delay or flame speed).
+    data : numpy.ndarray
+        Stacked sampled-state rows from all cases.
+
+    """
+    results = _run_workers(simulations, worker, num_threads)
+    metrics = np.zeros(len(results))
+    data = []
+    for idx in range(len(results)):
+        metric, case_data = results[idx]
+        metrics[idx] = metric
+        data += list(case_data)
+    return metrics, np.array(data)
+
+
+def _run_metric_jobs(simulations, worker, num_threads):
+    """Run metric-only workers and collect their per-case metrics.
+
+    For ``ignition_worker`` / ``flame_worker``, whose results are ``{idx: metric}``.
+
+    Returns
+    -------
+    numpy.ndarray
+        1-D array of the per-case global metric.
+
+    """
+    results = _run_workers(simulations, worker, num_threads)
+    metrics = np.zeros(len(results))
+    for idx, metric in results.items():
+        metrics[idx] = metric
+    return metrics
+
+
 def calculate_error(metrics_original, metrics_test):
     """Calculates error of global metrics between test and original model.
 
@@ -294,21 +365,9 @@ def sample_metrics(
                     ]
                 )
 
-            jobs = tuple(simulations)
-            if num_threads == 1:
-                results = []
-                for job in jobs:
-                    results.append(ignition_worker(job))
-            else:
-                pool = multiprocessing.Pool(processes=num_threads)
-                results = pool.map(ignition_worker, jobs)
-                pool.close()
-                pool.join()
-
-            results = {key: val for k in results for key, val in k.items()}
-            ignition_delays = np.zeros(len(results))
-            for idx, ignition_delay in results.items():
-                ignition_delays[idx] = ignition_delay
+            ignition_delays = _run_metric_jobs(
+                simulations, ignition_worker, num_threads
+            )
 
     if psr_conditions:
         raise NotImplementedError("PSR calculations not currently supported.")
@@ -344,21 +403,7 @@ def sample_metrics(
                     ]
                 )
 
-            jobs = tuple(simulations)
-            if num_threads == 1:
-                results = []
-                for job in jobs:
-                    results.append(flame_worker(job))
-            else:
-                pool = multiprocessing.Pool(processes=num_threads)
-                results = pool.map(flame_worker, jobs)
-                pool.close()
-                pool.join()
-
-            results = {key: val for k in results for key, val in k.items()}
-            flame_speeds = np.zeros(len(results))
-            for idx, flame_speed in results.items():
-                flame_speeds[idx] = flame_speed
+            flame_speeds = _run_metric_jobs(simulations, flame_worker, num_threads)
 
     metric_arrays = [
         np.atleast_1d(m) for m in (ignition_delays, flame_speeds) if m.size
@@ -454,25 +499,9 @@ def sample(
                     ]
                 )
 
-            jobs = tuple(simulations)
-            if num_threads == 1:
-                results = []
-                for job in jobs:
-                    results.append(ignition_sample_worker(job))
-            else:
-                pool = multiprocessing.Pool(processes=num_threads)
-                results = pool.map(ignition_sample_worker, jobs)
-                pool.close()
-                pool.join()
-
-            results = {key: val for k in results for key, val in k.items()}
-            ignition_delays = np.zeros(len(results))
-            ignition_data = []
-            for idx in range(len(results)):
-                ignition_delay, data = results[idx]
-                ignition_delays[idx] = ignition_delay
-                ignition_data += list(data)
-            ignition_data = np.array(ignition_data)
+            ignition_delays, ignition_data = _run_sampling_jobs(
+                simulations, ignition_sample_worker, num_threads
+            )
 
             np.savetxt(data_files["data_ignition"], ignition_data, delimiter=",")
             np.savetxt(data_files["output_ignition"], ignition_delays, delimiter=",")
@@ -528,25 +557,9 @@ def sample(
                     ]
                 )
 
-            jobs = tuple(simulations)
-            if num_threads == 1:
-                results = []
-                for job in jobs:
-                    results.append(flame_sample_worker(job))
-            else:
-                pool = multiprocessing.Pool(processes=num_threads)
-                results = pool.map(flame_sample_worker, jobs)
-                pool.close()
-                pool.join()
-
-            results = {key: val for k in results for key, val in k.items()}
-            flame_speeds = np.zeros(len(results))
-            flame_data = []
-            for idx in range(len(results)):
-                flame_speed, data = results[idx]
-                flame_speeds[idx] = flame_speed
-                flame_data += list(data)
-            flame_data = np.array(flame_data)
+            flame_speeds, flame_data = _run_sampling_jobs(
+                simulations, flame_sample_worker, num_threads
+            )
 
             np.savetxt(data_files["data_flame"], flame_data, delimiter=",")
             np.savetxt(data_files["output_flame"], flame_speeds, delimiter=",")
