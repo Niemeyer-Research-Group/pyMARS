@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added a global `min-flame-speed` input option (default 0.05 m/s): a solved laminar flame speed at or below this floor is treated as a degenerate, non-physical result ("no flame"). Lower it when studying fuels with genuinely low flame speeds.
-- Adds tests for `num_workers` > 1
+- Adds tests for `num_workers` > 1, covering the ignition and flame multiprocessing paths (parallel results match serial) and the shared dispatch helper
 
 ### Changed
 

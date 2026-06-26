@@ -395,6 +395,35 @@ class TestFlameSampling:
         assert np.allclose(serial, parallel)
 
 
+class TestIgnitionSampling:
+    """Exercises the autoignition branch of sample / sample_metrics."""
+
+    def _hydrogen_ignition(self):
+        return InputIgnition(
+            kind="constant volume",
+            pressure=1.0,
+            temperature=1200.0,
+            equivalence_ratio=1.0,
+            fuel={"H2": 1.0},
+            oxidizer={"O2": 1.0, "N2": 3.76},
+        )
+
+    @pytest.mark.slow
+    def test_parallel_matches_serial(self):
+        """The ignition multiprocessing path matches serial results.
+
+        Verifies ``IgnitionSimulation`` objects survive the spawn-pool pickle
+        round-trip; a live reactor net cannot be pickled and is rebuilt per
+        worker via ``setup_case()``.
+        """
+        ignition_conditions = [self._hydrogen_ignition() for _ in range(2)]
+        serial = sample_metrics("h2o2.yaml", ignition_conditions, num_threads=1)
+        parallel = sample_metrics("h2o2.yaml", ignition_conditions, num_threads=2)
+        assert serial.shape == (2,)
+        assert parallel.shape == (2,)
+        assert np.allclose(serial, parallel)
+
+
 def _double_worker(job):
     """Trivial picklable worker for testing the parallel dispatch in isolation."""
     _sim, idx = job
