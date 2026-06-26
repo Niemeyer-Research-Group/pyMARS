@@ -408,6 +408,28 @@ class TestIgnitionSampling:
             oxidizer={"O2": 1.0, "N2": 3.76},
         )
 
+    def test_sample_metrics_integration_failure_is_zero(self, monkeypatch):
+        """A reduced model whose ignition integration fails yields a 0.0 metric.
+
+        Reproduces the issue #69 scenario: ``sample_metrics`` (the reduced-model
+        path) must not crash when the integrator fails (CVODES error); the 0.0
+        metric then drives a 100% error in ``calculate_error``, so the model is
+        rejected during reduction.
+        """
+        from pymars.simulation import IgnitionSimulation
+
+        def force_failure(_self):
+            raise ct.CanteraError("forced failure: CVODES error encountered")
+
+        # num_threads=1 so the monkeypatch applies (it would not reach subprocesses)
+        monkeypatch.setattr(IgnitionSimulation, "_step", force_failure)
+        metrics = sample_metrics(
+            "h2o2.yaml", [self._hydrogen_ignition()], num_threads=1
+        )
+
+        assert metrics.shape == (1,)
+        assert metrics[0] == 0.0
+
     @pytest.mark.slow
     def test_parallel_matches_serial(self):
         """The ignition multiprocessing path matches serial results.
