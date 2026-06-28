@@ -75,38 +75,36 @@ def _damped_newton(residual, x0, tol=1.0e-9, maxit=50):
 
 
 def _core_residual(gas, Y, T, tau, P, Y_in, h_in, h_scale, Wk):
-    """The ``K+1`` steady-PSR residuals (species, then energy), well scaled.
+    """The ``gas.n_species+1`` steady-PSR residuals (species, then energy), well scaled.
 
     Returns a large finite penalty for unphysical states (non-positive
     temperature, non-finite mass fractions, or a Cantera evaluation error) so the
     corrector backtracks instead of crashing.
     """
-    K = gas.n_species
     if T <= 0.0 or not np.all(np.isfinite(Y)):
-        return np.full(K + 1, PENALTY)
+        return np.full(gas.n_species + 1, PENALTY)
     try:
         gas.set_unnormalized_mass_fractions(Y)
         gas.TP = T, P
         wdot = gas.net_production_rates
         rho = gas.density
     except ct.CanteraError:
-        return np.full(K + 1, PENALTY)
+        return np.full(gas.n_species + 1, PENALTY)
     return np.concatenate(
         [(Y - Y_in) - tau * wdot * Wk / rho, [(gas.enthalpy_mass - h_in) / h_scale]]
     )
 
 
-def _core_jacobian(gas, Y, T, tau, P, h_scale, Wk):
-    """Analytic Jacobian of :func:`_core_residual` with respect to ``(Y, T, tau)``.
+def _core_jacobian(gas, Y, temp, tau, pressure, h_scale, Wk):
+    """Analytic Jacobian of :func:`_core_residual` with respect to ``(Y, temp, tau)``.
 
-    Returns an array of shape ``(K+1, K+2)`` (columns ``Y_1 .. Y_K``, ``T``,
-    ``tau``), assembled from Cantera's analytic kinetics derivatives
-    (``net_production_rates_ddCi`` and ``net_production_rates_ddT``) combined with
-    the density and enthalpy derivatives via the chain rule.
+    Returns an array of shape ``(gas.n_species+1, gas.n_species+2)``
+    (columns ``Y_1 .. Y_gas.n_species``, ``temp``, ``tau``), assembled from Cantera's
+    analytic kinetics derivatives (``net_production_rates_ddCi`` and ``net_production_rates_ddT``)
+    combined with the density and enthalpy derivatives via the chain rule.
     """
-    K = gas.n_species
     gas.set_unnormalized_mass_fractions(Y)
-    gas.TP = T, P
+    gas.TP = temp, pressure
     wdot = gas.net_production_rates
     rho = gas.density
     mw = gas.mean_molecular_weight
@@ -115,16 +113,16 @@ def _core_jacobian(gas, Y, T, tau, P, h_scale, Wk):
     yow = Y / Wk
     drho_dY = -rho * mw / Wk
     dCdY = np.outer(yow, drho_dY)
-    dCdY[np.diag_indices(K)] += rho / Wk
+    dCdY[np.diag_indices(gas.n_species)] += rho / Wk
     ds_dY = Wk[:, None] * ((ddCi @ dCdY) / rho - np.outer(wdot, drho_dY) / rho**2)
-    drho_dT = -rho / T
+    drho_dT = -rho / temp
     ds_dT = Wk * ((ddT + ddCi @ (drho_dT * yow)) / rho - wdot * drho_dT / rho**2)
-    jac = np.zeros((K + 1, K + 2))
-    jac[:K, :K] = np.eye(K) - tau * ds_dY
-    jac[:K, K] = -tau * ds_dT
-    jac[:K, K + 1] = -(wdot * Wk / rho)
-    jac[K, :K] = gas.partial_molar_enthalpies / Wk / h_scale
-    jac[K, K] = gas.cp_mass / h_scale
+    jac = np.zeros((gas.n_species + 1, gas.n_species + 2))
+    jac[: gas.n_species, : gas.n_species] = np.eye(gas.n_species) - tau * ds_dY
+    jac[: gas.n_species, gas.n_species] = -tau * ds_dT
+    jac[: gas.n_species, gas.n_species + 1] = -(wdot * Wk / rho)
+    jac[gas.n_species, : gas.n_species] = gas.partial_molar_enthalpies / Wk / h_scale
+    jac[gas.n_species, gas.n_species] = gas.cp_mass / h_scale
     return jac
 
 
@@ -174,8 +172,7 @@ def trace_extinction_curve(
         reaching the turning point.
 
     """
-    K = gas.n_species
-    P = gas.P
+    pressure = gas.P
     inlet_T = gas.T
     Y_in = gas.Y.copy()
     h_in = gas.enthalpy_mass
@@ -184,14 +181,14 @@ def trace_extinction_curve(
 
     # ---- residual and analytic Jacobian (physical variables Y, T, tau) ----
     def core_res_phys(Y, T, tau):
-        return _core_residual(gas, Y, T, tau, P, Y_in, h_in, h_scale, Wk)
+        return _core_residual(gas, Y, T, tau, pressure, Y_in, h_in, h_scale, Wk)
 
     def core_jac_phys(Y, T, tau):
-        return _core_jacobian(gas, Y, T, tau, P, h_scale, Wk)
+        return _core_jacobian(gas, Y, T, tau, pressure, h_scale, Wk)
 
     # ---- scaled unknown vector u = [Y, theta=T/TREF, sigma=ln tau] ----
     def unpack(u):
-        return u[:K], u[K] * TREF, np.exp(u[K + 1])
+        return u[: gas.n_species], u[gas.n_species] * TREF, np.exp(u[gas.n_species + 1])
 
     def core_res(u):
         Y, T, tau = unpack(u)
@@ -200,13 +197,21 @@ def trace_extinction_curve(
     def core_jac(u):
         Y, T, tau = unpack(u)
         jac = core_jac_phys(Y, T, tau).copy()
-        jac[:, K] *= TREF
-        jac[:, K + 1] *= tau
+        jac[:, gas.n_species] *= TREF
+        jac[:, gas.n_species + 1] *= tau
         return jac
 
     def solve_fixed_tau(tau, guess):
-        res = lambda x: core_res_phys(x[:K], x[K], tau)  # noqa: E731
-        jac = lambda x: core_jac_phys(x[:K], x[K], tau)[:, : K + 1]  # noqa: E731
+        def res(x):
+            return core_res_phys(
+                x[: gas.n_species], x[gas.n_species], tau
+            )  # noqa: E731
+
+        def jac(x):
+            return core_jac_phys(x[: gas.n_species], x[gas.n_species], tau)[
+                :, : gas.n_species + 1
+            ]  # noqa: E731
+
         sol = root(res, guess, jac=jac, method="hybr", tol=1e-10)
         if sol.success and np.linalg.norm(sol.fun) < 1e-7:
             return sol.x, True
@@ -226,12 +231,16 @@ def trace_extinction_curve(
     if not (ok0 and ok1):
         raise RuntimeError("PSR: failed to seed the burning branch")
 
-    u_pp = np.concatenate([x0[:K], [x0[K] / TREF, np.log(tau_start)]])
-    u_prev = np.concatenate([x1[:K], [x1[K] / TREF, np.log(tau_second)]])
+    u_pp = np.concatenate(
+        [x0[: gas.n_species], [x0[gas.n_species] / TREF, np.log(tau_start)]]
+    )
+    u_prev = np.concatenate(
+        [x1[: gas.n_species], [x1[gas.n_species] / TREF, np.log(tau_second)]]
+    )
 
     taus = [tau_start, tau_second]
-    temps = [x0[K], x1[K]]
-    states = [x0[:K].copy(), x1[:K].copy()]
+    temps = [x0[gas.n_species], x1[gas.n_species]]
+    states = [x0[: gas.n_species].copy(), x1[: gas.n_species].copy()]
     ds = ds0
     fold_passed = False
     tau_ext = min(tau_start, tau_second)
@@ -253,7 +262,7 @@ def trace_extinction_curve(
             continue
 
         Y_new, T_new, tau_new = unpack(u_new)
-        if tangent[K + 1] > 0:
+        if tangent[gas.n_species + 1] > 0:
             fold_passed = True
         taus.append(tau_new)
         temps.append(T_new)
