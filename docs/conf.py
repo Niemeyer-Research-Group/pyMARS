@@ -69,8 +69,9 @@ bibtex_default_style = "unsrt"
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3.14", None),
     "numpy": ("https://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "networkx": ("https://networkx.github.io/documentation/stable/", None),
-    "cantera": ("https://cantera.org/documentation/docs-3.0/sphinx/html/", None),
+    "cantera": ("https://cantera.org/stable/", None),
     #'pytables': ('http://www.pytables.org/usersguide/libref/', None)
 }
 
@@ -78,10 +79,13 @@ intersphinx_mapping = {
 # instead of the package name
 modindex_common_prefix = ["pymars."]
 
-# Suppress duplicate citation warnings.
-# WARNING: Also suppresses undefined citation warnings and unused
-# reference warnings.
-suppress_warnings = ["ref.citation"]
+# Suppress duplicate citation warnings. "ref.citation" covers the docutils-level
+# warnings (and, as a side effect, undefined-citation and unused-reference
+# warnings). "bibtex.duplicate_citation" covers a reference cited from more than
+# one page-local bibliography (e.g., niemeyer:2015 appears in both theory and
+# psr_theory); label collisions are already avoided via the bibliography
+# directive's ``:labelprefix:``.
+suppress_warnings = ["ref.citation", "bibtex.duplicate_citation"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

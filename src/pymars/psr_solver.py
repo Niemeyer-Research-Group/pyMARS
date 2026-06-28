@@ -74,6 +74,60 @@ def _damped_newton(residual, x0, tol=1.0e-9, maxit=50):
     return u, np.linalg.norm(residual(u)) < tol * 100
 
 
+def _core_residual(gas, Y, T, tau, P, Y_in, h_in, h_scale, Wk):
+    """The ``K+1`` steady-PSR residuals (species, then energy), well scaled.
+
+    Returns a large finite penalty for unphysical states (non-positive
+    temperature, non-finite mass fractions, or a Cantera evaluation error) so the
+    corrector backtracks instead of crashing.
+    """
+    K = gas.n_species
+    if T <= 0.0 or not np.all(np.isfinite(Y)):
+        return np.full(K + 1, PENALTY)
+    try:
+        gas.set_unnormalized_mass_fractions(Y)
+        gas.TP = T, P
+        wdot = gas.net_production_rates
+        rho = gas.density
+    except ct.CanteraError:
+        return np.full(K + 1, PENALTY)
+    return np.concatenate(
+        [(Y - Y_in) - tau * wdot * Wk / rho, [(gas.enthalpy_mass - h_in) / h_scale]]
+    )
+
+
+def _core_jacobian(gas, Y, T, tau, P, h_scale, Wk):
+    """Analytic Jacobian of :func:`_core_residual` with respect to ``(Y, T, tau)``.
+
+    Returns an array of shape ``(K+1, K+2)`` (columns ``Y_1 .. Y_K``, ``T``,
+    ``tau``), assembled from Cantera's analytic kinetics derivatives
+    (``net_production_rates_ddCi`` and ``net_production_rates_ddT``) combined with
+    the density and enthalpy derivatives via the chain rule.
+    """
+    K = gas.n_species
+    gas.set_unnormalized_mass_fractions(Y)
+    gas.TP = T, P
+    wdot = gas.net_production_rates
+    rho = gas.density
+    mw = gas.mean_molecular_weight
+    ddCi = gas.net_production_rates_ddCi
+    ddT = gas.net_production_rates_ddT
+    yow = Y / Wk
+    drho_dY = -rho * mw / Wk
+    dCdY = np.outer(yow, drho_dY)
+    dCdY[np.diag_indices(K)] += rho / Wk
+    ds_dY = Wk[:, None] * ((ddCi @ dCdY) / rho - np.outer(wdot, drho_dY) / rho**2)
+    drho_dT = -rho / T
+    ds_dT = Wk * ((ddT + ddCi @ (drho_dT * yow)) / rho - wdot * drho_dT / rho**2)
+    jac = np.zeros((K + 1, K + 2))
+    jac[:K, :K] = np.eye(K) - tau * ds_dY
+    jac[:K, K] = -tau * ds_dT
+    jac[:K, K + 1] = -(wdot * Wk / rho)
+    jac[K, :K] = gas.partial_molar_enthalpies / Wk / h_scale
+    jac[K, K] = gas.cp_mass / h_scale
+    return jac
+
+
 def trace_extinction_curve(
     gas,
     ds0=0.10,
@@ -130,41 +184,10 @@ def trace_extinction_curve(
 
     # ---- residual and analytic Jacobian (physical variables Y, T, tau) ----
     def core_res_phys(Y, T, tau):
-        if T <= 0.0 or not np.all(np.isfinite(Y)):
-            return np.full(K + 1, PENALTY)
-        try:
-            gas.set_unnormalized_mass_fractions(Y)
-            gas.TP = T, P
-            wdot = gas.net_production_rates
-            rho = gas.density
-        except ct.CanteraError:
-            return np.full(K + 1, PENALTY)
-        return np.concatenate(
-            [(Y - Y_in) - tau * wdot * Wk / rho, [(gas.enthalpy_mass - h_in) / h_scale]]
-        )
+        return _core_residual(gas, Y, T, tau, P, Y_in, h_in, h_scale, Wk)
 
     def core_jac_phys(Y, T, tau):
-        gas.set_unnormalized_mass_fractions(Y)
-        gas.TP = T, P
-        wdot = gas.net_production_rates
-        rho = gas.density
-        mw = gas.mean_molecular_weight
-        ddCi = gas.net_production_rates_ddCi
-        ddT = gas.net_production_rates_ddT
-        yow = Y / Wk
-        drho_dY = -rho * mw / Wk
-        dCdY = np.outer(yow, drho_dY)
-        dCdY[np.diag_indices(K)] += rho / Wk
-        ds_dY = Wk[:, None] * ((ddCi @ dCdY) / rho - np.outer(wdot, drho_dY) / rho**2)
-        drho_dT = -rho / T
-        ds_dT = Wk * ((ddT + ddCi @ (drho_dT * yow)) / rho - wdot * drho_dT / rho**2)
-        jac = np.zeros((K + 1, K + 2))
-        jac[:K, :K] = np.eye(K) - tau * ds_dY
-        jac[:K, K] = -tau * ds_dT
-        jac[:K, K + 1] = -(wdot * Wk / rho)
-        jac[K, :K] = gas.partial_molar_enthalpies / Wk / h_scale
-        jac[K, K] = gas.cp_mass / h_scale
-        return jac
+        return _core_jacobian(gas, Y, T, tau, P, h_scale, Wk)
 
     # ---- scaled unknown vector u = [Y, theta=T/TREF, sigma=ln tau] ----
     def unpack(u):
