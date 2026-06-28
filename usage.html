@@ -186,6 +186,8 @@ reduction methods</p></li>
 simulations, described in more detail next</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code>: List of initial conditions for freely-propagating
 laminar flame simulations, described in more detail below</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min-flame-speed</span></code>: Optional minimum laminar flame speed, in m/s, that counts
+as a real flame (default <code class="docutils literal notranslate"><span class="pre">0.05</span></code>); see the laminar flame parameters below</p></li>
 </ul>
 <p>At least one of <code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code> or <code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code> must
 be provided; you may also supply both, in which case the sampled states and the
@@ -276,6 +278,17 @@ of the domain size, which Cantera refines automatically during the solve:</p>
 <p>Note that the kinetic model must include transport data to run laminar flame
 simulations. Flame simulations are considerably more expensive than autoignition
 simulations, so reductions that rely on them will take longer.</p>
+<p><strong>No-flame detection.</strong> A non-flammable mixture does not raise an error when
+solved; it instead converges to a degenerate, near-zero (or negative) “flame
+speed”. pyMARS treats any solved flame speed at or below <code class="docutils literal notranslate"><span class="pre">min-flame-speed</span></code>
+(default <code class="docutils literal notranslate"><span class="pre">0.05</span></code> m/s) as no flame: during a reduction, a candidate reduced model
+that produces such a result is rejected (assigned 100% error) rather than
+aborting the run. <code class="docutils literal notranslate"><span class="pre">min-flame-speed</span></code> is a single global setting (not per-case);
+lower it if you are studying a fuel with actual low flame speeds that could
+fall below the default floor:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">min-flame-speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+</pre></div>
+</div>
 <p>As with autoignition data, pyMARS reuses saved laminar flame samples from a
 prior run when the number and shape of the saved cases match the input file.</p>
 </section>

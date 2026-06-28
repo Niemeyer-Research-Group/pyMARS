@@ -105,7 +105,7 @@ those that don’t (e.g., laminar flame) leave it <code class="docutils literal 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pymars.simulation.FlameSimulation">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.simulation.</span></span><span class="sig-name descname"><span class="pre">FlameSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.simulation.</span></span><span class="sig-name descname"><span class="pre">FlameSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_flame_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation" title="Link to this definition">¶</a></dt>
 <dd><p>Class for one-dimensional freely-propagating laminar flame simulations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -122,12 +122,40 @@ those that don’t (e.g., laminar flame) leave it <code class="docutils literal 
 <dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.calculate">
 <span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.calculate" title="Link to this definition">¶</a></dt>
 <dd><p>Solve the flame and return only the flame speed.</p>
+<p>Returns a flame speed of <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (rather than raising) when no flame is
+detected – a solver failure or a degenerate, non-physical flame speed –
+so that a reduced model that can no longer sustain a flame is rejected
+through the error metric instead of aborting the reduction, mirroring how
+<code class="docutils literal notranslate"><span class="pre">IgnitionSimulation.calculate</span></code> treats a non-igniting model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Computed laminar flame speed in m/s, or <code class="docutils literal notranslate"><span class="pre">0.0</span></code> if no flame is detected.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.min_flame_speed">
+<span class="sig-name descname"><span class="pre">min_flame_speed</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.05</span></span><a class="headerlink" href="#pymars.simulation.FlameSimulation.min_flame_speed" title="Link to this definition">¶</a></dt>
+<dd><p>Default minimum physically-meaningful laminar flame speed, in m/s. A solved
+flame speed at or below the active floor (negative or near-zero) is treated
+as “no flame detected” – a degenerate, non-physical result – and handled
+the same as a solver failure (a non-flammable mixture tends to “solve” to
+such a speed rather than raising). The floor can be raised or lowered per
+run via the <code class="docutils literal notranslate"><span class="pre">min_flame_speed</span></code> constructor argument (e.g., for a fuel with
+genuinely low flame speeds).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.process_results">
 <span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.process_results" title="Link to this definition">¶</a></dt>
 <dd><p>Solve the flame and sample data along the flame profile.</p>
+<p>Uses <code class="docutils literal notranslate"><span class="pre">run_case</span></code>, so an undetectable flame raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code>; this
+path samples data for the original model, where a missing flame should
+halt the reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>skip_data</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Flag to skip sampling thermochemical data</p>
@@ -145,6 +173,10 @@ those that don’t (e.g., laminar flame) leave it <code class="docutils literal 
 <dt class="sig sig-object py" id="pymars.simulation.FlameSimulation.run_case">
 <span class="sig-name descname"><span class="pre">run_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.FlameSimulation.run_case" title="Link to this definition">¶</a></dt>
 <dd><p>Solve the laminar flame and return the unburned flame speed.</p>
+<p>Raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> if no flame is detected (solver failure or a
+degenerate, non-physical flame speed). This is the path used for the
+original (baseline) model, where an undetectable flame should halt the
+reduction rather than be silently ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Unused; retained for interface symmetry with <code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code>.</p>
@@ -185,6 +217,20 @@ those that don’t (e.g., laminar flame) leave it <code class="docutils literal 
 <dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation.calculate">
 <span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation.calculate" title="Link to this definition">¶</a></dt>
 <dd><p>Run simulation case, just for ignition delay.</p>
+<p>Returns an ignition delay of <code class="docutils literal notranslate"><span class="pre">0.0</span></code> (rather than raising) when the
+model does not ignite or the integrator fails (e.g., a CVODES error),
+so a reduced candidate that can no longer be integrated is rejected
+through the error metric instead of aborting the reduction. This mirrors
+<code class="docutils literal notranslate"><span class="pre">FlameSimulation.calculate</span></code> and the no-flame handling (see issue #69).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Computed ignition delay in seconds, or <code class="docutils literal notranslate"><span class="pre">0.0</span></code> if the model does not
+ignite or the integration fails.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -199,7 +245,7 @@ those that don’t (e.g., laminar flame) leave it <code class="docutils literal 
 <dd class="field-even"><p>Ignition delay, or ignition delay and sampled data</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>

@@ -171,8 +171,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>metrics_original</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – Metrics serving as basis of error calculation</p></li>
-<li><p><strong>metrics_test</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – Metrics for which error is being calculated with respect to <code class="docutils literal notranslate"><span class="pre">metrics_original</span></code></p></li>
+<li><p><strong>metrics_original</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a>) – Metrics serving as basis of error calculation</p></li>
+<li><p><strong>metrics_test</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a>) – Metrics for which error is being calculated with respect to <code class="docutils literal notranslate"><span class="pre">metrics_original</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -222,16 +222,20 @@
 <dt class="sig sig-object py" id="pymars.sampling.ignition_sample_worker">
 <span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">ignition_sample_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_tuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.ignition_sample_worker" title="Link to this definition">¶</a></dt>
 <dd><p>Worker for multiprocessing of autoignition cases with data sampling.</p>
+<p>Runs, processes, and cleans up the case entirely within the worker, returning
+only the (picklable) metric and sampled data – mirroring
+<code class="docutils literal notranslate"><span class="pre">flame_sample_worker</span></code>. The intermediate HDF5 file written by <code class="docutils literal notranslate"><span class="pre">run_case</span></code> is
+read by <code class="docutils literal notranslate"><span class="pre">process_results</span></code> and removed by <code class="docutils literal notranslate"><span class="pre">clean</span></code> here, so the live
+(unpicklable) reactor never needs to cross the process boundary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>sim_tuple</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Contains IgnitionSimulation object and other parameters needed to setup
-and run case.</p>
+<dd class="field-odd"><p><strong>sim_tuple</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Tuple of IgnitionSimulation object to be run and identifier</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>sim</strong> – Object with simulation metadata</p>
+<dd class="field-even"><p>Case identifier mapped to a tuple of the ignition delay and sampled data</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="simulation.html#pymars.simulation.IgnitionSimulation" title="pymars.simulation.IgnitionSimulation">IgnitionSimulation</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -333,14 +337,14 @@ and run case.</p>
 speeds), used for evaluating error</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymars.sampling.sample">
-<span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_flame_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample" title="Link to this definition">¶</a></dt>
 <dd><p>Samples thermochemical data and generates metrics for various phenomena.</p>
 <p>Supports autoignition delay and laminar flame speed metrics.</p>
 <dl class="field-list simple">
@@ -362,14 +366,14 @@ use the specified number of threads.</p></li>
 <dd class="field-even"><p>Metrics, and sampled data</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymars.sampling.sample_metrics">
-<span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">sample_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_saved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample_metrics" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">sample_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_saved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_flame_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample_metrics" title="Link to this definition">¶</a></dt>
 <dd><p>Evaluates metrics used for determining error of reduced model</p>
 <p>Supports autoignition delay and laminar flame speed metrics.</p>
 <dl class="field-list simple">
@@ -393,7 +397,7 @@ use the specified number of threads.</p></li>
 speeds), used for evaluating error</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
