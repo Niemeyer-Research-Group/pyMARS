@@ -16,6 +16,8 @@ import numpy as np
 import h5py
 import cantera as ct
 
+from .psr_solver import trace_extinction_curve
+
 
 class BaseSimulation(ABC):
     """Common interface and shared behavior for a single simulation case.
@@ -623,3 +625,167 @@ class FlameSimulation(BaseSimulation):
         sampled_data = self._sample_profile(temperatures, pressures, mass_fractions)
         self.sampled_data = sampled_data
         return self.flame_speed, sampled_data
+
+
+class PSRSimulation(BaseSimulation):
+    """Class for steady perfectly stirred reactor (PSR) simulations.
+
+    The steady temperature-vs-residence-time response curve is traced through its
+    extinction turning point by pseudo-arclength continuation (see
+    :mod:`pymars.psr_solver`). Three points are sampled from the burning branch:
+    the extinction turning point, the point nearest a residence time of 0.1 s,
+    and their logarithmic midpoint.
+
+    The global metric is a length-three vector ``[tau_ext, T_mid, T_near]``: the
+    extinction residence time, and the response temperatures at the log-midpoint
+    and 0.1 s points. Combined element-wise by ``calculate_error`` (relative error,
+    maximized), the error metric is the larger of the extinction residence-time
+    error and the response-temperature errors.
+
+    Parameters
+    ----------
+    idx : int
+        Identifier index for case
+    properties : InputPSR
+        Object with inlet conditions for the simulation
+    model : str
+        Filename for Cantera-format model to be used
+    phase_name : str, optional
+        Optional name for phase to load from YAML file (e.g., 'gas').
+    path : str, optional
+        Path for location of output files
+
+    """
+
+    #: Number of points sampled from the response curve (extinction turning
+    #: point, nearest 0.1 s, and their log-midpoint).
+    num_sample_points = 3
+
+    def setup_case(self):
+        """Initialize simulation case."""
+        self._setup_gas()
+        # Store the inlet state so the curve can be retraced from a clean start
+        # (the solver uses ``gas`` as scratch space and leaves it modified).
+        self._inlet_state = (self.gas.T, self.gas.P, self.gas.Y.copy())
+        self.psr_metrics = None
+        self._result = None
+
+    def _detect(self):
+        """Trace the response curve, or return ``None`` if it cannot be traced.
+
+        "No extinction curve" means the continuation could not seed or sustain the
+        burning branch through the turning point (raising a ``CanteraError`` or
+        ``RuntimeError``), as happens for a reduced model that can no longer
+        sustain a stirred reactor.
+
+        Returns
+        -------
+        dict or None
+            The traced-curve result (see :func:`pymars.psr_solver.trace_extinction_curve`),
+            or ``None`` if no extinction curve is detected.
+
+        """
+        # reset the gas to the inlet state (the solver mutates it as scratch)
+        self.gas.TPY = self._inlet_state
+        try:
+            self._result = trace_extinction_curve(self.gas)
+        except (ct.CanteraError, RuntimeError):
+            self._result = None
+        return self._result
+
+    @staticmethod
+    def _metrics(result):
+        """Build the ``[tau_ext, T_mid, T_near]`` metric vector from a result."""
+        points = result["points"]
+        return np.array(
+            [
+                points["extinction"][0],
+                points["log_mid"][1],
+                points["near_0.1s"][1],
+            ]
+        )
+
+    def run_case(self, restart=False):
+        """Trace the PSR response curve and return the metric vector.
+
+        Raises ``RuntimeError`` if no extinction curve is detected. This is the
+        path used for the original (baseline) model, where a failure to trace the
+        curve should halt the reduction rather than be silently ignored.
+
+        Parameters
+        ----------
+        restart : bool
+            Unused; retained for interface symmetry with ``IgnitionSimulation``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Metric vector ``[tau_ext, T_mid, T_near]``.
+
+        """
+        result = self._detect()
+        if result is None:
+            logging.error(f"No extinction curve detected for PSR case {self.idx}")
+            raise RuntimeError(f"No extinction curve detected for PSR case {self.idx}")
+        self.psr_metrics = self._metrics(result)
+        return self.psr_metrics
+
+    def calculate(self):
+        """Trace the PSR response curve and return only the metric vector.
+
+        Returns a zero metric vector (rather than raising) when no extinction
+        curve is detected, so that a reduced model that can no longer sustain a
+        stirred reactor is rejected through the error metric instead of aborting
+        the reduction, mirroring how ``IgnitionSimulation``/``FlameSimulation``
+        treat a non-igniting / non-flammable model.
+
+        Returns
+        -------
+        numpy.ndarray
+            Metric vector ``[tau_ext, T_mid, T_near]``, or zeros if no curve is
+            detected.
+
+        """
+        result = self._detect()
+        if result is None:
+            logging.warning(
+                f"No extinction curve detected for PSR case {self.idx}; "
+                "treating the metrics as zero"
+            )
+            self.psr_metrics = np.zeros(self.num_sample_points)
+            return self.psr_metrics
+        self.psr_metrics = self._metrics(result)
+        return self.psr_metrics
+
+    def process_results(self, skip_data=False):
+        """Trace the response curve and sample the state at the three points.
+
+        Uses ``run_case``, so a curve that cannot be traced raises ``RuntimeError``;
+        this path samples data for the original model, where a missing curve should
+        halt the reduction.
+
+        Parameters
+        ----------
+        skip_data : bool
+            Flag to skip sampling thermochemical data
+
+        Returns
+        -------
+        numpy.ndarray, or tuple of numpy.ndarray and numpy.ndarray
+            Metric vector, or metric vector and sampled data of shape
+            ``(num_sample_points, 2 + n_species)``.
+
+        """
+        metrics = self.run_case()
+        if skip_data:
+            return metrics
+
+        pressure = self.properties.pressure * ct.one_atm
+        points = self._result["points"]
+        rows = []
+        for key in ("extinction", "log_mid", "near_0.1s"):
+            _, temperature, mass_fractions = points[key]
+            rows.append(np.concatenate([[temperature, pressure], mass_fractions]))
+        sampled_data = np.array(rows)
+        self.sampled_data = sampled_data
+        return metrics, sampled_data

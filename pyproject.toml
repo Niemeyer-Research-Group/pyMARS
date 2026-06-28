@@ -26,6 +26,7 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
+    "scipy",
     "cantera>=3.0",
     "networkx",
     "h5py",

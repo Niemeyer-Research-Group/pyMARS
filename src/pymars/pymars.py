@@ -113,12 +113,10 @@ def parse_inputs(input_dict):
     psr_conditions = input_dict.get("psr-conditions", {})
     flame_conditions = input_dict.get("laminar-flame-conditions", {})
 
-    assert ignition_conditions or flame_conditions, (
-        "at least one of autoignition-conditions or laminar-flame-conditions "
-        "must be specified"
+    assert ignition_conditions or psr_conditions or flame_conditions, (
+        "at least one of autoignition-conditions, psr-conditions, or "
+        "laminar-flame-conditions must be specified"
     )
-    if psr_conditions:
-        raise NotImplementedError("PSR sampling not implemented yet, sorry!")
 
     # check validity of input file
     ignition_inputs = parse_ignition_inputs(model, ignition_conditions, phase_name)
@@ -126,10 +124,10 @@ def parse_inputs(input_dict):
     flame_inputs = parse_flame_inputs(model, flame_conditions, phase_name)
 
     # Automatically retain any fuel, oxidizer, or reactant species from the
-    # initial conditions (autoignition or laminar flame) that aren't already a
-    # target or retained species. If one of these were removed, the simulations
+    # initial conditions (autoignition, PSR, or laminar flame) that aren't already
+    # a target or retained species. If one of these were removed, the simulations
     # could not be set up, leading to confusing errors for the user.
-    for case in list(ignition_inputs) + list(flame_inputs):
+    for case in list(ignition_inputs) + list(psr_inputs) + list(flame_inputs):
         for sp in list(case.fuel) + list(case.oxidizer) + list(case.reactants):
             if sp not in target_species and sp not in safe_species:
                 safe_species.append(sp)
