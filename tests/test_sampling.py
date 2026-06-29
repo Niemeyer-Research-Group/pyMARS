@@ -574,7 +574,7 @@ class TestPSRSampling:
         model during reduction.
         """
 
-        def force_failure(_gas):
+        def force_failure(_gas, **_kwargs):
             raise ct.CanteraError("forced failure: no extinction curve")
 
         monkeypatch.setattr("pymars.simulation.trace_extinction_curve", force_failure)

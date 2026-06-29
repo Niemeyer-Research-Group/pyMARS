@@ -114,9 +114,10 @@ class TestCoreJacobian:
 
 
 class TestTraceExtinctionCurve:
-    """The full pseudo-arclength continuation of the S-curve."""
+    """The pseudo-arclength continuation of the S-curve."""
 
     def test_structure_and_regression(self):
+        # default path: stop at the extinction turning point (the burning branch)
         gas = _ch4_air_gas()
         result = trace_extinction_curve(gas)
 
@@ -126,10 +127,10 @@ class TestTraceExtinctionCurve:
 
         tau, _temp = branch[:, 0], branch[:, 1]
         i_ext = int(np.argmin(tau))
-        # S-curve shape: the fold is interior, and tau folds back up past it
-        assert 0 < i_ext < len(tau) - 1
+        # the upper branch descends to the extinction fold, which ends the march:
+        # tau decreases from the seed to the minimum, which sits at the very end
         assert tau[0] > tau[i_ext]
-        assert tau[-1] > tau[i_ext]
+        assert i_ext >= len(tau) - 2
 
         points = result["points"]
         assert set(points) == {"extinction", "near_0.1s", "log_mid"}
@@ -153,6 +154,58 @@ class TestTraceExtinctionCurve:
             assert mass_fractions.shape == (gas.n_species,)
             assert mass_fractions.sum() == pytest.approx(1.0, abs=1.0e-4)
             assert mass_fractions.min() > -1.0e-4
+
+    @pytest.mark.slow
+    def test_full_march_reaches_ignition_turning_point(self):
+        # a high inlet temperature closes the S-curve: the lower (ignition) turning
+        # point sits at a reachable residence time, so the full march finds both
+        # folds (the cold-inlet 300 K case never reaches the ignition fold)
+        gas = ct.Solution("gri30.yaml")
+        gas.set_equivalence_ratio(1.0, "CH4", {"O2": 1.0, "N2": 3.76})
+        gas.TP = 1200.0, ct.one_atm
+        result = trace_extinction_curve(gas, stop_at_extinction=False)
+
+        tau, temp = result["branch"][:, 0], result["branch"][:, 1]
+        i_ext = int(np.argmin(tau))  # extinction fold: minimum residence time
+        i_ign = i_ext + int(np.argmax(tau[i_ext:]))  # ignition fold: later maximum
+
+        # extinction turning point: a vigorously burning state at small tau,
+        # reached partway along the branch
+        assert 0 < i_ext < i_ign
+        assert temp[i_ext] > 1800.0
+        # ignition turning point: the curve folds back up to a much larger tau, at
+        # a temperature just above the inlet (the mixture is about to ignite)
+        assert tau[i_ign] > 100.0 * tau[i_ext]
+        assert temp[i_ign] == pytest.approx(1200.0, abs=60.0)
+        # the middle branch stays physical: no spurious sub-inlet-temperature
+        # solutions (T can never drop below the inlet in an adiabatic reactor)
+        assert temp[i_ext:].min() > 1200.0 - 10.0
+
+    @pytest.mark.slow
+    def test_full_march_high_pressure_hydrogen(self):
+        # H2/air at 20 atm with a 1000 K inlet: a complete S-curve with both turning
+        # points. Order-of-magnitude sanity check against literature values
+        # (extinction 1.4211e-7 s, ignition 1.0710e-3 s) computed with the Li et al.
+        # (2004) 9-species H2 model. Here we use Cantera's bundled h2o2.yaml, whose
+        # H2 chemistry differs, so the extinction point matches closely (high-T
+        # chemistry) while the ignition point is only the right order of magnitude.
+        gas = ct.Solution("h2o2.yaml")
+        gas.set_equivalence_ratio(1.0, "H2", {"O2": 1.0, "N2": 3.76})
+        gas.TP = 1000.0, 20.0 * ct.one_atm
+        result = trace_extinction_curve(gas, stop_at_extinction=False)
+
+        tau, temp = result["branch"][:, 0], result["branch"][:, 1]
+        i_ext = int(np.argmin(tau))
+        i_ign = i_ext + int(np.argmax(tau[i_ext:]))
+
+        assert 0 < i_ext < i_ign
+        # extinction fold: high-T chemistry, close to the literature value
+        assert tau[i_ext] == pytest.approx(1.4211e-7, rel=0.1)
+        # ignition fold: mechanism-sensitive, so only an order-of-magnitude check
+        assert tau[i_ign] == pytest.approx(1.0710e-3, rel=0.5)
+        # physical lower branch, just above the 1000 K inlet
+        assert temp[i_ign] == pytest.approx(1000.0, abs=60.0)
+        assert temp[i_ext:].min() > 1000.0 - 10.0
 
     def test_deterministic(self):
         ext1 = trace_extinction_curve(_ch4_air_gas())["points"]["extinction"]

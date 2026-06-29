@@ -688,7 +688,7 @@ class PSRSimulation(BaseSimulation):
         # reset the gas to the inlet state (the solver mutates it as scratch)
         self.gas.TPY = self._inlet_state
         try:
-            self._result = trace_extinction_curve(self.gas)
+            self._result = trace_extinction_curve(self.gas, stop_at_extinction=True)
         except (ct.CanteraError, RuntimeError):
             self._result = None
         return self._result

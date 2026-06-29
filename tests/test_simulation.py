@@ -700,7 +700,7 @@ class TestPSRFailure:
         )
 
     @staticmethod
-    def _force_failure(_gas):
+    def _force_failure(_gas, **_kwargs):
         raise ct.CanteraError("forced failure: no extinction curve")
 
     def test_calculate_returns_zeros_on_failure(self, monkeypatch):

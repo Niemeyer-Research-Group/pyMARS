@@ -66,18 +66,26 @@ solution exists; below it, the reactor cannot be sustained.
 .. figure:: /_graph/psr_scurve.*
    :width: 5in
    :align: center
-   :alt: steady PSR response curve with the extinction turning point
+   :alt: complete steady PSR S-curve with extinction and ignition turning points
 
-   Steady PSR response curve for stoichiometric methane/air at 1 atm with an
-   inlet temperature of 300 K (GRI-Mech 3.0). The continuation traces the stable
-   upper (burning) branch down to the extinction turning point, then continues
-   onto the unstable middle branch. The three sampled points are marked.
+   Complete steady PSR response curve (S-curve) for stoichiometric methane/air at
+   1 atm with an inlet temperature of 1200 K (GRI-Mech 3.0). The continuation
+   traces the stable upper (burning) branch down to the extinction turning point,
+   then the unstable middle branch up to the ignition turning point; the
+   weakly-reacting lower branch lies just above the 1200 K inlet temperature. A
+   high inlet temperature is used here so that both turning points fall at
+   practical residence times.
 
-The full curve in the figure above is produced directly with
-:mod:`pymars.psr_solver`. :func:`~pymars.psr_solver.trace_extinction_curve`
+The burning and middle branches and the two turning points in the figure above
+are produced directly with :mod:`pymars.psr_solver`.
+:func:`~pymars.psr_solver.trace_extinction_curve` with ``stop_at_extinction=False``
 returns the traced ``branch`` (an array of :math:`(\tau, T)` pairs, ordered from
-the start of the upper branch, around the fold, and onto the middle branch) along
-with the three sampled ``points``:
+the start of the upper branch, around the extinction fold, along the middle
+branch, and up to the ignition turning point) together with the three sampled
+``points`` on the burning branch. By default ``stop_at_extinction=True``, stopping
+at the extinction turning point (all that model reduction needs). The complete
+S-curve, with the ignition turning point as well, appears only for a sufficiently
+high inlet temperature.
 
 .. code-block:: python
 
@@ -86,24 +94,30 @@ with the three sampled ``points``:
     import matplotlib.pyplot as plt
     from pymars.psr_solver import trace_extinction_curve
 
-    # inlet state: stoichiometric methane/air at 1 atm, 300 K
+    # inlet state: stoichiometric methane/air at 1 atm, heated to 1200 K so that
+    # both the extinction and ignition turning points fall at practical tau
     gas = ct.Solution("gri30.yaml")
     gas.set_equivalence_ratio(1.0, "CH4", {"O2": 1.0, "N2": 3.76})
-    gas.TP = 300.0, ct.one_atm
+    gas.TP = 1200.0, ct.one_atm
 
-    result = trace_extinction_curve(gas)
-    branch = result["branch"]              # (N, 2) array of (tau, T)
-    i_ext = int(np.argmin(branch[:, 0]))   # index of the extinction turning point
+    result = trace_extinction_curve(gas, stop_at_extinction=False)
+    branch = result["branch"]                          # (N, 2) array of (tau, T)
+    i_ext = int(np.argmin(branch[:, 0]))               # extinction turning point
+    i_ign = i_ext + int(np.argmax(branch[i_ext:, 0]))  # ignition turning point
 
     fig, ax = plt.subplots()
     ax.plot(branch[: i_ext + 1, 0], branch[: i_ext + 1, 1], label="upper (burning) branch")
     ax.plot(branch[i_ext:, 0], branch[i_ext:, 1], "--", label="middle (unstable) branch")
-    for name in ("extinction", "log_mid", "near_0.1s"):
-        tau, temp, _mass_fractions = result["points"][name]
-        ax.plot(tau, temp, "o", label=name)
+    ax.plot(branch[i_ext, 0], branch[i_ext, 1], "o", label="extinction turning point")
+    ax.plot(branch[i_ign, 0], branch[i_ign, 1], "s", label="ignition turning point")
     ax.set(xscale="log", xlabel="residence time (s)", ylabel="temperature (K)")
     ax.legend()
     fig.savefig("psr_scurve.pdf")
+
+The weakly reacting lower branch in the figure (steady solutions just above the
+inlet temperature, up to the ignition turning point) is overlaid for completeness;
+it is obtained separately by solving the steady equations at fixed residence times
+seeded from the cold inlet state.
 
 
 Why naive methods fail near extinction

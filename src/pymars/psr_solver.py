@@ -37,6 +37,11 @@ from scipy.optimize import root
 TREF = 1000.0
 #: Residual returned for an unphysical state so the corrector backtracks.
 PENALTY = 1.0e3
+#: Maximum pseudo-arclength step (scaled) on the unstable middle branch. A coarser
+#: step there lets the corrector jump off onto a spurious solution; this cap is
+#: applied only after the extinction fold, during a full ``stop_at_extinction=False``
+#: march toward the ignition turning point.
+DS_MAX_MIDDLE = 0.05
 
 
 def _damped_newton(residual, x0, tol=1.0e-9, maxit=50):
@@ -128,6 +133,7 @@ def _core_jacobian(gas, Y, temp, tau, pressure, h_scale, Wk):
 
 def trace_extinction_curve(
     gas,
+    stop_at_extinction=True,
     ds0=0.10,
     ds_min=1.0e-3,
     ds_max=0.4,
@@ -135,7 +141,7 @@ def trace_extinction_curve(
     tau_second=0.5,
     max_steps=6000,
 ):
-    """Trace the burning PSR branch through the extinction turning point.
+    """Trace the PSR response curve through its turning point(s).
 
     Parameters
     ----------
@@ -143,6 +149,16 @@ def trace_extinction_curve(
         Gas object already set to the inlet state (inlet temperature, pressure,
         and composition). It is used as scratch space for kinetics/thermo
         evaluations and its state is modified during the solve.
+    stop_at_extinction : bool, optional
+        If ``True`` (the default, used by model reduction), stop as soon as the
+        extinction turning point is found, returning only the upper (burning)
+        branch. If ``False``, continue past the extinction fold along the unstable
+        middle branch and, for a sufficiently high inlet temperature,
+        around the lower (ignition) turning point onto the weakly-reacting branch,
+        returning the complete S-curve. For a cold inlet the ignition turning point
+        lies at an impractically large residence time (any reactor below the ignition
+        delay sits near the inlet temperature), so the full march instead terminates
+        at ``max_steps``.
     ds0, ds_min, ds_max : float, optional
         Initial, minimum, and maximum pseudo-arclength step size (in the scaled
         unknown space).
@@ -158,22 +174,23 @@ def trace_extinction_curve(
 
         - ``branch`` -- a :class:`numpy.ndarray` of shape ``(N, 2)`` whose columns
           are the residence time and temperature ``(tau, T)`` along the traced
-          curve, ordered from the start of the upper branch, around the fold, and
-          onto the middle branch.
+          curve. With ``stop_at_extinction=True`` it ends at the extinction
+          turning point; with ``stop_at_extinction=False`` it continues onto the
+          middle branch (and, for a high enough inlet temperature, around the
+          ignition turning point onto the weakly-reacting branch).
         - ``points`` -- a :class:`dict` with keys ``"extinction"``,
           ``"near_0.1s"``, and ``"log_mid"``, each mapping to a tuple
           ``(tau, T, Y)`` of the residence time, temperature, and mass-fraction
-          vector at that sample point.
+          vector at that sample point (all on the upper branch).
 
     Raises
     ------
     RuntimeError
-        If the burning branch cannot be seeded or the continuation fails before
-        reaching the turning point.
+        If the burning branch cannot be seeded, or the continuation never reaches
+        the extinction turning point.
 
     """
     pressure = gas.P
-    inlet_T = gas.T
     Y_in = gas.Y.copy()
     h_in = gas.enthalpy_mass
     Wk = gas.molecular_weights
@@ -242,11 +259,38 @@ def trace_extinction_curve(
     temps = [x0[gas.n_species], x1[gas.n_species]]
     states = [x0[: gas.n_species].copy(), x1[: gas.n_species].copy()]
     ds = ds0
-    fold_passed = False
-    tau_ext = min(tau_start, tau_second)
+    ds_cap = ds_max  # max step, tightened past the extinction fold (see below)
+
+    # Turning points are detected by sign changes of the tangent's sigma = ln(tau)
+    # component. The march starts heading down the upper branch (tau decreasing, so
+    # sigma_sign < 0); the first flip (tau starts increasing) is the extinction
+    # fold, and the second flip (tau starts decreasing again) is the ignition fold,
+    # the maximum-tau turning point that closes the S-curve. The second fold is only
+    # reachable for a high enough inlet temperature; otherwise the full march runs
+    # out at ``max_steps`` along the middle branch.
+    sigma = gas.n_species + 1
+    sigma_sign = -1.0
+    n_folds = 0
+    i_ext = None
 
     for _ in range(max_steps):
         tangent = (u_prev - u_pp) / np.linalg.norm(u_prev - u_pp)
+
+        new_sign = np.sign(tangent[sigma])
+        if new_sign != 0.0 and new_sign != sigma_sign:
+            sigma_sign = new_sign
+            n_folds += 1
+            if n_folds == 1:
+                # extinction turning point = smallest tau reached so far
+                i_ext = int(np.argmin(taus))
+                if stop_at_extinction:
+                    break
+                # the middle branch is steep; tighten the step so the corrector
+                # stays on the physical branch en route to the ignition fold
+                ds_cap = min(ds_max, DS_MAX_MIDDLE)
+                ds = min(ds, ds_cap)
+            elif n_folds == 2:
+                break  # full march: reached the ignition turning point
 
         def augmented_res(u, _t=tangent, _up=u_prev, _ds=ds):
             return np.concatenate([core_res(u), [np.dot(_t, u - _up) - _ds]])
@@ -262,29 +306,20 @@ def trace_extinction_curve(
             continue
 
         Y_new, T_new, tau_new = unpack(u_new)
-        if tangent[gas.n_species + 1] > 0:
-            fold_passed = True
         taus.append(tau_new)
         temps.append(T_new)
         states.append(Y_new.copy())
-        tau_ext = min(tau_ext, tau_new)
 
         u_pp, u_prev = u_prev, u_new
-        ds = min(ds * 1.2, ds_max)
+        ds = min(ds * 1.2, ds_cap)
 
-        if fold_passed and (T_new < inlet_T + 100.0 or tau_new > 5.0 * tau_ext):
-            break
-
-    if not fold_passed:
+    if i_ext is None:
         raise RuntimeError(
             "PSR: continuation did not reach the extinction turning point"
         )
 
     taus = np.asarray(taus)
     temps = np.asarray(temps)
-
-    # extinction turning point = minimum residence time
-    i_ext = int(np.argmin(taus))
     upper_taus = taus[: i_ext + 1]  # burning branch down to the fold
 
     # point nearest tau = 0.1 s on the burning branch
