@@ -44,13 +44,15 @@ Or clone the repository and install from the local copy::
     cd pyMARS
     pip install .
 
-Via conda
----------
+Via Conda (``conda-forge``)
+---------------------------
 
-Install pyMARS from the ``niemeyer-research-group`` channel, with
-``conda-forge`` providing the remaining dependencies (including Cantera)::
+Install pyMARS from ``conda-forge``::
 
-    conda install -c niemeyer-research-group -c conda-forge pymars
+    conda install -c conda-forge nrg-pymars
+
+As on PyPI, the ``conda-forge`` package is named ``nrg-pymars`` while the import
+package and command-line tool remain ``pymars``.
 
 Development
 -----------
