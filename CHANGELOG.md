@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Sampling workers now have the same behavior; the ignition sampling worker processes and removes the `.h5` files.
+- Conda packages are now distributed via conda-forge (`conda install -c conda-forge nrg-pymars`) instead of the self-hosted `niemeyer-research-group` Anaconda.org channel. Removed the `conda.recipe/` recipe and the Anaconda.org build/upload job from the publish workflow; the conda-forge feedstock builds automatically from each PyPI release.
 
 ### Fixed
 

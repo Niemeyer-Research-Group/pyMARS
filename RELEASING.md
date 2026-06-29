@@ -1,22 +1,21 @@
 # Releasing a new version
 
 This is the maintainer checklist for cutting a new pyMARS release. Releases are
-published to **PyPI** (as `nrg-pymars`) and **conda-forge**; the import package
+published to **PyPI** and **conda-forge** (as `nrg-pymars`); the import package
 and command-line tool are named `pymars`.
 
 ## Prerequisites (one-time setup)
 
 - **PyPI:** OIDC trusted publishing is configured for the `nrg-pymars` project,
   tied to this repository's `publish.yml` workflow and the `pypi` environment.
-- **conda-forge:** the `nrg-pymars-feedstock` exists (created automatically after
-  the `conda-forge/staged-recipes` PR is merged).
+- **conda-forge:** the `nrg-pymars-feedstock` exists.
 
 ## Release steps
 
 1. Make sure `main` is green (CI passing).
 
-2. Bump the version in `src/pymars/_version.py`. This is the single source of
-   truth — `pyproject.toml`, the conda recipe, and the docs all read from it.
+2. Bump the version in `src/pymars/_version.py`. This is the single source of truth;
+   `pyproject.toml` and the docs read from it.
 
 3. Update `CHANGELOG.md`: move the entries under `## [Unreleased]` into a new
    `## [X.Y.Z] - YYYY-MM-DD` section, and add the matching compare link at the
@@ -61,16 +60,3 @@ and command-line tool are named `pymars`.
 10. A few minutes after the GitHub Release is published, Zenodo should archive it
    and mint a new DOI. <https://zenodo.org/badge/latestdoi/51664233> should point
    to the latest DOI; grab that, and update in `CITATION.cff` and `CITATION.md`.
-
-## TODO: clean up once the conda-forge package is live
-
-The self-hosted Anaconda.org build is redundant once `nrg-pymars` is on
-conda-forge. After the feedstock is publishing, do the following:
-
-- [ ] Remove the `conda` job from `.github/workflows/publish.yml` (the
-      Anaconda.org build + upload to the `niemeyer-research-group` channel).
-- [ ] Remove `conda.recipe/` (the self-hosted recipe) if nothing else uses it.
-- [ ] Update the conda install instructions in `README.md` and
-      `docs/installation.rst` to `conda install -c conda-forge nrg-pymars`.
-- [ ] Remove the `ANACONDA_API_TOKEN` repository secret once nothing references it.
-- [ ] Update this file to drop the Anaconda.org references above.

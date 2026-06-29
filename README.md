@@ -26,7 +26,7 @@ model; however, its computational expense is high, and applying this method alon
 ## Installation
 
 [![PyPI](https://img.shields.io/pypi/v/nrg-pymars)](https://pypi.org/project/nrg-pymars/)
-[![Anaconda-Server Badge](https://anaconda.org/niemeyer-research-group/pymars/badges/version.svg)](https://anaconda.org/niemeyer-research-group/pymars)
+[![conda-forge](https://img.shields.io/conda/vn/conda-forge/nrg-pymars.svg)](https://anaconda.org/conda-forge/nrg-pymars)
 
 pyMARS requires Python 3.10+ and [Cantera](https://cantera.org) 3.x.
 
@@ -39,9 +39,9 @@ for details.
 
     pip install nrg-pymars
 
-**Via conda:**
+**Via conda (`conda-forge`):**
 
-    conda install -c niemeyer-research-group -c conda-forge pymars
+    conda install -c conda-forge nrg-pymars
 
 **From GitHub (latest development version):**
 
@@ -53,7 +53,7 @@ for details.
     cd pyMARS
     pip install .
 
-> **Note:** On PyPI, pyMARS is distributed under the name `nrg-pymars`, because
+> **Note:** On PyPI and conda-forge, pyMARS is distributed under the name `nrg-pymars`, because
 > the `pymars` name belongs to an unrelated, active project. The import package
 > and command-line tool remain `pymars` — install with `pip install nrg-pymars`,
 > then `import pymars` or run `pymars`.
