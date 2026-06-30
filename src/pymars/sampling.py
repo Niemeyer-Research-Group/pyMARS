@@ -8,7 +8,7 @@ from typing import NamedTuple, Dict
 import numpy as np
 import cantera as ct
 
-from .simulation import IgnitionSimulation, FlameSimulation
+from .simulation import IgnitionSimulation, PSRSimulation, FlameSimulation
 
 data_files = {
     "data_ignition": "ignition_data.dat",
@@ -38,14 +38,26 @@ class InputIgnition(NamedTuple):
 
 
 class InputPSR(NamedTuple):
-    """Holds input parameters for single PSR simulation."""
+    """Holds input parameters for a single perfectly stirred reactor (PSR) case.
+
+    PSR cases are modeled as adiabatic and constant-pressure.
+    ``temperature`` is the inlet temperature.
+    """
+
+    temperature: float
+    pressure: float
+
+    equivalence_ratio: float = 0.0
+    fuel: Dict = {}
+    oxidizer: Dict = {}
+    reactants: Dict = {}
+    composition_type: str = "mole"
 
 
 class InputLaminarFlame(NamedTuple):
     """Holds input parameters for single laminar flame simulation.
 
-    Freely-propagating laminar flames are inherently constant pressure, so
-    (unlike autoignition cases) no ``kind`` is specified.
+    Freely-propagating laminar flames are inherently constant pressure.
     """
 
     temperature: float
@@ -150,6 +162,50 @@ def flame_worker(flamesim_tuple):
     return {idx: flame_speed}
 
 
+def psr_sample_worker(sim_tuple):
+    """Worker for multiprocessing of PSR cases with data sampling.
+
+    Runs, processes, and samples the case entirely within the worker (the PSR
+    solver writes no intermediate file), returning the (picklable) metric vector
+    and sampled data.
+
+    Parameters
+    ----------
+    sim_tuple : tuple
+        Tuple of PSRSimulation object to be run and identifier
+
+    Returns
+    -------
+    dict
+        Case identifier mapped to a tuple of the PSR metric vector and sampled data
+
+    """
+    sim, idx = sim_tuple
+    sim.setup_case()
+    metrics, data = sim.process_results()
+    return {idx: (metrics, data)}
+
+
+def psr_worker(sim_tuple):
+    """Worker for multiprocessing of PSR metric-only cases.
+
+    Parameters
+    ----------
+    sim_tuple : tuple
+        Tuple of PSRSimulation object to be run and identifier
+
+    Returns
+    -------
+    dict
+        Case identifier mapped to the PSR metric vector
+
+    """
+    sim, idx = sim_tuple
+    sim.setup_case()
+    metrics = sim.calculate()
+    return {idx: metrics}
+
+
 def _run_workers(simulations, worker, num_threads):
     """Run ``worker`` over a list of job tuples and merge the per-case results.
 
@@ -182,43 +238,47 @@ def _run_workers(simulations, worker, num_threads):
 def _run_sampling_jobs(simulations, worker, num_threads):
     """Run data-sampling workers and collect their metrics and sampled data.
 
-    For ``ignition_sample_worker`` / ``flame_sample_worker``, whose results are
-    ``{idx: (metric, sampled_data)}``.
+    For ``ignition_sample_worker`` / ``flame_sample_worker`` / ``psr_sample_worker``,
+    whose results are ``{idx: (metric, sampled_data)}``. The per-case metric may be
+    a scalar (ignition delay, flame speed) or a vector (the PSR metric triple); it
+    is flattened so each case contributes one or more entries, in case order.
 
     Returns
     -------
     metrics : numpy.ndarray
-        1-D array of the per-case global metric (ignition delay or flame speed).
+        1-D array of the per-case global metrics, concatenated in case order.
     data : numpy.ndarray
         Stacked sampled-state rows from all cases.
 
     """
     results = _run_workers(simulations, worker, num_threads)
-    metrics = np.zeros(len(results))
+    metrics = []
     data = []
     for idx in range(len(results)):
         metric, case_data = results[idx]
-        metrics[idx] = metric
+        metrics.append(np.atleast_1d(metric))
         data += list(case_data)
+    metrics = np.concatenate(metrics) if metrics else np.array([])
     return metrics, np.array(data)
 
 
 def _run_metric_jobs(simulations, worker, num_threads):
     """Run metric-only workers and collect their per-case metrics.
 
-    For ``ignition_worker`` / ``flame_worker``, whose results are ``{idx: metric}``.
+    For ``ignition_worker`` / ``flame_worker`` / ``psr_worker``, whose results are
+    ``{idx: metric}``. The per-case metric may be a scalar (ignition delay, flame
+    speed) or a vector (the PSR metric triple); it is flattened so each case
+    contributes one or more entries, in case order.
 
     Returns
     -------
     numpy.ndarray
-        1-D array of the per-case global metric.
+        1-D array of the per-case global metrics, concatenated in case order.
 
     """
     results = _run_workers(simulations, worker, num_threads)
-    metrics = np.zeros(len(results))
-    for idx, metric in results.items():
-        metrics[idx] = metric
-    return metrics
+    metrics = [np.atleast_1d(results[idx]) for idx in range(len(results))]
+    return np.concatenate(metrics) if metrics else np.array([])
 
 
 def calculate_error(metrics_original, metrics_test):
@@ -277,7 +337,12 @@ def read_metrics(ignition_conditions, psr_conditions=[], flame_conditions=[]):
             raise SystemError("Error, no ignition output file present.")
 
     if psr_conditions:
-        raise NotImplementedError("PSR calculations not currently supported.")
+        if os.path.isfile(data_files["output_psr"]):
+            metrics.append(
+                np.atleast_1d(np.genfromtxt(data_files["output_psr"], delimiter=","))
+            )
+        else:
+            raise SystemError("Error, no PSR output file present.")
 
     if flame_conditions:
         if os.path.isfile(data_files["output_flame"]):
@@ -303,7 +368,7 @@ def sample_metrics(
 ):
     """Evaluates metrics used for determining error of reduced model
 
-    Supports autoignition delay and laminar flame speed metrics.
+    Supports autoignition delay, laminar flame speed, and PSR temperature response curve metrics.
 
     Parameters
     ----------
@@ -330,8 +395,8 @@ def sample_metrics(
     Returns
     -------
     numpy.ndarray
-        Combined metrics for the model (ignition delays followed by flame
-        speeds), used for evaluating error
+        Combined metrics for the model (ignition delays, PSR temperature response
+        curve, flame speeds), used for evaluating error
 
     """
     # If number of threads specified as 0, use either max number of available
@@ -369,8 +434,34 @@ def sample_metrics(
                 simulations, ignition_worker, num_threads
             )
 
+    # PSR cases contribute three metrics each (extinction residence time and the
+    # two response temperatures), concatenated in case order.
+    psr_metrics = np.array([])
     if psr_conditions:
-        raise NotImplementedError("PSR calculations not currently supported.")
+        # each PSR case yields three metrics: extinction tau and two temperatures
+        n_psr_metrics = 3 * len(psr_conditions)
+
+        exists_output = os.path.isfile(data_files["output_psr"])
+        if reuse_saved and exists_output:
+            psr_metrics = np.atleast_1d(
+                np.genfromtxt(data_files["output_psr"], delimiter=",")
+            )
+
+        if reuse_saved and len(psr_metrics) == n_psr_metrics:
+            logging.info("Reusing existing PSR samples for the starting model.")
+        else:
+            simulations = []
+            for idx, case in enumerate(psr_conditions):
+                simulations.append(
+                    [
+                        PSRSimulation(
+                            idx, case, model, phase_name=phase_name, path=path
+                        ),
+                        idx,
+                    ]
+                )
+
+            psr_metrics = _run_metric_jobs(simulations, psr_worker, num_threads)
 
     flame_speeds = np.array([])
     if flame_conditions:
@@ -406,7 +497,7 @@ def sample_metrics(
             flame_speeds = _run_metric_jobs(simulations, flame_worker, num_threads)
 
     metric_arrays = [
-        np.atleast_1d(m) for m in (ignition_delays, flame_speeds) if m.size
+        np.atleast_1d(m) for m in (ignition_delays, psr_metrics, flame_speeds) if m.size
     ]
     return np.concatenate(metric_arrays) if metric_arrays else np.array([])
 
@@ -423,7 +514,7 @@ def sample(
 ):
     """Samples thermochemical data and generates metrics for various phenomena.
 
-    Supports autoignition delay and laminar flame speed metrics.
+    Supports autoignition delay, PSR, and laminar flame speed metrics.
 
     Parameters
     ----------
@@ -506,8 +597,52 @@ def sample(
             np.savetxt(data_files["data_ignition"], ignition_data, delimiter=",")
             np.savetxt(data_files["output_ignition"], ignition_delays, delimiter=",")
 
+    # PSR cases contribute three metrics each (extinction residence time and the
+    # two response temperatures) and ``num_sample_points`` sampled-state rows.
+    psr_metrics = np.array([])
+    psr_data = []
     if psr_conditions:
-        raise NotImplementedError("PSR calculations not currently supported.")
+        n_rows = PSRSimulation.num_sample_points
+        n_psr_metrics = 3 * len(psr_conditions)
+
+        # check for presence of data and output files; if present, reuse.
+        matches_number = False
+        matches_shape = False
+        exists_data = os.path.isfile(data_files["data_psr"])
+        exists_output = os.path.isfile(data_files["output_psr"])
+        if exists_data and exists_output:
+            psr_metrics = np.atleast_1d(
+                np.genfromtxt(data_files["output_psr"], delimiter=",")
+            )
+            psr_data = np.genfromtxt(data_files["data_psr"], delimiter=",")
+            matches_number = psr_metrics.size == n_psr_metrics and psr_data.shape[
+                0
+            ] / n_rows == len(psr_conditions)
+
+            gas = ct.Solution(model, phase_name)
+            matches_shape = psr_data.shape[1] == 2 + gas.n_species
+
+        if matches_number and matches_shape:
+            logging.info("Reusing existing PSR samples for the starting model.")
+        else:
+            logging.info("Running PSR simulations for starting model.")
+            simulations = []
+            for idx, case in enumerate(psr_conditions):
+                simulations.append(
+                    [
+                        PSRSimulation(
+                            idx, case, model, phase_name=phase_name, path=path
+                        ),
+                        idx,
+                    ]
+                )
+
+            psr_metrics, psr_data = _run_sampling_jobs(
+                simulations, psr_sample_worker, num_threads
+            )
+
+            np.savetxt(data_files["data_psr"], psr_data, delimiter=",")
+            np.savetxt(data_files["output_psr"], psr_metrics, delimiter=",")
 
     flame_speeds = np.array([])
     flame_data = []
@@ -564,11 +699,13 @@ def sample(
             np.savetxt(data_files["data_flame"], flame_data, delimiter=",")
             np.savetxt(data_files["output_flame"], flame_speeds, delimiter=",")
 
-    # combine metrics and sampled data from all phenomena (ignition then flame)
+    # combine metrics and sampled data from all phenomena (ignition, PSR, flame)
     metric_arrays = [
-        np.atleast_1d(m) for m in (ignition_delays, flame_speeds) if m.size
+        np.atleast_1d(m) for m in (ignition_delays, psr_metrics, flame_speeds) if m.size
     ]
-    data_arrays = [np.asarray(d) for d in (ignition_data, flame_data) if len(d)]
+    data_arrays = [
+        np.asarray(d) for d in (ignition_data, psr_data, flame_data) if len(d)
+    ]
     sampled_metrics = np.concatenate(metric_arrays) if metric_arrays else np.array([])
     sampled_data = np.vstack(data_arrays) if data_arrays else np.array([])
     return sampled_metrics, sampled_data
@@ -694,7 +831,78 @@ def parse_psr_inputs(model, conditions, phase_name=""):
         List of validated objects with PSR input parameters
 
     """
-    return None
+    gas = ct.Solution(model, phase_name)
+
+    inputs = []
+    for idx, case in enumerate(conditions):
+        pre = f"PSR input {idx}: "
+
+        # check required keys
+        temperature = case.get("temperature", 0.0)
+        pressure = case.get("pressure", 0.0)
+
+        assert temperature > 0.0, pre + '"temperature" needs to be > 0'
+        assert pressure > 0.0, pre + '"pressure" needs to be a number > 0'
+
+        equiv_ratio = case.get("equivalence-ratio", 0.0)
+        fuel = case.get("fuel", [])
+        oxidizer = case.get("oxidizer", [])
+
+        reactants = case.get("reactants", [])
+
+        assert (bool(equiv_ratio or fuel or oxidizer) + bool(reactants)) == 1, (
+            pre + "should specify either equivalence-ratio/fuel/oxidizer or reactants."
+        )
+
+        if equiv_ratio or fuel or oxidizer:
+            assert equiv_ratio > 0.0, pre + 'needs non-zero "equivalence-ratio"'
+
+            assert fuel, pre + 'needs "fuel" with at least one entry'
+            for entry in fuel:
+                assert fuel[entry] > 0, pre + entry + " value needs to be a number > 0"
+                assert entry in gas.species_names, (
+                    pre + "fuel species not in model: " + entry
+                )
+
+            assert oxidizer, pre + 'needs "oxidizer" with at least one entry'
+            for entry in oxidizer:
+                assert oxidizer[entry] > 0, (
+                    pre + entry + " value needs to be a number > 0"
+                )
+                assert entry in gas.species_names, (
+                    pre + "oxidizer species not in model: " + entry
+                )
+
+        if reactants:
+            for entry in reactants:
+                assert reactants[entry] > 0, (
+                    pre + entry + " value needs to be a number > 0"
+                )
+                assert entry in gas.species_names, (
+                    pre + "reactant not in model: " + entry
+                )
+
+        composition_type = case.get("composition-type", "mole")
+        assert composition_type in ["mole", "mass"], (
+            pre + 'composition-type must be "mole" or "mass"'
+        )
+        assert not (composition_type == "mass" and equiv_ratio), (
+            pre + "composition-type: must be mole when specifying equivalence ratio"
+        )
+
+        inputs.append(
+            InputPSR(
+                temperature,
+                pressure,
+                equiv_ratio,
+                fuel,
+                oxidizer,
+                reactants,
+                composition_type,
+            )
+        )
+
+    return inputs
 
 
 def parse_flame_inputs(model, conditions, phase_name=""):

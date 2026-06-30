@@ -38,6 +38,7 @@ def evaluate_species_errors(
     ignition_conditions,
     metrics,
     species_limbo,
+    psr_conditions=[],
     flame_conditions=[],
     phase_name="",
     num_threads=1,
@@ -86,6 +87,7 @@ def evaluate_species_errors(
             reduced_model_metrics = sample_metrics(
                 test_model_file,
                 ignition_conditions,
+                psr_conditions=psr_conditions,
                 flame_conditions=flame_conditions,
                 min_flame_speed=min_flame_speed,
                 phase_name=phase_name,
@@ -164,6 +166,7 @@ def run_sa(
     initial_metrics = sample_metrics(
         model_file,
         ignition_conditions,
+        psr_conditions=psr_conditions,
         flame_conditions=flame_conditions,
         min_flame_speed=min_flame_speed,
         reuse_saved=True,
@@ -187,6 +190,7 @@ def run_sa(
         ignition_conditions,
         initial_metrics,
         species_limbo,
+        psr_conditions=psr_conditions,
         flame_conditions=flame_conditions,
         min_flame_speed=min_flame_speed,
         phase_name=phase_name,
@@ -217,6 +221,7 @@ def run_sa(
             reduced_model_metrics = sample_metrics(
                 test_model_file,
                 ignition_conditions,
+                psr_conditions=psr_conditions,
                 flame_conditions=flame_conditions,
                 min_flame_speed=min_flame_speed,
                 phase_name=phase_name,
@@ -244,6 +249,7 @@ def run_sa(
                     ignition_conditions,
                     initial_metrics,
                     species_limbo,
+                    psr_conditions=psr_conditions,
                     flame_conditions=flame_conditions,
                     min_flame_speed=min_flame_speed,
                     phase_name=phase_name,

@@ -9,8 +9,13 @@ import numpy as np
 import h5py
 import cantera as ct
 
-from pymars.sampling import InputIgnition, InputLaminarFlame
-from pymars.simulation import BaseSimulation, IgnitionSimulation, FlameSimulation
+from pymars.sampling import InputIgnition, InputPSR, InputLaminarFlame
+from pymars.simulation import (
+    BaseSimulation,
+    IgnitionSimulation,
+    FlameSimulation,
+    PSRSimulation,
+)
 
 
 def relative_location(file):
@@ -621,3 +626,101 @@ class TestSampleProfile:
             else:
                 # a threshold beyond the maximum temperature leaves the row unset
                 assert np.array_equal(data[k], np.zeros(2 + n_species))
+
+
+class TestPSRRun:
+    """Exercises the perfectly stirred reactor (PSR) simulation."""
+
+    def _case(self):
+        return InputPSR(
+            temperature=300.0,
+            pressure=1.0,
+            equivalence_ratio=1.0,
+            fuel={"CH4": 1.0},
+            oxidizer={"O2": 1.0, "N2": 3.76},
+        )
+
+    def test_run_case_metrics(self):
+        """run_case returns the [tau_ext, T_mid, T_near] metric vector."""
+        sim = PSRSimulation(0, self._case(), "gri30.yaml")
+        sim.setup_case()
+        metrics = sim.run_case()
+
+        assert metrics.shape == (3,)
+        tau_ext, temp_mid, temp_near = metrics
+        # stoichiometric CH4/air, 1 atm, 300 K (GRI-Mech 3.0); the solver is
+        # deterministic, so these are tight regression bounds with a small margin
+        # for cross-version kinetics/solver differences
+        assert tau_ext == pytest.approx(7.90e-5, rel=0.05)
+        assert temp_mid == pytest.approx(2062.0, rel=0.03)
+        assert temp_near == pytest.approx(2207.0, rel=0.03)
+
+    def test_calculate_matches_run_case(self):
+        """The metric-only path matches the full run_case metrics."""
+        sim = PSRSimulation(0, self._case(), "gri30.yaml")
+        sim.setup_case()
+        assert np.allclose(sim.calculate(), sim.run_case())
+
+    def test_process_results_shape(self):
+        """process_results samples the three points' states."""
+        gas = ct.Solution("gri30.yaml")
+        sim = PSRSimulation(0, self._case(), "gri30.yaml")
+        sim.setup_case()
+        metrics, data = sim.process_results()
+
+        assert metrics.shape == (3,)
+        assert data.shape == (PSRSimulation.num_sample_points, 2 + gas.n_species)
+        # sampled pressure is the (constant) inlet pressure in Pa
+        assert np.allclose(data[:, 1], 1.0 * ct.one_atm)
+
+    def test_regression_gri_ch4(self):
+        """Documented regression anchor: stoichiometric CH4/air, 300 K, 1 atm, GRI 3.0."""
+        sim = PSRSimulation(0, self._case(), "gri30.yaml")
+        sim.setup_case()
+        tau_ext = sim.run_case()[0]
+        assert tau_ext == pytest.approx(7.9e-5, rel=0.15)
+
+
+class TestPSRFailure:
+    """A PSR whose extinction curve cannot be traced is handled gracefully.
+
+    The integrator failure is forced deterministically by monkeypatching the
+    continuation solver to raise; the metric-only ``calculate`` path degrades to a
+    zero vector (so the candidate is rejected via the error metric) while the
+    baseline ``run_case`` path raises.
+    """
+
+    def _case(self):
+        return InputPSR(
+            temperature=300.0,
+            pressure=1.0,
+            equivalence_ratio=1.0,
+            fuel={"CH4": 1.0},
+            oxidizer={"O2": 1.0, "N2": 3.76},
+        )
+
+    @staticmethod
+    def _force_failure(_gas, **_kwargs):
+        raise ct.CanteraError("forced failure: no extinction curve")
+
+    def test_calculate_returns_zeros_on_failure(self, monkeypatch):
+        """The metric-only path degrades to zeros (so the candidate is rejected)."""
+        monkeypatch.setattr(
+            "pymars.simulation.trace_extinction_curve", self._force_failure
+        )
+        sim = PSRSimulation(0, self._case(), "gri30.yaml")
+        sim.setup_case()
+        metrics = sim.calculate()
+
+        assert metrics.shape == (3,)
+        assert np.all(metrics == 0.0)
+
+    def test_run_case_raises_on_failure(self, monkeypatch):
+        """The original-model path raises, so a broken baseline is caught."""
+        monkeypatch.setattr(
+            "pymars.simulation.trace_extinction_curve", self._force_failure
+        )
+        sim = PSRSimulation(0, self._case(), "gri30.yaml")
+        sim.setup_case()
+        with pytest.raises(RuntimeError, match="No extinction curve detected"):
+            sim.run_case()

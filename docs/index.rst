@@ -46,6 +46,7 @@ User's Guide
    installation
    usage
    theory
+   psr_theory
 
 
 Code API
@@ -58,6 +59,7 @@ Code API
    drg
    drgep
    pfa
+   psr_solver
    pymars
    reduce_model
    sampling

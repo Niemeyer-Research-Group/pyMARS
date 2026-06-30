@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added perfectly stirred reactor (PSR) support (addressing #100). A new `PSRSimulation` traces the steady temperature-vs-residence-time response curve to the extinction turning point using pseudo-arclength continuation, and samples three points from the burning branch: the extinction turning point, the point nearest 0.1 s, and their log-midpoint. The error metric is the larger of the extinction residence-time error and the response-temperature errors. Requires `scipy`. Model reduction uses default `stop_at_extinction=True`, halting at the extinction turning point; passing `stop_at_extinction=False` to `trace_extinction_curve` marches the complete S-curve, continuing past the extinction fold and, for a sufficiently high inlet temperature, around the lower (ignition) turning point.
 - Added a global `min-flame-speed` input option (default 0.05 m/s): a solved laminar flame speed at or below this floor is treated as a degenerate, non-physical result ("no flame"). Lower it when studying fuels with genuinely low flame speeds.
 - Adds tests for `num_workers` > 1, covering the ignition and flame multiprocessing paths (parallel results match serial) and the shared dispatch helper
 

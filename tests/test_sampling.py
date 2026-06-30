@@ -9,10 +9,12 @@ import cantera as ct
 from pymars import sampling
 from pymars.sampling import (
     parse_ignition_inputs,
+    parse_psr_inputs,
     parse_flame_inputs,
     sample,
     sample_metrics,
     InputIgnition,
+    InputPSR,
     InputLaminarFlame,
 )
 
@@ -263,6 +265,75 @@ class TestParseFlameInputs:
             parse_flame_inputs("gri30.yaml", case)
 
 
+class TestParsePSRInputs:
+    def test_empty_returns_empty_list(self):
+        """No PSR conditions should parse to an empty list (not None)."""
+        assert parse_psr_inputs("gri30.yaml", []) == []
+
+    def test_good_example_equivalence_ratio(self):
+        """Tests a valid PSR input using an equivalence ratio."""
+        inputs = [
+            {
+                "pressure": 1.0,
+                "temperature": 300.0,
+                "fuel": {"CH4": 1.0},
+                "oxidizer": {"O2": 1.0, "N2": 3.76},
+                "equivalence-ratio": 1.0,
+            },
+        ]
+        conditions = parse_psr_inputs("gri30.yaml", inputs)
+        assert len(conditions) == 1
+        for item in conditions:
+            assert isinstance(item, InputPSR)
+            assert item.temperature == 300.0
+            assert item.equivalence_ratio == 1.0
+
+    def test_good_example_reactants(self):
+        """Tests a valid PSR input using a reactant list."""
+        inputs = [
+            {
+                "pressure": 1.0,
+                "temperature": 300.0,
+                "reactants": {"CH4": 1.0, "O2": 1.0, "N2": 3.76},
+            },
+        ]
+        conditions = parse_psr_inputs("gri30.yaml", inputs)
+        for item in conditions:
+            assert isinstance(item, InputPSR)
+            assert item.reactants
+
+    @pytest.mark.parametrize(
+        "key",
+        ["pressure", "temperature", "fuel", "oxidizer", "equivalence-ratio"],
+    )
+    def test_missing_keys(self, key):
+        """Tests correct errors for missing required keys."""
+        case = [
+            {
+                "pressure": 1.0,
+                "temperature": 300.0,
+                "fuel": {"CH4": 1.0},
+                "oxidizer": {"O2": 1.0, "N2": 3.76},
+                "equivalence-ratio": 1.0,
+            }
+        ]
+        del case[0][key]
+        with pytest.raises(AssertionError):
+            parse_psr_inputs("gri30.yaml", case)
+
+    def test_bad_species(self):
+        """Tests raising error for species not in model."""
+        case = [
+            {
+                "pressure": 1.0,
+                "temperature": 300.0,
+                "reactants": {"C4H10": 1.0, "O2": 1.0, "N2": 3.76},
+            }
+        ]
+        with pytest.raises(AssertionError):
+            parse_psr_inputs("gri30.yaml", case)
+
+
 class TestFlameSampling:
     """Exercises the laminar flame branches of sample / sample_metrics."""
 
@@ -444,6 +515,130 @@ class TestIgnitionSampling:
         assert serial.shape == (2,)
         assert parallel.shape == (2,)
         assert np.allclose(serial, parallel)
+
+
+class TestPSRSampling:
+    """Exercises the PSR branches of sample / sample_metrics."""
+
+    def _ch4_psr(self):
+        return InputPSR(
+            temperature=300.0,
+            pressure=1.0,
+            equivalence_ratio=1.0,
+            fuel={"CH4": 1.0},
+            oxidizer={"O2": 1.0, "N2": 3.76},
+        )
+
+    def test_sample_metrics_psr_only(self):
+        """sample_metrics returns the three PSR metrics per case."""
+        metrics = sample_metrics(
+            "gri30.yaml", [], psr_conditions=[self._ch4_psr()], num_threads=1
+        )
+        assert metrics.shape == (3,)
+        tau_ext, temp_mid, temp_near = metrics
+        assert 1.0e-5 < tau_ext < 5.0e-4
+        assert 1500.0 < temp_mid < 2300.0
+        assert temp_near > temp_mid
+
+    def test_sample_psr_data_and_reuse(self, tmp_path, monkeypatch):
+        """sample should write PSR metric/data files and reuse them on a second call."""
+        for key in ("data_psr", "output_psr"):
+            monkeypatch.setitem(sampling.data_files, key, str(tmp_path / key))
+
+        psr_conditions = [self._ch4_psr()]
+        metrics, data = sample(
+            "gri30.yaml", [], psr_conditions=psr_conditions, num_threads=1
+        )
+
+        gas = ct.Solution("gri30.yaml")
+        assert metrics.shape == (3,)
+        assert data.shape == (
+            sampling.PSRSimulation.num_sample_points,
+            2 + gas.n_species,
+        )
+        assert (tmp_path / "data_psr").is_file()
+        assert (tmp_path / "output_psr").is_file()
+
+        # second call should reuse the saved samples and give identical results
+        metrics_reuse, data_reuse = sample(
+            "gri30.yaml", [], psr_conditions=psr_conditions, num_threads=1
+        )
+        assert np.allclose(metrics_reuse, metrics)
+        assert np.allclose(data_reuse, data)
+
+    def test_sample_metrics_psr_failure_is_zero(self, monkeypatch):
+        """A reduced model whose PSR curve cannot be traced yields zero metrics.
+
+        ``sample_metrics`` (the reduced-model path) must not crash; the zero
+        metrics then drive a 100% error in ``calculate_error``, rejecting the
+        model during reduction.
+        """
+
+        def force_failure(_gas, **_kwargs):
+            raise ct.CanteraError("forced failure: no extinction curve")
+
+        monkeypatch.setattr("pymars.simulation.trace_extinction_curve", force_failure)
+        metrics = sample_metrics(
+            "gri30.yaml", [], psr_conditions=[self._ch4_psr()], num_threads=1
+        )
+        assert metrics.shape == (3,)
+        assert np.all(metrics == 0.0)
+
+    @pytest.mark.slow
+    def test_sample_combined_order(self, tmp_path, monkeypatch):
+        """Combined sampling concatenates metrics/data as ignition, then PSR, then flame."""
+        for key in (
+            "data_ignition",
+            "output_ignition",
+            "data_psr",
+            "output_psr",
+            "data_flame",
+            "output_flame",
+        ):
+            monkeypatch.setitem(sampling.data_files, key, str(tmp_path / key))
+
+        ignition = [
+            InputIgnition(
+                kind="constant volume",
+                pressure=1.0,
+                temperature=1200.0,
+                equivalence_ratio=1.0,
+                fuel={"H2": 1.0},
+                oxidizer={"O2": 1.0, "N2": 3.76},
+            )
+        ]
+        psr = [self._ch4_psr()]
+        flame = [
+            InputLaminarFlame(
+                pressure=1.0,
+                temperature=300.0,
+                equivalence_ratio=1.0,
+                fuel={"H2": 1.0},
+                oxidizer={"O2": 1.0, "N2": 3.76},
+                width=0.03,
+            )
+        ]
+
+        metrics, data = sample(
+            "gri30.yaml",
+            ignition,
+            psr_conditions=psr,
+            flame_conditions=flame,
+            num_threads=1,
+        )
+
+        gas = ct.Solution("gri30.yaml")
+        n_pts = 20  # ignition/flame sample points
+        n_psr = sampling.PSRSimulation.num_sample_points
+
+        # one ignition metric, three PSR metrics, then one flame metric
+        assert metrics.shape == (1 + 3 + 1,)
+        assert 0.0 < metrics[0] < 0.5  # ignition delay (s) first
+        assert 1.0e-5 < metrics[1] < 5.0e-4  # PSR extinction tau next
+        assert 0.5 < metrics[4] < 5.0  # flame speed (m/s) last
+
+        # data stacked in the same order: ignition rows, PSR rows, flame rows
+        assert data.shape == (n_pts + n_psr + n_pts, 2 + gas.n_species)
 
 
 def _double_worker(job):

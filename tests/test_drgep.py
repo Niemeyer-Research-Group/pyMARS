@@ -3,11 +3,12 @@
 import os
 import pathlib
 
+import pytest
 import numpy as np
 import cantera as ct
 import networkx as nx
 
-from pymars.sampling import data_files, InputIgnition, InputLaminarFlame
+from pymars.sampling import data_files, InputIgnition, InputPSR, InputLaminarFlame
 from pymars.drgep import graph_search_drgep, get_importance_coeffs
 from pymars.drgep import run_drgep
 
@@ -538,4 +539,45 @@ class TestRunDRGEP:
         full_model = ct.Solution(model_file)
         assert 0 < reduced_model.model.n_species <= full_model.n_species
         assert reduced_model.model.transport_model == full_model.transport_model
+        assert reduced_model.error <= 30.0
+
+    @pytest.mark.slow
+    def test_psr_reduction(self, monkeypatch):
+        """Tests a DRGEP reduction driven by PSR metrics (no ignition or flame)."""
+        model_file = "h2o2.yaml"
+
+        psr_conditions = [
+            InputPSR(
+                temperature=300.0,
+                pressure=1.0,
+                equivalence_ratio=1.0,
+                fuel={"H2": 1.0},
+                oxidizer={"O2": 1.0, "N2": 3.76},
+            )
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            # keep the sampled PSR data/output files out of the repo
+            monkeypatch.setitem(
+                data_files, "data_psr", os.path.join(temp_dir, "psr_data.dat")
+            )
+            monkeypatch.setitem(
+                data_files, "output_psr", os.path.join(temp_dir, "psr_output.txt")
+            )
+            reduced_model = run_drgep(
+                model_file,
+                [],  # no ignition conditions
+                psr_conditions,  # PSR-only reduction
+                [],  # no flame conditions
+                error_limit=30.0,
+                species_targets=["H2", "O2"],
+                species_safe=["N2"],
+                num_threads=1,
+                path=temp_dir,
+            )
+
+        # The reduced model should be valid, smaller than the original, and within
+        # the requested error limit.
+        full_model = ct.Solution(model_file)
+        assert 0 < reduced_model.model.n_species <= full_model.n_species
         assert reduced_model.error <= 30.0

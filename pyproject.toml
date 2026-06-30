@@ -26,6 +26,7 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
+    "scipy",
     "cantera>=3.0",
     "networkx",
     "h5py",
@@ -56,6 +57,9 @@ include = [
     "README.md",
     "LICENSE",
 ]
+
+[tool.black]
+target-version = ["py310", "py311", "py312", "py313", "py314"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
