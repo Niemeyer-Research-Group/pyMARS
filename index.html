@@ -87,6 +87,17 @@ metric; autoignition and flame conditions may be used separately or together.</p
 <li class="toctree-l2"><a class="reference internal" href="theory.html#references">References</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="psr_theory.html">Perfectly stirred reactor (PSR) extinction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#the-steady-psr">The steady PSR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#the-s-curve-and-the-extinction-turning-point">The S-curve and the extinction turning point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#why-naive-methods-fail-near-extinction">Why naive methods fail near extinction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#pseudo-arclength-continuation">Pseudo-arclength continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#relation-to-the-original-mars-solver">Relation to the original MARS solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#sampling-points-and-the-error-metric">Sampling points and the error metric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#implementation-notes">Implementation notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_theory.html#references">References</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -121,6 +132,13 @@ metric; autoignition and flame conditions may be used separately or together.</p
 <li class="toctree-l2"><a class="reference internal" href="pfa.html#pymars.pfa.trim_pfa"><code class="docutils literal notranslate"><span class="pre">trim_pfa()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="psr_solver.html#pymars.psr_solver.DS_MAX_MIDDLE"><code class="docutils literal notranslate"><span class="pre">DS_MAX_MIDDLE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_solver.html#pymars.psr_solver.PENALTY"><code class="docutils literal notranslate"><span class="pre">PENALTY</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_solver.html#pymars.psr_solver.TREF"><code class="docutils literal notranslate"><span class="pre">TREF</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="psr_solver.html#pymars.psr_solver.trace_extinction_curve"><code class="docutils literal notranslate"><span class="pre">trace_extinction_curve()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pymars.html#pymars.pymars.METHODS"><code class="docutils literal notranslate"><span class="pre">METHODS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymars.html#pymars.pymars.ReductionInputs"><code class="docutils literal notranslate"><span class="pre">ReductionInputs</span></code></a></li>
@@ -145,6 +163,8 @@ metric; autoignition and flame conditions may be used separately or together.</p
 <li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.parse_flame_inputs"><code class="docutils literal notranslate"><span class="pre">parse_flame_inputs()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.parse_ignition_inputs"><code class="docutils literal notranslate"><span class="pre">parse_ignition_inputs()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.parse_psr_inputs"><code class="docutils literal notranslate"><span class="pre">parse_psr_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.psr_sample_worker"><code class="docutils literal notranslate"><span class="pre">psr_sample_worker()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.psr_worker"><code class="docutils literal notranslate"><span class="pre">psr_worker()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.read_metrics"><code class="docutils literal notranslate"><span class="pre">read_metrics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.sample"><code class="docutils literal notranslate"><span class="pre">sample()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="sampling.html#pymars.sampling.sample_metrics"><code class="docutils literal notranslate"><span class="pre">sample_metrics()</span></code></a></li>
@@ -159,6 +179,7 @@ metric; autoignition and flame conditions may be used separately or together.</p
 <li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.BaseSimulation"><code class="docutils literal notranslate"><span class="pre">BaseSimulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.FlameSimulation"><code class="docutils literal notranslate"><span class="pre">FlameSimulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.IgnitionSimulation"><code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html#pymars.simulation.PSRSimulation"><code class="docutils literal notranslate"><span class="pre">PSRSimulation</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a><ul>
@@ -234,12 +255,14 @@ metric; autoignition and flame conditions may be used separately or together.</p
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_theory.html">Perfectly stirred reactor (PSR) extinction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>

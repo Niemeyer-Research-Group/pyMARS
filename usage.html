@@ -184,14 +184,19 @@ sensitivity analysis; only used when following one of the graph-based
 reduction methods</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code>: List of initial conditions for autoignition
 simulations, described in more detail next</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">psr-conditions</span></code>: List of inlet conditions for perfectly stirred reactor
+(PSR) simulations, described in more detail below</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code>: List of initial conditions for freely-propagating
 laminar flame simulations, described in more detail below</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">min-flame-speed</span></code>: Optional minimum laminar flame speed, in m/s, that counts
 as a real flame (default <code class="docutils literal notranslate"><span class="pre">0.05</span></code>); see the laminar flame parameters below</p></li>
 </ul>
-<p>At least one of <code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code> or <code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code> must
-be provided; you may also supply both, in which case the sampled states and the
-error metrics (ignition delays and flame speeds) from all cases are combined.</p>
+<p>At least one of <code class="docutils literal notranslate"><span class="pre">autoignition-conditions</span></code>, <code class="docutils literal notranslate"><span class="pre">psr-conditions</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">laminar-flame-conditions</span></code> must be provided; you may also supply any
+combination, in which case the sampled states and the error metrics from all
+cases are combined.</p>
+<p>The theory behind the PSR extinction-curve computation is documented separately;
+see <a class="reference internal" href="psr_theory.html"><span class="doc">Perfectly stirred reactor (PSR) extinction</span></a>.</p>
 <p>Species given in <code class="docutils literal notranslate"><span class="pre">targets</span></code>, <code class="docutils literal notranslate"><span class="pre">retained-species</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">fuel</span></code>/<code class="docutils literal notranslate"><span class="pre">oxidizer</span></code>/<code class="docutils literal notranslate"><span class="pre">reactants</span></code> must be present in the model specified in
 <code class="docutils literal notranslate"><span class="pre">model</span></code>, spelling must match exactly (including case).</p>
@@ -291,6 +296,40 @@ fall below the default floor:</p>
 </div>
 <p>As with autoignition data, pyMARS reuses saved laminar flame samples from a
 prior run when the number and shape of the saved cases match the input file.</p>
+<p><strong>Perfectly stirred reactor (PSR) parameters:</strong> pyMARS can additionally (or
+instead) use steady perfectly stirred reactor simulations to sample
+thermochemical data and to use the reactor’s extinction behavior as an error
+metric. For each case, pyMARS traces the steady temperature-versus-residence-time
+response curve and follows its upper (burning) branch through the <em>extinction
+turning point</em> using pseudo-arclength continuation, which is robust where ordinary
+time-integration fails near extinction. The underlying theory is documented in
+<a class="reference internal" href="psr_theory.html"><span class="doc">Perfectly stirred reactor (PSR) extinction</span></a>. This capability requires the <code class="docutils literal notranslate"><span class="pre">scipy</span></code> package.</p>
+<p>Conditions are given in the <code class="docutils literal notranslate"><span class="pre">psr-conditions</span></code> field as a list, using the same
+mixture keys as laminar flame cases (<code class="docutils literal notranslate"><span class="pre">pressure</span></code> in atm, <code class="docutils literal notranslate"><span class="pre">temperature</span></code> in K,
+and either <code class="docutils literal notranslate"><span class="pre">equivalence-ratio</span></code> with <code class="docutils literal notranslate"><span class="pre">fuel</span></code>/<code class="docutils literal notranslate"><span class="pre">oxidizer</span></code> or a list of
+<code class="docutils literal notranslate"><span class="pre">reactants</span></code>). PSR cases are modeled as adiabatic and constant pressure,
+and <code class="docutils literal notranslate"><span class="pre">temperature</span></code> is the inlet temperature (e.g., 300 K):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">psr-conditions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300.0</span>
+<span class="w">    </span><span class="nt">fuel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CH4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">oxidizer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">O2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">N2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.76</span>
+<span class="w">    </span><span class="nt">equivalence-ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+</pre></div>
+</div>
+<p>Three points are sampled from the burning branch: the extinction turning point,
+the point nearest a residence time of 0.1 s, and their logarithmic midpoint. The
+PSR error metric is the largest of the relative error in the extinction residence
+time and the relative errors in the response temperatures at the other two
+points. A candidate reduced model that can no longer sustain a stirred reactor
+(its response curve cannot be traced) is rejected—assigned 100% error—rather
+than aborting the run, the same way non-igniting and non-flammable
+candidates are handled. As with the other data sources, pyMARS reuses saved PSR
+samples from a prior run when the number and shape of the saved cases match the
+input file.</p>
 </section>
 <section id="conversion">
 <span id="id1"></span><h2>Conversion<a class="headerlink" href="#conversion" title="Link to this heading">¶</a></h2>
@@ -360,12 +399,14 @@ data can also be included in the resulting Cantera file with the
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_theory.html">Perfectly stirred reactor (PSR) extinction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>

@@ -258,7 +258,7 @@ ignite or the integration fails.</p>
 to steady state (or a maximum of 10,000 steps, by default). This is done
 by checking whether the system state changes below a certain threshold,
 with the residual computed using feature checking. This is blatantly stolen
-from Cantera’s <a class="reference external" href="https://cantera.org/3.0/sphinx/html/cython/zerodim.html#cantera.ReactorNet.advance_to_steady_state" title="(in Cantera v3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cantera.ReactorNet.advance_to_steady_state()</span></code></a> method.</p>
+from Cantera’s <a class="reference external" href="https://cantera.org/stable/python/zerodim.html#cantera.ReactorNet.advance_to_steady_state" title="(in Cantera v3.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cantera.ReactorNet.advance_to_steady_state()</span></code></a> method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -278,6 +278,107 @@ from Cantera’s <a class="reference external" href="https://cantera.org/3.0/sph
 <dl class="py method">
 <dt class="sig sig-object py" id="pymars.simulation.IgnitionSimulation.setup_case">
 <span class="sig-name descname"><span class="pre">setup_case</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.IgnitionSimulation.setup_case" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize simulation case.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymars.simulation.PSRSimulation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.simulation.</span></span><span class="sig-name descname"><span class="pre">PSRSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.PSRSimulation" title="Link to this definition">¶</a></dt>
+<dd><p>Class for steady perfectly stirred reactor (PSR) simulations.</p>
+<p>The steady temperature-vs-residence-time response curve is traced through its
+extinction turning point by pseudo-arclength continuation (see
+<a class="reference internal" href="psr_solver.html#module-pymars.psr_solver" title="pymars.psr_solver"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pymars.psr_solver</span></code></a>). Three points are sampled from the burning branch:
+the extinction turning point, the point nearest a residence time of 0.1 s,
+and their logarithmic midpoint.</p>
+<p>The global metric is a length-three vector <code class="docutils literal notranslate"><span class="pre">[tau_ext,</span> <span class="pre">T_mid,</span> <span class="pre">T_near]</span></code>: the
+extinction residence time, and the response temperatures at the log-midpoint
+and 0.1 s points. Combined element-wise by <code class="docutils literal notranslate"><span class="pre">calculate_error</span></code> (relative error,
+maximized), the error metric is the larger of the extinction residence-time
+error and the response-temperature errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Identifier index for case</p></li>
+<li><p><strong>properties</strong> (<a class="reference internal" href="sampling.html#pymars.sampling.InputPSR" title="pymars.sampling.InputPSR"><em>InputPSR</em></a>) – Object with inlet conditions for the simulation</p></li>
+<li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for Cantera-format model to be used</p></li>
+<li><p><strong>phase_name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optional name for phase to load from YAML file (e.g., ‘gas’).</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Path for location of output files</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.PSRSimulation.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.PSRSimulation.calculate" title="Link to this definition">¶</a></dt>
+<dd><p>Trace the PSR response curve and return only the metric vector.</p>
+<p>Returns a zero metric vector (rather than raising) when no extinction
+curve is detected, so that a reduced model that can no longer sustain a
+stirred reactor is rejected through the error metric instead of aborting
+the reduction, mirroring how <code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code>/<code class="docutils literal notranslate"><span class="pre">FlameSimulation</span></code>
+treat a non-igniting / non-flammable model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Metric vector <code class="docutils literal notranslate"><span class="pre">[tau_ext,</span> <span class="pre">T_mid,</span> <span class="pre">T_near]</span></code>, or zeros if no curve is
+detected.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.simulation.PSRSimulation.num_sample_points">
+<span class="sig-name descname"><span class="pre">num_sample_points</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pymars.simulation.PSRSimulation.num_sample_points" title="Link to this definition">¶</a></dt>
+<dd><p>Number of points sampled from the response curve (extinction turning
+point, nearest 0.1 s, and their log-midpoint).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.PSRSimulation.process_results">
+<span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.PSRSimulation.process_results" title="Link to this definition">¶</a></dt>
+<dd><p>Trace the response curve and sample the state at the three points.</p>
+<p>Uses <code class="docutils literal notranslate"><span class="pre">run_case</span></code>, so a curve that cannot be traced raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code>;
+this path samples data for the original model, where a missing curve should
+halt the reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_data</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Flag to skip sampling thermochemical data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Metric vector, or metric vector and sampled data of shape
+<code class="docutils literal notranslate"><span class="pre">(num_sample_points,</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">n_species)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a>, or <a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of numpy.ndarray and numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.PSRSimulation.run_case">
+<span class="sig-name descname"><span class="pre">run_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.PSRSimulation.run_case" title="Link to this definition">¶</a></dt>
+<dd><p>Trace the PSR response curve and return the metric vector.</p>
+<p>Raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> if no extinction curve is detected. This is the
+path used for the original (baseline) model, where a failure to trace the
+curve should halt the reduction rather than be silently ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Unused; retained for interface symmetry with <code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Metric vector <code class="docutils literal notranslate"><span class="pre">[tau_ext,</span> <span class="pre">T_mid,</span> <span class="pre">T_near]</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymars.simulation.PSRSimulation.setup_case">
+<span class="sig-name descname"><span class="pre">setup_case</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymars.simulation.PSRSimulation.setup_case" title="Link to this definition">¶</a></dt>
 <dd><p>Initialize simulation case.</p>
 </dd></dl>
 
@@ -327,12 +428,14 @@ from Cantera’s <a class="reference external" href="https://cantera.org/3.0/sph
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_theory.html">Perfectly stirred reactor (PSR) extinction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
@@ -341,6 +444,7 @@ from Cantera’s <a class="reference external" href="https://cantera.org/3.0/sph
 <li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.BaseSimulation"><code class="docutils literal notranslate"><span class="pre">BaseSimulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.FlameSimulation"><code class="docutils literal notranslate"><span class="pre">FlameSimulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.IgnitionSimulation"><code class="docutils literal notranslate"><span class="pre">IgnitionSimulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.simulation.PSRSimulation"><code class="docutils literal notranslate"><span class="pre">PSRSimulation</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>

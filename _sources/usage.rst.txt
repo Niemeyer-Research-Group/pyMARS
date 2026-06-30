@@ -173,14 +173,20 @@ indicated with the ``--input`` or ``-i`` command-line argument. Keys include:
   reduction methods
 - ``autoignition-conditions``: List of initial conditions for autoignition
   simulations, described in more detail next
+- ``psr-conditions``: List of inlet conditions for perfectly stirred reactor
+  (PSR) simulations, described in more detail below
 - ``laminar-flame-conditions``: List of initial conditions for freely-propagating
   laminar flame simulations, described in more detail below
 - ``min-flame-speed``: Optional minimum laminar flame speed, in m/s, that counts
   as a real flame (default ``0.05``); see the laminar flame parameters below
 
-At least one of ``autoignition-conditions`` or ``laminar-flame-conditions`` must
-be provided; you may also supply both, in which case the sampled states and the
-error metrics (ignition delays and flame speeds) from all cases are combined.
+At least one of ``autoignition-conditions``, ``psr-conditions``, or
+``laminar-flame-conditions`` must be provided; you may also supply any
+combination, in which case the sampled states and the error metrics from all
+cases are combined.
+
+The theory behind the PSR extinction-curve computation is documented separately;
+see :doc:`psr_theory`.
 
 Species given in ``targets``, ``retained-species``, or
 ``fuel``/``oxidizer``/``reactants`` must be present in the model specified in
@@ -298,6 +304,44 @@ fall below the default floor:
 
 As with autoignition data, pyMARS reuses saved laminar flame samples from a
 prior run when the number and shape of the saved cases match the input file.
+
+**Perfectly stirred reactor (PSR) parameters:** pyMARS can additionally (or
+instead) use steady perfectly stirred reactor simulations to sample
+thermochemical data and to use the reactor's extinction behavior as an error
+metric. For each case, pyMARS traces the steady temperature-versus-residence-time
+response curve and follows its upper (burning) branch through the *extinction
+turning point* using pseudo-arclength continuation, which is robust where ordinary
+time-integration fails near extinction. The underlying theory is documented in
+:doc:`psr_theory`. This capability requires the ``scipy`` package.
+
+Conditions are given in the ``psr-conditions`` field as a list, using the same
+mixture keys as laminar flame cases (``pressure`` in atm, ``temperature`` in K,
+and either ``equivalence-ratio`` with ``fuel``/``oxidizer`` or a list of
+``reactants``). PSR cases are modeled as adiabatic and constant pressure,
+and ``temperature`` is the inlet temperature (e.g., 300 K):
+
+.. code-block:: yaml
+
+    psr-conditions:
+      - pressure: 1.0
+        temperature: 300.0
+        fuel:
+          CH4: 1.0
+        oxidizer:
+          O2: 1.0
+          N2: 3.76
+        equivalence-ratio: 1.0
+
+Three points are sampled from the burning branch: the extinction turning point,
+the point nearest a residence time of 0.1 s, and their logarithmic midpoint. The
+PSR error metric is the largest of the relative error in the extinction residence
+time and the relative errors in the response temperatures at the other two
+points. A candidate reduced model that can no longer sustain a stirred reactor
+(its response curve cannot be traced) is rejected---assigned 100% error---rather
+than aborting the run, the same way non-igniting and non-flammable
+candidates are handled. As with the other data sources, pyMARS reuses saved PSR
+samples from a prior run when the number and shape of the saved cases match the
+input file.
 
 
 .. _conversion:

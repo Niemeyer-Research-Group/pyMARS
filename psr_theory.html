@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Perfectly stirred reactor (PSR) extinction &#8212; pyMARS 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=6efca38a"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="drg" href="drg.html" />
+    <link rel="prev" title="Theory" href="theory.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="perfectly-stirred-reactor-psr-extinction">
+<span id="sec-psr-theory"></span><h1>Perfectly stirred reactor (PSR) extinction<a class="headerlink" href="#perfectly-stirred-reactor-psr-extinction" title="Link to this heading">¶</a></h1>
+<p>pyMARS can use steady perfectly stirred reactor (PSR) simulations as a source of
+sampled thermochemical data and as an error metric for reduction, focused on the
+reactor’s <strong>extinction turning point</strong>. Unlike autoignition and laminar flame
+simulations, this computation is not built into Cantera, so pyMARS implements it
+directly (in <a class="reference internal" href="psr_solver.html#module-pymars.psr_solver" title="pymars.psr_solver"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pymars.psr_solver</span></code></a>, using Cantera only for thermodynamic and
+kinetic evaluations). This page documents the underlying theory.</p>
+<p>The approach is adapted from the original Fortran <a class="reference external" href="https://niemeyer-research-group.github.io/MARS/">MARS code</a>, which was built on the
+Sandia CHEMKIN <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id36" title="R. J. Kee, F. M. Rupley, E. Meeks, and J. A. Miller. CHEMKIN-III: a Fortran chemical kinetics package for the analysis of gas-phase chemical and plasma kinetics. Technical Report SAND96-8216, Sandia National Laboratories, Livermore, CA, 1996. doi:10.2172/481621.">P2</a>]</span> and PSR <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id37" title="P. Glarborg, R. J. Kee, J. F. Grcar, and J. A. Miller. PSR: a Fortran program for modeling well-stirred reactors. Technical Report SAND86-8209, Sandia National Laboratories, Livermore, CA, 1986.">P3</a>]</span> packages;
+see Niemeyer &amp; Sung <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id16" title="Kyle E. Niemeyer and Chih-Jen Sung. Reduced chemistry for a gasoline surrogate valid at engine-relevant conditions. Energy &amp; Fuels, 29(2):1172–1185, 2015. doi:10.1021/ef5022126.">P1</a>]</span> for details.</p>
+<section id="the-steady-psr">
+<h2>The steady PSR<a class="headerlink" href="#the-steady-psr" title="Link to this heading">¶</a></h2>
+<p>A perfectly stirred reactor is a spatially uniform reactor fed by a steady inlet
+stream. Modeling it as adiabatic and at constant pressure, with inlet mass
+fractions <span class="math notranslate nohighlight">\(Y_{k,\mathrm{in}}\)</span> and temperature <span class="math notranslate nohighlight">\(T_{\mathrm{in}}\)</span>, and
+defining the <strong>residence time</strong> <span class="math notranslate nohighlight">\(\tau = \rho V / \dot m\)</span> (instantaneous mass
+divided by mass flow rate), the steady-state balances are</p>
+<div class="math notranslate nohighlight">
+\[(Y_k - Y_{k,\mathrm{in}}) - \tau\,\frac{\dot\omega_k W_k}{\rho} = 0
+\qquad (k = 1, \dots, K)\]</div>
+<div class="math notranslate nohighlight">
+\[h(T, Y) - h_{\mathrm{in}} = 0\]</div>
+<p>where <span class="math notranslate nohighlight">\(\dot\omega_k\)</span> are the net molar production rates, <span class="math notranslate nohighlight">\(W_k\)</span> the
+molecular weights, <span class="math notranslate nohighlight">\(\rho\)</span> the mass density, and <span class="math notranslate nohighlight">\(h\)</span> the
+mass-specific mixture enthalpy. The first set are the species balances; the
+second is the energy balance, which for an adiabatic reactor reduces to the
+statement that the outlet enthalpy equals the inlet enthalpy. (For the adiabatic
+case the reactor volume cancels, so the solution depends only on the residence
+time <span class="math notranslate nohighlight">\(\tau\)</span>.)</p>
+</section>
+<section id="the-s-curve-and-the-extinction-turning-point">
+<h2>The S-curve and the extinction turning point<a class="headerlink" href="#the-s-curve-and-the-extinction-turning-point" title="Link to this heading">¶</a></h2>
+<p>Sweeping the residence time <span class="math notranslate nohighlight">\(\tau\)</span> and plotting the steady response
+temperature <span class="math notranslate nohighlight">\(T(\tau)\)</span> traces the classic <strong>S-shaped response curve</strong>
+<span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id35" title="Chung K. Law. Combustion Physics. Cambridge University Press, New York, 2006. doi:10.1017/CBO9780511754517.">P4</a>]</span>:</p>
+<ul class="simple">
+<li><p>an <strong>upper branch</strong> of vigorously burning solutions, which is stable; as
+<span class="math notranslate nohighlight">\(\tau\)</span> decreases (less time to react), the temperature falls slowly and
+then drops steeply;</p></li>
+<li><p>a <strong>turning point</strong> at the <em>extinction</em> residence time <span class="math notranslate nohighlight">\(\tau_{\mathrm{ext}}\)</span>,
+where the curve folds back on itself
+(<span class="math notranslate nohighlight">\(\mathrm{d}\tau/\mathrm{d}T \to 0\)</span>)—a saddle-node (fold) bifurcation;</p></li>
+<li><p>a <strong>middle branch</strong> of physically unstable solutions, and a <strong>lower branch</strong> of
+weakly reacting solutions.</p></li>
+</ul>
+<p>The extinction residence time is the smallest <span class="math notranslate nohighlight">\(\tau\)</span> for which a burning
+solution exists; below it, the reactor cannot be sustained.</p>
+<figure class="align-center" id="id38">
+<a class="reference internal image-reference" href="_images/psr_scurve.svg"><img alt="complete steady PSR S-curve with extinction and ignition turning points" src="_images/psr_scurve.svg" style="width: 5in;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Complete steady PSR response curve (S-curve) for stoichiometric methane/air at
+1 atm with an inlet temperature of 1200 K (GRI-Mech 3.0). The continuation
+traces the stable upper (burning) branch down to the extinction turning point,
+then the unstable middle branch up to the ignition turning point; the
+weakly-reacting lower branch lies just above the 1200 K inlet temperature. A
+high inlet temperature is used here so that both turning points fall at
+practical residence times.</span><a class="headerlink" href="#id38" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>The burning and middle branches and the two turning points in the figure above
+are produced directly with <a class="reference internal" href="psr_solver.html#module-pymars.psr_solver" title="pymars.psr_solver"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pymars.psr_solver</span></code></a>.
+<a class="reference internal" href="psr_solver.html#pymars.psr_solver.trace_extinction_curve" title="pymars.psr_solver.trace_extinction_curve"><code class="xref py py-func docutils literal notranslate"><span class="pre">trace_extinction_curve()</span></code></a> with <code class="docutils literal notranslate"><span class="pre">stop_at_extinction=False</span></code>
+returns the traced <code class="docutils literal notranslate"><span class="pre">branch</span></code> (an array of <span class="math notranslate nohighlight">\((\tau, T)\)</span> pairs, ordered from
+the start of the upper branch, around the extinction fold, along the middle
+branch, and up to the ignition turning point) together with the three sampled
+<code class="docutils literal notranslate"><span class="pre">points</span></code> on the burning branch. By default <code class="docutils literal notranslate"><span class="pre">stop_at_extinction=True</span></code>, stopping
+at the extinction turning point (all that model reduction needs). The complete
+S-curve, with the ignition turning point as well, appears only for a sufficiently
+high inlet temperature.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cantera</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ct</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymars.psr_solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">trace_extinction_curve</span>
+
+<span class="c1"># inlet state: stoichiometric methane/air at 1 atm, heated to 1200 K so that</span>
+<span class="c1"># both the extinction and ignition turning points fall at practical tau</span>
+<span class="n">gas</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">Solution</span><span class="p">(</span><span class="s2">&quot;gri30.yaml&quot;</span><span class="p">)</span>
+<span class="n">gas</span><span class="o">.</span><span class="n">set_equivalence_ratio</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;O2&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;N2&quot;</span><span class="p">:</span> <span class="mf">3.76</span><span class="p">})</span>
+<span class="n">gas</span><span class="o">.</span><span class="n">TP</span> <span class="o">=</span> <span class="mf">1200.0</span><span class="p">,</span> <span class="n">ct</span><span class="o">.</span><span class="n">one_atm</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">trace_extinction_curve</span><span class="p">(</span><span class="n">gas</span><span class="p">,</span> <span class="n">stop_at_extinction</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">branch</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span>                          <span class="c1"># (N, 2) array of (tau, T)</span>
+<span class="n">i_ext</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">branch</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>               <span class="c1"># extinction turning point</span>
+<span class="n">i_ign</span> <span class="o">=</span> <span class="n">i_ext</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">branch</span><span class="p">[</span><span class="n">i_ext</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]))</span>  <span class="c1"># ignition turning point</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">branch</span><span class="p">[:</span> <span class="n">i_ext</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">branch</span><span class="p">[:</span> <span class="n">i_ext</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;upper (burning) branch&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">branch</span><span class="p">[</span><span class="n">i_ext</span><span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">branch</span><span class="p">[</span><span class="n">i_ext</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;middle (unstable) branch&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">branch</span><span class="p">[</span><span class="n">i_ext</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">branch</span><span class="p">[</span><span class="n">i_ext</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;extinction turning point&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">branch</span><span class="p">[</span><span class="n">i_ign</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">branch</span><span class="p">[</span><span class="n">i_ign</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ignition turning point&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xscale</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;residence time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;temperature (K)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;psr_scurve.pdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The weakly reacting lower branch in the figure (steady solutions just above the
+inlet temperature, up to the ignition turning point) is overlaid for completeness;
+it is obtained separately by solving the steady equations at fixed residence times
+seeded from the cold inlet state.</p>
+</section>
+<section id="why-naive-methods-fail-near-extinction">
+<h2>Why naive methods fail near extinction<a class="headerlink" href="#why-naive-methods-fail-near-extinction" title="Link to this heading">¶</a></h2>
+<p>Two obvious approaches both break down at the point of interest:</p>
+<ul class="simple">
+<li><p><strong>Time integration to steady state</strong> (e.g., advancing a Cantera reactor
+network) reaches only the stable branches, and it systematically
+overpredicts the extinction residence time. Started from a hot state at a
+residence time near extinction, the transient overshoots and falls out of the
+shrinking basin of attraction, extinguishing even though a stable steady
+burning solution still exists.</p></li>
+<li><p><strong>A residence-time-parametrized Newton solve</strong> (fix <span class="math notranslate nohighlight">\(\tau\)</span>, solve the
+<span class="math notranslate nohighlight">\(K+1\)</span> steady equations for <span class="math notranslate nohighlight">\(T\)</span> and <span class="math notranslate nohighlight">\(Y\)</span>) (the approach of
+the original Sandia <code class="docutils literal notranslate"><span class="pre">PSR</span></code> program <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id37" title="P. Glarborg, R. J. Kee, J. F. Grcar, and J. A. Miller. PSR: a Fortran program for modeling well-stirred reactors. Technical Report SAND86-8209, Sandia National Laboratories, Livermore, CA, 1986.">P3</a>]</span>) has a singular
+Jacobian at the fold, where the burning branch becomes vertical, so it stalls
+as the turning point is approached and cannot continue onto the other branches.</p></li>
+</ul>
+</section>
+<section id="pseudo-arclength-continuation">
+<h2>Pseudo-arclength continuation<a class="headerlink" href="#pseudo-arclength-continuation" title="Link to this heading">¶</a></h2>
+<p>pyMARS instead parametrizes the solution branch by <strong>arclength</strong> rather than by
+residence time, a classical pseudo-arclength continuation technique for tracing
+solution branches through turning-point bifurcations
+<span class="bibtex-citation" id="id6">[<a class="reference internal" href="#id30" title="Herbert B. Keller. Numerical solution of bifurcation and nonlinear eigenvalue problems. In Paul H. Rabinowitz, editor, Applications of Bifurcation Theory, pages 359–384. Academic Press, 1977.">P5</a>, <a class="reference internal" href="#id31" title="Tony F. Chan. Newton-like pseudo-arclength methods for computing simple turning points. SIAM Journal on Scientific and Statistical Computing, 5(1):135–148, 1984. doi:10.1137/0905010.">P6</a>]</span>. Writing the (scaled) unknown vector as</p>
+<div class="math notranslate nohighlight">
+\[u = \left[\, Y_1, \dots, Y_K,\ \theta = T/T_{\mathrm{ref}},\
+\sigma = \ln\tau \,\right]\]</div>
+<p>and collecting the <span class="math notranslate nohighlight">\(K+1\)</span> steady residuals above into <span class="math notranslate nohighlight">\(\mathbf G(u)\)</span>,
+each continuation step solves the <strong>augmented system</strong></p>
+<div class="math notranslate nohighlight">
+\[\mathbf G(u) = 0,
+\qquad
+\hat t \cdot (u - u_{\mathrm{prev}}) - \Delta s = 0\]</div>
+<p>where <span class="math notranslate nohighlight">\(\hat t\)</span> is the unit tangent (a secant approximation from the two
+previous points) and <span class="math notranslate nohighlight">\(\Delta s\)</span> is the arclength step. This
+<span class="math notranslate nohighlight">\((K+2)\times(K+2)\)</span> system remains non-singular <em>through</em> the fold, so the
+same solver walks smoothly down the upper branch, around the extinction turning point,
+and onto the middle branch. The turning point is the point of minimum <span class="math notranslate nohighlight">\(\tau\)</span>
+(equivalently, where the <span class="math notranslate nohighlight">\(\sigma\)</span> component of the tangent changes sign).
+The continuation is seeded from the adiabatic-equilibrium state (a burning point
+at large residence time).</p>
+<p>This kind of arclength continuation has long been used to compute extinction and
+ignition turning points in combustion, for example, to trace the response
+curves of steady counterflow premixed <span class="bibtex-citation" id="id7">[<a class="reference internal" href="#id34" title="V. Giovangigli and M. D. Smooke. Extinction of strained premixed laminar flames with complex chemistry. Combustion Science and Technology, 53(1):23–49, 1987. doi:10.1080/00102208708947017.">P7</a>]</span> and diffusion
+<span class="bibtex-citation" id="id8">[<a class="reference internal" href="#id33" title="G. Balakrishnan, M. D. Smooke, and F. A. Williams. A numerical investigation of extinction and ignition limits in laminar nonpremixed counterflowing hydrogen–air streams for both elementary and reduced chemistry. Combustion and Flame, 102(3):329–340, 1995. doi:10.1016/0010-2180(95)00031-Z.">P8</a>]</span> flames through their extinction and ignition limits.
+Here it is applied instead to the perfectly stirred reactor.</p>
+</section>
+<section id="relation-to-the-original-mars-solver">
+<h2>Relation to the original MARS solver<a class="headerlink" href="#relation-to-the-original-mars-solver" title="Link to this heading">¶</a></h2>
+<p>The original MARS code achieved the same effect using the Chemkin-based <code class="docutils literal notranslate"><span class="pre">PSR</span></code>
+code <span class="bibtex-citation" id="id9">[<a class="reference internal" href="#id37" title="P. Glarborg, R. J. Kee, J. F. Grcar, and J. A. Miller. PSR: a Fortran program for modeling well-stirred reactors. Technical Report SAND86-8209, Sandia National Laboratories, Livermore, CA, 1986.">P3</a>]</span> by <em>switching which variable is the unknown</em>.
+Its standard solver fixes the residence time and solves for
+temperature and composition (well-conditioned where the curve is shallow), while
+a companion solver fixes the temperature and solves for the residence time and
+composition (well-conditioned through the near-vertical fold). Pseudo-arclength
+continuation is the single-system equivalent of that parameter switching.</p>
+<p>The two implementations trace the same response curve. The figure below overlays
+the full temperature-vs-residence-time curve computed by the original MARS
+Fortran/Chemkin code on the pyMARS pseudo-arclength continuation, for a
+stoichiometric methane/air reactor at 1 atm with an inlet temperature of 300 K
+(GRI-Mech 3.0). The curves agree along the entire burning branch, and the
+extinction residence times match to within about 0.05%
+(<span class="math notranslate nohighlight">\(\tau_\mathrm{ext} = 7.899\times10^{-5}\)</span> s for MARS versus
+<span class="math notranslate nohighlight">\(7.895\times10^{-5}\)</span> s for pyMARS).</p>
+<figure class="align-center" id="id39">
+<a class="reference internal image-reference" href="_images/psr_mars_comparison.svg"><img alt="MARS Fortran response curve overlaid on the pyMARS continuation" src="_images/psr_mars_comparison.svg" style="width: 5in;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Steady PSR temperature response curve for stoichiometric methane/air at 1 atm,
+<span class="math notranslate nohighlight">\(T_\mathrm{in} = 300\)</span> K (GRI-Mech 3.0): the original MARS Fortran/Chemkin
+solver (markers) versus the pyMARS pseudo-arclength continuation (lines). The
+continuation additionally traces the unstable middle branch past the extinction
+turning point, which the marching solver does not follow.</span><a class="headerlink" href="#id39" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="sampling-points-and-the-error-metric">
+<h2>Sampling points and the error metric<a class="headerlink" href="#sampling-points-and-the-error-metric" title="Link to this heading">¶</a></h2>
+<p>From the traced burning branch, pyMARS samples three points, following MARS:</p>
+<ol class="arabic simple">
+<li><p>the point nearest a residence time of 0.1 s, <span class="math notranslate nohighlight">\(\tau_{0.1}\)</span>;</p></li>
+<li><p>the extinction turning point, <span class="math notranslate nohighlight">\(\tau_{\mathrm{ext}}\)</span>;</p></li>
+<li><p>the logarithmic midpoint between the two,
+<span class="math notranslate nohighlight">\(\tau_{\mathrm{mid}} = \sqrt{\tau_{\mathrm{ext}}\,\tau_{0.1}}\)</span>.</p></li>
+</ol>
+<p>The thermochemical state at these three points is added to the data used to
+build the reduction graphs. The PSR error metric for a candidate reduced
+model is the largest of the relative error in the extinction residence time and
+the relative errors in the response temperatures at the other two points. A
+candidate whose response curve cannot be traced at all (it can no longer sustain
+a stirred reactor) is rejected—assigned 100% error—rather than aborting the
+reduction, mirroring how non-igniting and non-flammable candidates are handled.</p>
+</section>
+<section id="implementation-notes">
+<h2>Implementation notes<a class="headerlink" href="#implementation-notes" title="Link to this heading">¶</a></h2>
+<p>The solver lives in <a class="reference internal" href="psr_solver.html#module-pymars.psr_solver" title="pymars.psr_solver"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pymars.psr_solver</span></code></a>. The continuation corrector uses
+SciPy’s <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root.html#scipy.optimize.root" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.root()</span></code></a> with the <code class="docutils literal notranslate"><span class="pre">hybr</span></code> method (a modified Powell
+hybrid solver) <span class="bibtex-citation" id="id10">[<a class="reference internal" href="#id32" title="Pauli Virtanen, Ralf Gommers, Travis E. Oliphant, Matt Haberland, Tyler Reddy, David Cournapeau, Evgeni Burovski, Pearu Peterson, Warren Weckesser, Jonathan Bright, Stéfan J. van der Walt, Matthew Brett, Joshua Wilson, K. Jarrod Millman, Nikolay Mayorov, Andrew R. J. Nelson, Eric Jones, Robert Kern, Eric Larson, C J Carey, İlhan Polat, Yu Feng, Eric W. Moore, Jake VanderPlas, Denis Laxalde, Josef Perktold, Robert Cimrman, Ian Henriksen, E. A. Quintero, Charles R. Harris, Anne M. Archibald, Antônio H. Ribeiro, Fabian Pedregosa, and Paul van Mulbregt. SciPy 1.0: fundamental algorithms for scientific computing in Python. Nature Methods, 17:261–272, 2020. doi:10.1038/s41592-019-0686-2.">P9</a>]</span>, supplied with an analytic Jacobian rather
+than letting the solver form one by finite differences. The Jacobian of the
+chemical source terms is assembled from Cantera’s analytic reaction-rate
+derivatives—specifically
+<a class="reference external" href="https://cantera.org/stable/python/kinetics.html#cantera.Kinetics.net_production_rates_ddCi" title="(in Cantera v3.2)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">net_production_rates_ddCi</span></code></a>
+(derivatives with respect to species concentrations) and
+<a class="reference external" href="https://cantera.org/stable/python/kinetics.html#cantera.Kinetics.net_production_rates_ddT" title="(in Cantera v3.2)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">net_production_rates_ddT</span></code></a>
+(with respect to temperature)—combined with the density and enthalpy
+derivatives via the chain rule. The analytic Jacobian makes the solve both more
+robust and substantially faster than a finite-difference one; a finite-difference
+damped Newton serves as a fallback when a step fails. Because it relies on SciPy,
+PSR support requires the <code class="docutils literal notranslate"><span class="pre">scipy</span></code> package.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div class="docutils container" id="id11">
+<div role="list" class="citation-list">
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">P1</a><span class="fn-bracket">]</span></span>
+<p>Kyle E. Niemeyer and Chih-Jen Sung. Reduced chemistry for a gasoline surrogate valid at engine-relevant conditions. <em>Energy &amp; Fuels</em>, 29(2):1172–1185, 2015. <a class="reference external" href="https://doi.org/10.1021/ef5022126">doi:10.1021/ef5022126</a>.</p>
+</div>
+<div class="citation" id="id36" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">P2</a><span class="fn-bracket">]</span></span>
+<p>R. J. Kee, F. M. Rupley, E. Meeks, and J. A. Miller. CHEMKIN-III: a Fortran chemical kinetics package for the analysis of gas-phase chemical and plasma kinetics. Technical Report SAND96-8216, Sandia National Laboratories, Livermore, CA, 1996. <a class="reference external" href="https://doi.org/10.2172/481621">doi:10.2172/481621</a>.</p>
+</div>
+<div class="citation" id="id37" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>P3<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id5">2</a>,<a role="doc-backlink" href="#id9">3</a>)</span>
+<p>P. Glarborg, R. J. Kee, J. F. Grcar, and J. A. Miller. PSR: a Fortran program for modeling well-stirred reactors. Technical Report SAND86-8209, Sandia National Laboratories, Livermore, CA, 1986.</p>
+</div>
+<div class="citation" id="id35" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">P4</a><span class="fn-bracket">]</span></span>
+<p>Chung K. Law. <em>Combustion Physics</em>. Cambridge University Press, New York, 2006. <a class="reference external" href="https://doi.org/10.1017/CBO9780511754517">doi:10.1017/CBO9780511754517</a>.</p>
+</div>
+<div class="citation" id="id30" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">P5</a><span class="fn-bracket">]</span></span>
+<p>Herbert B. Keller. Numerical solution of bifurcation and nonlinear eigenvalue problems. In Paul H. Rabinowitz, editor, <em>Applications of Bifurcation Theory</em>, pages 359–384. Academic Press, 1977.</p>
+</div>
+<div class="citation" id="id31" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">P6</a><span class="fn-bracket">]</span></span>
+<p>Tony F. Chan. Newton-like pseudo-arclength methods for computing simple turning points. <em>SIAM Journal on Scientific and Statistical Computing</em>, 5(1):135–148, 1984. <a class="reference external" href="https://doi.org/10.1137/0905010">doi:10.1137/0905010</a>.</p>
+</div>
+<div class="citation" id="id34" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">P7</a><span class="fn-bracket">]</span></span>
+<p>V. Giovangigli and M. D. Smooke. Extinction of strained premixed laminar flames with complex chemistry. <em>Combustion Science and Technology</em>, 53(1):23–49, 1987. <a class="reference external" href="https://doi.org/10.1080/00102208708947017">doi:10.1080/00102208708947017</a>.</p>
+</div>
+<div class="citation" id="id33" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">P8</a><span class="fn-bracket">]</span></span>
+<p>G. Balakrishnan, M. D. Smooke, and F. A. Williams. A numerical investigation of extinction and ignition limits in laminar nonpremixed counterflowing hydrogen–air streams for both elementary and reduced chemistry. <em>Combustion and Flame</em>, 102(3):329–340, 1995. <a class="reference external" href="https://doi.org/10.1016/0010-2180(95)00031-Z">doi:10.1016/0010-2180(95)00031-Z</a>.</p>
+</div>
+<div class="citation" id="id32" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">P9</a><span class="fn-bracket">]</span></span>
+<p>Pauli Virtanen, Ralf Gommers, Travis E. Oliphant, Matt Haberland, Tyler Reddy, David Cournapeau, Evgeni Burovski, Pearu Peterson, Warren Weckesser, Jonathan Bright, Stéfan J. van der Walt, Matthew Brett, Joshua Wilson, K. Jarrod Millman, Nikolay Mayorov, Andrew R. J. Nelson, Eric Jones, Robert Kern, Eric Larson, C J Carey, İlhan Polat, Yu Feng, Eric W. Moore, Jake VanderPlas, Denis Laxalde, Josef Perktold, Robert Cimrman, Ian Henriksen, E. A. Quintero, Charles R. Harris, Anne M. Archibald, Antônio H. Ribeiro, Fabian Pedregosa, and Paul van Mulbregt. SciPy 1.0: fundamental algorithms for scientific computing in Python. <em>Nature Methods</em>, 17:261–272, 2020. <a class="reference external" href="https://doi.org/10.1038/s41592-019-0686-2">doi:10.1038/s41592-019-0686-2</a>.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pymars-logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Niemeyer-Research-Group&repo=pyMARS&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Perfectly stirred reactor (PSR) extinction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-steady-psr">The steady PSR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-s-curve-and-the-extinction-turning-point">The S-curve and the extinction turning point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-naive-methods-fail-near-extinction">Why naive methods fail near extinction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pseudo-arclength-continuation">Pseudo-arclength continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#relation-to-the-original-mars-solver">Relation to the original MARS solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sampling-points-and-the-error-metric">Sampling points and the error metric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-notes">Implementation notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis.html">sensitivity_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2ck.html">soln2ck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="soln2yaml.html">soln2yaml</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="theory.html" title="previous chapter">Theory</a></li>
+      <li>Next: <a href="drg.html" title="next chapter">drg</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Phillip Mestas, Parker Clayton, and Kyle Niemeyer.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/psr_theory.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Niemeyer-Research-Group/pyMARS" class="github">
+        <img src="_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

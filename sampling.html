@@ -106,8 +106,7 @@
 <dt class="sig sig-object py" id="pymars.sampling.InputLaminarFlame">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">InputLaminarFlame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equivalence_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fuel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxidizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composition_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mole'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.InputLaminarFlame" title="Link to this definition">¶</a></dt>
 <dd><p>Holds input parameters for single laminar flame simulation.</p>
-<p>Freely-propagating laminar flames are inherently constant pressure, so
-(unlike autoignition cases) no <code class="docutils literal notranslate"><span class="pre">kind</span></code> is specified.</p>
+<p>Freely-propagating laminar flames are inherently constant pressure.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymars.sampling.InputLaminarFlame.composition_type">
 <span class="sig-name descname"><span class="pre">composition_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pymars.sampling.InputLaminarFlame.composition_type" title="Link to this definition">¶</a></dt>
@@ -160,8 +159,52 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pymars.sampling.InputPSR">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">InputPSR</span></span><a class="headerlink" href="#pymars.sampling.InputPSR" title="Link to this definition">¶</a></dt>
-<dd><p>Holds input parameters for single PSR simulation.</p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">InputPSR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">equivalence_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fuel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxidizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composition_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mole'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.InputPSR" title="Link to this definition">¶</a></dt>
+<dd><p>Holds input parameters for a single perfectly stirred reactor (PSR) case.</p>
+<p>PSR cases are modeled as adiabatic and constant-pressure.
+<code class="docutils literal notranslate"><span class="pre">temperature</span></code> is the inlet temperature.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.composition_type">
+<span class="sig-name descname"><span class="pre">composition_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.composition_type" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.equivalence_ratio">
+<span class="sig-name descname"><span class="pre">equivalence_ratio</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.equivalence_ratio" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.fuel">
+<span class="sig-name descname"><span class="pre">fuel</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.fuel" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.oxidizer">
+<span class="sig-name descname"><span class="pre">oxidizer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.oxidizer" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.pressure">
+<span class="sig-name descname"><span class="pre">pressure</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.pressure" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.reactants">
+<span class="sig-name descname"><span class="pre">reactants</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.reactants" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymars.sampling.InputPSR.temperature">
+<span class="sig-name descname"><span class="pre">temperature</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pymars.sampling.InputPSR.temperature" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -321,6 +364,43 @@ read by <code class="docutils literal notranslate"><span class="pre">process_res
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymars.sampling.psr_sample_worker">
+<span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">psr_sample_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_tuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.psr_sample_worker" title="Link to this definition">¶</a></dt>
+<dd><p>Worker for multiprocessing of PSR cases with data sampling.</p>
+<p>Runs, processes, and samples the case entirely within the worker (the PSR
+solver writes no intermediate file), returning the (picklable) metric vector
+and sampled data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sim_tuple</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Tuple of PSRSimulation object to be run and identifier</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Case identifier mapped to a tuple of the PSR metric vector and sampled data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymars.sampling.psr_worker">
+<span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">psr_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_tuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.psr_worker" title="Link to this definition">¶</a></dt>
+<dd><p>Worker for multiprocessing of PSR metric-only cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sim_tuple</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Tuple of PSRSimulation object to be run and identifier</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Case identifier mapped to the PSR metric vector</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymars.sampling.read_metrics">
 <span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">read_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.read_metrics" title="Link to this definition">¶</a></dt>
 <dd><p>Reads in stored already-sampled metrics.</p>
@@ -346,7 +426,7 @@ speeds), used for evaluating error</p>
 <dt class="sig sig-object py" id="pymars.sampling.sample">
 <span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_flame_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample" title="Link to this definition">¶</a></dt>
 <dd><p>Samples thermochemical data and generates metrics for various phenomena.</p>
-<p>Supports autoignition delay and laminar flame speed metrics.</p>
+<p>Supports autoignition delay, PSR, and laminar flame speed metrics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -375,7 +455,7 @@ use the specified number of threads.</p></li>
 <dt class="sig sig-object py" id="pymars.sampling.sample_metrics">
 <span class="sig-prename descclassname"><span class="pre">pymars.sampling.</span></span><span class="sig-name descname"><span class="pre">sample_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignition_conditions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psr_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flame_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_saved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_flame_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymars.sampling.sample_metrics" title="Link to this definition">¶</a></dt>
 <dd><p>Evaluates metrics used for determining error of reduced model</p>
-<p>Supports autoignition delay and laminar flame speed metrics.</p>
+<p>Supports autoignition delay, laminar flame speed, and PSR temperature response curve metrics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -393,8 +473,8 @@ use the specified number of threads.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Combined metrics for the model (ignition delays followed by flame
-speeds), used for evaluating error</p>
+<dd class="field-even"><p>Combined metrics for the model (ignition delays, PSR temperature response
+curve, flame speeds), used for evaluating error</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
@@ -446,12 +526,14 @@ speeds), used for evaluating error</p>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_theory.html">Perfectly stirred reactor (PSR) extinction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">sampling</a><ul>
@@ -466,6 +548,8 @@ speeds), used for evaluating error</p>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.parse_flame_inputs"><code class="docutils literal notranslate"><span class="pre">parse_flame_inputs()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.parse_ignition_inputs"><code class="docutils literal notranslate"><span class="pre">parse_ignition_inputs()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.parse_psr_inputs"><code class="docutils literal notranslate"><span class="pre">parse_psr_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.psr_sample_worker"><code class="docutils literal notranslate"><span class="pre">psr_sample_worker()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.psr_worker"><code class="docutils literal notranslate"><span class="pre">psr_worker()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.read_metrics"><code class="docutils literal notranslate"><span class="pre">read_metrics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.sample"><code class="docutils literal notranslate"><span class="pre">sample()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymars.sampling.sample_metrics"><code class="docutils literal notranslate"><span class="pre">sample_metrics()</span></code></a></li>

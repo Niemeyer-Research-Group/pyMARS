@@ -36,6 +36,7 @@
 <div class="genindex-jumpbox">
  <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
@@ -79,6 +80,8 @@
 </li>
         <li><a href="simulation.html#pymars.simulation.IgnitionSimulation.calculate">(pymars.simulation.IgnitionSimulation method)</a>
 </li>
+        <li><a href="simulation.html#pymars.simulation.PSRSimulation.calculate">(pymars.simulation.PSRSimulation method)</a>
+</li>
       </ul></li>
       <li><a href="sampling.html#pymars.sampling.calculate_error">calculate_error() (in module pymars.sampling)</a>
 </li>
@@ -93,6 +96,8 @@
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.composition_type">(pymars.sampling.InputLaminarFlame attribute)</a>
 </li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.composition_type">(pymars.sampling.InputPSR attribute)</a>
+</li>
       </ul></li>
       <li><a href="tools.html#pymars.tools.convert">convert() (in module pymars.tools)</a>
 </li>
@@ -101,6 +106,14 @@
       <li><a href="drgep.html#pymars.drgep.create_drgep_matrix">create_drgep_matrix() (in module pymars.drgep)</a>
 </li>
       <li><a href="pfa.html#pymars.pfa.create_pfa_matrix">create_pfa_matrix() (in module pymars.pfa)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="psr_solver.html#pymars.psr_solver.DS_MAX_MIDDLE">DS_MAX_MIDDLE (in module pymars.psr_solver)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -114,6 +127,8 @@
 
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.equivalence_ratio">(pymars.sampling.InputLaminarFlame attribute)</a>
+</li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.equivalence_ratio">(pymars.sampling.InputPSR attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -138,16 +153,18 @@
 </li>
       <li><a href="sampling.html#pymars.sampling.flame_sample_worker">flame_sample_worker() (in module pymars.sampling)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sampling.html#pymars.sampling.flame_worker">flame_worker() (in module pymars.sampling)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulation.html#pymars.simulation.FlameSimulation">FlameSimulation (class in pymars.simulation)</a>
 </li>
       <li><a href="sampling.html#pymars.sampling.InputIgnition.fuel">fuel (pymars.sampling.InputIgnition attribute)</a>
 
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.fuel">(pymars.sampling.InputLaminarFlame attribute)</a>
+</li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.fuel">(pymars.sampling.InputPSR attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -244,6 +261,8 @@
 </li>
         <li><a href="pfa.html#module-pymars.pfa">pymars.pfa</a>
 </li>
+        <li><a href="psr_solver.html#module-pymars.psr_solver">pymars.psr_solver</a>
+</li>
         <li><a href="pymars.html#module-pymars.pymars">pymars.pymars</a>
 </li>
         <li><a href="reduce_model.html#module-pymars.reduce_model">pymars.reduce_model</a>
@@ -268,7 +287,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulation.html#pymars.simulation.BaseSimulation.num_sample_points">num_sample_points (pymars.simulation.BaseSimulation attribute)</a>
+
+      <ul>
+        <li><a href="simulation.html#pymars.simulation.PSRSimulation.num_sample_points">(pymars.simulation.PSRSimulation attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -279,6 +302,8 @@
 
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.oxidizer">(pymars.sampling.InputLaminarFlame attribute)</a>
+</li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.oxidizer">(pymars.sampling.InputPSR attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -295,12 +320,16 @@
 </li>
       <li><a href="sampling.html#pymars.sampling.parse_psr_inputs">parse_psr_inputs() (in module pymars.sampling)</a>
 </li>
+      <li><a href="psr_solver.html#pymars.psr_solver.PENALTY">PENALTY (in module pymars.psr_solver)</a>
+</li>
       <li><a href="pymars.html#pymars.pymars.ReductionInputs.phase_name">phase_name (pymars.pymars.ReductionInputs attribute)</a>
 </li>
       <li><a href="sampling.html#pymars.sampling.InputIgnition.pressure">pressure (pymars.sampling.InputIgnition attribute)</a>
 
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.pressure">(pymars.sampling.InputLaminarFlame attribute)</a>
+</li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.pressure">(pymars.sampling.InputPSR attribute)</a>
 </li>
       </ul></li>
       <li><a href="simulation.html#pymars.simulation.BaseSimulation.process_results">process_results() (pymars.simulation.BaseSimulation method)</a>
@@ -310,8 +339,16 @@
 </li>
         <li><a href="simulation.html#pymars.simulation.IgnitionSimulation.process_results">(pymars.simulation.IgnitionSimulation method)</a>
 </li>
+        <li><a href="simulation.html#pymars.simulation.PSRSimulation.process_results">(pymars.simulation.PSRSimulation method)</a>
+</li>
       </ul></li>
       <li><a href="pymars.html#pymars.pymars.ReductionInputs.psr_conditions">psr_conditions (pymars.pymars.ReductionInputs attribute)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.psr_sample_worker">psr_sample_worker() (in module pymars.sampling)</a>
+</li>
+      <li><a href="sampling.html#pymars.sampling.psr_worker">psr_worker() (in module pymars.sampling)</a>
+</li>
+      <li><a href="simulation.html#pymars.simulation.PSRSimulation">PSRSimulation (class in pymars.simulation)</a>
 </li>
       <li>
     pymars.drg
@@ -327,6 +364,8 @@
         <li><a href="drgep.html#module-pymars.drgep">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pymars.pfa
 
@@ -334,8 +373,13 @@
         <li><a href="pfa.html#module-pymars.pfa">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    pymars.psr_solver
+
+      <ul>
+        <li><a href="psr_solver.html#module-pymars.psr_solver">module</a>
+</li>
+      </ul></li>
       <li>
     pymars.pymars
 
@@ -403,6 +447,8 @@
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.reactants">(pymars.sampling.InputLaminarFlame attribute)</a>
 </li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.reactants">(pymars.sampling.InputPSR attribute)</a>
+</li>
       </ul></li>
       <li><a href="sampling.html#pymars.sampling.read_metrics">read_metrics() (in module pymars.sampling)</a>
 </li>
@@ -424,6 +470,8 @@
         <li><a href="simulation.html#pymars.simulation.FlameSimulation.run_case">(pymars.simulation.FlameSimulation method)</a>
 </li>
         <li><a href="simulation.html#pymars.simulation.IgnitionSimulation.run_case">(pymars.simulation.IgnitionSimulation method)</a>
+</li>
+        <li><a href="simulation.html#pymars.simulation.PSRSimulation.run_case">(pymars.simulation.PSRSimulation method)</a>
 </li>
       </ul></li>
       <li><a href="drg.html#pymars.drg.run_drg">run_drg() (in module pymars.drg)</a>
@@ -461,6 +509,8 @@
 </li>
         <li><a href="simulation.html#pymars.simulation.IgnitionSimulation.setup_case">(pymars.simulation.IgnitionSimulation method)</a>
 </li>
+        <li><a href="simulation.html#pymars.simulation.PSRSimulation.setup_case">(pymars.simulation.PSRSimulation method)</a>
+</li>
       </ul></li>
       <li><a href="drgep.html#pymars.drgep.ss_dijkstra_path_length_modified">ss_dijkstra_path_length_modified() (in module pymars.drgep)</a>
 </li>
@@ -477,9 +527,15 @@
       <ul>
         <li><a href="sampling.html#pymars.sampling.InputLaminarFlame.temperature">(pymars.sampling.InputLaminarFlame attribute)</a>
 </li>
+        <li><a href="sampling.html#pymars.sampling.InputPSR.temperature">(pymars.sampling.InputPSR attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="psr_solver.html#pymars.psr_solver.trace_extinction_curve">trace_extinction_curve() (in module pymars.psr_solver)</a>
+</li>
+      <li><a href="psr_solver.html#pymars.psr_solver.TREF">TREF (in module pymars.psr_solver)</a>
+</li>
       <li><a href="reduce_model.html#pymars.reduce_model.trim">trim() (in module pymars.reduce_model)</a>
 </li>
       <li><a href="drg.html#pymars.drg.trim_drg">trim_drg() (in module pymars.drg)</a>
@@ -560,12 +616,14 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_theory.html">Perfectly stirred reactor (PSR) extinction</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="drg.html">drg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drgep.html">drgep</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pfa.html">pfa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psr_solver.html">psr_solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pymars.html">pymars</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce_model.html">reduce_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">sampling</a></li>
